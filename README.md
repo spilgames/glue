@@ -1,4 +1,4 @@
-5-glue-engine
-=============
+HTML5 Glue Engine
+=================
 
-HTML5 Glue engine
+Generic HTML5 engine and abstraction layer

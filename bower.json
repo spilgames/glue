@@ -1,0 +1,17 @@
+{
+    "name": "5-glue-engine",
+    "version": "0.1.0",
+    "author": {
+        "name": "Jeroen Reurings",
+        "email": "jeroen.reurings@spilgames.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/spilgames/5-glue-engine"
+    },
+    "dependencies": {
+        "jasmine": "https://github.com/pivotal/jasmine.git",
+        "melonjs": "https://github.com/melonjs/melonJS.git",
+        "requirejs": "https://github.com/jrburke/requirejs.git"
+    }
+}
