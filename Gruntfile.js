@@ -13,15 +13,14 @@ module.exports = function (grunt) {
                     'build/src/engines.js': [
                         'bower_components/melonjs/build/melonJS-0.9.9.js'
                     ],
-                    'build/src/base.js': [
-                        'js/glue.js'
-                    ],
-                    'build/src/glue.js': [
-                        'js/glue/api.js',
-                        'js/glue/sugar.js'
+                    'build/src/modules.js': [
+                        'js/modules/spilgames/**/*'
                     ],
                     'build/src/adapters.js': [
-                        'js/glue/adapters/**/*'
+                        'js/adapters/**/*'
+                    ],
+                    'build/src/base.js': [
+                        'js/glue.js'
                     ]
                 }
             }
@@ -30,11 +29,11 @@ module.exports = function (grunt) {
             dist: {
                 files: {
                     'build/glue.min.js': [
-                        'build/src/base.js',
                         'build/src/libraries.js',
                         'build/src/engines.js',
+                        'build/src/modules.js',
                         'build/src/adapters.js',
-                        'build/src/glue.js'
+                        'build/src/base.js'
                     ]
                 }
             }

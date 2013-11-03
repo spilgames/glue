@@ -143,4 +143,4 @@
             });
         });
     });
-}(glue.adapters.melonjs, me));
+}(adapters.melonjs, me));

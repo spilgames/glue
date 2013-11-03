@@ -5,8 +5,8 @@
  *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
-glue.adapters = glue.adapters || {};
-glue.adapters.melonjs = (function (MelonJS) {
+var adapters = adapters || {};
+adapters.melonjs = (function (MelonJS) {
     'use strict';
     return {
         name: 'melonJS-adapter',
@@ -151,6 +151,6 @@ glue.adapters.melonjs = (function (MelonJS) {
                     true                // maintian aspect ratio
                 );  
             }
-        },
+        }
     };
 }(window.me));
