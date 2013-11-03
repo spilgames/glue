@@ -12,8 +12,8 @@ adapters.spilgames = (function (win, Spilgames) {
         name: 'Spilgames-adapter',
         sugar: Spilgames.sugar,
         module: {
-            module: win.define,
-            getModule: win.require,
+            create: win.define,
+            get: win.require,
             config: win.requirejs.config
         }
     };
