@@ -22,6 +22,8 @@ var glue = (function (adapters) {
     };
 }(adapters));
 
+var glue = glue();
+
 glue.module.config({
     paths: {
         glue: 'modules'
@@ -32,7 +34,6 @@ glue.module.create('glue.core', function () {
     console.log('hi...');
 });
 
-var glue = glue();
 glue.game = glue.game || {};
 glue.game.namespace = 'game';
 window[glue.game.namespace] = {};
