@@ -20,22 +20,6 @@ adapters.melonjs = (function (MelonJS) {
             off: MelonJS.event.unsubscribe,
             fire: MelonJS.event.publish
         },
-        levelManager: {
-            loadLevel: function (levelName) {
-                MelonJS.levelDirector.loadLevel(levelName);
-
-                // add our HUD to the game world    
-                MelonJS.game.add(new game.HUD.Container());
-            },
-            unloadLevel: function () {
-                MelonJS.game.world.removeChild(
-                    MelonJS.game.world.getEntityByProp(
-                        'name', 
-                        'HUD'
-                    )[0]
-                );
-            }
-        },
         input: {
             /**
             *  @name pointerEvent
@@ -70,9 +54,9 @@ adapters.melonjs = (function (MelonJS) {
                     eventType = eventType.replace('pointer', 'mouse');
                     MelonJS.input.registerPointerEvent(eventType, rect, callback, floating);
                 },
-                off: function (eventType, rect, callback, floating) {
+                off: function (eventType, rect) {
                     eventType = eventType.replace('pointer', 'mouse');
-                    MelonJS.input.releasePointerEvent();
+                    MelonJS.input.releasePointerEvent(eventType, rect);
                 }
             },
             init: function () {
@@ -112,6 +96,22 @@ adapters.melonjs = (function (MelonJS) {
                 settings.rect = MelonJS.game.viewport;
                 settings.eventType = settings.eventType.replace('pointer', 'mouse');
                 MelonJS.input.releasePointerEvent(settings.eventType, settings.rect);
+            }
+        },
+        levelManager: {
+            loadLevel: function (levelName) {
+                MelonJS.levelDirector.loadLevel(levelName);
+
+                // add our HUD to the game world    
+                MelonJS.game.add(new game.HUD.Container());
+            },
+            unloadLevel: function () {
+                MelonJS.game.world.removeChild(
+                    MelonJS.game.world.getEntityByProp(
+                        'name', 
+                        'HUD'
+                    )[0]
+                );
             }
         },
         loader: {
