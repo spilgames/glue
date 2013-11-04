@@ -11,7 +11,7 @@ module.exports = function (grunt) {
                         'bower_components/requirejs/require.js'
                     ],
                     'build/src/engines.js': [
-                        'bower_components/melonjs/build/melonJS-0.9.9.js'
+                        'bower_components/melonjs/build/melonJS-0.9.10.js'
                     ],
                     'build/src/modules.js': [
                         'js/modules/spilgames/**/*'
