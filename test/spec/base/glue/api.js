@@ -26,7 +26,7 @@
                 });
             });
             describe('Entities', function () {
-                it('Should be able to create an entity which gets updated and drawn in the game loop', function () {
+                it('Should be able to create an entity which gets updated and drawn in the game loop', function (done) {
                     var updated = false,
                         drawn = false;
 
@@ -44,6 +44,7 @@
                                 // mix in some custom methods
                                 obj = base.mix({
                                     draw: function (context) {
+                                        drawn = true;
                                         context.fillStyle = color;
                                         context.fillRect(
                                             this.pos.x,
@@ -52,23 +53,27 @@
                                             this.height
                                         );
                                         font.draw(context, text, this.pos.x, this.pos.y);
+                                    },
+                                    update: function () {
+                                        updated = true;
                                     }
                                 });
-
+                            // return the mixed object
                             return obj;
                         };
                     });
 
                     glue.module.get(['entity/player'], function (Entity) {
                         me.game.add(Entity(100, 100, {
-                            name: 'testPlayer2',
+                            name: 'testplayer',
                             width: 100,
                             height: 100
-                        }), 2);
-                        expect(me.game.getEntityByName('testPlayer')[0].name).toEqual('testPlayer');
+                        }), 1);
+                        expect(me.game.getEntityByName('testplayer')[0].name).toEqual('testplayer');
                         setTimeout(function () {
                             expect(updated).toBeTruthy();
                             expect(drawn).toBeTruthy();
+                            done();
                         }, 30);
                     });
                 });
