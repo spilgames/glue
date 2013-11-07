@@ -30,35 +30,40 @@
                     var updated = false,
                         drawn = false;
 
-                    glue.module.create('entity/player', function () {
-                        return function () {
-                            return me.ObjectEntity.extend({
-                                init: function (x, y, settings) {
-                                    this.parent(x, y, settings);
-                                    this.name = settings.name;
-                                    this.width = settings.width;
-                                    this.height = settings.height;
-                                    this.color = settings.color;
-                                },
-                                update: function () {
-                                    updated = true;
-                                    return true;
-                                },
-                                draw: function (context) {
-                                    drawn = true;
-                                    context.fillStyle = 'blue';
-                                    context.fillRect(this.pos.x, this.pos.y, this.width, this.height);
-                                }
-                            });
+                    glue.module.create('entity/player', ['glue/entity/base'],
+                        function (BaseEntity) {
+                        return function (x, y, settings) {
+                                // construct a new base entity instance
+                            var base = new BaseEntity(x, y, settings),
+                                // set the initial color to white
+                                color = 'white',
+                                // set the font we want to use
+                                font = new me.Font('Verdana', 15, 'black'),
+                                // set the text
+                                text = 'Player entity',
+                                // mix in some custom methods
+                                obj = base.mix({
+                                    draw: function (context) {
+                                        context.fillStyle = color;
+                                        context.fillRect(
+                                            this.pos.x,
+                                            this.pos.y,
+                                            this.width,
+                                            this.height
+                                        );
+                                        font.draw(context, text, this.pos.x, this.pos.y);
+                                    }
+                                });
+
+                            return obj;
                         };
                     });
+
                     glue.module.get(['entity/player'], function (Entity) {
-                        var testEntity = Entity();
-                        me.game.add(new testEntity(0, 0, {
-                            name: 'testPlayer',
+                        me.game.add(Entity(100, 100, {
+                            name: 'testPlayer2',
                             width: 100,
-                            height: 100,
-                            color: 'blue'
+                            height: 100
                         }), 2);
                         expect(me.game.getEntityByName('testPlayer')[0].name).toEqual('testPlayer');
                         setTimeout(function () {
@@ -67,6 +72,7 @@
                         }, 30);
                     });
                 });
+
             });
         });
     });

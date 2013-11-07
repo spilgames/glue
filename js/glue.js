@@ -20,6 +20,12 @@ var glue = (function (adapters) {
     };
 }(adapters));
 
+glue.module.create('glue/entity/base', function () {
+    return function (x, y, settings) {
+        return new me.ObjectEntity(x, y, settings);
+    };
+});
+
 glue.game = glue.game || {};
 glue.game.namespace = 'game';
 window[glue.game.namespace] = {};
