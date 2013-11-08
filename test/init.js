@@ -9,7 +9,7 @@
             'plugins/plugins.js',
             'spec/spechelper.js',
             // glue
-            '../build/glue.min.js',
+            '../build/glue.min.js'
             // specs for wrapped functionality (glue internals)
             //'spec/adapters/melonjs.js',
             //'spec/adapters/spilgames.js',
@@ -18,12 +18,15 @@
         // glue specs
         specs = [
             //'spec/api',
-            'spec/modules/spilgames/entity/ui/scrollbutton'
+            'spec/modules/spilgames/examples/ui/scrollbutton'
         ],
         // enable game canvas below for debugging
         showCanvas = true,
         loadCount = 0,
         game = {},
+
+        // TODO: changes all of this to using glue instead of melon directly
+
         initMelon = function (callback) {
             game.PlayScreen = me.ScreenObject.extend({
                 /** 
@@ -51,9 +54,19 @@
             }
             // Initialize the audio
             me.audio.init('mp3,ogg');
-            // switch to the Play Screen
-            me.state.set(me.state.PLAY, new game.PlayScreen());
-            me.state.change(me.state.PLAY);
+
+            me.loader.onload = function () {
+                me.state.set(me.state.PLAY, new game.PlayScreen());
+                me.state.change(me.state.PLAY);
+            };
+
+            me.loader.preload([
+                {name: "hallway_level_tiles",  type:"image", src: "data/img/maps/hallway_level_tiles.png"},
+                {name: "door",  type:"image", src: "data/img/sprites/door.png"},
+                {name: "leftButton",  type:"image", src: "data/img/gui/left-button.png"},
+                {name: "rightButton",  type:"image", src: "data/img/gui/right-button.png"},
+                {name: "hallway", type: "tmx", src: "data/map/hallway.tmx"}
+            ]);
         },
         // loads the Jasmine environment, runs tests
         loadJasmine = function () {

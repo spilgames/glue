@@ -47,26 +47,29 @@ glue.module.create(['glue'], function (Glue) {
                                     },
                                     update: function () {
                                         updated = true;
-                                        if (this.isHovering()) {
-                                            console.log('hovered...');
-                                        }
-                                        if (this.isPressed()) {
-                                            console.log('pressed...');
-                                        }
+                                    },
+                                    clicked: function () {
+                                        console.log(obj.name, 'clicked');
+                                    },
+                                    hovered: function () {
+                                        console.log(obj.name, 'hovered');
                                     }
                                 });
+
                             // return the mixed object
                             return obj;
                         };
                     }
                 );
+
                 glue.module.get(
                     ['scrollbutton'],
                     function (Scrollbutton) {
                         me.game.add(Scrollbutton(100, 100, {
                             name: 'scrollbutton',
                             width: 100,
-                            height: 100
+                            height: 100,
+                            image: 'leftButton'
                         }), 1);
                         expect(me.game.getEntityByName('scrollbutton')[0].name).toEqual('scrollbutton');
                         setTimeout(function () {

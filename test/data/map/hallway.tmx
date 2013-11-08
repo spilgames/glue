@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="4" height="1" tilewidth="768" tileheight="768">
+ <tileset firstgid="1" name="hallway_level_tiles" tilewidth="768" tileheight="768">
+  <image source="../img/maps/hallway_level_tiles.png" width="3072" height="768"/>
+ </tileset>
+ <layer name="background" width="4" height="1">
+  <data encoding="base64">
+   AQAAAAIAAAADAAAABAAAAA==
+  </data>
+ </layer>
+</map>
