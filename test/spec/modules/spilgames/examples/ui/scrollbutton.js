@@ -64,7 +64,6 @@ glue.module.create(['glue'], function (Glue) {
                         // Add buttons (this will be in the screen normally)
                         me.game.add(Scrollbutton(0, 300, {
                             name: 'scrollbutton',
-                            width: 204,
                             height: 105,
                             spritewidth: 102,
                             image: 'leftButton'
@@ -72,7 +71,6 @@ glue.module.create(['glue'], function (Glue) {
 
                         me.game.add(Scrollbutton(920, 300, {
                             name: 'scrollbutton2',
-                            width: 204,
                             height: 105,
                             spritewidth: 102,
                             image: 'rightButton'
