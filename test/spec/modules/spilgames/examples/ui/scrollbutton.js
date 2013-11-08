@@ -22,12 +22,14 @@ glue.module.create(['glue'], function (Glue) {
                         return function (x, y, settings) {
                                 // construct a new base entity instance
                             var base = new Glue.entity.base(x, y, settings),
+                                baseDraw = base.draw,
+                                baseUpdate = base.update,
                                 // mix in the hoverable functionality
                                 hoverable = Hoverable(base),
                                 // mix in the clickable functionality
                                 clickable = Clickable(base),
                                 // set the initial color to white
-                                color = 'white',
+                                color = settings.color || 'white',
                                 // set the font we want to use
                                 font = new me.Font('Verdana', 15, 'black'),
                                 // set the text
@@ -36,6 +38,7 @@ glue.module.create(['glue'], function (Glue) {
                                 obj = base.mix({
                                     draw: function (context) {
                                         drawn = true;
+                                        baseDraw();
                                         context.fillStyle = color;
                                         context.fillRect(
                                             this.pos.x,
@@ -47,8 +50,8 @@ glue.module.create(['glue'], function (Glue) {
                                     },
                                     update: function () {
                                         updated = true;
+                                        baseUpdate();
                                     },
-                                    
                                     clicked: function () {
                                         console.log(obj.name, 'clicked');
                                     },
@@ -66,13 +69,28 @@ glue.module.create(['glue'], function (Glue) {
                 glue.module.get(
                     ['scrollbutton'],
                     function (Scrollbutton) {
+                        // Add buttons (this will be in the screen normally)
                         me.game.add(Scrollbutton(100, 100, {
                             name: 'scrollbutton',
                             width: 100,
                             height: 100,
-                            image: 'leftButton'
+                            // this will be used in an actual implementation
+                            image: 'leftButton',
+                            // we just use the color for this test
+                            color: 'red'
                         }), 1);
-                        expect(me.game.getEntityByName('scrollbutton')[0].name).toEqual('scrollbutton');
+
+                        me.game.add(Scrollbutton(300, 300, {
+                            name: 'scrollbutton2',
+                            width: 300,
+                            height: 300,
+                            // this will be used in an actual implementation
+                            image: 'rightButton',
+                            // we just use the color for this test
+                            color: 'green'
+                        }), 2);
+
+                        expect(me.game.getEntityByName('scrollbutton2')[0].name).toEqual('scrollbutton2');
                         setTimeout(function () {
                             expect(updated).toBeTruthy();
                             expect(drawn).toBeTruthy();
