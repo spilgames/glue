@@ -2,7 +2,6 @@
  *  @module MelonJS
  *  @namespace adapters
  *  @desc Provides adapters to interface with MelonJS
- *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
 var adapters = adapters || {};
@@ -13,6 +12,11 @@ adapters.melonjs = (function (MelonJS) {
         audio: {
             init: function (formats) {
                 return MelonJS.audio.init(formats);
+            }
+        },
+        entity: {
+            base: function () {
+                return MelonJS.ObjectEntity;
             }
         },
         event: {
@@ -66,13 +70,13 @@ adapters.melonjs = (function (MelonJS) {
             POINTER_DOWN:  'pointerdown',
             POINTER_MOVE:  'pointermove',
             pointer: {
-                on: function (eventType, rect, callback, floating) {
+                on: function (eventType, callback, floating) {
                     eventType = eventType.replace('pointer', 'mouse');
-                    MelonJS.input.registerPointerEvent(eventType, rect, callback, floating);
+                    MelonJS.input.registerPointerEvent(eventType, MelonJS.game.viewport, callback, floating);
                 },
-                off: function (eventType, rect, callback, floating) {
+                off: function (eventType) {
                     eventType = eventType.replace('pointer', 'mouse');
-                    MelonJS.input.releasePointerEvent();
+                    MelonJS.input.releasePointerEvent(eventType, MelonJS.game.viewport);
                 }
             },
             init: function () {
@@ -89,29 +93,21 @@ adapters.melonjs = (function (MelonJS) {
 
                 this.pointer.on(
                     this.POINTER_UP,
-                    MelonJS.game.viewport,
-                    pointerUpCallback,
-                    true
+                    pointerUpCallback
                 );
                 this.pointer.on(
                     this.POINTER_DOWN,
-                    MelonJS.game.viewport,
-                    pointerDownCallback,
-                    true
+                    pointerDownCallback
                 );
                 this.pointer.on(
                     this.POINTER_MOVE,
-                    MelonJS.game.viewport,
-                    pointerMoveCallback,
-                    true
+                    pointerMoveCallback
                 );
             },
             destroy: function () {
-                var settings = {};
-                settings.eventType = 'pointermove';
-                settings.rect = MelonJS.game.viewport;
-                settings.eventType = settings.eventType.replace('pointer', 'mouse');
-                MelonJS.input.releasePointerEvent(settings.eventType, settings.rect);
+                this.pointer.off(this.POINTER_UP);
+                this.pointer.off(this.POINTER_DOWN);
+                this.pointer.off(this.POINTER_MOVE);
             }
         },
         loader: {
@@ -143,13 +139,13 @@ adapters.melonjs = (function (MelonJS) {
                 MelonJS.sys.scalingInterpolation = true;
                 // init the video and return the result
                 return MelonJS.video.init(
-                    containerId,        // the DOM id of the game canvas container
-                    dimensions.width,   // the width of the canvas
-                    dimensions.height,  // the height of the canvas
-                    true,               // double buffering
-                    'auto',             // scaling
-                    true                // maintian aspect ratio
-                );  
+                    containerId, // the DOM id of the game canvas container
+                    dimensions.width, // the width of the canvas
+                    dimensions.height, // the height of the canvas
+                    true, // double buffering
+                    'auto', // scaling
+                    true // maintian aspect ratio
+                );
             }
         }
     };

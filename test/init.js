@@ -9,15 +9,24 @@
             'plugins/plugins.js',
             'spec/spechelper.js',
             // glue
-            '../build/glue.min.js',
-            // specs (functional tests)
-            'spec/base/glue/adapters/melonjs.js',
-            'spec/base/glue/sugar.js'
+            '../build/glue.js'
+            // specs for wrapped functionality (glue internals)
+            //'spec/adapters/melonjs.js',
+            //'spec/adapters/spilgames.js',
+            //'spec/modules/spilgames/sugar.js'
+        ],
+        // glue specs
+        specs = [
+            //'spec/api',
+            'spec/modules/spilgames/examples/ui/scrollbutton'
         ],
         // enable game canvas below for debugging
-        showCanvas = false,
+        showCanvas = true,
         loadCount = 0,
         game = {},
+
+        // TODO: changes all of this to using glue instead of melon directly
+
         initMelon = function (callback) {
             game.PlayScreen = me.ScreenObject.extend({
                 /** 
@@ -32,7 +41,6 @@
                     callback();
                 }
             });
-
             // Initialize the video, set scale to 1 to get accurate test results
             if (!me.video.init('screen', 1024, 768, true, 1)) {
                 alert('Your browser does not support HTML5 canvas.');
@@ -46,9 +54,19 @@
             }
             // Initialize the audio
             me.audio.init('mp3,ogg');
-            // switch to the Play Screen
-            me.state.set(me.state.PLAY, new game.PlayScreen());
-            me.state.change(me.state.PLAY);
+
+            me.loader.onload = function () {
+                me.state.set(me.state.PLAY, new game.PlayScreen());
+                me.state.change(me.state.PLAY);
+            };
+
+            me.loader.preload([
+                {name: "hallway_level_tiles",  type:"image", src: "data/img/maps/hallway_level_tiles.png"},
+                {name: "door",  type:"image", src: "data/img/sprites/door.png"},
+                {name: "leftButton",  type:"image", src: "data/img/gui/left-button.png"},
+                {name: "rightButton",  type:"image", src: "data/img/gui/right-button.png"},
+                {name: "hallway", type: "tmx", src: "data/map/hallway.tmx"}
+            ]);
         },
         // loads the Jasmine environment, runs tests
         loadJasmine = function () {
@@ -65,9 +83,31 @@
             if (loadCount === testScripts.length) {
                 // init MelonJS
                 window.onReady(function onReady() {
-                    initMelon(function () {
-                        loadJasmine();
+                    // config our module paths
+                    glue.module.config({
+                        baseUrl: '../js/',
+                        paths: {
+                            base: 'base',
+                            modules: 'modules',
+                            screens: 'screens',
+                            entities: 'entities',
+                            spec: '../test/spec'
+                        }
                     });
+                    specs.unshift('glue');
+                    // load spec modules
+                    glue.module.get(
+                        specs,
+                        function (Glue) {
+                            // init used engines
+                            initMelon(function () {
+                                // initialize glue input system
+                                Glue.input.init();
+                                // load jasmine
+                                loadJasmine();
+                            });
+                        }
+                    );
                 });
             }
         };

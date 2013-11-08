@@ -1,6 +1,7 @@
 /**
  *  @desc Tests for MelonJS adapter
  *  @author Marco Colombo
+ *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
 (function (MelonJSAdapter, MelonJS) {

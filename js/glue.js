@@ -1,25 +1,29 @@
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
- *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
-var glue = (function (adapters) {
-    'use strict';
-    return {
-        audio: adapters.melonjs.audio,
-        event: adapters.melonjs.event,
-        input: adapters.melonjs.input,
-        levelManager: adapters.melonjs.levelManager,
-        loader: adapters.melonjs.loader,
-        module: adapters.spilgames.module,
-        plugin: adapters.melonjs.plugin,
-        state: adapters.melonjs.state,
-        sugar: adapters.spilgames.sugar,
-        video: adapters.melonjs.video
+(function () {
+    var glue = (function (adapters) {
+        'use strict';
+        return {
+            audio: adapters.melonjs.audio,
+            entity: adapters.melonjs.entity,
+            event: adapters.melonjs.event,
+            input: adapters.melonjs.input,
+            levelManager: adapters.melonjs.levelManager,
+            loader: adapters.melonjs.loader,
+            module: adapters.spilgames.module,
+            plugin: adapters.melonjs.plugin,
+            state: adapters.melonjs.state,
+            sugar: adapters.spilgames.sugar,
+            video: adapters.melonjs.video
+        };
+    }(adapters));
+    window['glue'] = {
+        module: glue.module
     };
-}(adapters));
-
-glue.game = glue.game || {};
-glue.game.namespace = 'game';
-window[glue.game.namespace] = {};
+    glue.module.create('glue', function () {
+        return glue;
+    });
+}());

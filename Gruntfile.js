@@ -14,26 +14,33 @@ module.exports = function (grunt) {
                         'bower_components/melonjs/build/melonJS-0.9.10.js'
                     ],
                     'build/src/modules.js': [
-                        'js/modules/spilgames/**/*'
+                        'js/modules/spilgames/*.js'
                     ],
                     'build/src/adapters.js': [
                         'js/adapters/**/*'
                     ],
                     'build/src/base.js': [
                         'js/glue.js'
+                    ],
+                    'build/src/gluemodules.js': [
+                        'js/modules/spilgames/entity/behaviour/*.js'
+                    ],
+                    'build/glue.js': [
+                        'build/src/libraries.js',
+                        'build/src/engines.js',
+                        'build/src/modules.js',
+                        'build/src/adapters.js',
+                        'build/src/base.js',
+                        'build/src/gluemodules.js'
                     ]
                 }
-            }
+            },
         },
         uglify: {
             dist: {
                 files: {
                     'build/glue.min.js': [
-                        'build/src/libraries.js',
-                        'build/src/engines.js',
-                        'build/src/modules.js',
-                        'build/src/adapters.js',
-                        'build/src/base.js'
+                        'build/glue.js'
                     ]
                 }
             }
@@ -58,6 +65,12 @@ module.exports = function (grunt) {
         'clean:beforeRelease',
         'concat',
         'uglify',
+        'clean:afterRelease'
+    ]);
+    // Default task(s).
+    grunt.registerTask('dev', [
+        'clean:beforeRelease',
+        'concat',
         'clean:afterRelease'
     ]);
 };
