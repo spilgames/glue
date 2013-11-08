@@ -10,11 +10,14 @@
             'spec/spechelper.js',
             // glue
             '../build/glue.min.js',
-            // specs (functional tests)
-            //'spec/base/glue/adapters/melonjs.js',
-            //'spec/base/glue/adapters/spilgames.js',
-            //'spec/base/glue/modules/spilgames/sugar.js',
-            'spec/base/glue/api.js'
+            // specs for wrapped functionality (glue internals)
+            'spec/adapters/melonjs.js',
+            'spec/adapters/spilgames.js',
+            'spec/modules/spilgames/sugar.js'
+        ],
+        // glue specs
+        specs = [
+            'spec/api'
         ],
         // enable game canvas below for debugging
         showCanvas = true,
@@ -34,7 +37,6 @@
                     callback();
                 }
             });
-
             // Initialize the video, set scale to 1 to get accurate test results
             if (!me.video.init('screen', 1024, 768, true, 1)) {
                 alert('Your browser does not support HTML5 canvas.');
@@ -67,9 +69,31 @@
             if (loadCount === testScripts.length) {
                 // init MelonJS
                 window.onReady(function onReady() {
-                    initMelon(function () {
-                        loadJasmine();
+                    // config our module paths
+                    glue.module.config({
+                        baseUrl: '../js/',
+                        paths: {
+                            base: 'base',
+                            modules: 'modules',
+                            screens: 'screens',
+                            entities: 'entities',
+                            spec: '../test/spec'
+                        }
                     });
+                    specs.unshift('glue');
+                    // load spec modules
+                    glue.module.get(
+                        specs,
+                        function (Glue) {
+                            // init used engines
+                            initMelon(function () {
+                                // initialize glue input system
+                                Glue.input.init();
+                                // load jasmine
+                                loadJasmine();
+                            });
+                        }
+                    );
                 });
             }
         };

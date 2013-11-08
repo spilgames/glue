@@ -15,6 +15,11 @@ adapters.melonjs = (function (MelonJS) {
                 return MelonJS.audio.init(formats);
             }
         },
+        entity: {
+            base: function (x, y, settings) {
+                return new MelonJS.ObjectEntity(x, y, settings);
+            }
+        },
         event: {
             on: MelonJS.event.subscribe,
             off: MelonJS.event.unsubscribe,
@@ -78,13 +83,13 @@ adapters.melonjs = (function (MelonJS) {
             init: function () {
                 var self = this,
                     pointerUpCallback = function (evt) {
-                        this.event.fire(self.POINTER_UP, [evt]);
+                        MelonJS.event.publish(self.POINTER_UP, [evt]);
                     },
                     pointerDownCallback = function (evt) {
-                        this.event.fire(self.POINTER_DOWN, [evt]);
+                        MelonJS.event.publish(self.POINTER_DOWN, [evt]);
                     },
                     pointerMoveCallback = function (evt) {
-                        this.event.fire(self.POINTER_MOVE, [evt]);
+                        MelonJS.event.publish(self.POINTER_MOVE, [evt]);
                     };
 
                 this.pointer.on(
