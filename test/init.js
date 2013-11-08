@@ -11,16 +11,17 @@
             // glue
             '../build/glue.min.js',
             // specs for wrapped functionality (glue internals)
-            'spec/adapters/melonjs.js',
-            'spec/adapters/spilgames.js',
-            'spec/modules/spilgames/sugar.js'
+            //'spec/adapters/melonjs.js',
+            //'spec/adapters/spilgames.js',
+            //'spec/modules/spilgames/sugar.js'
         ],
         // glue specs
         specs = [
-            'spec/api'
+            //'spec/api',
+            'spec/modules/spilgames/entity/ui/scrollbutton'
         ],
         // enable game canvas below for debugging
-        showCanvas = false,
+        showCanvas = true,
         loadCount = 0,
         game = {},
         initMelon = function (callback) {
