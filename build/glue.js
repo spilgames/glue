@@ -18756,7 +18756,6 @@ modules.spilgames.sugar = (function (win, doc) {
  *  @module MelonJS
  *  @namespace adapters
  *  @desc Provides adapters to interface with MelonJS
- *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
 var adapters = adapters || {};
@@ -18910,7 +18909,6 @@ adapters.melonjs = (function (MelonJS) {
  *  @module Spilgames
  *  @namespace adapters
  *  @desc Provides adapters to interface with custom Spilgames modules or vendors
- *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
 var adapters = adapters || {};
@@ -18930,7 +18928,6 @@ adapters.spilgames = (function (win, Spilgames) {
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
- *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
 (function () {
@@ -18961,8 +18958,6 @@ adapters.spilgames = (function (win, Spilgames) {
 /*
  * @module Clickable
  * @namespace modules.spilgames.entity.behaviour
- * @author Marco Colombo
- * @author Jeroen Reurings
  * @desc Used to make a game entity clickable
  */
 glue.module.create(
@@ -19056,8 +19051,6 @@ glue.module.create(
 /*
  * @module Hoverable
  * @namespace modules.spilgames.entity.behaviour
- * @author Marco Colombo
- * @author Jeroen Reurings
  * @desc Used to make a game entity hoverable
  */
 glue.module.create(
