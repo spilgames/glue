@@ -32,7 +32,7 @@ glue.module.create(['glue'], function (Glue) {
 
                     glue.module.create(
                         'entity/player',
-                        ['Glue'],
+                        ['glue'],
                         function (Glue) {
                             return function (x, y, settings) {
                                     // construct a new base entity instance

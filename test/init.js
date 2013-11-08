@@ -20,7 +20,7 @@
             'spec/api'
         ],
         // enable game canvas below for debugging
-        showCanvas = true,
+        showCanvas = false,
         loadCount = 0,
         game = {},
         initMelon = function (callback) {
