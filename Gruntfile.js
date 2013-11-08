@@ -21,19 +21,22 @@ module.exports = function (grunt) {
                     ],
                     'build/src/base.js': [
                         'js/glue.js'
-                    ]
-                }
-            }
-        },
-        uglify: {
-            dist: {
-                files: {
-                    'build/glue.min.js': [
+                    ],
+                    'build/glue.js': [
                         'build/src/libraries.js',
                         'build/src/engines.js',
                         'build/src/modules.js',
                         'build/src/adapters.js',
                         'build/src/base.js'
+                    ]
+                }
+            },
+        },
+        uglify: {
+            dist: {
+                files: {
+                    'build/glue.min.js': [
+                        'build/glue.js'
                     ]
                 }
             }
@@ -58,6 +61,12 @@ module.exports = function (grunt) {
         'clean:beforeRelease',
         'concat',
         'uglify',
+        'clean:afterRelease'
+    ]);
+    // Default task(s).
+    grunt.registerTask('dev', [
+        'clean:beforeRelease',
+        'concat',
         'clean:afterRelease'
     ]);
 };
