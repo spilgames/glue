@@ -1,7 +1,6 @@
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
- *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
 (function () {

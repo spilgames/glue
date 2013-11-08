@@ -1,8 +1,6 @@
 /*
  * @module Clickable
  * @namespace modules.spilgames.entity.behaviour
- * @author Marco Colombo
- * @author Jeroen Reurings
  * @desc Used to make a game entity clickable
  */
 glue.module.create(
