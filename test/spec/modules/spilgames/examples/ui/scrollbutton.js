@@ -48,6 +48,7 @@ glue.module.create(['glue'], function (Glue) {
                                     update: function () {
                                         updated = true;
                                     },
+                                    
                                     clicked: function () {
                                         console.log(obj.name, 'clicked');
                                     },

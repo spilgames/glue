@@ -18965,28 +18965,29 @@ glue.module.create(
     ],
     function (Glue) {
         return function (obj) {
-            var isPressed = false;
-
-            // unbind all events on destroy?!
-
-            Glue.event.on(
-                Glue.input.POINTER_DOWN,
-                function () {
+            var isPressed = false,
+                onPointerUp = function () {
+                    isPressed = false;
+                },
+                onPointerDown = function () {
                     if(obj.isHovering()) {
                         isPressed = true;
+                        // call the clicked method if it exists
                         if (obj.clicked) {
                             obj.clicked();
                         }
                     }
-                }
-            );
-            Glue.event.on(
-                Glue.input.POINTER_UP,
-                function () {
-                    isPressed = false;
-                    firstPress = false;
-                }
-            );
+                },
+                setupEvents = function () {
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
+                },
+                tearDownEvents = function () {
+                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.off(Glue.input.POINTER_UP, onPointerUp);
+                };
+
+            setupEvents();
 
             return obj.mix({
                 isPressed: function () {
