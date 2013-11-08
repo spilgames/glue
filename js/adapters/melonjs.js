@@ -24,6 +24,9 @@ adapters.melonjs = (function (MelonJS) {
             off: MelonJS.event.unsubscribe,
             fire: MelonJS.event.publish
         },
+        game: {
+            add: MelonJS.game.add
+        },
         levelManager: {
             loadLevel: function (levelName) {
                 MelonJS.levelDirector.loadLevel(levelName);

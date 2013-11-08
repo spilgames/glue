@@ -18778,6 +18778,9 @@ adapters.melonjs = (function (MelonJS) {
             off: MelonJS.event.unsubscribe,
             fire: MelonJS.event.publish
         },
+        game: {
+            add: MelonJS.game.add
+        },
         levelManager: {
             loadLevel: function (levelName) {
                 MelonJS.levelDirector.loadLevel(levelName);
@@ -18937,6 +18940,7 @@ adapters.spilgames = (function (win, Spilgames) {
             audio: adapters.melonjs.audio,
             entity: adapters.melonjs.entity,
             event: adapters.melonjs.event,
+            game: adapters.melonjs.game,
             input: adapters.melonjs.input,
             levelManager: adapters.melonjs.levelManager,
             loader: adapters.melonjs.loader,
@@ -18992,7 +18996,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerDown = function (evt) {
-                    if(obj.isHovering()) {
+                    if(!obj.isHovering || obj.isHovering()) {
                         isPressed = true;
                         // call the clicked method if it exists
                         if (obj.clicked) {
@@ -19038,6 +19042,192 @@ glue.module.create(
                  * Can be used to destruct this entity
                  * @name isPressed
                  * @memberOf clickable
+                 * @function
+                 */
+                destructClickable: function () {
+                    tearDownEvents();
+                }
+            });
+        };
+    }
+);
+
+/*
+ * @module Draggable
+ * @namespace modules.spilgames.entity.behaviour
+ * @desc Used to make a game entity draggable
+ */
+glue.module.create(
+    'modules/spilgames/entity/behaviour/draggable',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        /**
+         * Constructor
+         * @memberOf draggable
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (obj) {
+            var isPressed = false,
+                /**
+                 * Listens the POINTER_UP event
+                 * @name onPointerUp
+                 * @memberOf draggable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerUp = function (evt) {
+                    isPressed = false;
+                },
+                /**
+                 * Listens the POINTER_DOWN event
+                 * @name onPointerDown
+                 * @memberOf draggable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerDown = function (evt) {
+                    if(obj.isHovering()) {
+                        isPressed = true;
+                        // call the clicked method if it exists
+                        if (obj.clicked) {
+                            obj.clicked();
+                        }
+                    }
+                },
+                /**
+                 * Sets up all events for this module
+                 * @name setupEvents
+                 * @memberOf draggable
+                 * @function
+                 */
+                setupEvents = function () {
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
+                },
+                /**
+                 * Tears down all events for this module
+                 * @name teardownEvents
+                 * @memberOf draggable
+                 * @function
+                 */
+                tearDownEvents = function () {
+                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.off(Glue.input.POINTER_UP, onPointerUp);
+                };
+
+            // setup the module events
+            setupEvents();
+
+            return obj.mix({
+                /**
+                 * Returns if this entity is pressed
+                 * @name isPressed
+                 * @memberOf draggable
+                 * @function
+                 */
+                isPressed: function () {
+                    return isPressed;
+                },
+                /**
+                 * Can be used to destruct this entity
+                 * @name isPressed
+                 * @memberOf draggable
+                 * @function
+                 */
+                destructClickable: function () {
+                    tearDownEvents();
+                }
+            });
+        };
+    }
+);
+
+/*
+ * @module Droptarget
+ * @namespace modules.spilgames.entity.behaviour
+ * @desc Used to make a game entity act as a droptarget
+ */
+glue.module.create(
+    'modules/spilgames/entity/behaviour/droptarget',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        /**
+         * Constructor
+         * @memberOf droptarget
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (obj) {
+            var isPressed = false,
+                /**
+                 * Listens the POINTER_UP event
+                 * @name onPointerUp
+                 * @memberOf droptarget
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerUp = function (evt) {
+                    isPressed = false;
+                },
+                /**
+                 * Listens the POINTER_DOWN event
+                 * @name onPointerDown
+                 * @memberOf droptarget
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerDown = function (evt) {
+                    if(obj.isHovering()) {
+                        isPressed = true;
+                        // call the clicked method if it exists
+                        if (obj.clicked) {
+                            obj.clicked();
+                        }
+                    }
+                },
+                /**
+                 * Sets up all events for this module
+                 * @name setupEvents
+                 * @memberOf droptarget
+                 * @function
+                 */
+                setupEvents = function () {
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
+                },
+                /**
+                 * Tears down all events for this module
+                 * @name teardownEvents
+                 * @memberOf droptarget
+                 * @function
+                 */
+                tearDownEvents = function () {
+                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.off(Glue.input.POINTER_UP, onPointerUp);
+                };
+
+            // setup the module events
+            setupEvents();
+
+            return obj.mix({
+                /**
+                 * Returns if this entity is pressed
+                 * @name isPressed
+                 * @memberOf droptarget
+                 * @function
+                 */
+                isPressed: function () {
+                    return isPressed;
+                },
+                /**
+                 * Can be used to destruct this entity
+                 * @name isPressed
+                 * @memberOf droptarget
                  * @function
                  */
                 destructClickable: function () {

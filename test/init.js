@@ -18,7 +18,8 @@
         // glue specs
         specs = [
             //'spec/api',
-            'spec/modules/spilgames/examples/ui/scrollbutton'
+            'spec/modules/spilgames/entity/behaviour/mixin',
+            'spec/modules/spilgames/entity/behaviour/clickable'
         ],
         // enable game canvas below for debugging
         showCanvas = true,

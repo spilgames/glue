@@ -1,17 +1,17 @@
 /*
- * @module Clickable
+ * @module Draggable
  * @namespace modules.spilgames.entity.behaviour
- * @desc Used to make a game entity clickable
+ * @desc Used to make a game entity draggable
  */
 glue.module.create(
-    'modules/spilgames/entity/behaviour/clickable',
+    'modules/spilgames/entity/behaviour/draggable',
     [
         'glue'
     ],
     function (Glue) {
         /**
          * Constructor
-         * @memberOf clickable
+         * @memberOf draggable
          * @function
          * @param {Object} obj: the entity object
          */
@@ -20,7 +20,7 @@ glue.module.create(
                 /**
                  * Listens the POINTER_UP event
                  * @name onPointerUp
-                 * @memberOf clickable
+                 * @memberOf draggable
                  * @function
                  * @param {Object} evt: The pointer event
                  */
@@ -30,12 +30,12 @@ glue.module.create(
                 /**
                  * Listens the POINTER_DOWN event
                  * @name onPointerDown
-                 * @memberOf clickable
+                 * @memberOf draggable
                  * @function
                  * @param {Object} evt: The pointer event
                  */
                 onPointerDown = function (evt) {
-                    if(!obj.isHovering || obj.isHovering()) {
+                    if(obj.isHovering()) {
                         isPressed = true;
                         // call the clicked method if it exists
                         if (obj.clicked) {
@@ -46,7 +46,7 @@ glue.module.create(
                 /**
                  * Sets up all events for this module
                  * @name setupEvents
-                 * @memberOf clickable
+                 * @memberOf draggable
                  * @function
                  */
                 setupEvents = function () {
@@ -56,7 +56,7 @@ glue.module.create(
                 /**
                  * Tears down all events for this module
                  * @name teardownEvents
-                 * @memberOf clickable
+                 * @memberOf draggable
                  * @function
                  */
                 tearDownEvents = function () {
@@ -71,7 +71,7 @@ glue.module.create(
                 /**
                  * Returns if this entity is pressed
                  * @name isPressed
-                 * @memberOf clickable
+                 * @memberOf draggable
                  * @function
                  */
                 isPressed: function () {
@@ -80,7 +80,7 @@ glue.module.create(
                 /**
                  * Can be used to destruct this entity
                  * @name isPressed
-                 * @memberOf clickable
+                 * @memberOf draggable
                  * @function
                  */
                 destructClickable: function () {
