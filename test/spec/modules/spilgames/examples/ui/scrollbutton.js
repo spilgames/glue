@@ -35,7 +35,7 @@ glue.module.create(['glue'], function (Glue) {
                                     },
                                     update: function () {
                                         updated = true;
-                                        this.parent();
+                                        //this.parent();
                                         return true;
                                     },
                                     clicked: function () {
