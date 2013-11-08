@@ -20,37 +20,23 @@ glue.module.create(['glue'], function (Glue) {
                     ],
                     function (Glue, Hoverable, Clickable) {
                         return function (x, y, settings) {
-                                // construct a new base entity instance
-                            var base = new Glue.entity.base(x, y, settings),
-                                baseDraw = base.draw,
-                                baseUpdate = base.update,
-                                // mix in the hoverable functionality
-                                hoverable = Hoverable(base),
-                                // mix in the clickable functionality
-                                clickable = Clickable(base),
                                 // set the initial color to white
-                                color = settings.color || 'white',
+                            var color = 'white',
                                 // set the font we want to use
-                                font = new me.Font('Verdana', 15, 'black'),
+                                font = new me.Font('Verdana', 15, color),
                                 // set the text
                                 text = 'Scrollbutton',
                                 // mix in some custom methods
-                                obj = base.mix({
+                                obj = Glue.entity.base().extend({
                                     draw: function (context) {
                                         drawn = true;
-                                        baseDraw();
-                                        context.fillStyle = color;
-                                        context.fillRect(
-                                            this.pos.x,
-                                            this.pos.y,
-                                            this.width,
-                                            this.height
-                                        );
-                                        font.draw(context, text, this.pos.x, this.pos.y);
+                                        this.parent(context);
+                                        font.draw(context, text, this.pos.x, this.pos.y - 30);
                                     },
                                     update: function () {
                                         updated = true;
-                                        baseUpdate();
+                                        this.parent();
+                                        return true;
                                     },
                                     clicked: function () {
                                         console.log(obj.name, 'clicked');
@@ -60,6 +46,12 @@ glue.module.create(['glue'], function (Glue) {
                                     }
                                 });
 
+                            // construct a new base entity instance
+                            obj = new obj(x, y, settings);
+                            // mix in the hoverable functionality
+                            Hoverable(obj);
+                            // mix in the clickable functionality
+                            Clickable(obj);
                             // return the mixed object
                             return obj;
                         };
@@ -70,24 +62,20 @@ glue.module.create(['glue'], function (Glue) {
                     ['scrollbutton'],
                     function (Scrollbutton) {
                         // Add buttons (this will be in the screen normally)
-                        me.game.add(Scrollbutton(100, 100, {
+                        me.game.add(Scrollbutton(0, 300, {
                             name: 'scrollbutton',
-                            width: 100,
-                            height: 100,
-                            // this will be used in an actual implementation
-                            image: 'leftButton',
-                            // we just use the color for this test
-                            color: 'red'
+                            width: 204,
+                            height: 105,
+                            spritewidth: 102,
+                            image: 'leftButton'
                         }), 1);
 
-                        me.game.add(Scrollbutton(300, 300, {
+                        me.game.add(Scrollbutton(920, 300, {
                             name: 'scrollbutton2',
-                            width: 300,
-                            height: 300,
-                            // this will be used in an actual implementation
-                            image: 'rightButton',
-                            // we just use the color for this test
-                            color: 'green'
+                            width: 204,
+                            height: 105,
+                            spritewidth: 102,
+                            image: 'rightButton'
                         }), 2);
 
                         expect(me.game.getEntityByName('scrollbutton2')[0].name).toEqual('scrollbutton2');

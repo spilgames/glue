@@ -9,7 +9,7 @@
             'plugins/plugins.js',
             'spec/spechelper.js',
             // glue
-            '../build/glue.min.js'
+            '../build/glue.js'
             // specs for wrapped functionality (glue internals)
             //'spec/adapters/melonjs.js',
             //'spec/adapters/spilgames.js',

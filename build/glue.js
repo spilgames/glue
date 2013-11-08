@@ -18770,8 +18770,8 @@ adapters.melonjs = (function (MelonJS) {
             }
         },
         entity: {
-            base: function (x, y, settings) {
-                return new MelonJS.ObjectEntity(x, y, settings);
+            base: function () {
+                return MelonJS.ObjectEntity;
             }
         },
         event: {
