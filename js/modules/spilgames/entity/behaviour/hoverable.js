@@ -1,7 +1,9 @@
 /*
- * @module Hoverable
- * @namespace modules.spilgames.entity.behaviour
- * @desc Used to make a game entity hoverable
+ *  @module Hoverable
+ *  @namespace modules.spilgames.entity.behaviour
+ *  @desc Used to make a game entity hoverable
+ *  @author Jeroen Reurings
+ *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
     'modules/spilgames/entity/behaviour/hoverable',

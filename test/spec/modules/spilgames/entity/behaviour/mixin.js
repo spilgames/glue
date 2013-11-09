@@ -4,10 +4,10 @@
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(['glue'], function (Glue) {
-    describe('spilgames.entity.scrollbutton', function () {
+    describe('spilgames.entity.behaviour.mixin', function () {
         'use strict';
         describe('Modules', function () {
-            it('Should be able to create a scrollbutton entity', function (done) {
+            it('Should be able to mixin an entity which is added updated and drawn', function (done) {
                 var updated = false,
                     drawn = false;
 
@@ -32,10 +32,10 @@ glue.module.create(['glue'], function (Glue) {
                                     return true;
                                 },
                                 clicked: function () {
-                                    console.log(obj.name, 'clicked');
+                                    //console.log(obj.name, 'clicked');
                                 },
                                 hovered: function () {
-                                    console.log(obj.name, 'hovered');
+                                    //console.log(obj.name, 'hovered');
                                 }
                             });
 
@@ -52,7 +52,7 @@ glue.module.create(['glue'], function (Glue) {
                 glue.module.get(
                     ['scrollbutton'],
                     function (Scrollbutton) {
-                        me.game.add(Scrollbutton(0, 300, {
+                        Glue.game.add(Scrollbutton(0, 300, {
                             name: 'scrollbutton',
                             height: 105,
                             spritewidth: 102,
@@ -64,7 +64,7 @@ glue.module.create(['glue'], function (Glue) {
                             expect(updated).toBeTruthy();
                             expect(drawn).toBeTruthy();
                             done();
-                        }, 30);
+                        }, 70);
                     }
                 );
             });

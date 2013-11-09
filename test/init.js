@@ -9,22 +9,22 @@
             'plugins/plugins.js',
             'spec/spechelper.js',
             // glue
-            '../build/glue.js'
+            '../build/glue.js',
             // specs for wrapped functionality (glue internals)
-            //'spec/adapters/melonjs.js',
-            //'spec/adapters/spilgames.js',
-            //'spec/modules/spilgames/sugar.js'
+            'spec/adapters/melonjs.js',
+            'spec/adapters/spilgames.js',
+            'spec/modules/spilgames/sugar.js'
         ],
         // glue specs
         specs = [
             //'spec/api',
-            //'spec/modules/spilgames/entity/behaviour/mixin',
-            //'spec/modules/spilgames/entity/behaviour/clickable',
+            'spec/modules/spilgames/entity/behaviour/mixin',
+            'spec/modules/spilgames/entity/behaviour/clickable',
             'spec/modules/spilgames/entity/behaviour/draggable',
-            //'spec/modules/spilgames/entity/behaviour/droptarget'
+            'spec/modules/spilgames/entity/behaviour/droptarget'
         ],
         // enable game canvas below for debugging
-        showCanvas = true,
+        showCanvas = false,
         loadCount = 0,
         game = {},
 
@@ -64,11 +64,10 @@
             };
 
             me.loader.preload([
-                {name: "hallway_level_tiles",  type:"image", src: "data/img/maps/hallway_level_tiles.png"},
-                {name: "door",  type:"image", src: "data/img/sprites/door.png"},
-                {name: "leftButton",  type:"image", src: "data/img/gui/left-button.png"},
-                {name: "rightButton",  type:"image", src: "data/img/gui/right-button.png"},
-                {name: "hallway", type: "tmx", src: "data/map/hallway.tmx"}
+                {name: 'door',  type: 'image', src: 'data/img/sprites/door.png'},
+                {name: 'kitty', type: 'image', src: 'data/img/sprites/kitty.png'},
+                {name: 'leftButton', type: 'image', src: 'data/img/gui/left-button.png'},
+                {name: 'rightButton', type: 'image', src: 'data/img/gui/right-button.png'}
             ]);
         },
         // loads the Jasmine environment, runs tests

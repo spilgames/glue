@@ -50,7 +50,7 @@ glue.module.create(
 
             afterEach(function () {
                 if (obj) {
-                    //Glue.game.remove(obj);
+                    Glue.game.remove(obj);
                 }
             });
 

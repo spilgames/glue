@@ -1,7 +1,9 @@
 /*
- * @module Droptarget
- * @namespace modules.spilgames.entity.behaviour
- * @desc Used to make a game entity act as a droptarget
+ *  @module Droptarget
+ *  @namespace modules.spilgames.entity.behaviour
+ *  @desc Used to make a game entity act as a droptarget
+ *  @author Jeroen Reurings
+ *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
     'modules/spilgames/entity/behaviour/droptarget',
@@ -9,84 +11,113 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
+        'use strict';
+        // - cross instance private members -
+
         /**
          * Constructor
-         * @memberOf droptarget
+         * @name init
+         * @memberOf me.DroptargetEntity
          * @function
          * @param {Object} obj: the entity object
          */
         return function (obj) {
-            var isPressed = false,
+            // - per instance private members -
                 /**
-                 * Listens the POINTER_UP event
-                 * @name onPointerUp
-                 * @memberOf droptarget
-                 * @function
-                 * @param {Object} evt: The pointer event
+                 * the checkmethod we want to use
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name checkMethod
                  */
-                onPointerUp = function (evt) {
-                    isPressed = false;
+            var checkMethod = null,
+                /**
+                 * Gets called when a draggable entity is dropped on the current entity
+                 * @name drop
+                 * @memberOf me.DroptargetEntity
+                 * @function
+                 * @param {Object} draggableEntity: the draggable entity that is dropped
+                 */
+                drop = function (draggableEntity) {
+                    // could be used to perform default drop logic
                 },
                 /**
-                 * Listens the POINTER_DOWN event
-                 * @name onPointerDown
-                 * @memberOf droptarget
+                 * Checks if a dropped entity is dropped on the current entity
+                 * @name checkOnMe
+                 * @memberOf me.DroptargetEntity
                  * @function
-                 * @param {Object} evt: The pointer event
+                 * @param {Object} e: the drag event
+                 * @param {Object} draggableEntity: the draggable entity that is dropped
                  */
-                onPointerDown = function (evt) {
-                    if(obj.isHovering()) {
-                        isPressed = true;
-                        // call the clicked method if it exists
-                        if (obj.clicked) {
-                            obj.clicked();
-                        }
+                checkOnMe = function (e, draggableEntity) {
+                    // the check if the draggable entity is this entity should work after
+                    // a total refactoring to the module pattern
+                    if (draggableEntity && draggableEntity !== obj &&
+                        obj[checkMethod](draggableEntity.collisionBox)) {
+                            // call the drop method on the current entity
+                            drop(draggableEntity);
+                            if (obj.drop) {
+                                obj.drop(e);
+                            }
+                    }
+                };
+
+            // - external interface -
+            obj.mix({
+                /**
+                 * constant for the overlaps method
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name CHECKMETHOD_OVERLAPS
+                 */
+                CHECKMETHOD_OVERLAPS: "overlaps",
+                /**
+                 * constant for the contains method
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name CHECKMETHOD_CONTAINS
+                 */
+                CHECKMETHOD_CONTAINS: "contains",
+                /**
+                 * Sets the collision method which is going to be used to check a valid drop
+                 * @name setCheckMethod
+                 * @memberOf me.DroptargetEntity
+                 * @function
+                 * @param {Constant} checkMethod: the checkmethod (defaults to CHECKMETHOD_OVERLAP)
+                 */
+                setCheckMethod: function (value) {
+                    if (this[value] !== undefined) {
+                        checkMethod = value;
                     }
                 },
                 /**
-                 * Sets up all events for this module
-                 * @name setupEvents
-                 * @memberOf droptarget
+                 * Destructor
+                 * @name destroy
+                 * @memberOf me.DroptargetEntity
                  * @function
                  */
-                setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
+                destroy: function () {
+                    Glue.event.off(Glue.input.DRAG_END, checkOnMe);
                 },
                 /**
-                 * Tears down all events for this module
-                 * @name teardownEvents
-                 * @memberOf droptarget
+                 * Updates the entity per cycle, can be overwritten
+                 * @name update
+                 * @memberOf me.DroptargetEntity
                  * @function
                  */
-                tearDownEvents = function () {
-                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.off(Glue.input.POINTER_UP, onPointerUp);
-                };
-
-            // setup the module events
-            setupEvents();
-
-            return obj.mix({
-                /**
-                 * Returns if this entity is pressed
-                 * @name isPressed
-                 * @memberOf droptarget
-                 * @function
-                 */
-                isPressed: function () {
-                    return isPressed;
-                },
-                /**
-                 * Can be used to destruct this entity
-                 * @name isPressed
-                 * @memberOf droptarget
-                 * @function
-                 */
-                destructClickable: function () {
-                    tearDownEvents();
+                update: function () {
+                    return true;
                 }
             });
+
+            // - initialisation logic -
+            Glue.event.on(Glue.input.DRAG_END, checkOnMe.bind(obj));
+            checkMethod = obj.CHECKMETHOD_OVERLAPS;
+            
+            // - return external interface -
+            return obj;
         };
     }
 );

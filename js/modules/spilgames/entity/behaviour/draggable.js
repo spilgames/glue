@@ -1,7 +1,9 @@
 /*
- * @module Draggable
- * @namespace modules.spilgames.entity.behaviour
- * @desc Used to make a game entity draggable
+ *  @module Draggable
+ *  @namespace modules.spilgames.entity.behaviour
+ *  @desc Used to make a game entity draggable
+ *  @author Jeroen Reurings
+ *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
     'modules/spilgames/entity/behaviour/draggable',
@@ -9,6 +11,8 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
+        // - cross instance private members -
+
         /**
          * Constructor
          * @name init

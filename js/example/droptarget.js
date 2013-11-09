@@ -65,7 +65,7 @@ me.DroptargetEntity = (function (Event, Rectangle) {
              * @type String
              * @name CHECKMETHOD_OVERLAPS
              */
-            CHECKMETHOD_OVERLAPS: "overlaps",
+            CHECKMETHOD_OVERLAPS: 'overlaps',
             /**
              * constant for the contains method
              * @public
@@ -73,7 +73,7 @@ me.DroptargetEntity = (function (Event, Rectangle) {
              * @type String
              * @name CHECKMETHOD_CONTAINS
              */
-            CHECKMETHOD_CONTAINS: "contains",
+            CHECKMETHOD_CONTAINS: 'contains',
             /**
              * Sets the collision method which is going to be used to check a valid drop
              * @name setCheckMethod
@@ -93,7 +93,7 @@ me.DroptargetEntity = (function (Event, Rectangle) {
              * @function
              */
             destroy: function () {
-                Event.unsubscribe(Event.DRAGEND, checkOnMe);
+                Glue.event.off(Glue.input.DRAG_END, checkOnMe);
             },
             /**
              * Updates the entity per cycle, can be overwritten
@@ -116,10 +116,10 @@ me.DroptargetEntity = (function (Event, Rectangle) {
         });
 
         // - initialisation logic -
-        Event.subscribe(Event.DRAGEND, checkOnMe.bind(obj));
+        Glue.event.on(Glue.input.DRAG_END, checkOnMe.bind(obj));
         checkMethod = obj.CHECKMETHOD_OVERLAPS;
         
         // - return external interface -
         return obj;
     };
-}(me.event, me.Rect));
+});

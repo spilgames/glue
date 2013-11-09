@@ -22,7 +22,7 @@ glue.module.create(
                         name: 'draggableEntity',
                         width: dimensions.x,
                         height: dimensions.y,
-                        image: 'leftButton'
+                        image: 'kitty'
                     }).inject({
                         draw: function (context) {
                             this.parent(context);
@@ -44,7 +44,7 @@ glue.module.create(
                         name: 'droptargetEntity',
                         width: dimensions.x,
                         height: dimensions.y,
-                        image: 'rightButton'
+                        image: 'door'
                     }).inject({
                         draw: function (context) {
                             this.parent(context);
@@ -68,9 +68,9 @@ glue.module.create(
                 // drags an entity from a start to an end location
                 drag = function (startFrom, moveTo) {
                     // mock user drag events
-                    Glue.event.fire(Event.DRAGSTART, [{gameX: startFrom.x, gameY: startFrom.y, pointerId: 2}, draggable]);
-                    Glue.event.fire(Event.MOUSEMOVE, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 2}, draggable]);
-                    Glue.event.fire(Event.DRAGEND, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 2}, draggable]);
+                    Glue.event.fire(Glue.input.DRAG_START, [{gameX: startFrom.x, gameY: startFrom.y, pointerId: 2}, draggable]);
+                    Glue.event.fire(Glue.input.POINTER_MOVE, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 2}, draggable]);
+                    Glue.event.fire(Glue.input.DRAG_END, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 2}, draggable]);
                 },
                 // removes all test entities from the game
                 removeEntities = function () {
@@ -97,12 +97,12 @@ glue.module.create(
 
             describe('checkmethod: contains', function () {
                 it('Should be able to detect a valid drop of a draggable', function () {
-                    var startFrom = {x: 70, y: 70},
-                        moveTo = {x: 220, y: 220};
+                    var startFrom = {x: 0, y: 0},
+                        moveTo = {x: 391, y: 325};
                     // create a draggable
-                    createDraggable({x: 0, y: 0}, {x: 100, y: 100});
+                    createDraggable({x: 0, y: 0}, {x: 198, y: 226});
                     // create a droptarget
-                    createDroptarget({x: 100, y: 100}, {x: 200, y: 200});
+                    createDroptarget({x: 200, y: 200}, {x: 491, y: 414});
                     // enable the contains check method
                     droptarget.enableContains();
                     // drag the draggable entity to a new location
@@ -112,11 +112,11 @@ glue.module.create(
                 });
                 it('Should not accept a drop outside of the check area', function () {
                     var startFrom = {x: 70, y: 70},
-                        moveTo = {x: 100, y: 100};
+                        moveTo = {x: 825, y: 325};
                     // create a draggable
-                    createDraggable({x: 0, y: 0}, {x: 100, y: 100});
+                    createDraggable({x: 0, y: 0}, {x: 198, y: 226});
                     // create a droptarget
-                    createDroptarget({x: 100, y: 100}, {x: 200, y: 200});
+                    createDroptarget({x: 200, y: 200}, {x: 491, y: 414});
                     // enable the contains check method
                     droptarget.enableContains();
                     // drag the draggable entity to a new location
@@ -129,11 +129,11 @@ glue.module.create(
             describe('checkmethod: overlap', function () {
                 it('Should be able to detect a valid drop of a draggable', function () {
                     var startFrom = {x: 70, y: 70},
-                        moveTo = {x: 100, y: 100};
+                        moveTo = {x: 86, y: 359};
                     // create a draggable
-                    createDraggable({x: 0, y: 0}, {x: 100, y: 100});
+                    createDraggable({x: 0, y: 0}, {x: 198, y: 226});
                     // create a droptarget
-                    createDroptarget({x: 100, y: 100}, {x: 200, y: 200});
+                    createDroptarget({x: 200, y: 200}, {x: 491, y: 414});
                     // drag the draggable entity to a new location
                     drag(startFrom, moveTo);
 
@@ -141,11 +141,11 @@ glue.module.create(
                 });
                 it('Should not accept a drop outside of the check area', function () {
                     var startFrom = {x: 70, y: 70},
-                        moveTo = {x: 500, y: 500};
+                        moveTo = {x: 825, y: 325};
                     // create a draggable
-                    createDraggable({x: 0, y: 0}, {x: 100, y: 100});
+                    createDraggable({x: 0, y: 0}, {x: 198, y: 226});
                     // create a droptarget
-                    createDroptarget({x: 100, y: 100}, {x: 200, y: 200});
+                    createDroptarget({x: 200, y: 200}, {x: 491, y: 414});
                     // drag the draggable entity to a new location
                     drag(startFrom, moveTo);
 
