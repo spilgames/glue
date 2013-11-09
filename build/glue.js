@@ -18779,7 +18779,8 @@ adapters.melonjs = (function (MelonJS) {
             fire: MelonJS.event.publish
         },
         game: {
-            add: MelonJS.game.add
+            add: MelonJS.game.add,
+            remove: MelonJS.game.remove
         },
         levelManager: {
             loadLevel: function (levelName) {
@@ -18903,6 +18904,9 @@ adapters.melonjs = (function (MelonJS) {
                     'auto', // scaling
                     true // maintian aspect ratio
                 );
+            },
+            getCanvas: function () {
+                return MelonJS.video.getScreenCanvas();
             }
         }
     };

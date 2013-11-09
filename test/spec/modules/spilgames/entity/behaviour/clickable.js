@@ -1,6 +1,5 @@
 /**
  *  @desc Tests for clickable behaviour
- *  @author Jeroen Reurings
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
