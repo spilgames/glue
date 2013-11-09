@@ -18811,7 +18811,7 @@ adapters.melonjs = (function (MelonJS) {
             *  pointerdown: The event occurs when a user presses a 
             *  pointer button over an element
             *
-            *  pointerup:   The event occurs when a user releases a
+            *  pointerup: The event occurs when a user releases a
             *  pointer button over an element
             *
             *  pointermove: The event occurs when the pointer is moving
@@ -18820,21 +18820,25 @@ adapters.melonjs = (function (MelonJS) {
             *  pointerover: The event occurs when the pointer is moved
             *  onto an element
             *
-            *  pointerout:  The event occurs when a user moves the
+            *  pointerout: The event occurs when a user moves the
             *  pointer out of an element
+            *  @note The drag events could be separated later on
             *  @url http://www.w3.org/Submission/pointer-events
             */
-            POINTER_UP:    'pointerup',
-            POINTER_DOWN:  'pointerdown',
-            POINTER_MOVE:  'pointermove',
+            POINTER_UP: 'pointerup',
+            POINTER_DOWN: 'pointerdown',
+            POINTER_MOVE: 'pointermove',
+            DRAG_START: 'dragstart',
+            DRAG_MOVE: 'dragmove',
+            DRAG_END: 'dragend',
             pointer: {
-                on: function (eventType, callback, floating) {
+                on: function (eventType, callback, rect, floating) {
                     eventType = eventType.replace('pointer', 'mouse');
-                    MelonJS.input.registerPointerEvent(eventType, MelonJS.game.viewport, callback, floating);
+                    MelonJS.input.registerPointerEvent(eventType, rect || MelonJS.game.viewport, callback, floating);
                 },
-                off: function (eventType) {
+                off: function (eventType, rect) {
                     eventType = eventType.replace('pointer', 'mouse');
-                    MelonJS.input.releasePointerEvent(eventType, MelonJS.game.viewport);
+                    MelonJS.input.releasePointerEvent(eventType, rect || MelonJS.game.viewport);
                 }
             },
             init: function () {
@@ -19079,7 +19083,6 @@ glue.module.create(
          * @param {Object} obj: the entity object
          */
         return function (obj) {
-            console.log('works')
             // - per instance private members -
             var dragging = false,
                 dragId = null,
@@ -19142,13 +19145,38 @@ glue.module.create(
                     }
                 },
                 /**
-                 * Initializes the events the modules needs to listen to
+                 * Translates a pointer event to a me.event
                  * @name init
-                 * @memberOf Draggable
+                 * @memberOf me.DraggableEntity
+                 * @function
+                 * @param {Object} e: the pointer event you want to translate
+                 * @param {String} translation: the me.event you want to translate
+                 * the event to
+                 */
+                translatePointerEvent = function (e, translation) {
+                    Glue.event.fire(translation, [e, obj]);
+                },
+                /**
+                 * Initializes the events the modules needs to listen to
+                 * It translates the pointer events to me.events
+                 * in order to make them pass through the system and to make
+                 * this module testable. Then we subscribe this module to the
+                 * transformed events. This can be inproved by handling it
+                 * by the Glue.input module.
+                 * @name init
+                 * @memberOf me.DraggableEntity
                  * @function
                  */
                  initEvents = function () {
-                    Glue.event.on(Glue.input.MOUSE_MOVE, dragMove);
+                    pointerDown = function (e) {
+                        translatePointerEvent(e, Glue.input.DRAG_START);
+                    };
+                    pointerUp = function (e) {
+                        translatePointerEvent(e, Glue.input.DRAG_END);
+                    };
+                    Glue.input.pointer.on(Glue.input.POINTER_DOWN, pointerDown, obj);
+                    Glue.input.pointer.on(Glue.input.POINTER_UP, pointerUp, obj);
+                    Glue.event.on(Glue.input.POINTER_MOVE, dragMove);
                     Glue.event.on(Glue.input.DRAG_START, function (e, draggable) {
                         if (draggable === obj) {
                             dragStart(e);
@@ -19170,6 +19198,8 @@ glue.module.create(
                  * @function
                  */
                 destroy: function () {
+                    Glue.input.pointer.off(Glue.input.POINTER_DOWN);
+                    Glue.input.pointer.off(Glue.input.POINTER_UP);
                     Glue.event.off(Glue.input.MOUSE_MOVE, dragMove);
                     Glue.event.off(Glue.input.DRAG_START, dragStart);
                     Glue.event.off(Glue.input.DRAG_END, dragEnd);

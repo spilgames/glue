@@ -38,9 +38,9 @@ glue.module.create(
                 // drags an entity from a start to an end location
                 drag = function (startFrom, moveTo) {
                     // mock user drag events
-                    Glue.event.fire(Event.DRAGSTART, [{gameX: startFrom.x, gameY: startFrom.y, pointerId: 1}, obj]);
-                    Glue.event.fire(Event.MOUSEMOVE, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 1}, obj]);
-                    Glue.event.fire(Event.DRAGEND, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 1}, obj]);
+                    Glue.event.fire(Glue.input.DRAG_START, [{gameX: startFrom.x, gameY: startFrom.y, pointerId: 1}, obj]);
+                    Glue.event.fire(Glue.input.POINTER_MOVE, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 1}, obj]);
+                    Glue.event.fire(Glue.input.DRAG_END, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 1}, obj]);
                 };
 
             beforeAll(function () {
@@ -50,20 +50,20 @@ glue.module.create(
 
             afterEach(function () {
                 if (obj) {
-                    Glue.game.remove(obj);
+                    //Glue.game.remove(obj);
                 }
             });
 
             it('Should be able to drag an entity to a new location', function () {
-                var startFrom = {x: 70, y: 70},
+                var startFrom = {x: 1, y: 1},
                     moveTo = {x: 700, y: 500};
                 // create a draggable
-                createDraggable({x: 10, y: 10}, {x: 100, y: 100});
+                createDraggable({x: 0, y: 0}, {x: 204, y: 105});
                 // drag the draggable entity to a new location
                 drag(startFrom, moveTo);
 
-                expect(obj.pos.x).toEqual(640);
-                expect(obj.pos.y).toEqual(440);
+                expect(obj.pos.x).toEqual(699);
+                expect(obj.pos.y).toEqual(499);
             });
         });
     }

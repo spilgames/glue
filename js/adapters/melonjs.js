@@ -57,7 +57,7 @@ adapters.melonjs = (function (MelonJS) {
             *  pointerdown: The event occurs when a user presses a 
             *  pointer button over an element
             *
-            *  pointerup:   The event occurs when a user releases a
+            *  pointerup: The event occurs when a user releases a
             *  pointer button over an element
             *
             *  pointermove: The event occurs when the pointer is moving
@@ -66,21 +66,25 @@ adapters.melonjs = (function (MelonJS) {
             *  pointerover: The event occurs when the pointer is moved
             *  onto an element
             *
-            *  pointerout:  The event occurs when a user moves the
+            *  pointerout: The event occurs when a user moves the
             *  pointer out of an element
+            *  @note The drag events could be separated later on
             *  @url http://www.w3.org/Submission/pointer-events
             */
-            POINTER_UP:    'pointerup',
-            POINTER_DOWN:  'pointerdown',
-            POINTER_MOVE:  'pointermove',
+            POINTER_UP: 'pointerup',
+            POINTER_DOWN: 'pointerdown',
+            POINTER_MOVE: 'pointermove',
+            DRAG_START: 'dragstart',
+            DRAG_MOVE: 'dragmove',
+            DRAG_END: 'dragend',
             pointer: {
-                on: function (eventType, callback, floating) {
+                on: function (eventType, callback, rect, floating) {
                     eventType = eventType.replace('pointer', 'mouse');
-                    MelonJS.input.registerPointerEvent(eventType, MelonJS.game.viewport, callback, floating);
+                    MelonJS.input.registerPointerEvent(eventType, rect || MelonJS.game.viewport, callback, floating);
                 },
-                off: function (eventType) {
+                off: function (eventType, rect) {
                     eventType = eventType.replace('pointer', 'mouse');
-                    MelonJS.input.releasePointerEvent(eventType, MelonJS.game.viewport);
+                    MelonJS.input.releasePointerEvent(eventType, rect || MelonJS.game.viewport);
                 }
             },
             init: function () {

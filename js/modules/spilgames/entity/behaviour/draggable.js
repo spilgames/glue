@@ -88,7 +88,7 @@ glue.module.create(
                  * the event to
                  */
                 translatePointerEvent = function (e, translation) {
-                    Glue.event.publish(translation, [e, obj]);
+                    Glue.event.fire(translation, [e, obj]);
                 },
                 /**
                  * Initializes the events the modules needs to listen to
@@ -108,8 +108,8 @@ glue.module.create(
                     pointerUp = function (e) {
                         translatePointerEvent(e, Glue.input.DRAG_END);
                     };
-                    Glue.pointer.on(Glue.input.POINTER_DOWN, obj, pointerDown);
-                    Glue.pointer.on(Glue.input.POINTER_UP, obj, pointerUp);
+                    Glue.input.pointer.on(Glue.input.POINTER_DOWN, pointerDown, obj);
+                    Glue.input.pointer.on(Glue.input.POINTER_UP, pointerUp, obj);
                     Glue.event.on(Glue.input.POINTER_MOVE, dragMove);
                     Glue.event.on(Glue.input.DRAG_START, function (e, draggable) {
                         if (draggable === obj) {
@@ -132,6 +132,8 @@ glue.module.create(
                  * @function
                  */
                 destroy: function () {
+                    Glue.input.pointer.off(Glue.input.POINTER_DOWN);
+                    Glue.input.pointer.off(Glue.input.POINTER_UP);
                     Glue.event.off(Glue.input.MOUSE_MOVE, dragMove);
                     Glue.event.off(Glue.input.DRAG_START, dragStart);
                     Glue.event.off(Glue.input.DRAG_END, dragEnd);
