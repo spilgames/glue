@@ -18877,6 +18877,9 @@ adapters.melonjs = (function (MelonJS) {
                 MelonJS.loader.preload(resources);
             }
         },
+        math: {
+            vector: MelonJS.Vector2d
+        },
         plugin: {
             register: function () {
                 MelonJS.plugin.register.apply(null, arguments);
@@ -18948,6 +18951,7 @@ adapters.spilgames = (function (win, Spilgames) {
             input: adapters.melonjs.input,
             levelManager: adapters.melonjs.levelManager,
             loader: adapters.melonjs.loader,
+            math: adapters.melonjs.math,
             module: adapters.spilgames.module,
             plugin: adapters.melonjs.plugin,
             state: adapters.melonjs.state,
@@ -19075,10 +19079,11 @@ glue.module.create(
          * @param {Object} obj: the entity object
          */
         return function (obj) {
+            console.log('works')
             // - per instance private members -
             var dragging = false,
                 dragId = null,
-                grabOffset = new Vector(0, 0),
+                grabOffset = new Glue.math.vector(0, 0),
                 mouseDown = null,
                 mouseUp = null,
                 pointerId = null,
@@ -19137,43 +19142,19 @@ glue.module.create(
                     }
                 },
                 /**
-                 * Translates a pointer event to a me.event
-                 * @name init
-                 * @memberOf Draggable
-                 * @function
-                 * @param {Object} e: the pointer event you want to translate
-                 * @param {String} translation: the me.event you want to translate
-                 * the event to
-                 */
-                translatePointerEvent = function (e, translation) {
-                    Event.publish(translation, [e, obj]);
-                },
-                /**
                  * Initializes the events the modules needs to listen to
-                 * It translates the pointer events to me.events
-                 * in order to make them pass through the system and to make
-                 * this module testable. Then we subscribe this module to the
-                 * transformed events.
                  * @name init
                  * @memberOf Draggable
                  * @function
                  */
                  initEvents = function () {
-                    mouseDown = function (e) {
-                        translatePointerEvent(e, Event.DRAGSTART);
-                    };
-                    mouseUp = function (e) {
-                        translatePointerEvent(e, Event.DRAGEND);
-                    };
-                    onPointerEvent('mousedown', obj, mouseDown);
-                    onPointerEvent('mouseup', obj, mouseUp);
-                    Event.subscribe(Event.MOUSEMOVE, dragMove);
-                    Event.subscribe(Event.DRAGSTART, function (e, draggable) {
+                    Glue.event.on(Glue.input.MOUSE_MOVE, dragMove);
+                    Glue.event.on(Glue.input.DRAG_START, function (e, draggable) {
                         if (draggable === obj) {
                             dragStart(e);
                         }
                     });
-                    Event.subscribe(Event.DRAGEND, function (e, draggable) {
+                    Glue.event.on(Glue.input.DRAG_END, function (e, draggable) {
                         if (draggable === obj) {
                             dragEnd(e);
                         }
@@ -19189,11 +19170,9 @@ glue.module.create(
                  * @function
                  */
                 destroy: function () {
-                    Event.unsubscribe(Event.MOUSEMOVE, dragMove);
-                    Event.unsubscribe(Event.DRAGSTART, dragStart);
-                    Event.unsubscribe(Event.DRAGEND, dragEnd);
-                    removePointerEvent('mousedown', this);
-                    removePointerEvent('mouseup', this);
+                    Glue.event.off(Glue.input.MOUSE_MOVE, dragMove);
+                    Glue.event.off(Glue.input.DRAG_START, dragStart);
+                    Glue.event.off(Glue.input.DRAG_END, dragEnd);
                 },
                 /**
                  * Sets a callback function which will be called when this entity is dragged
@@ -19224,7 +19203,7 @@ glue.module.create(
                  * @param {Number} y: the vertical offset
                  */
                 setGrabOffset: function (x, y) {
-                    grabOffset = new Vector(x, y);
+                    grabOffset = new Glue.math.vector(x, y);
                 },
                 /**
                  * Updates the entity per cycle, can be overwritten

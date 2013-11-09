@@ -14,6 +14,7 @@
             input: adapters.melonjs.input,
             levelManager: adapters.melonjs.levelManager,
             loader: adapters.melonjs.loader,
+            math: adapters.melonjs.math,
             module: adapters.spilgames.module,
             plugin: adapters.melonjs.plugin,
             state: adapters.melonjs.state,

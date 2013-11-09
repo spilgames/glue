@@ -123,6 +123,9 @@ adapters.melonjs = (function (MelonJS) {
                 MelonJS.loader.preload(resources);
             }
         },
+        math: {
+            vector: MelonJS.Vector2d
+        },
         plugin: {
             register: function () {
                 MelonJS.plugin.register.apply(null, arguments);

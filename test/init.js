@@ -21,7 +21,7 @@
             //'spec/modules/spilgames/entity/behaviour/mixin',
             //'spec/modules/spilgames/entity/behaviour/clickable',
             'spec/modules/spilgames/entity/behaviour/draggable',
-            'spec/modules/spilgames/entity/behaviour/droptarget'
+            //'spec/modules/spilgames/entity/behaviour/droptarget'
         ],
         // enable game canvas below for debugging
         showCanvas = true,
