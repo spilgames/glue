@@ -12,6 +12,14 @@ glue.module.create(
     ],
     function (Glue) {
         // - cross instance private members -
+        /*
+            Depth sorting implementation improvement:
+            - Assign z index of Infinity on dragged entity (so it also
+              covers HUD and other not draggable entities)
+            - Revert back to highgest z index of all draggables
+              on drag end (so it is dropped on top of the draggable stack)
+        */
+        // Most simple implementation that works
         var highestEntity = null,
             maxZ = 1;
         /**
@@ -37,6 +45,7 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
+                    // depth sorting
                     if (highestEntity === null) {
                         highestEntity = obj;
                     } else {
@@ -45,8 +54,11 @@ glue.module.create(
                         }
                     }
                     if (dragging === false && obj === highestEntity) {
+                        // clicked entity goes on top
                         obj.z = maxZ + 1;
+                        // save max z index of all draggables
                         maxZ = obj.z;
+                        // re-sort all game entities
                         me.game.world.sort();
                         dragging = true;
                         dragId = e.pointerId;
