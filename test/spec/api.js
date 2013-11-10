@@ -32,19 +32,19 @@ glue.module.create(['glue'], function (Glue) {
 
                     glue.module.create(
                         'entity/player',
-                        ['glue'],
-                        function (Glue) {
+                        [
+                            'glue',
+                            'modules/spilgames/entity/base'
+                        ],
+                        function (Glue, Base) {
                             return function (x, y, settings) {
-                                    // construct a new base entity instance
-                                var base = new Glue.entity.base(x, y, settings),
-                                    // set the initial color to white
-                                    color = 'white',
+                                var color = 'white',
                                     // set the font we want to use
                                     font = new me.Font('Verdana', 15, 'black'),
                                     // set the text
                                     text = 'Player entity',
                                     // mix in some custom methods
-                                    obj = base.mix({
+                                    obj = Base(x, y, settings).inject({
                                         draw: function (context) {
                                             drawn = true;
                                             context.fillStyle = color;
@@ -58,6 +58,7 @@ glue.module.create(['glue'], function (Glue) {
                                         },
                                         update: function () {
                                             updated = true;
+                                            return true;
                                         }
                                     });
                                 // return the mixed object

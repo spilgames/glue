@@ -19081,7 +19081,8 @@ glue.module.create(
     ],
     function (Glue) {
         // - cross instance private members -
-
+        var highestEntity = null,
+            maxZ = 1;
         /**
          * Constructor
          * @name init
@@ -19105,7 +19106,17 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
-                    if (dragging === false) {
+                    if (highestEntity === null) {
+                        highestEntity = obj;
+                    } else {
+                        if (obj.z > highestEntity.z) {
+                            highestEntity = obj;
+                        }
+                    }
+                    if (dragging === false && obj === highestEntity) {
+                        obj.z = maxZ + 1;
+                        maxZ = obj.z;
+                        me.game.world.sort();
                         dragging = true;
                         dragId = e.pointerId;
                         grabOffset.set(e.gameX, e.gameY);
@@ -19142,6 +19153,7 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragEnd = function (e) {
+                    highestEntity = null;
                     if (dragging === true) {
                         pointerId = undefined;
                         dragging = false;

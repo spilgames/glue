@@ -17,7 +17,7 @@
         ],
         // glue specs
         specs = [
-            //'spec/api',
+            'spec/api',
             'spec/modules/spilgames/entity/behaviour/mixin',
             'spec/modules/spilgames/entity/behaviour/clickable',
             'spec/modules/spilgames/entity/behaviour/draggable',
