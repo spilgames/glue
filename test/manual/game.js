@@ -32,7 +32,7 @@ glue.module.create(function () {
                 // switch to the Play Screen
                 me.state.set(me.state.PLAY, new game.PlayScreen());
                 // start the game
-                State.change(me.state.PLAY);
+                me.state.change(me.state.PLAY);
             }
         };
     };

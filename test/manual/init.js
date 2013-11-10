@@ -13,9 +13,8 @@ glue.module.config({
     }
 });
 
-glue.module.get(['test/game'], function (Game) {
-    var win = window,
-        Glue = glue;
+glue.module.get(['test/game', 'glue'], function (Game, Glue) {
+    var win = window;
 
     // init game
     Game().load();

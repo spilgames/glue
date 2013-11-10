@@ -18963,9 +18963,10 @@ adapters.spilgames = (function (win, Spilgames) {
             video: adapters.melonjs.video
         };
     }(adapters));
-    window['glue'] = {
+    window.glue = {
         module: glue.module
     };
+    window.game = {};
     glue.module.create('glue', function () {
         return glue;
     });
