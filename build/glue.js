@@ -18972,6 +18972,27 @@ adapters.spilgames = (function (win, Spilgames) {
     });
 }());
 
+glue.module.create(
+    'modules/spilgames/entity/behaviour/base',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        return function (x, y, settings) {
+            return {
+                inject: function (extention) {
+                    // get the base entity and extend it with a custom extention
+                    var obj = Glue.entity.base().extend(extention);
+                    // construct a new base entity instance
+                    obj = new obj(x, y, settings);
+                    // return the mixed object
+                    return obj;
+                }
+            };
+        };
+    }
+);
+
 /*
  *  @module Clickable
  *  @namespace modules.spilgames.entity.behaviour
@@ -19002,6 +19023,10 @@ glue.module.create(
                  */
                 onPointerUp = function (evt) {
                     isPressed = false;
+                    // call the clicked method if it exists
+                    if (obj.clickUp) {
+                        obj.clickUp();
+                    }
                 },
                 /**
                  * Listens the POINTER_DOWN event
@@ -19014,8 +19039,8 @@ glue.module.create(
                     if(!obj.isHovering || obj.isHovering()) {
                         isPressed = true;
                         // call the clicked method if it exists
-                        if (obj.clicked) {
-                            obj.clicked();
+                        if (obj.clickDown) {
+                            obj.clickDown();
                         }
                     }
                 },
@@ -19450,8 +19475,8 @@ glue.module.create(
                         pointerPosition.y >= obj.pos.y && 
                         pointerPosition.y <= (obj.pos.y + obj.height)) {
                         isHovering = true;
-                        if (obj.hovered) {
-                            obj.hovered();
+                        if (obj.hoverMove) {
+                            obj.hoverMove();
                         }
                     } else {
                         isHovering = false;

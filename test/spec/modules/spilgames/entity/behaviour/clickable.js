@@ -5,7 +5,7 @@
 glue.module.create(
     [
         'glue',
-        'modules/spilgames/entity/base',
+        'modules/spilgames/entity/behaviour/base',
         'modules/spilgames/entity/behaviour/clickable'
     ],
     function (Glue, Base, Clickable) {
@@ -13,24 +13,23 @@ glue.module.create(
             'use strict';
 
             it('Should be able to create a clickable entity', function (done) {
-                var clicked = false;
-
-                var obj = Base(100, 100, {
-                    name: 'clickableEntity',
-                    height: 105,
-                    spritewidth: 102,
-                    image: 'rightButton'
-                }).inject({
-                    draw: function (context) {
-                        this.parent(context);
-                    },
-                    update: function () {
-                        return true;
-                    },
-                    clicked: function () {
-                        clicked = true;
-                    }
-                });
+                var clickDown = false,
+                    obj = Base(100, 100, {
+                        name: 'clickableEntity',
+                        height: 105,
+                        spritewidth: 102,
+                        image: 'rightButton'
+                    }).inject({
+                        draw: function (context) {
+                            this.parent(context);
+                        },
+                        update: function () {
+                            return true;
+                        },
+                        clickDown: function () {
+                            clickDown = true;
+                        }
+                    });
 
                 Clickable(obj);
                 Glue.game.add(obj, 1);
@@ -39,7 +38,7 @@ glue.module.create(
                     gameY: 101
                 }]);
                 setTimeout(function () {
-                    expect(clicked).toEqual(true);
+                    expect(clickDown).toEqual(true);
                     done();
                 }, 30);
             });

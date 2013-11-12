@@ -28,6 +28,10 @@ glue.module.create(
                  */
                 onPointerUp = function (evt) {
                     isPressed = false;
+                    // call the clicked method if it exists
+                    if (obj.clickUp) {
+                        obj.clickUp();
+                    }
                 },
                 /**
                  * Listens the POINTER_DOWN event
@@ -40,8 +44,8 @@ glue.module.create(
                     if(!obj.isHovering || obj.isHovering()) {
                         isPressed = true;
                         // call the clicked method if it exists
-                        if (obj.clicked) {
-                            obj.clicked();
+                        if (obj.clickDown) {
+                            obj.clickDown();
                         }
                     }
                 },

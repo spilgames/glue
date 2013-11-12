@@ -36,8 +36,8 @@ glue.module.create(
                         pointerPosition.y >= obj.pos.y && 
                         pointerPosition.y <= (obj.pos.y + obj.height)) {
                         isHovering = true;
-                        if (obj.hovered) {
-                            obj.hovered();
+                        if (obj.hoverMove) {
+                            obj.hoverMove();
                         }
                     } else {
                         isHovering = false;

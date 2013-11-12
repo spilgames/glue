@@ -34,7 +34,7 @@ glue.module.create(['glue'], function (Glue) {
                         'entity/player',
                         [
                             'glue',
-                            'modules/spilgames/entity/base'
+                            'modules/spilgames/entity/behaviour/base'
                         ],
                         function (Glue, Base) {
                             return function (x, y, settings) {
