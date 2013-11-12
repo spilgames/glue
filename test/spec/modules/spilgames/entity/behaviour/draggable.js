@@ -11,7 +11,10 @@ glue.module.create(
     function (Glue, Base, Draggable) {
         describe('spilgames.entity.behaviour.draggable', function () {
             'use strict';
-            var canvas,
+            var dragStartCalled = false,
+                dragMoveCalled = false,
+                dragEndCalled = false,
+                canvas,
                 // creates a test draggable entity
                 createDraggable = function (position, dimensions, zIndex) {
                     // create the base object and add custom methods
@@ -26,6 +29,16 @@ glue.module.create(
                         },
                         update: function () {
                             return true;
+                        },
+                        dragStart: function (e) {
+                            // also test the event object later on
+                            dragStartCalled = true;
+                        },
+                        dragMove: function (e) {
+                            dragMoveCalled = true;
+                        },
+                        dragEnd: function (e) {
+                            dragEndCalled = true;
                         }
                     });
 
@@ -62,6 +75,11 @@ glue.module.create(
 
                 expect(entity.pos.x).toEqual(699);
                 expect(entity.pos.y).toEqual(499);
+
+                expect(dragStartCalled).toBeTruthy();
+                expect(dragMoveCalled).toBeTruthy();
+                expect(dragEndCalled).toBeTruthy();
+
                 // manual cleanup
                 Glue.game.remove(entity);
             });
