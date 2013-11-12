@@ -7,7 +7,7 @@
 (function (MelonJSAdapter, MelonJS) {
     describe('base.glue.adapters.melonJS', function () {
         'use strict';
-        describe('-CREATION-', function () {
+        describe('Creation', function () {
             describe('.name', function () {
                 it('Shoud be able to load the melonJS adapter', function () {
                     expect(MelonJSAdapter.name).toBe('melonJS-adapter');
@@ -15,7 +15,7 @@
             });
         });
 
-        describe('-AUDIO-', function () {
+        describe('Audio', function () {
             describe('.audio.init', function () {
                 it('Shoud be able to initialize MelonJS audio system', function () {
                     expect(MelonJSAdapter.audio.init('mp3,ogg')).toEqual(true);
@@ -23,7 +23,7 @@
             });
         });
 
-        describe('-EVENTS-', function () {
+        describe('Events', function () {
             describe('.event.on / .event.fire', function () {
                 it('Shoud be able to subscribe and fire MelonJS events', function () {
                     var result = false;
@@ -50,7 +50,7 @@
                 });
             });
         });
-        describe('-LEVEL MANAGER-', function () {
+        describe('Level manager', function () {
             describe('.levelManager.loadLevel', function () {
                 it('Shoud be able to load a level', function () {
                     spyOn(MelonJSAdapter.levelManager, 'loadLevel');
@@ -69,7 +69,7 @@
             });
         });
 
-        describe('-LOADER-', function () {
+        describe('Loader', function () {
             describe('.loader.setLoadCallback', function () {
                 it('Shoud be able to set the callback function of the loader', function () {
                     var result;
@@ -93,7 +93,7 @@
             });
         });
 
-        describe('-PLUGIN-', function () {
+        describe('Plugin', function () {
             describe('.register', function () {
                 it('Shoud be able to register a MelonJS plugin', function () {
                     var args = {};
@@ -105,7 +105,7 @@
             });
         });
 
-        describe('-STATE-', function () {
+        describe('State', function () {
             describe('.change', function () {
                 it('Shoud be able to change a MelonJS state', function () {
                     var args = {};
@@ -128,7 +128,7 @@
             });
         });
 
-        describe('-VIDEO-', function () {
+        describe('Video', function () {
             describe('.init', function () {
                 it('Shoud be able to initialize the video, using MelonJS', function () {
                     var result = false,
