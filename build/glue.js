@@ -18973,7 +18973,7 @@ adapters.spilgames = (function (win, Spilgames) {
 }());
 
 glue.module.create(
-    'modules/spilgames/entity/behaviour/base',
+    'glue/modules/spilgames/entity/base',
     [
         'glue'
     ],
@@ -19001,7 +19001,7 @@ glue.module.create(
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
-    'modules/spilgames/entity/behaviour/clickable',
+    'glue/modules/spilgames/entity/behaviour/clickable',
     [
         'glue'
     ],
@@ -19100,7 +19100,7 @@ glue.module.create(
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
-    'modules/spilgames/entity/behaviour/draggable',
+    'glue/modules/spilgames/entity/behaviour/draggable',
     [
         'glue'
     ],
@@ -19321,7 +19321,7 @@ glue.module.create(
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
-    'modules/spilgames/entity/behaviour/droptarget',
+    'glue/modules/spilgames/entity/behaviour/droptarget',
     [
         'glue'
     ],
@@ -19445,7 +19445,7 @@ glue.module.create(
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
-    'modules/spilgames/entity/behaviour/hoverable',
+    'glue/modules/spilgames/entity/behaviour/hoverable',
     [
         'glue'
     ],

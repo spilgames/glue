@@ -1,5 +1,5 @@
 glue.module.create(
-    'modules/spilgames/entity/behaviour/base',
+    'glue/modules/spilgames/entity/base',
     [
         'glue'
     ],
