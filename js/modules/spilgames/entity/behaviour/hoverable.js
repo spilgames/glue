@@ -19,6 +19,8 @@ glue.module.create(
          */
         return function (obj) {
             var isHovering = false,
+                hoverOverCalled = false,
+                hoverOutCalled = false,
                 /**
                  * Listens the POINTER_MOVE event
                  * @name onPointerMove
@@ -36,11 +38,18 @@ glue.module.create(
                         pointerPosition.y >= obj.pos.y && 
                         pointerPosition.y <= (obj.pos.y + obj.height)) {
                         isHovering = true;
-                        if (obj.hoverMove) {
-                            obj.hoverMove();
+                        if (obj.hoverOver && !hoverOverCalled) {
+                            hoverOverCalled = true;
+                            hoverOutCalled = false;
+                            obj.hoverOver(evt);
                         }
                     } else {
                         isHovering = false;
+                        if (obj.hoverOut && !hoverOutCalled) {
+                            hoverOutCalled = true;
+                            hoverOverCalled = false;
+                            obj.hoverOut(evt);
+                        }
                     }
                 },
                 /**

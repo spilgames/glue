@@ -15,9 +15,9 @@ glue.module.create(['glue'], function (Glue) {
                     'scrollbutton',
                     [
                         'glue',
-                        'modules/spilgames/entity/behaviour/base',
-                        'modules/spilgames/entity/behaviour/hoverable',
-                        'modules/spilgames/entity/behaviour/clickable'
+                        'glue/modules/spilgames/entity/base',
+                        'glue/modules/spilgames/entity/behaviour/hoverable',
+                        'glue/modules/spilgames/entity/behaviour/clickable'
                     ],
                     function (Glue, Base, Hoverable, Clickable) {
                         return function (x, y, settings) {
