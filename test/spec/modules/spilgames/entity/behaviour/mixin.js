@@ -32,14 +32,10 @@ glue.module.create(['glue'], function (Glue) {
                                     floating = this.floating;
                                     updated = true;
                                     return true;
-                                },
-                                clicked: function () {
-                                    //console.log(obj.name, 'clicked');
-                                },
-                                hovered: function () {
-                                    //console.log(obj.name, 'hovered');
                                 }
                             });
+                            // set the floating to true
+                            obj.floating = true;
 
                             // mix in the hoverable functionality
                             Hoverable(obj);
@@ -60,7 +56,6 @@ glue.module.create(['glue'], function (Glue) {
                             spritewidth: 102,
                             image: 'leftButton'
                         });
-                        scrollbutton.floating = true;
                         Glue.game.add(scrollbutton, 1);
 
                         expect(me.game.getEntityByName('scrollbutton')[0].name).toEqual('scrollbutton');

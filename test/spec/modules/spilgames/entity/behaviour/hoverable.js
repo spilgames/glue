@@ -12,7 +12,7 @@ glue.module.create(
         describe('spilgames.entity.behaviour.hoverable', function () {
             'use strict';
 
-            it('Should be able to create a hoverable entity', function (done) {
+            it('Should be able to create a hoverable entity', function () {
                 var obj = Base(100, 100, {
                         name: 'hoverableEntity',
                         height: 105,
@@ -54,11 +54,9 @@ glue.module.create(
                     gameX: 10,
                     gameY: 10
                 }]);
-                setTimeout(function () {
-                    expect(obj.hoverOver.calls.length).toEqual(2);
-                    expect(obj.hoverOut.calls.length).toEqual(2);
-                    done();
-                }, 30);
+
+                expect(obj.hoverOver.calls.length).toEqual(2);
+                expect(obj.hoverOut.calls.length).toEqual(2);
             });
         });
     }
