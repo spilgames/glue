@@ -9,7 +9,8 @@ glue.module.create(['glue'], function (Glue) {
         describe('Modules', function () {
             it('Should be able to mixin an entity which is added updated and drawn', function (done) {
                 var updated = false,
-                    drawn = false;
+                    drawn = false,
+                    floating = false;
 
                 glue.module.create(
                     'scrollbutton',
@@ -28,6 +29,7 @@ glue.module.create(['glue'], function (Glue) {
                                     this.parent(context);
                                 },
                                 update: function () {
+                                    floating = this.floating;
                                     updated = true;
                                     return true;
                                 },
@@ -52,17 +54,20 @@ glue.module.create(['glue'], function (Glue) {
                 glue.module.get(
                     ['scrollbutton'],
                     function (Scrollbutton) {
-                        Glue.game.add(Scrollbutton(0, 300, {
+                        var scrollbutton = Scrollbutton(0, 300, {
                             name: 'scrollbutton',
                             height: 105,
                             spritewidth: 102,
                             image: 'leftButton'
-                        }), 1);
+                        });
+                        scrollbutton.floating = true;
+                        Glue.game.add(scrollbutton, 1);
 
                         expect(me.game.getEntityByName('scrollbutton')[0].name).toEqual('scrollbutton');
                         setTimeout(function () {
                             expect(updated).toBeTruthy();
                             expect(drawn).toBeTruthy();
+                            expect(floating).toBeTruthy();
                             done();
                         }, 70);
                     }
