@@ -38,21 +38,22 @@ glue.module.create(
 
                 Hoverable(obj);
                 Glue.game.add(obj, 1);
-                Glue.event.fire(Glue.input.POINTER_MOVE, [{
-                    gameX: 110,
-                    gameY: 110
+                
+                Glue.event.fire(Glue.input.POINTER_DOWN, [{
+                    gameX: 150,
+                    gameY: 150
                 }]);
-                Glue.event.fire(Glue.input.POINTER_MOVE, [{
+                Glue.event.fire(Glue.input.POINTER_DOWN, [{
                     gameX: 10,
                     gameY: 10
                 }]);
-                Glue.event.fire(Glue.input.POINTER_MOVE, [{
-                    gameX: 110,
-                    gameY: 110
+                Glue.event.fire(Glue.input.POINTER_DOWN, [{
+                    gameX: 120,
+                    gameY: 120
                 }]);
-                Glue.event.fire(Glue.input.POINTER_MOVE, [{
-                    gameX: 10,
-                    gameY: 10
+                Glue.event.fire(Glue.input.POINTER_DOWN, [{
+                    gameX: 800,
+                    gameY: 300
                 }]);
 
                 expect(obj.hoverOver.calls.length).toEqual(2);

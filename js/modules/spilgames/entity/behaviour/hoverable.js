@@ -22,13 +22,13 @@ glue.module.create(
                 hoverOverCalled = false,
                 hoverOutCalled = false,
                 /**
-                 * Listens the POINTER_MOVE event
+                 * Listens the POINTER_DOWN event
                  * @name onPointerMove
                  * @memberOf hoverable
                  * @function
                  * @param {Object} evt: The pointer event
                  */
-                onPointerMove = function (evt) {
+                onPointerDown = function (evt) {
                     var pointerPosition = {
                         x: evt.gameX,
                         y: evt.gameY
@@ -59,7 +59,7 @@ glue.module.create(
                  * @function
                  */
                 setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_MOVE, onPointerMove);
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
                 },
                 /**
                  * Tears down all events for this module
@@ -68,7 +68,7 @@ glue.module.create(
                  * @function
                  */
                 tearDownEvents = function () {
-                    Glue.event.off(Glue.input.POINTER_MOVE, onPointerMove);
+                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
                 };
 
             // setup the module events
