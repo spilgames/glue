@@ -19462,13 +19462,13 @@ glue.module.create(
                 hoverOverCalled = false,
                 hoverOutCalled = false,
                 /**
-                 * Listens the POINTER_DOWN event
-                 * @name onPointerMove
+                 * Checks if the user is hovering based on the pointer event
+                 * @name checkHovering
                  * @memberOf hoverable
                  * @function
                  * @param {Object} evt: The pointer event
                  */
-                onPointerDown = function (evt) {
+                checkHovering = function (evt) {
                     var pointerPosition = {
                         x: evt.gameX,
                         y: evt.gameY
@@ -19493,6 +19493,26 @@ glue.module.create(
                     }
                 },
                 /**
+                 * Listens the POINTER_DOWN event
+                 * @name onPointerDown
+                 * @memberOf hoverable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerDown = function (evt) {
+                    checkHovering(evt);
+                },
+                /**
+                 * Listens the POINTER_MOVE event
+                 * @name onPointerMove
+                 * @memberOf hoverable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerMove = function (evt) {
+                    checkHovering(evt);
+                },
+                /**
                  * Sets up all events for this module
                  * @name setupEvents
                  * @memberOf hoverable
@@ -19500,6 +19520,7 @@ glue.module.create(
                  */
                 setupEvents = function () {
                     Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.on(Glue.input.POINTER_MOVE, onPointerMove);
                 },
                 /**
                  * Tears down all events for this module
@@ -19509,6 +19530,7 @@ glue.module.create(
                  */
                 tearDownEvents = function () {
                     Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.off(Glue.input.POINTER_MOVE, onPointerMove);
                 };
 
             // setup the module events
