@@ -18780,7 +18780,8 @@ adapters.melonjs = (function (MelonJS) {
         },
         game: {
             add: MelonJS.game.add,
-            remove: MelonJS.game.remove
+            remove: MelonJS.game.remove,
+            viewport: MelonJS.game.viewport
         },
         levelManager: {
             loadLevel: function (levelName) {
@@ -19472,10 +19473,10 @@ glue.module.create(
                         x: evt.gameX,
                         y: evt.gameY
                     };
-                    if (pointerPosition.x >= obj.pos.x && 
-                        pointerPosition.x <= (obj.pos.x + obj.width) &&
-                        pointerPosition.y >= obj.pos.y && 
-                        pointerPosition.y <= (obj.pos.y + obj.height)) {
+                    if (pointerPosition.x >= (me.game.viewport.pos.x + obj.pos.x) && 
+                        pointerPosition.x <= (me.game.viewport.pos.x + obj.pos.x + obj.width) &&
+                        pointerPosition.y >= (me.game.viewport.pos.y + obj.pos.y) && 
+                        pointerPosition.y <= (me.game.viewport.pos.y + obj.pos.y + obj.height)) {
                         isHovering = true;
                         if (obj.hoverOver && !hoverOverCalled) {
                             hoverOverCalled = true;

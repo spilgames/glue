@@ -26,7 +26,8 @@ adapters.melonjs = (function (MelonJS) {
         },
         game: {
             add: MelonJS.game.add,
-            remove: MelonJS.game.remove
+            remove: MelonJS.game.remove,
+            viewport: MelonJS.game.viewport
         },
         levelManager: {
             loadLevel: function (levelName) {
