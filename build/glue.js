@@ -19373,7 +19373,7 @@ glue.module.create(
                             // call the drop method on the current entity
                             drop(draggableEntity);
                             if (obj.drop) {
-                                obj.drop(e);
+                                obj.drop(draggableEntity);
                             }
                     }
                 };
