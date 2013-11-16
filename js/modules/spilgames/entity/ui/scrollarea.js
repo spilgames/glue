@@ -20,11 +20,11 @@ glue.module.create(
                  * @function
                  */
             var draggedObject = null,
-                dragStart = function (e, obj) {
+                dragStart = function (e, draggable) {
                     isDragging = true;
-                    draggedObject = obj;
+                    draggedObject = draggable;
                 },
-                dragEnd = function (e, obj) {
+                dragEnd = function (e) {
                     isDragging = false;
                 },
                 setupEvents = function () {
@@ -46,6 +46,7 @@ glue.module.create(
                  */
                 isHovering = false,
                 isDragging = false,
+                hoverPosition = null,
                 /**
                  * Returns the entity with its behaviours
                  * @name obj
@@ -61,18 +62,22 @@ glue.module.create(
                         }
                     },
                     hoverOver: function (e) {
+                        hoverPosition = me.game.viewport.worldToLocal(
+                            draggedObject.pos.x,
+                            draggedObject.pos.y
+                        );
                         isHovering = true;
                     },
                     hoverOut: function () {
                         isHovering = false;
                     },
                     update: function () {
-                        //console.log(isDragging, this.isHovering(), settings.direction);
                         if(isDragging && this.isHovering()) {
                             Glue.event.fire('SCROLL_SCREEN', [settings.direction]);
-                            // testing
-                            draggedObject.pos =
-                            me.game.viewport.localToWorld(draggedObject.pos.x, draggedObject.pos.y);
+                            draggedObject.pos = me.game.viewport.localToWorld(
+                                hoverPosition.x,
+                                hoverPosition.y
+                            );
                         }
                         return true;
                     },

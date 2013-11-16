@@ -30,7 +30,7 @@ glue.module.create(
                     isPressed = false;
                     // call the clicked method if it exists
                     if (obj.clickUp) {
-                        obj.clickUp();
+                        obj.clickUp(evt);
                     }
                 },
                 /**
@@ -45,7 +45,7 @@ glue.module.create(
                         isPressed = true;
                         // call the clicked method if it exists
                         if (obj.clickDown) {
-                            obj.clickDown();
+                            obj.clickDown(evt);
                         }
                     }
                 },

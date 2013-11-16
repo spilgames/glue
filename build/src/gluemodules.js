@@ -51,7 +51,7 @@ glue.module.create(
                     isPressed = false;
                     // call the clicked method if it exists
                     if (obj.clickUp) {
-                        obj.clickUp();
+                        obj.clickUp(evt);
                     }
                 },
                 /**
@@ -66,7 +66,7 @@ glue.module.create(
                         isPressed = true;
                         // call the clicked method if it exists
                         if (obj.clickDown) {
-                            obj.clickDown();
+                            obj.clickDown(evt);
                         }
                     }
                 },
@@ -185,7 +185,7 @@ glue.module.create(
                         grabOffset.set(e.gameX, e.gameY);
                         grabOffset.sub(obj.pos);
                         if (obj.dragStart) {
-                            obj.dragStart(e, obj);
+                            obj.dragStart(e);
                         }
                         return false;
                     }
@@ -203,7 +203,7 @@ glue.module.create(
                             obj.pos.set(e.gameX, e.gameY);
                             obj.pos.sub(grabOffset);
                             if (obj.dragMove) {
-                                obj.dragMove(e, obj);
+                                obj.dragMove(e);
                             }
                         }
                     }
@@ -221,7 +221,7 @@ glue.module.create(
                         pointerId = undefined;
                         dragging = false;
                         if (obj.dragEnd) {
-                            obj.dragEnd(e, obj);
+                            obj.dragEnd(e);
                         }
                         return false;
                     }
@@ -720,11 +720,11 @@ glue.module.create(
                  * @function
                  */
             var draggedObject = null,
-                dragStart = function (e, obj) {
+                dragStart = function (e, draggable) {
                     isDragging = true;
-                    draggedObject = obj;
+                    draggedObject = draggable;
                 },
-                dragEnd = function (e, obj) {
+                dragEnd = function (e) {
                     isDragging = false;
                 },
                 setupEvents = function () {
@@ -746,6 +746,7 @@ glue.module.create(
                  */
                 isHovering = false,
                 isDragging = false,
+                hoverPosition = null,
                 /**
                  * Returns the entity with its behaviours
                  * @name obj
@@ -761,17 +762,22 @@ glue.module.create(
                         }
                     },
                     hoverOver: function (e) {
+                        hoverPosition = me.game.viewport.worldToLocal(
+                            draggedObject.pos.x,
+                            draggedObject.pos.y
+                        );
                         isHovering = true;
                     },
                     hoverOut: function () {
                         isHovering = false;
                     },
                     update: function () {
-                        //console.log(isDragging, this.isHovering(), settings.direction);
                         if(isDragging && this.isHovering()) {
                             Glue.event.fire('SCROLL_SCREEN', [settings.direction]);
-                            draggedObject.pos =
-                            me.game.viewport.localToWorld(draggedObject.pos.x - me.game.viewport.pos.x, draggedObject.pos.y);
+                            draggedObject.pos = me.game.viewport.localToWorld(
+                                hoverPosition.x,
+                                hoverPosition.y
+                            );
                         }
                         return true;
                     },
