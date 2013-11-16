@@ -783,10 +783,8 @@ glue.module.create(
                     update: function () {
                         if(isDragging && this.isHovering()) {
                             Glue.event.fire('SCROLL_SCREEN', [settings.direction]);
-                            draggedObject.pos = me.game.viewport.localToWorld(
-                                hoverPosition.x,
-                                hoverPosition.y
-                            );
+                            draggedObject.pos.x = hoverPosition.x + me.game.viewport.pos.x;
+                            draggedObject.pos.y = hoverPosition.y + me.game.viewport.pos.y;
                         }
                         return true;
                     },
