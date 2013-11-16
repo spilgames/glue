@@ -28,15 +28,8 @@ glue.module.create(
                  * @function
                  * @param {Object} evt: The pointer event
                  */
-                checkHovering = function (evt) {
-                    var pointerPosition = {
-                        x: evt.gameX,
-                        y: evt.gameY
-                    };
-                    if (pointerPosition.x >= (me.game.viewport.pos.x + obj.pos.x) && 
-                        pointerPosition.x <= (me.game.viewport.pos.x + obj.pos.x + obj.width) &&
-                        pointerPosition.y >= (me.game.viewport.pos.y + obj.pos.y) && 
-                        pointerPosition.y <= (me.game.viewport.pos.y + obj.pos.y + obj.height)) {
+                checkHovering = function (evt, collisionBox) {
+                    if (collisionBox.containsPoint(evt.gameX, evt.gameY)) {
                         isHovering = true;
                         if (obj.hoverOver && !hoverOverCalled) {
                             hoverOverCalled = true;
@@ -60,7 +53,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerDown = function (evt) {
-                    checkHovering(evt);
+                    checkHovering(evt, this.collisionBox);
                 },
                 /**
                  * Listens the POINTER_MOVE event
@@ -70,7 +63,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerMove = function (evt) {
-                    checkHovering(evt);
+                    checkHovering(evt, this.collisionBox);
                 },
                 /**
                  * Sets up all events for this module
@@ -79,8 +72,8 @@ glue.module.create(
                  * @function
                  */
                 setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.on(Glue.input.POINTER_MOVE, onPointerMove);
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown.bind(obj));
+                    Glue.event.on(Glue.input.POINTER_MOVE, onPointerMove.bind(obj));
                 },
                 /**
                  * Tears down all events for this module
