@@ -29,7 +29,8 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 checkHovering = function (evt, collisionBox) {
-                    if (collisionBox.containsPoint(evt.gameX, evt.gameY)) {
+                    var localPosition = me.game.viewport.worldToLocal(evt.gameX, evt.gameY);
+                    if (collisionBox.containsPointV(localPosition)) {
                         isHovering = true;
                         if (obj.hoverOver && !hoverOverCalled) {
                             hoverOverCalled = true;

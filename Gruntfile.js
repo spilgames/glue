@@ -50,7 +50,7 @@ module.exports = function (grunt) {
                 'build/**/*.js'
             ],
             afterRelease: [
-                'build/src'
+                //'build/src'
             ]
         }
     });
