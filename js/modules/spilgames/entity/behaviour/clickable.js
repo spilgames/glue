@@ -41,7 +41,11 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerDown = function (evt) {
-                    if(!obj.isHovering || obj.isHovering()) {
+                    var localPosition = me.game.viewport.worldToLocal(
+                        evt.gameX,
+                        evt.gameY
+                    );
+                    if (this.collisionBox.containsPointV(localPosition)) {
                         isPressed = true;
                         // call the clicked method if it exists
                         if (obj.clickDown) {
@@ -56,7 +60,7 @@ glue.module.create(
                  * @function
                  */
                 setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown.bind(obj));
                     Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
                 },
                 /**

@@ -111,8 +111,43 @@ glue.module.create(
                             Glue.event.fire(Glue.input.DRAG_END, this);
                         }
                     }
-                );
+                ),
+                door = Base(1000, 0, {
+                    name: 'door',
+                    image: 'door',
+                    spritewidth: 245,
+                    width: 491,
+                    height: 414,
+                    zIndex: 20
+                }).inject({
+                    draw: function (context) {
+                        this.parent(context);
+                    },
+                    update: function () {
+                        return true;
+                    },
+                    drop: function (draggableEntity) {
+                        console.log('drop', draggableEntity);
+                    },
+                    hoverOver: function () {
+                        if(this.renderable) {
+                            this.renderable.setCurrentAnimation('hovered');
+                        }
+                    },
+                    hoverOut: function () {
+                        if(this.renderable) {
+                            this.renderable.setCurrentAnimation('normal');
+                        }
+                    },
+                });
 
+            if(door.renderable) {
+                door.renderable.addAnimation('normal', [0]);
+                door.renderable.addAnimation('hovered', [1]);
+            }
+
+            Droptarget(door);
+            Hoverable(door);
             Draggable(kitty1);
             Draggable(kitty2);
 
@@ -126,6 +161,7 @@ glue.module.create(
             Glue.game.add(rightScrollArea, 1);
             Glue.game.add(kitty1, 1);
             Glue.game.add(kitty2, 1);
+            Glue.game.add(door, 1);
         };
         
         beforeAll(function () {
@@ -135,6 +171,8 @@ glue.module.create(
         describe('Click', function () {
             it('Chould be able to detect a click on an entity', function (done) {
                 var clicked = false;
+                expect(true).toBe(true);
+                done();
             });
         });
     });

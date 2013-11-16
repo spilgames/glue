@@ -107,6 +107,30 @@
                             initMelon(function () {
                                 // initialize glue input system
                                 Glue.input.init();
+                                // Mobile browser hacks
+                                if (me.device.isMobile && !navigator.isCocoonJS) {
+                                    // Prevent the webview from moving on a swipe
+                                    window.document.addEventListener('touchmove', function (e) {
+                                        e.preventDefault();
+                                        windown.scroll(0, 0);
+                                        return false;
+                                    }, false);
+
+                                    window.document.addEventListener('touchstart', function (e) {
+                                        e.preventDefault();
+                                        return false;
+                                    }, false);
+
+                                    // Scroll away mobile GUI
+                                    (function () {
+                                        window.scrollTo(0, 1);
+                                        me.video.onresize(null);
+                                    }).defer();
+
+                                    Glue.event.on(me.event.WINDOW_ONRESIZE, function (e) {
+                                        window.scrollTo(0, 1);
+                                    });
+                                }
                                 // load jasmine
                                 loadJasmine();
                             });

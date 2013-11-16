@@ -28,8 +28,11 @@ glue.module.create(
                  * @function
                  * @param {Object} evt: The pointer event
                  */
-                checkHovering = function (evt, collisionBox) {
-                    var localPosition = me.game.viewport.worldToLocal(evt.gameX, evt.gameY);
+                checkHovering = function (evt, collisionBox, obj) {
+                    var localPosition = obj.floating ?
+                        me.game.viewport.worldToLocal(evt.gameX, evt.gameY) :
+                        {x: evt.gameX, y: evt.gameY};
+
                     if (collisionBox.containsPointV(localPosition)) {
                         isHovering = true;
                         if (obj.hoverOver && !hoverOverCalled) {
@@ -54,7 +57,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerDown = function (evt) {
-                    checkHovering(evt, this.collisionBox);
+                    checkHovering(evt, this.collisionBox, this);
                 },
                 /**
                  * Listens the POINTER_MOVE event
@@ -64,7 +67,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerMove = function (evt) {
-                    checkHovering(evt, this.collisionBox);
+                    checkHovering(evt, this.collisionBox, this);
                 },
                 /**
                  * Sets up all events for this module

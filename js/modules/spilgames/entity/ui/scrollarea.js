@@ -62,10 +62,12 @@ glue.module.create(
                         }
                     },
                     hoverOver: function (e) {
-                        hoverPosition = me.game.viewport.worldToLocal(
-                            draggedObject.pos.x,
-                            draggedObject.pos.y
-                        );
+                        if (draggedObject) {
+                            hoverPosition = me.game.viewport.worldToLocal(
+                                draggedObject.pos.x,
+                                draggedObject.pos.y
+                            );
+                        }
                         isHovering = true;
                     },
                     hoverOut: function () {
