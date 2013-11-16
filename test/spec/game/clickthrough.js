@@ -60,13 +60,15 @@ glue.module.create(
                     name: 'leftScrollArea',
                     width: 100,
                     height: me.game.viewport.getHeight(),
-                    direction: 'left'
+                    direction: 'left',
+                    debug: true
                 }),
-                rightScrollArea = ScrollArea(0, 0, {
+                rightScrollArea = ScrollArea(me.game.viewport.getWidth() - 100, 0, {
                     name: 'rightScrollArea',
                     width: 100,
                     height: me.game.viewport.getHeight(),
-                    direction: 'right'
+                    direction: 'right',
+                    debug: true
                 }),
                 kitty1 = Base(200, 100, {                               
                     name: 'kitty',

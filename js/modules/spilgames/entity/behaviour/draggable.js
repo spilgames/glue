@@ -65,7 +65,7 @@ glue.module.create(
                         grabOffset.set(e.gameX, e.gameY);
                         grabOffset.sub(obj.pos);
                         if (obj.dragStart) {
-                            obj.dragStart(e);
+                            obj.dragStart(e, obj);
                         }
                         return false;
                     }
@@ -83,7 +83,7 @@ glue.module.create(
                             obj.pos.set(e.gameX, e.gameY);
                             obj.pos.sub(grabOffset);
                             if (obj.dragMove) {
-                                obj.dragMove(e);
+                                obj.dragMove(e, obj);
                             }
                         }
                     }
@@ -101,7 +101,7 @@ glue.module.create(
                         pointerId = undefined;
                         dragging = false;
                         if (obj.dragEnd) {
-                            obj.dragEnd(e);
+                            obj.dragEnd(e, obj);
                         }
                         return false;
                     }

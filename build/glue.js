@@ -19160,7 +19160,7 @@ glue.module.create(
                         grabOffset.set(e.gameX, e.gameY);
                         grabOffset.sub(obj.pos);
                         if (obj.dragStart) {
-                            obj.dragStart(e);
+                            obj.dragStart(e, obj);
                         }
                         return false;
                     }
@@ -19178,7 +19178,7 @@ glue.module.create(
                             obj.pos.set(e.gameX, e.gameY);
                             obj.pos.sub(grabOffset);
                             if (obj.dragMove) {
-                                obj.dragMove(e);
+                                obj.dragMove(e, obj);
                             }
                         }
                     }
@@ -19196,7 +19196,7 @@ glue.module.create(
                         pointerId = undefined;
                         dragging = false;
                         if (obj.dragEnd) {
-                            obj.dragEnd(e);
+                            obj.dragEnd(e, obj);
                         }
                         return false;
                     }
@@ -19694,13 +19694,17 @@ glue.module.create(
                  * @memberOf scrollArea
                  * @function
                  */
-            var setupEvents = function () {
-                    Glue.event.on(Glue.input.DRAG_START, function (obj) {
-                        isDragging = true;
-                    });
-                    Glue.event.on(Glue.input.DRAG_END, function (obj) {
-                        isDragging = false;
-                    });
+            var draggedObject = null,
+                dragStart = function (e, obj) {
+                    isDragging = true;
+                    draggedObject = obj;
+                },
+                dragEnd = function (e, obj) {
+                    isDragging = false;
+                },
+                setupEvents = function () {
+                    Glue.event.on(Glue.input.DRAG_START, dragStart);
+                    Glue.event.on(Glue.input.DRAG_END, dragEnd);
                 },
                 /**
                  * Tears down all events for this module
@@ -19709,6 +19713,8 @@ glue.module.create(
                  * @function
                  */
                 tearDownEvents = function () {
+                    Glue.event.off(Glue.input.DRAG_START, dragStart);
+                    Glue.event.off(Glue.input.DRAG_END, dragEnd);
                 },
                 /**
                  * Variables
@@ -19724,23 +19730,23 @@ glue.module.create(
                 obj = Base(x, y, settings).inject({
                     draw: function (context) {
                         this.parent(context);
+                        if (settings.debug) {
+                            context.fillStyle = 'blue';
+                            context.fillRect(this.pos.x,this.pos.y,this.width,this.height);
+                        }
                     },
-                    hoverOver: function () {
+                    hoverOver: function (e) {
                         isHovering = true;
                     },
                     hoverOut: function () {
                         isHovering = false;
                     },
-                    dragStart: function () {
-                        isDragging = true;
-                    },
-                    dragEnd: function () {
-                        isDragging = false;
-                    },
                     update: function () {
                         //console.log(isDragging, this.isHovering(), settings.direction);
                         if(isDragging && this.isHovering()) {
                             Glue.event.fire('SCROLL_SCREEN', [settings.direction]);
+                            draggedObject.pos =
+                            me.game.viewport.localToWorld(draggedObject.pos.x - me.game.viewport.pos.x, draggedObject.pos.y);
                         }
                         return true;
                     },
