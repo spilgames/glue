@@ -866,16 +866,16 @@ glue.module.create(
                         }
                         return true;
                     },
-                    clickUp: function () {
+                    clickUp: function (e) {
                         isClicked = false;
                     },
-                    hoverOver: function () {
+                    hoverOver: function (e) {
                         isHovering = true;
                         if(this.renderable) {
                             this.renderable.setCurrentAnimation('hovered');
                         }
                     },
-                    hoverOut: function () {
+                    hoverOut: function (e) {
                         isHovering = false;
                         if(this.renderable) {
                             this.renderable.setCurrentAnimation('normal');
@@ -890,7 +890,7 @@ glue.module.create(
                      * @memberOf scrollButton
                      * @function
                      */
-                    clickDown: function () {
+                    clickDown: function (e) {
                         isClicked = true;
                     },
                     isClicked: function () {
