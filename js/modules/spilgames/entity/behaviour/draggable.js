@@ -21,7 +21,7 @@ glue.module.create(
         */
         // Most simple implementation that works
         var highestEntity = null,
-            maxZ = 1;
+            maxZ = 2;
         /**
          * Constructor
          * @name init

@@ -18787,8 +18787,10 @@ adapters.melonjs = (function (MelonJS) {
             loadLevel: function (levelName) {
                 MelonJS.levelDirector.loadLevel(levelName);
 
-                // add our HUD to the game world    
-                MelonJS.game.add(new game.HUD.Container());
+                // add our HUD to the game world
+                if (game.HUD) {
+                    MelonJS.game.add(new game.HUD.Container());
+                }
             },
             unloadLevel: function () {
                 MelonJS.game.world.removeChild(
@@ -19120,7 +19122,7 @@ glue.module.create(
         */
         // Most simple implementation that works
         var highestEntity = null,
-            maxZ = 1;
+            maxZ = 2;
         /**
          * Constructor
          * @name init

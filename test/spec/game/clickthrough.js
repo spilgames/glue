@@ -70,49 +70,67 @@ glue.module.create(
                     direction: 'right',
                     debug: true
                 }),
-                kitty1 = Base(200, 100, {                               
+                kitty1 = Base(200, 300, {                               
                     name: 'kitty',
                     image: 'kitty',
                     spritewidth: 198,
                     width: 198,
-                    height: 226,
-                    zIndex: 3}).inject({
-                        draw: function (context) {
-                            this.parent(context);
-                        },
-                        update: function () {
-                            return true;
-                        },
-                        dragStart: function () {
-                            Glue.event.fire(Glue.input.DRAG_START, this);
-                        },
-                        dragEnd: function () {
-                            Glue.event.fire(Glue.input.DRAG_END, this);
-                        }
+                    height: 226
+                }).inject({
+                    draw: function (context) {
+                        this.parent(context);
+                    },
+                    update: function () {
+                        return true;
+                    },
+                    dragStart: function () {
+                        Glue.event.fire(Glue.input.DRAG_START, this);
+                    },
+                    dragEnd: function () {
+                        Glue.event.fire(Glue.input.DRAG_END, this);
                     }
-                ),
-                kitty2 = Base(400, 100, {                               
-                    name: 'kitty',
+                }),
+                kitty2 = Base(400, 350, {                               
+                    name: 'kitty2',
                     image: 'kitty',
                     spritewidth: 198,
                     width: 198,
-                    height: 226,
-                    zIndex: 3}).inject({
-                        draw: function (context) {
-                            this.parent(context);
-                        },
-                        update: function () {
-                            return true;
-                        },
-                        dragStart: function () {
-                            Glue.event.fire(Glue.input.DRAG_START, this);
-                        },
-                        dragEnd: function () {
-                            Glue.event.fire(Glue.input.DRAG_END, this);
-                        }
+                    height: 226
+                }).inject({
+                    draw: function (context) {
+                        this.parent(context);
+                    },
+                    update: function () {
+                        return true;
+                    },
+                    dragStart: function () {
+                        Glue.event.fire(Glue.input.DRAG_START, this);
+                    },
+                    dragEnd: function () {
+                        Glue.event.fire(Glue.input.DRAG_END, this);
                     }
-                ),
-                door = Base(1000, 0, {
+                }),
+                kitty3 = Base(600, 400, {                               
+                    name: 'kitty3',
+                    image: 'kitty',
+                    spritewidth: 198,
+                    width: 198,
+                    height: 226
+                }).inject({
+                    draw: function (context) {
+                        this.parent(context);
+                    },
+                    update: function () {
+                        return true;
+                    },
+                    dragStart: function () {
+                        Glue.event.fire(Glue.input.DRAG_START, this);
+                    },
+                    dragEnd: function () {
+                        Glue.event.fire(Glue.input.DRAG_END, this);
+                    }
+                }),
+                door = Base(1000, 53, {
                     name: 'door',
                     image: 'door',
                     spritewidth: 245,
@@ -150,18 +168,20 @@ glue.module.create(
             Hoverable(door);
             Draggable(kitty1);
             Draggable(kitty2);
+            Draggable(kitty3);
 
             leftButton.floating = true;
             rightButton.floating = true;
 
             Glue.game.add(cameraManager, 1);
-            Glue.game.add(leftButton, 1);
-            Glue.game.add(rightButton, 1);
+            Glue.game.add(leftButton, 50);
+            Glue.game.add(rightButton, 50);
             Glue.game.add(leftScrollArea, 1);
             Glue.game.add(rightScrollArea, 1);
-            Glue.game.add(kitty1, 1);
-            Glue.game.add(kitty2, 1);
-            Glue.game.add(door, 1);
+            Glue.game.add(kitty1, 2);
+            Glue.game.add(kitty2, 2);
+            Glue.game.add(kitty3, 2);
+            Glue.game.add(door, 2);
         };
         
         beforeAll(function () {

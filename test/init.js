@@ -69,7 +69,9 @@
                 {name: 'door',  type: 'image', src: 'data/img/sprites/door.png'},
                 {name: 'kitty', type: 'image', src: 'data/img/sprites/kitty.png'},
                 {name: 'leftButton', type: 'image', src: 'data/img/gui/left-button.png'},
-                {name: 'rightButton', type: 'image', src: 'data/img/gui/right-button.png'}
+                {name: 'rightButton', type: 'image', src: 'data/img/gui/right-button.png'},
+                {name: 'hallway_level_tiles',  type: 'image', src: 'data/img/maps/hallway_level_tiles.png'},
+                {name: 'hallway', type: 'tmx', src: 'data/map/hallway.tmx'}
             ]);
         },
         // loads the Jasmine environment, runs tests
@@ -107,6 +109,8 @@
                             initMelon(function () {
                                 // initialize glue input system
                                 Glue.input.init();
+
+                                Glue.levelManager.loadLevel('hallway');
                                 // Mobile browser hacks
                                 if (me.device.isMobile && !navigator.isCocoonJS) {
                                     // Prevent the webview from moving on a swipe
