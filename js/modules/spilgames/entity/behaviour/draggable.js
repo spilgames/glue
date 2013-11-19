@@ -196,15 +196,6 @@ glue.module.create(
                  */
                 setGrabOffset: function (x, y) {
                     grabOffset = new Glue.math.vector(x, y);
-                },
-                /**
-                 * Updates the entity per cycle, can be overwritten
-                 * @name update
-                 * @memberOf Draggable
-                 * @function
-                 */
-                update: function () {
-                    return true;
                 }
             });
 

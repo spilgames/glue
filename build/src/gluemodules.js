@@ -320,15 +320,6 @@ glue.module.create(
                  */
                 setGrabOffset: function (x, y) {
                     grabOffset = new Glue.math.vector(x, y);
-                },
-                /**
-                 * Updates the entity per cycle, can be overwritten
-                 * @name update
-                 * @memberOf Draggable
-                 * @function
-                 */
-                update: function () {
-                    return true;
                 }
             });
 
@@ -445,15 +436,6 @@ glue.module.create(
                  */
                 destroy: function () {
                     Glue.event.off(Glue.input.DRAG_END, checkOnMe);
-                },
-                /**
-                 * Updates the entity per cycle, can be overwritten
-                 * @name update
-                 * @memberOf me.DroptargetEntity
-                 * @function
-                 */
-                update: function () {
-                    return true;
                 }
             });
 
