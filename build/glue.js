@@ -19464,6 +19464,9 @@ glue.module.create(
                         me.game.viewport.worldToLocal(evt.gameX, evt.gameY) :
                         {x: evt.gameX, y: evt.gameY};
 
+                    if (!collisionBox) {
+                        return;
+                    }
                     if (collisionBox.containsPointV(localPosition)) {
                         isHovering = true;
                         if (obj.hoverOver && !hoverOverCalled) {
