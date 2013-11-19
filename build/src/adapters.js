@@ -39,12 +39,15 @@ adapters.melonjs = (function (MelonJS) {
                 }
             },
             unloadLevel: function () {
+                /*
                 MelonJS.game.world.removeChild(
                     MelonJS.game.world.getEntityByProp(
                         'name', 
                         'HUD'
                     )[0]
                 );
+                */
+                me.game.removeAll();
             }
         },
         input: {
