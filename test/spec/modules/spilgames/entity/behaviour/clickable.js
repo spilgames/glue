@@ -26,7 +26,7 @@ glue.module.create(
                         update: function () {
                             return true;
                         },
-                        clickDown: function () {
+                        clickDown: function (e) {
                             clickDown = true;
                         }
                     });

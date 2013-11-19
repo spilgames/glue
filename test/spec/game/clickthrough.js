@@ -93,12 +93,6 @@ glue.module.create(
                         },
                         update: function () {
                             return true;
-                        },
-                        dragStart: function () {
-                            Glue.event.fire(Glue.input.DRAG_START, this);
-                        },
-                        dragEnd: function () {
-                            Glue.event.fire(Glue.input.DRAG_END, this);
                         }
                     }),
                     kitty2 = Base(400, 350, {                               
@@ -113,12 +107,6 @@ glue.module.create(
                         },
                         update: function () {
                             return true;
-                        },
-                        dragStart: function () {
-                            Glue.event.fire(Glue.input.DRAG_START, this);
-                        },
-                        dragEnd: function () {
-                            Glue.event.fire(Glue.input.DRAG_END, this);
                         }
                     }),
                     kitty3 = Base(600, 400, {                               
@@ -133,12 +121,6 @@ glue.module.create(
                         },
                         update: function () {
                             return true;
-                        },
-                        dragStart: function () {
-                            Glue.event.fire(Glue.input.DRAG_START, this);
-                        },
-                        dragEnd: function () {
-                            Glue.event.fire(Glue.input.DRAG_END, this);
                         }
                     }),
                     door = Base(1000, 53, {
@@ -186,9 +168,6 @@ glue.module.create(
                 Draggable(kitty1);
                 Draggable(kitty2);
                 Draggable(kitty3);
-
-                leftButton.floating = true;
-                rightButton.floating = true;
 
                 Glue.game.add(cameraManager, 1);
                 Glue.game.add(leftButton, 50);

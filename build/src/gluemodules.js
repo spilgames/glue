@@ -912,6 +912,9 @@ glue.module.create(
                     obj.renderable.addAnimation('hovered', [1]);
                 }
 
+            // we assume that all scroll buttons are floating
+            obj.floating = true;
+
             // setup the module events
             setupEvents();
 
