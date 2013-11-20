@@ -66,7 +66,7 @@ glue.module.create(
                         evt.gameX,
                         evt.gameY
                     );
-                    if (this.collisionBox.containsPointV(localPosition)) {
+                    if (this.collisionBox && this.collisionBox.containsPointV(localPosition)) {
                         isPressed = true;
                         // call the clicked method if it exists
                         if (obj.clickDown) {

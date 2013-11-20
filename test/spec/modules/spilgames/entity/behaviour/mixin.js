@@ -73,7 +73,7 @@ glue.module.create(['glue'], function (Glue) {
                             expect(floating).toBeTruthy();
                             Glue.game.remove(scrollbutton);
                             done();
-                        }, 100);
+                        }, 200);
                     }
                 );
             });
