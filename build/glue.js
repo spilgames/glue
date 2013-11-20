@@ -18791,22 +18791,20 @@ adapters.melonjs = (function (MelonJS) {
         levelManager: {
             loadLevel: function (levelName) {
                 MelonJS.levelDirector.loadLevel(levelName);
-
-                // add our HUD to the game world
-                if (game.HUD) {
-                    MelonJS.game.add(new game.HUD.Container());
-                }
             },
             unloadLevel: function () {
-                /*
-                MelonJS.game.world.removeChild(
-                    MelonJS.game.world.getEntityByProp(
-                        'name', 
-                        'HUD'
-                    )[0]
-                );
-                */
-                me.game.removeAll();
+                var entities = MelonJS.game.world.children,
+                    i,
+                    l,
+                    obj;
+
+                for (i = 0, l = entities.length; i < l; ++i) {
+                    obj = entities[i];
+                    if (obj.destruct) {
+                        obj.destruct();
+                    }
+                    MelonJS.game.remove(obj);
+                }
             }
         },
         input: {
