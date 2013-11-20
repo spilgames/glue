@@ -64,7 +64,7 @@ glue.module.create(['glue'], function (Glue) {
                             expect(drawn).toBeTruthy();
                             expect(floating).toBeTruthy();
                             done();
-                        }, 70);
+                        }, 100);
                     }
                 );
             });

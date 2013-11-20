@@ -31,12 +31,28 @@ glue.module.create(
          */
         return function (obj) {
             // - per instance private members -
-            var dragging = false,
+            var position = {
+                    x: obj.pos.x,
+                    y: obj.pos.y
+                },
+                dropped = false,
+                resetted = false,
+                dragging = false,
                 dragId = null,
                 grabOffset = new Glue.math.vector(0, 0),
                 mouseDown = null,
                 mouseUp = null,
                 pointerId = null,
+                /**
+                 * Is used to reset the draggable to its initial position
+                 * @name reset
+                 * @memberOf Draggable
+                 * @function
+                 */
+                resetMe = function () {
+                    obj.pos.x = position.x;
+                    obj.pos.y = position.y;
+                },
                 /**
                  * Gets called when the user starts dragging the entity
                  * @name dragStart
@@ -45,6 +61,8 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
+                    dropped = false;
+                    resetted = false;
                     // depth sorting
                     if (highestEntity === null) {
                         highestEntity = obj;
@@ -101,7 +119,7 @@ glue.module.create(
                         pointerId = undefined;
                         dragging = false;
                         if (obj.dragEnd) {
-                            obj.dragEnd(e);
+                            obj.dragEnd(e, resetMe);
                         }
                         return false;
                     }
@@ -116,7 +134,7 @@ glue.module.create(
                  * the event to
                  */
                 translatePointerEvent = function (e, translation) {
-                    Glue.event.fire(translation, [e, obj]);
+                    Glue.event.fire(translation, [e, obj, resetMe]);
                 },
                 /**
                  * Initializes the events the modules needs to listen to
@@ -196,6 +214,25 @@ glue.module.create(
                  */
                 setGrabOffset: function (x, y) {
                     grabOffset = new Glue.math.vector(x, y);
+                },
+                isResetted: function () {
+                    return resetted;
+                },
+                isDropped: function () {
+                    return dropped;
+                },
+                setDropped: function (value) {
+                    if (Glue.sugar.isBoolean(value)) {
+                        dropped = value;
+                    }
+                },
+                setResetted: function (value) {
+                    if (Glue.sugar.isBoolean(value)) {
+                        resetted = value;
+                    }
+                },
+                resetMe: function () {
+                    return resetMe;
                 }
             });
 

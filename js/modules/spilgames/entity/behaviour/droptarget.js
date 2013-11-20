@@ -13,6 +13,7 @@ glue.module.create(
     function (Glue) {
         'use strict';
         // - cross instance private members -
+        var resetTimeout = 100;
 
         /**
          * Constructor
@@ -49,16 +50,24 @@ glue.module.create(
                  * @param {Object} e: the drag event
                  * @param {Object} draggableEntity: the draggable entity that is dropped
                  */
-                checkOnMe = function (e, draggableEntity) {
+                checkOnMe = function (e, draggableEntity, resetMe) {
                     // the check if the draggable entity is this entity should work after
                     // a total refactoring to the module pattern
                     if (draggableEntity && draggableEntity !== obj &&
                         obj[checkMethod](draggableEntity.collisionBox)) {
                             // call the drop method on the current entity
                             drop(draggableEntity);
+                            draggableEntity.setDropped(true);
                             if (obj.drop) {
                                 obj.drop(draggableEntity);
                             }
+                    } else {
+                        Glue.sugar.setAnimationFrameTimeout(function () {
+                            if (!draggableEntity.isResetted() && !draggableEntity.isDropped()) {
+                                resetMe();
+                                draggableEntity.setResetted(true);
+                            }
+                        }, resetTimeout);
                     }
                 };
 

@@ -70,7 +70,7 @@ glue.module.create(
                     // mock user drag events
                     Glue.event.fire(Glue.input.DRAG_START, [{gameX: startFrom.x, gameY: startFrom.y, pointerId: 2}, draggable]);
                     Glue.event.fire(Glue.input.POINTER_MOVE, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 2}, draggable]);
-                    Glue.event.fire(Glue.input.DRAG_END, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 2}, draggable]);
+                    Glue.event.fire(Glue.input.DRAG_END, [{gameX: moveTo.x, gameY: moveTo.y, pointerId: 2}, draggable, draggable.resetMe()]);
                 },
                 // removes all test entities from the game
                 removeEntities = function () {
@@ -150,6 +150,39 @@ glue.module.create(
                     drag(startFrom, moveTo);
 
                     expect(dropped).toBeFalsy();
+                });
+                it('Should be able to reset to intial position', function (done) {
+                    var startFrom = {x: 70, y: 70},
+                        moveTo = {x: 825, y: 325};
+                    // create a draggable
+                    createDraggable({x: 0, y: 0}, {x: 198, y: 226});
+                    // create a droptarget
+                    createDroptarget({x: 200, y: 200}, {x: 491, y: 414});
+                    // drag the draggable entity to a new location
+                    drag(startFrom, moveTo);
+
+                    setTimeout(function () {
+                        expect(draggable.pos.x).toEqual(0);
+                        expect(draggable.pos.y).toEqual(0);
+                        done();
+                    }, 200);
+                });
+                it('Should not reset after a valid drop', function (done) {
+                    var startFrom = {x: 70, y: 70},
+                        moveTo = {x: 86, y: 359};
+                    // create a draggable
+                    createDraggable({x: 0, y: 0}, {x: 198, y: 226});
+                    // create a droptarget
+                    createDroptarget({x: 200, y: 200}, {x: 491, y: 414});
+                    // drag the draggable entity to a new location
+                    drag(startFrom, moveTo);
+
+                    expect(dropped).toBeTruthy();
+                    setTimeout(function () {
+                        expect(draggable.pos.x).toEqual(16);
+                        expect(draggable.pos.y).toEqual(289);
+                        done();
+                    }, 200);
                 });
             });
         });
