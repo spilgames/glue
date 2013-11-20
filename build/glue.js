@@ -19285,11 +19285,11 @@ glue.module.create(
                  * @function
                  */
                 destructDraggable: function () {
+                    Glue.event.off(Glue.input.DRAG_START, dragStart);
+                    Glue.event.off(Glue.input.DRAG_MOVE, dragMove);
+                    Glue.event.off(Glue.input.DRAG_END, dragEnd);
                     Glue.input.pointer.off(Glue.input.POINTER_DOWN);
                     Glue.input.pointer.off(Glue.input.POINTER_UP);
-                    Glue.event.off(Glue.input.MOUSE_MOVE, dragMove);
-                    Glue.event.off(Glue.input.DRAG_START, dragStart);
-                    Glue.event.off(Glue.input.DRAG_END, dragEnd);
                 },
                 /**
                  * Sets a callback function which will be called when this entity is dragged
