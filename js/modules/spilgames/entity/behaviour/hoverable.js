@@ -102,7 +102,7 @@ glue.module.create(
                 },
                 /**
                  * Can be used to destruct this entity
-                 * @name isPressed
+                 * @name destructHoverable
                  * @memberOf hoverable
                  * @function
                  */

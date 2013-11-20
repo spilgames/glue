@@ -18,9 +18,10 @@ glue.module.create(['glue'], function (Glue) {
                         'glue',
                         'glue/modules/spilgames/entity/base',
                         'glue/modules/spilgames/entity/behaviour/hoverable',
-                        'glue/modules/spilgames/entity/behaviour/clickable'
+                        'glue/modules/spilgames/entity/behaviour/clickable',
+                        'glue/modules/spilgames/entity/behaviour/draggable'
                     ],
-                    function (Glue, Base, Hoverable, Clickable) {
+                    function (Glue, Base, Hoverable, Clickable, Draggable) {
                         return function (x, y, settings) {
                             // get the base entity and extend it
                             var obj = Base(x, y, settings).inject({
@@ -32,6 +33,11 @@ glue.module.create(['glue'], function (Glue) {
                                     floating = this.floating;
                                     updated = true;
                                     return true;
+                                },
+                                destruct: function () {
+                                    this.destructDraggable();
+                                    this.destructHoverable();
+                                    this.destructClickable();
                                 }
                             });
                             // set the floating to true
@@ -41,6 +47,8 @@ glue.module.create(['glue'], function (Glue) {
                             Hoverable(obj);
                             // mix in the clickable functionality
                             Clickable(obj);
+                            // mix in the draggable functionality
+                            Draggable(obj);
                             // return the mixed object
                             return obj;
                         };
@@ -63,6 +71,7 @@ glue.module.create(['glue'], function (Glue) {
                             expect(updated).toBeTruthy();
                             expect(drawn).toBeTruthy();
                             expect(floating).toBeTruthy();
+                            Glue.game.remove(scrollbutton);
                             done();
                         }, 100);
                     }

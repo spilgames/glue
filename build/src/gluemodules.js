@@ -110,7 +110,7 @@ glue.module.create(
                 },
                 /**
                  * Can be used to destruct this entity
-                 * @name isPressed
+                 * @name destructClickable
                  * @memberOf clickable
                  * @function
                  */
@@ -297,11 +297,11 @@ glue.module.create(
             obj.mix({
                 /**
                  * Destructor
-                 * @name destroy
+                 * @name destructDraggable
                  * @memberOf Draggable
                  * @function
                  */
-                destroy: function () {
+                destructDraggable: function () {
                     Glue.input.pointer.off(Glue.input.POINTER_DOWN);
                     Glue.input.pointer.off(Glue.input.POINTER_UP);
                     Glue.event.off(Glue.input.MOUSE_MOVE, dragMove);
@@ -476,11 +476,12 @@ glue.module.create(
                 },
                 /**
                  * Destructor
-                 * @name destroy
+                 * @name destructDroptarget
                  * @memberOf me.DroptargetEntity
                  * @function
                  */
-                destroy: function () {
+                destructDroptarget: function () {
+                    console.log('destructdroptarget')
                     Glue.event.off(Glue.input.DRAG_END, checkOnMe);
                 }
             });
@@ -599,7 +600,7 @@ glue.module.create(
                 },
                 /**
                  * Can be used to destruct this entity
-                 * @name isPressed
+                 * @name destructHoverable
                  * @memberOf hoverable
                  * @function
                  */

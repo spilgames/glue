@@ -89,7 +89,7 @@ glue.module.create(
                 },
                 /**
                  * Can be used to destruct this entity
-                 * @name isPressed
+                 * @name destructClickable
                  * @memberOf clickable
                  * @function
                  */

@@ -26,7 +26,12 @@ adapters.melonjs = (function (MelonJS) {
         },
         game: {
             add: MelonJS.game.add,
-            remove: MelonJS.game.remove,
+            remove: function (obj) {
+                if (obj.destruct) {
+                    obj.destruct();
+                }
+                MelonJS.game.remove(obj);
+            },
             viewport: MelonJS.game.viewport
         },
         levelManager: {

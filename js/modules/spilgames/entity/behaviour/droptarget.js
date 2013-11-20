@@ -103,11 +103,12 @@ glue.module.create(
                 },
                 /**
                  * Destructor
-                 * @name destroy
+                 * @name destructDroptarget
                  * @memberOf me.DroptargetEntity
                  * @function
                  */
-                destroy: function () {
+                destructDroptarget: function () {
+                    console.log('destructdroptarget')
                     Glue.event.off(Glue.input.DRAG_END, checkOnMe);
                 }
             });

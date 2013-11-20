@@ -173,11 +173,11 @@ glue.module.create(
             obj.mix({
                 /**
                  * Destructor
-                 * @name destroy
+                 * @name destructDraggable
                  * @memberOf Draggable
                  * @function
                  */
-                destroy: function () {
+                destructDraggable: function () {
                     Glue.input.pointer.off(Glue.input.POINTER_DOWN);
                     Glue.input.pointer.off(Glue.input.POINTER_UP);
                     Glue.event.off(Glue.input.MOUSE_MOVE, dragMove);
