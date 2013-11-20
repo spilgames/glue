@@ -179,7 +179,7 @@ glue.module.create(
                  */
                 destructDraggable: function () {
                     Glue.event.off(Glue.input.DRAG_START, dragStart);
-                    Glue.event.off(Glue.input.DRAG_MOVE, dragMove);
+                    Glue.event.off(Glue.input.POINTER_MOVE, dragMove);
                     Glue.event.off(Glue.input.DRAG_END, dragEnd);
                     Glue.input.pointer.off(Glue.input.POINTER_DOWN);
                     Glue.input.pointer.off(Glue.input.POINTER_UP);
