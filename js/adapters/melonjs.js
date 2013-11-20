@@ -83,8 +83,8 @@ adapters.melonjs = (function (MelonJS) {
             POINTER_UP: 'pointerup',
             POINTER_DOWN: 'pointerdown',
             POINTER_MOVE: 'pointermove',
+            // Drag events
             DRAG_START: 'dragstart',
-            DRAG_MOVE: 'dragmove',
             DRAG_END: 'dragend',
             pointer: {
                 on: function (eventType, callback, rect, floating) {
