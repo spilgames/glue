@@ -108,7 +108,6 @@ glue.module.create(
                  * @function
                  */
                 destructDroptarget: function () {
-                    console.log('destructdroptarget')
                     Glue.event.off(Glue.input.DRAG_END, checkOnMe);
                 }
             });
