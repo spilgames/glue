@@ -223,9 +223,13 @@ glue.module.create(
                  * @function
                  */
                 destructDraggable: function () {
+                    // unregister system events
                     Glue.event.off(Glue.input.DRAG_START, dragStart);
                     Glue.event.off(Glue.input.POINTER_MOVE, dragMove);
                     Glue.event.off(Glue.input.DRAG_END, dragEnd);
+                    // unregister pointer events
+                    Glue.input.pointer.off(Glue.input.POINTER_DOWN, obj);
+                    Glue.input.pointer.off(Glue.input.POINTER_UP, obj);
                 },
                 /**
                  * Sets the grab offset of this entity
