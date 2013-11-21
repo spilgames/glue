@@ -19180,32 +19180,34 @@ glue.module.create(
                  * @function
                  * @param {Object} e: the pointer event
                  */
-                dragStart = function (e) {
-                    dropped = false;
-                    resetted = false;
-                    // depth sorting
-                    if (highestEntity === null) {
-                        highestEntity = obj;
-                    } else {
-                        if (obj.z > highestEntity.z) {
+                dragStart = function (e, draggable) {
+                    if (draggable === obj) {
+                        dropped = false;
+                        resetted = false;
+                        // depth sorting
+                        if (highestEntity === null) {
                             highestEntity = obj;
+                        } else {
+                            if (obj.z > highestEntity.z) {
+                                highestEntity = obj;
+                            }
                         }
-                    }
-                    if (dragging === false && obj === highestEntity) {
-                        // clicked entity goes on top
-                        obj.z = maxZ + 1;
-                        // save max z index of all draggables
-                        maxZ = obj.z;
-                        // re-sort all game entities
-                        me.game.world.sort();
-                        dragging = true;
-                        dragId = e.pointerId;
-                        grabOffset.set(e.gameX, e.gameY);
-                        grabOffset.sub(obj.pos);
-                        if (obj.dragStart) {
-                            obj.dragStart(e);
+                        if (dragging === false && obj === highestEntity) {
+                            // clicked entity goes on top
+                            obj.z = maxZ + 1;
+                            // save max z index of all draggables
+                            maxZ = obj.z;
+                            // re-sort all game entities
+                            me.game.world.sort();
+                            dragging = true;
+                            dragId = e.pointerId;
+                            grabOffset.set(e.gameX, e.gameY);
+                            grabOffset.sub(obj.pos);
+                            if (obj.dragStart) {
+                                obj.dragStart(e);
+                            }
+                            return false;
                         }
-                        return false;
                     }
                 },
                 /**
@@ -19233,15 +19235,17 @@ glue.module.create(
                  * @function
                  * @param {Object} e: the pointer event
                  */
-                dragEnd = function (e) {
-                    highestEntity = null;
-                    if (dragging === true) {
-                        pointerId = undefined;
-                        dragging = false;
-                        if (obj.dragEnd) {
-                            obj.dragEnd(e, resetMe);
+                dragEnd = function (e, draggable) {
+                    if (draggable === obj) {
+                        highestEntity = null;
+                        if (dragging === true) {
+                            pointerId = undefined;
+                            dragging = false;
+                            if (obj.dragEnd) {
+                                obj.dragEnd(e, resetMe);
+                            }
+                            return false;
                         }
-                        return false;
                     }
                 },
                 /**
@@ -19277,16 +19281,8 @@ glue.module.create(
                     Glue.input.pointer.on(Glue.input.POINTER_DOWN, pointerDown, obj);
                     Glue.input.pointer.on(Glue.input.POINTER_UP, pointerUp, obj);
                     Glue.event.on(Glue.input.POINTER_MOVE, dragMove);
-                    Glue.event.on(Glue.input.DRAG_START, function (e, draggable) {
-                        if (draggable === obj) {
-                            dragStart(e);
-                        }
-                    });
-                    Glue.event.on(Glue.input.DRAG_END, function (e, draggable) {
-                        if (draggable === obj) {
-                            dragEnd(e);
-                        }
-                    });
+                    Glue.event.on(Glue.input.DRAG_START, dragStart);
+                    Glue.event.on(Glue.input.DRAG_END, dragEnd);
                 };
 
             // - external interface -
