@@ -19118,16 +19118,48 @@ glue.module.create(
     ],
     function (Glue) {
         // - cross instance private members -
-        /*
-            Depth sorting implementation improvement:
-            - Assign z index of Infinity on dragged entity (so it also
-              covers HUD and other not draggable entities)
-            - Revert back to highgest z index of all draggables
-              on drag end (so it is dropped on top of the draggable stack)
-        */
-        // Most simple implementation that works
         var highestEntity = null,
-            maxZ = 2;
+            maxZ = 2,
+            customResetPosition,
+            resetCallback,
+            /**
+             * constant for the reset callback type
+             * @desc Will call a callback function which can control the reset of the draggable
+             * @public
+             * @constant
+             * @type String
+             * @name RESET_TYPE_CALLBACK
+             */            
+            RESET_TYPE_CALLBACK = 'reset-type-callback',
+            /**
+             * constant for the reset custom type
+             * @desc Will reset the position of the draggable to a custom configuarable position
+             * @public
+             * @constant
+             * @type String
+             * @name RESET_TYPE_X
+             */            
+            RESET_TYPE_CUSTOM = 'reset-type-custom',
+            /**
+             * constant for the reset x type
+             * @desc Will only reset the x position of the draggable
+             * @public
+             * @constant
+             * @type String
+             * @name RESET_TYPE_X
+             */
+            RESET_TYPE_X = 'reset-type-x',
+            /**
+             * constant for the reset y type
+             * @desc Will only reset the y position of the draggable
+             * @public
+             * @constant
+             * @type String
+             * @name RESET_TYPE_Y
+             */
+            RESET_TYPE_Y = 'reset-type-y',
+            resetType = RESET_TYPE_CALLBACK;
+
         /**
          * Constructor
          * @name init
@@ -19156,8 +19188,25 @@ glue.module.create(
                  * @function
                  */
                 resetMe = function () {
-                    obj.pos.x = position.x;
-                    obj.pos.y = position.y;
+                    switch (resetType) {
+                        case RESET_TYPE_X:
+                            obj.pos.x = position.x;
+                        break;
+                        case RESET_TYPE_Y:
+                            obj.pos.y = position.y;
+                        break;
+                        case RESET_TYPE_CUSTOM:
+                            obj.pos.x = customResetPosition.x || obj.pos.x;
+                            obj.pos.y = customResetPosition.y || obj.pos.y;
+                        break;
+                        case RESET_TYPE_CALLBACK:
+                            resetCallback.apply(obj);
+                        break;
+                        default:
+                            obj.pos.x = position.x;
+                            obj.pos.y = position.y;
+                        break;
+                    }
                 },
                 /**
                  * Gets called when the user starts dragging the entity
@@ -19291,26 +19340,6 @@ glue.module.create(
                     Glue.input.pointer.off(Glue.input.POINTER_UP);
                 },
                 /**
-                 * Sets a callback function which will be called when this entity is dragged
-                 * @name setDragCallback
-                 * @memberOf Draggable
-                 * @function
-                 * @param {Function} callback: the callback function
-                 */
-                setDragCallback: function (callback) {
-                    dragCallback = callback;
-                },
-                /**
-                 * Sets a callback function which will be called when this entity is dropped
-                 * @name setDropCallback
-                 * @memberOf Draggable
-                 * @function
-                 * @param {Function} callback: the callback function
-                 */
-                setDropCallback: function (callback) {
-                    dropCallback = callback;
-                },
-                /**
                  * Sets the grab offset of this entity
                  * @name setGrabOffset
                  * @memberOf Draggable
@@ -19330,15 +19359,41 @@ glue.module.create(
                 setDropped: function (value) {
                     if (Glue.sugar.isBoolean(value)) {
                         dropped = value;
+                    } else {
+                        throw('Please supply a boolean value');
                     }
                 },
                 setResetted: function (value) {
                     if (Glue.sugar.isBoolean(value)) {
                         resetted = value;
+                    } else {
+                        throw('Please supply a boolean value');
                     }
                 },
                 resetMe: function () {
                     return resetMe;
+                },
+                setCustomResetPosition: function (value) {
+                    if (Glue.sugar.isObject(value)) {
+                        customResetPosition = value;
+                    } else {
+                        throw('Please supply an object value');
+                    }
+                },
+                setResetCallback: function (value) {
+                    if (Glue.sugar.isFunction(value)) {
+                        resetCallback = value;
+                    } else {
+                        throw('Please supply a function value');
+                    }
+                },
+                setResetType: function (value) {
+                    // improvement: check if the value is in the allowed constant array
+                    if (Glue.sugar.isString(value)) {
+                        resetType = value;
+                    } else {
+                        throw('Please supply a string value');
+                    }
                 }
             });
 
