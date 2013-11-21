@@ -1,7 +1,5 @@
-HTML5 Glue Engine
-=================
-
-# Generic HTML5 engine and abstraction layer
+# Glue
+## Generic HTML5 engine and abstraction layer
 
 Copyright © 2013 - SpilGames
 
