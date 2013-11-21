@@ -16,43 +16,7 @@ glue.module.create(
             maxZ = 2,
             customResetPosition,
             resetCallback,
-            /**
-             * constant for the reset callback type
-             * @desc Will call a callback function which can control the reset of the draggable
-             * @public
-             * @constant
-             * @type String
-             * @name RESET_TYPE_CALLBACK
-             */            
-            RESET_TYPE_CALLBACK = 'reset-type-callback',
-            /**
-             * constant for the reset custom type
-             * @desc Will reset the position of the draggable to a custom configuarable position
-             * @public
-             * @constant
-             * @type String
-             * @name RESET_TYPE_X
-             */            
-            RESET_TYPE_CUSTOM = 'reset-type-custom',
-            /**
-             * constant for the reset x type
-             * @desc Will only reset the x position of the draggable
-             * @public
-             * @constant
-             * @type String
-             * @name RESET_TYPE_X
-             */
-            RESET_TYPE_X = 'reset-type-x',
-            /**
-             * constant for the reset y type
-             * @desc Will only reset the y position of the draggable
-             * @public
-             * @constant
-             * @type String
-             * @name RESET_TYPE_Y
-             */
-            RESET_TYPE_Y = 'reset-type-y',
-            resetType = RESET_TYPE_CALLBACK;
+            resetType;
 
         /**
          * Constructor
@@ -83,17 +47,17 @@ glue.module.create(
                  */
                 resetMe = function () {
                     switch (resetType) {
-                        case RESET_TYPE_X:
+                        case obj.RESET_TYPE_X:
                             obj.pos.x = position.x;
                         break;
-                        case RESET_TYPE_Y:
+                        case obj.RESET_TYPE_Y:
                             obj.pos.y = position.y;
                         break;
-                        case RESET_TYPE_CUSTOM:
+                        case obj.RESET_TYPE_CUSTOM:
                             obj.pos.x = customResetPosition.x || obj.pos.x;
                             obj.pos.y = customResetPosition.y || obj.pos.y;
                         break;
-                        case RESET_TYPE_CALLBACK:
+                        case obj.RESET_TYPE_CALLBACK:
                             resetCallback.apply(obj);
                         break;
                         default:
@@ -220,6 +184,42 @@ glue.module.create(
 
             // - external interface -
             obj.mix({
+                /**
+                 * constant for the reset callback type
+                 * @desc Will call a callback function which can control the reset of the draggable
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name RESET_TYPE_CALLBACK
+                 */
+                RESET_TYPE_CALLBACK: 'reset-type-callback',
+                /**
+                 * constant for the reset custom type
+                 * @desc Will reset the position of the draggable to a custom configuarable position
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name RESET_TYPE_X
+                 */
+                RESET_TYPE_CUSTOM: 'reset-type-custom',
+                /**
+                 * constant for the reset x type
+                 * @desc Will only reset the x position of the draggable
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name RESET_TYPE_X
+                 */
+                RESET_TYPE_X: 'reset-type-x',
+                /**
+                 * constant for the reset y type
+                 * @desc Will only reset the y position of the draggable
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name RESET_TYPE_Y
+                 */
+                RESET_TYPE_Y: 'reset-type-y',
                 /**
                  * Destructor
                  * @name destructDraggable

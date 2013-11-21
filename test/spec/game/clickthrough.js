@@ -167,6 +167,7 @@ glue.module.create(
                 Hoverable(door);
                 Draggable(kitty1);
                 kitty1.setCustomResetPosition({y: 300});
+                kitty1.setResetType(kitty1.RESET_TYPE_CALLBACK);
                 kitty1.setResetCallback(function () {
                     if (this.pos.y <= 300) {
                         this.pos.y = 300;
