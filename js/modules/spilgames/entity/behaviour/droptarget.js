@@ -113,7 +113,7 @@ glue.module.create(
             });
 
             // - initialisation logic -
-            Glue.event.on(Glue.input.DRAG_END, checkOnMe.bind(obj));
+            Glue.event.on(Glue.input.DRAG_END, checkOnMe);
             checkMethod = obj.CHECKMETHOD_OVERLAPS;
             
             // - return external interface -

@@ -18,15 +18,15 @@
         // glue specs
         specs = [
             //'spec/api',
-            //'spec/modules/spilgames/entity/behaviour/mixin',
+            'spec/modules/spilgames/entity/behaviour/mixin',
             //'spec/modules/spilgames/entity/behaviour/clickable',
             //'spec/modules/spilgames/entity/behaviour/draggable',
             //'spec/modules/spilgames/entity/behaviour/droptarget',
             //'spec/modules/spilgames/entity/behaviour/hoverable'
-            'spec/game/clickthrough'
+            //'spec/game/clickthrough'
         ],
         // enable game canvas below for debugging
-        showCanvas = true,
+        showCanvas = false,
         loadCount = 0,
         game = {},
 

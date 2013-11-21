@@ -19048,7 +19048,7 @@ glue.module.create(
                         evt.gameX,
                         evt.gameY
                     );
-                    if (this.collisionBox && this.collisionBox.containsPointV(localPosition)) {
+                    if (obj.collisionBox && obj.collisionBox.containsPointV(localPosition)) {
                         isPressed = true;
                         // call the clicked method if it exists
                         if (obj.clickDown) {
@@ -19063,7 +19063,7 @@ glue.module.create(
                  * @function
                  */
                 setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown.bind(obj));
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
                     Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
                 },
                 /**
@@ -19521,7 +19521,7 @@ glue.module.create(
             });
 
             // - initialisation logic -
-            Glue.event.on(Glue.input.DRAG_END, checkOnMe.bind(obj));
+            Glue.event.on(Glue.input.DRAG_END, checkOnMe);
             checkMethod = obj.CHECKMETHOD_OVERLAPS;
             
             // - return external interface -
@@ -19592,7 +19592,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerDown = function (evt) {
-                    checkHovering(evt, this.collisionBox, this);
+                    checkHovering(evt, this.collisionBox, obj);
                 },
                 /**
                  * Listens the POINTER_MOVE event
@@ -19602,7 +19602,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerMove = function (evt) {
-                    checkHovering(evt, this.collisionBox, this);
+                    checkHovering(evt, this.collisionBox, obj);
                 },
                 /**
                  * Sets up all events for this module
@@ -19611,8 +19611,8 @@ glue.module.create(
                  * @function
                  */
                 setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown.bind(obj));
-                    Glue.event.on(Glue.input.POINTER_MOVE, onPointerMove.bind(obj));
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.on(Glue.input.POINTER_MOVE, onPointerMove);
                 },
                 /**
                  * Tears down all events for this module

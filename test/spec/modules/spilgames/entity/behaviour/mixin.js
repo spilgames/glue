@@ -10,7 +10,8 @@ glue.module.create(['glue'], function (Glue) {
             it('Should be able to mixin an entity which is added updated and drawn', function (done) {
                 var updated = false,
                     drawn = false,
-                    floating = false;
+                    floating = false,
+                    clicked = false;
 
                 glue.module.create(
                     'scrollbutton',
@@ -35,9 +36,14 @@ glue.module.create(['glue'], function (Glue) {
                                     return true;
                                 },
                                 destruct: function () {
+                                    console.log('destruct...');
                                     this.destructDraggable();
                                     this.destructHoverable();
                                     this.destructClickable();
+                                },
+                                clickDown: function () {
+                                    console.log('clicked...');
+                                    clicked = true;
                                 }
                             });
                             // set the floating to true
@@ -71,8 +77,22 @@ glue.module.create(['glue'], function (Glue) {
                             expect(updated).toBeTruthy();
                             expect(drawn).toBeTruthy();
                             expect(floating).toBeTruthy();
+                            Glue.event.fire(Glue.input.POINTER_DOWN, [{
+                                gameX: 0,
+                                gameY: 301
+                            }]);
+                            expect(clicked).toBeTruthy();
+                            clicked = false;
                             Glue.game.remove(scrollbutton);
-                            done();
+                            setTimeout(function () {
+                                Glue.event.fire(Glue.input.POINTER_DOWN, [{
+                                    gameX: 0,
+                                    gameY: 301
+                                }]);
+                                expect(clicked).toBeFalsy();
+                                done();
+                            }, 0);
+                            
                         }, 200);
                     }
                 );
