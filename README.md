@@ -6,8 +6,6 @@ Copyright © 2013 - SpilGames
 License:
 https://github.com/spilgames/5-glue-engine/blob/master/LICENSE
 
-## Learn the tech
-
 ### What is Glue?
 
 Glue is an abstraction module between HTML5 games and HTML5 engines. In addition to that Glue is also an engine by itself. Glue offers a game API that can be used to create HTML5 games. The implementation of this API can differ. To provide the functionality, Glue can delegates tasks to open source HTML5 engines by using engine adapters.Currently the API has an adapter for MelonJS. More adapters will be added as Glue evolves.
