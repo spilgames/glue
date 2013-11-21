@@ -17636,7 +17636,10 @@ window.me = window.me || {};
 
 			//can change loop or reverse array if the order matters
 			while(len--){
-				subs[len].apply(window, args || []); // is window correct here?
+				// check added for our needs
+				if (subs[len]) {
+					subs[len].apply(window, args || []); // is window correct here?
+				}
 			}
 		};
 
@@ -19336,6 +19339,8 @@ glue.module.create(
                     // unregister pointer events
                     Glue.input.pointer.off(Glue.input.POINTER_DOWN, obj);
                     Glue.input.pointer.off(Glue.input.POINTER_UP, obj);
+                    // depth sorting fix will solve the need for this
+                    highestEntity = null;
                 },
                 /**
                  * Sets the grab offset of this entity

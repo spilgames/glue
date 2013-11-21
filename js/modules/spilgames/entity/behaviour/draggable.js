@@ -230,6 +230,8 @@ glue.module.create(
                     // unregister pointer events
                     Glue.input.pointer.off(Glue.input.POINTER_DOWN, obj);
                     Glue.input.pointer.off(Glue.input.POINTER_UP, obj);
+                    // depth sorting fix will solve the need for this
+                    highestEntity = null;
                 },
                 /**
                  * Sets the grab offset of this entity
