@@ -230,8 +230,6 @@ glue.module.create(
                     Glue.event.off(Glue.input.DRAG_START, dragStart);
                     Glue.event.off(Glue.input.POINTER_MOVE, dragMove);
                     Glue.event.off(Glue.input.DRAG_END, dragEnd);
-                    Glue.input.pointer.off(Glue.input.POINTER_DOWN);
-                    Glue.input.pointer.off(Glue.input.POINTER_UP);
                 },
                 /**
                  * Sets the grab offset of this entity
