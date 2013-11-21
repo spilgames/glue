@@ -84,6 +84,149 @@ glue.module.create(['glue'], function (Glue) {
                     );
                 });
             });
+            describe('Events', function () {
+                it('Should be able to subscribe to and fire an event', function (done) {
+                    glue.module.create(
+                        'subscribe',
+                        [
+                            'glue'
+                        ],
+                        function (Glue) {
+                            return function () {
+                                var result = 'none';
+                                var callback = function (value) {
+                                        result = value;
+                                    };
+
+                                Glue.event.on('test.event', callback);
+                                return {
+                                    get: function () {
+                                        return result;
+                                    }
+                                };
+                            };
+                        }
+                    );
+                    glue.module.create(
+                        'fire',
+                        [
+                            'glue'
+                        ],
+                        function (Glue) {
+                            return function () {
+                                return {
+                                    fire: function () {
+                                        Glue.event.fire('test.event', ['test']);
+                                    }
+                                };
+                            };
+                        }
+                    );
+                    glue.module.get(['subscribe', 'fire'], function (Subscribe, Fire) {
+                        var subscribe = Subscribe(),
+                            fire = Fire();
+
+                        fire.fire();
+                        expect(subscribe.get()).toEqual('test');
+                        done();
+                    });
+                });
+                it('Should be able to unsubscribe from an event', function (done) {
+                    glue.module.create(
+                        'subscribe2',
+                        [
+                            'glue'
+                        ],
+                        function (Glue) {
+                            return function () {
+                                var result = 'none';
+                                var callback = function (value) {
+                                        result = value;
+                                    };
+
+                                Glue.event.on('test.event2', callback);
+                                Glue.event.off('test.event2', callback);
+                                return {
+                                    get: function () {
+                                        return result;
+                                    }
+                                };
+                            };
+                        }
+                    );
+                    glue.module.create(
+                        'fire2',
+                        [
+                            'glue'
+                        ],
+                        function (Glue) {
+                            return function () {
+                                return {
+                                    fire: function () {
+                                        Glue.event.fire('test.event2', ['test']);
+                                    }
+                                };
+                            };
+                        }
+                    );
+                    glue.module.get(['subscribe2', 'fire2'], function (Subscribe, Fire) {
+                        var subscribe = Subscribe(),
+                            fire = Fire();
+
+                        fire.fire();
+                        expect(subscribe.get()).toEqual('none');
+                        done();
+                    });
+                });
+                it('Should be able to unsubscribe from an event using this scope binding', function (done) {
+                    glue.module.create(
+                        'subscribe3',
+                        [
+                            'glue'
+                        ],
+                        function (Glue) {
+                            return function () {
+                                var result = 'none';
+                                var callback = function (value) {
+                                        result = this;
+                                    };
+
+                                callback = callback.bind({test:true});
+                                Glue.event.on('test.event3', callback);
+                                Glue.event.off('test.event3', callback);
+                                return {
+                                    get: function () {
+                                        return result;
+                                    }
+                                };
+                            };
+                        }
+                    );
+                    glue.module.create(
+                        'fire3',
+                        [
+                            'glue'
+                        ],
+                        function (Glue) {
+                            return function () {
+                                return {
+                                    fire: function () {
+                                        Glue.event.fire('test.event3', ['test3']);
+                                    }
+                                };
+                            };
+                        }
+                    );
+                    glue.module.get(['subscribe3', 'fire3'], function (Subscribe, Fire) {
+                        var subscribe = Subscribe(),
+                            fire = Fire();
+
+                        fire.fire();
+                        expect(subscribe.get()).toEqual('none');
+                        done();
+                    });
+                });
+            });
         });
     });
 });

@@ -60,7 +60,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerDown = function (evt) {
-                    checkHovering(evt, this.collisionBox, obj);
+                    checkHovering(evt, obj.collisionBox, obj);
                 },
                 /**
                  * Listens the POINTER_MOVE event
@@ -70,7 +70,7 @@ glue.module.create(
                  * @param {Object} evt: The pointer event
                  */
                 onPointerMove = function (evt) {
-                    checkHovering(evt, this.collisionBox, obj);
+                    checkHovering(evt, obj.collisionBox, obj);
                 },
                 /**
                  * Sets up all events for this module

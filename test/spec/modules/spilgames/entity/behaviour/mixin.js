@@ -36,13 +36,11 @@ glue.module.create(['glue'], function (Glue) {
                                     return true;
                                 },
                                 destruct: function () {
-                                    console.log('destruct...');
                                     this.destructDraggable();
                                     this.destructHoverable();
                                     this.destructClickable();
                                 },
                                 clickDown: function () {
-                                    console.log('clicked...');
                                     clicked = true;
                                 }
                             });
