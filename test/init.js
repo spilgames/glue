@@ -24,7 +24,7 @@
             //'spec/modules/spilgames/entity/behaviour/droptarget',
             //'spec/modules/spilgames/entity/behaviour/hoverable',
             //'spec/modules/glue/component/base',
-            //'spec/modules/glue/component/visible',
+            'spec/modules/glue/component/visible',
             'spec/modules/glue/component/mix'
             //'spec/game/clickthrough'
         ],

@@ -19,17 +19,16 @@ adapters.glue = (function (win) {
                create: function (mixins, callback) {
                     var i,
                         l,
-                        mixin,
+                        mixinModules,
                         mixed = {};
-
-                    for (i = 0, l = mixins.length; i < l; ++i) {
-                        mixin = mixins[i];
-                        self.module.get([mixin], function (MixinModule) {
-                            MixinModule(mixed);
-                        });
-                    }
-                    // TODO: has to be timed when fetching new modules
-                    callback.call(self, mixed);
+                    
+                    self.module.get(mixins, function () {
+                        mixinModules = Array.prototype.slice.call(arguments);
+                        for (i = 0, l = mixinModules.length; i < l; ++i) {
+                            mixinModules[i](mixed)
+                        }
+                        callback.call(self, mixed);
+                    });
                 }
             };
         }

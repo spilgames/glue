@@ -7,9 +7,6 @@ glue.module.create(
         return function (obj) {
             obj = obj || {};
             obj.visible = {
-                getName: function () {
-                    return name;
-                },
                 update: function (deltaT) {
 
                 },

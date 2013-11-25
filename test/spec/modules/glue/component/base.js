@@ -12,11 +12,11 @@ glue.module.create(
             'use strict';
 
             it('Should be able to create a base component which gets updated', function (done) {
-                var baseComponent = BaseComponent(0, 0, {});
+                var baseComponent = BaseComponent();
                 gg.add(baseComponent);
-                spyOn(baseComponent, 'update');
+
                 setTimeout(function () {
-                    expect(baseComponent.update).toHaveBeenCalled();
+                    expect(baseComponent.base.update).toHaveBeenCalled();
                     done();
                 }, 100);
             });

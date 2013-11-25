@@ -10,49 +10,10 @@ glue.module.create(
         describe('glue.component.create', function () {
             'use strict';
 
-            it('Should be able to create a manually mixed component and call mixed methods', function (done) {
-                glue.module.create(
-                    'mixed',
-                    [
-                        'glue',
-                        'glue/component/base',
-                        'glue/component/visible'
-                    ],
-                    function (Glue, BaseComponent, VisibleComponent) {
-                        return function (config) {
-
-                            var obj = {
-                                update: function (deltaT) {
-                                    this.base.update(deltaT);
-                                    this.visible.update(deltaT);
-                                },
-                                draw: function (deltaT, context) {
-                                    this.visible.draw(deltaT, context);
-                                }
-                            };
-                            BaseComponent(obj);
-                            VisibleComponent(obj)
-                            return obj;
-                        };
-                    }
-                );
-                glue.module.get(['mixed'], function(MixedModule) {
-                    var mixedModule = MixedModule({});
-                    spyOn(mixedModule, 'update');
-                    gg.add(mixedModule);
-                    setTimeout(function () {
-                        expect(mixedModule.update).toHaveBeenCalledWith(jasmine.any(Number));
-                        expect(mixedModule.base.update).toBeTruthy();
-                        expect(mixedModule.visible.update).toBeTruthy();
-                        expect(mixedModule.visible.draw).toBeTruthy();
-                        done();
-                    }, 100);
-                });
-            });
-
             it('Should be able to create an automatically mixed component', function (done) {
                 glue.module.create('test.player', function () {
                     return function (obj) {
+                        var message = 'success';
                         return obj.mix({
                             update: function (deltaT) {
                                 this.base.update(deltaT);
@@ -61,29 +22,32 @@ glue.module.create(
                             draw: function (deltaT, context) {
                                 this.visible.draw(deltaT, context);
                             },
+                            playerMethod: function () {
+                                return message;
+                            },
                             base: obj.base,
                             visible: obj.visible
                         });
-                    }; 
+                    };
                 });
                 Glue.component().create(
                     [
                         'glue/component/base',
-                        'glue/component/visible'
+                        'glue/component/visible',
+                        'test.player'
                     ],
                     function (obj) {
-                        glue.module.get(['test.player'], function (Player) {
-                            var player = Player(obj);
-                            expect(player.base.update).toBeTruthy();
-                            expect(player.visible.update).toBeTruthy();
-                            expect(player.visible.draw).toBeTruthy();
-                            done();
-                        });
+                        expect(obj.base.update).toBeTruthy();
+                        expect(obj.visible.update).toBeTruthy();
+                        expect(obj.visible.draw).toBeTruthy();
+                        expect(obj.playerMethod()).toEqual('success');
+                        done();
                     }
                 );
             });
 
-            it('Should be able to create an automatically mixed component and call mixed methods', function (done) {
+            it('Should be able to create an automatically mixed component and call mixed methods',
+                function (done) {
                 var mixin1Spy = jasmine.createSpy('mixin1spy'),
                     mixin2Spy = jasmine.createSpy('mixin2spy');
 
@@ -97,7 +61,7 @@ glue.module.create(
                                 this.testMixin2.draw(deltaT, context);
                             }
                         });
-                    }; 
+                    };
                 });
                 glue.module.create(
                     'test.mixin1',
@@ -151,6 +115,47 @@ glue.module.create(
                     }
                 );
             });
+
+            it('Should be able to create a manually mixed component and call mixed methods', function (done) {
+                glue.module.create(
+                    'mixed',
+                    [
+                        'glue',
+                        'glue/component/base',
+                        'glue/component/visible'
+                    ],
+                    function (Glue, BaseComponent, VisibleComponent) {
+                        return function (config) {
+
+                            var obj = {
+                                update: function (deltaT) {
+                                    this.base.update(deltaT);
+                                    this.visible.update(deltaT);
+                                },
+                                draw: function (deltaT, context) {
+                                    this.visible.draw(deltaT, context);
+                                }
+                            };
+                            BaseComponent(obj);
+                            VisibleComponent(obj);
+                            return obj;
+                        };
+                    }
+                );
+                glue.module.get(['mixed'], function(MixedModule) {
+                    var mixedModule = MixedModule({});
+                    spyOn(mixedModule, 'update');
+                    gg.add(mixedModule);
+                    setTimeout(function () {
+                        expect(mixedModule.update).toHaveBeenCalledWith(jasmine.any(Number));
+                        expect(mixedModule.base.update).toBeTruthy();
+                        expect(mixedModule.visible.update).toBeTruthy();
+                        expect(mixedModule.visible.draw).toBeTruthy();
+                        done();
+                    }, 100);
+                });
+            });
+
         });
     }
 );

@@ -22,6 +22,10 @@ glue.module.create(
                     if (canvas === null) {
                         canvas = document.createElement('canvas');
                         canvas.id = canvasId;
+                        // temp
+                        canvas.width = 640;
+                        canvas.height = 480;
+                        canvas.style.border = '1px solid #000';
                         document.body.appendChild(canvas);
                     }
 
@@ -139,6 +143,18 @@ glue.module.create(
                 },
                 remove: function (component) {
                     removedComponents.push(component);
+                },
+                get: function (componentName) {
+                    var i,
+                        l,
+                        component;
+
+                    for (i = 0, l = components.length; i < l; ++i) {
+                        component = components[i];
+                        if (component.name === componentName) {
+                            return component;
+                        }
+                    }
                 }
             }
         }

@@ -18776,17 +18776,16 @@ adapters.glue = (function (win) {
                create: function (mixins, callback) {
                     var i,
                         l,
-                        mixin,
+                        mixinModules,
                         mixed = {};
-
-                    for (i = 0, l = mixins.length; i < l; ++i) {
-                        mixin = mixins[i];
-                        self.module.get([mixin], function (MixinModule) {
-                            MixinModule(mixed);
-                        });
-                    }
-                    // TODO: has to be timed when fetching new modules
-                    callback.call(self, mixed);
+                    
+                    self.module.get(mixins, function () {
+                        mixinModules = Array.prototype.slice.call(arguments);
+                        for (i = 0, l = mixinModules.length; i < l; ++i) {
+                            mixinModules[i](mixed)
+                        }
+                        callback.call(self, mixed);
+                    });
                 }
             };
         }
@@ -20072,9 +20071,6 @@ glue.module.create(
         return function (obj) {
             obj = obj || {};
             obj.visible = {
-                getName: function () {
-                    return name;
-                },
                 update: function (deltaT) {
 
                 },
@@ -20111,6 +20107,10 @@ glue.module.create(
                     if (canvas === null) {
                         canvas = document.createElement('canvas');
                         canvas.id = canvasId;
+                        // temp
+                        canvas.width = 640;
+                        canvas.height = 480;
+                        canvas.style.border = '1px solid #000';
                         document.body.appendChild(canvas);
                     }
 
@@ -20228,6 +20228,18 @@ glue.module.create(
                 },
                 remove: function (component) {
                     removedComponents.push(component);
+                },
+                get: function (componentName) {
+                    var i,
+                        l,
+                        component;
+
+                    for (i = 0, l = components.length; i < l; ++i) {
+                        component = components[i];
+                        if (component.name === componentName) {
+                            return component;
+                        }
+                    }
                 }
             }
         }
