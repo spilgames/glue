@@ -45,7 +45,7 @@ glue.module.create(
     ) {
     describe('game.clickthrough', function () {
         'use strict';
-        var manualTest = true,
+        var manualTest = false,
             testTimeout = 3000,
             cameraManager,
             setUpGame = function () {

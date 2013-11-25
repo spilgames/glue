@@ -8,7 +8,6 @@ var adapters = adapters || {};
 adapters.melonjs = (function (MelonJS) {
     'use strict';
     return {
-        name: 'melonJS-adapter',
         audio: {
             init: function (formats) {
                 return MelonJS.audio.init(formats);

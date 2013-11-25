@@ -11,22 +11,26 @@
             // glue
             '../build/glue.js',
             // specs for wrapped functionality (glue internals)
-            'spec/adapters/melonjs.js',
-            'spec/adapters/spilgames.js',
-            'spec/modules/spilgames/sugar.js'
+            //'spec/adapters/melonjs.js',
+            //'spec/adapters/spilgames.js',
+            //'spec/modules/spilgames/sugar.js'
         ],
         // glue specs
         specs = [
-            'spec/api',
-            'spec/modules/spilgames/entity/behaviour/mixin',
-            'spec/modules/spilgames/entity/behaviour/clickable',
-            'spec/modules/spilgames/entity/behaviour/draggable',
-            'spec/modules/spilgames/entity/behaviour/droptarget',
-            'spec/modules/spilgames/entity/behaviour/hoverable'
+            //'spec/api',
+            //'spec/modules/spilgames/entity/behaviour/mixin',
+            //'spec/modules/spilgames/entity/behaviour/clickable',
+            //'spec/modules/spilgames/entity/behaviour/draggable',
+            //'spec/modules/spilgames/entity/behaviour/droptarget',
+            //'spec/modules/spilgames/entity/behaviour/hoverable',
+            //'spec/modules/glue/component/base',
+            //'spec/modules/glue/component/visible',
+            'spec/modules/glue/component/mix'
             //'spec/game/clickthrough'
         ],
         // enable game canvas below for debugging
         showCanvas = false,
+        useGlueEngine = true,
         loadCount = 0,
         game = {},
 
@@ -100,11 +104,20 @@
                             spec: '../test/spec'
                         }
                     });
+                    // load non spec module dependencies
                     specs.unshift('glue');
+                    specs.unshift('glue/game');
                     // load spec modules
                     glue.module.get(
                         specs,
-                        function (Glue) {
+                        function (GlueGame, Glue) {
+                            // init Glue Game (temp)
+                            if (useGlueEngine) {
+                                window['gg'] = GlueGame(window, 'canvas');
+                                // load jasmine
+                                loadJasmine();
+                                return;
+                            }
                             // init used engines
                             initMelon(function () {
                                 // initialize glue input system

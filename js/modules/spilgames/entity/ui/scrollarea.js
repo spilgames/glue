@@ -1,9 +1,9 @@
 glue.module.create(
-    'glue/modules/spilgames/entity/ui/scrollarea',
+    'glue/entity/ui/scrollarea',
     [
         'glue',
-        'glue/modules/spilgames/entity/base',
-        'glue/modules/spilgames/entity/behaviour/hoverable'
+        'glue/entity/base',
+        'glue/entity/behaviour/hoverable'
     ],
     function (Glue, Base, Hoverable) {
         /**

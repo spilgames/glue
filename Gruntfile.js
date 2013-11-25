@@ -23,7 +23,8 @@ module.exports = function (grunt) {
                         'js/glue.js'
                     ],
                     'build/src/gluemodules.js': [
-                        'js/modules/spilgames/entity/**/*.js'
+                        'js/modules/spilgames/entity/**/*.js',
+                        'js/modules/glue/**/**/*.js'
                     ],
                     'build/glue.js': [
                         'build/src/libraries.js',

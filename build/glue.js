@@ -18756,6 +18756,44 @@ modules.spilgames.sugar = (function (win, doc) {
 }(window, window.document));
 
 /**
+ *  @module Glue
+ *  @namespace adapters
+ *  @desc Provides adapters to interface with native Glue functionality
+ *  @copyright © 2013 - SpilGames
+ */
+var adapters = adapters || {};
+adapters.glue = (function (win) {
+    'use strict';
+    return {
+        module: {
+            create: win.define,
+            get: win.require,
+            config: win.requirejs.config
+        },
+        component: function () {
+            var self = this;
+            return {
+               create: function (mixins, callback) {
+                    var i,
+                        l,
+                        mixin,
+                        mixed = {};
+
+                    for (i = 0, l = mixins.length; i < l; ++i) {
+                        mixin = mixins[i];
+                        self.module.get([mixin], function (MixinModule) {
+                            MixinModule(mixed);
+                        });
+                    }
+                    // TODO: has to be timed when fetching new modules
+                    callback.call(self, mixed);
+                }
+            };
+        }
+    };
+}(window));
+
+/**
  *  @module MelonJS
  *  @namespace adapters
  *  @desc Provides adapters to interface with MelonJS
@@ -18765,7 +18803,6 @@ var adapters = adapters || {};
 adapters.melonjs = (function (MelonJS) {
     'use strict';
     return {
-        name: 'melonJS-adapter',
         audio: {
             init: function (formats) {
                 return MelonJS.audio.init(formats);
@@ -18949,31 +18986,40 @@ adapters.spilgames = (function (win, Spilgames) {
         }
     };
 }(window, modules.spilgames));
-
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
  *  @copyright © 2013 - SpilGames
  */
 (function () {
-    var glue = (function (adapters) {
-        'use strict';
-        return {
-            audio: adapters.melonjs.audio,
-            entity: adapters.melonjs.entity,
-            event: adapters.melonjs.event,
-            game: adapters.melonjs.game,
-            input: adapters.melonjs.input,
-            levelManager: adapters.melonjs.levelManager,
-            loader: adapters.melonjs.loader,
-            math: adapters.melonjs.math,
-            module: adapters.spilgames.module,
-            plugin: adapters.melonjs.plugin,
-            state: adapters.melonjs.state,
-            sugar: adapters.spilgames.sugar,
-            video: adapters.melonjs.video
-        };
-    }(adapters));
+    var profile1 = (function (adapters) {
+            'use strict';
+            return {
+                audio: adapters.melonjs.audio,
+                entity: adapters.melonjs.entity,
+                event: adapters.melonjs.event,
+                game: adapters.melonjs.game,
+                input: adapters.melonjs.input,
+                levelManager: adapters.melonjs.levelManager,
+                loader: adapters.melonjs.loader,
+                math: adapters.melonjs.math,
+                module: adapters.spilgames.module,
+                plugin: adapters.melonjs.plugin,
+                state: adapters.melonjs.state,
+                sugar: adapters.spilgames.sugar,
+                video: adapters.melonjs.video
+            };
+        }(adapters)),
+        profile2 = (function (adapters) {
+            'use strict';
+            return {
+                module: adapters.spilgames.module,
+                sugar: adapters.spilgames.sugar,
+                component: adapters.glue.component
+            };
+        }(adapters)),
+        glue = profile2;
+
     window.glue = {
         module: glue.module
     };
@@ -19652,10 +19698,10 @@ glue.module.create(
 );
 
 glue.module.create(
-    'glue/modules/spilgames/entity/managers/camera',
+    'glue/modules/entity/managers/camera',
     [
         'glue',
-        'glue/modules/spilgames/entity/base',
+        'glue/modules/entity/base',
     ],
     function (Glue, Base) {
         /**
@@ -19777,11 +19823,11 @@ glue.module.create(
 );
 
 glue.module.create(
-    'glue/modules/spilgames/entity/ui/scrollarea',
+    'glue/entity/ui/scrollarea',
     [
         'glue',
-        'glue/modules/spilgames/entity/base',
-        'glue/modules/spilgames/entity/behaviour/hoverable'
+        'glue/entity/base',
+        'glue/entity/behaviour/hoverable'
     ],
     function (Glue, Base, Hoverable) {
         /**
@@ -19996,5 +20042,194 @@ glue.module.create(
             // returns the entity with its behaviours
             return obj;
         };
+    }
+);
+
+glue.module.create(
+    'glue/component/base',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        return function (obj) {
+            obj = obj || {};
+            obj.base = {
+                update: function (deltaT) {
+                    //console.log('update', deltaT);
+                }
+            };
+            return obj;
+        };
+    }
+);
+
+glue.module.create(
+    'glue/component/visible',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        return function (obj) {
+            obj = obj || {};
+            obj.visible = {
+                getName: function () {
+                    return name;
+                },
+                update: function (deltaT) {
+
+                },
+                draw: function (deltaT, context) {
+
+                }
+            };
+            return obj;
+        };
+    }
+);
+
+glue.module.create(
+    'glue/game',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        return function (window, canvasId) {
+            var fps = 60,
+                components = [],
+                addedComponents = [],
+                removedComponents = [],
+                lastFrame = new Date().getTime(),
+                canvas,
+                context2D,
+                backBuffer,
+                backBufferContext2D,
+                canvasSupported,
+                doc = window.document,
+                initCanvas = function () {
+                    canvas = document.querySelector('#' + canvasId);
+                    // creat canvas if it doesn't exist
+                    if (canvas === null) {
+                        canvas = document.createElement('canvas');
+                        canvas.id = canvasId;
+                        document.body.appendChild(canvas);
+                    }
+
+                    if (canvas.getContext) {
+                        canvasSupported = true;
+                        context2D = canvas.getContext('2d');
+                        backBuffer = document.createElement('canvas');
+                        backBuffer.width = canvas.width;
+                        backBuffer.height = canvas.height;
+                        backBufferContext2D = backBuffer.getContext('2d');
+                    }
+                },
+                setEvents = function () {
+                    doc.addEventListener('keydown', function (e) {
+                        GameLoop.keyDown(e);
+                    });
+                    doc.addEventListener('keyup', function (e) {
+                        GameLoop.keyUp(e);
+                    });
+                    canvas.addEventListener('click', function (e) {
+                        GameLoop.mouseClick(e);
+                    });
+                },
+                sort = function() {
+                    components.sort(function(a, b) {
+                        return a.z - b.z;
+                    });
+                },
+                addComponents = function () {
+                    if (addedComponents.length) {
+                        for (var i = 0; i < addedComponents.length; ++i) {
+                            components.push(addedComponents[i]);
+                        };
+                        addedComponents = [];
+                        sort();
+                    }
+                },
+                removeComponents = function () {
+                    if (removedComponents.length) {
+                        for (var i = 0; i < removedComponents.length; ++i) {
+                            components.removeObject(removedComponents[i]);
+                        };
+                        removedComponents = [];
+                    }
+                },
+                redraw = function() {
+                    backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
+                    context2D.clearRect(0, 0, canvas.width, canvas.height);
+                }
+                cycle = function () {
+                    var currentFrame = new Date().getTime(),
+                        deltaT = (currentFrame - lastFrame),
+                        component;
+
+                    lastFrame = currentFrame;
+
+                    sort();
+
+                    if (canvasSupported) {
+                        redraw();
+                        removeComponents();
+                        addComponents();
+
+                        for (var i = 0; i < components.length; ++i) {
+                            component = components[i];
+                            if (component.update) {
+                                component.update(deltaT);
+                            }
+                            if (component.draw) {
+                                component.draw(deltaT, backBufferContext2D);
+                            }
+                        };
+                        context2D.drawImage(backBuffer, 0, 0);
+                    }
+                },
+                startup = function () {
+                    setInterval(function () {
+                        cycle();
+                    }, fps);
+                };
+
+            initCanvas();
+            setEvents();
+            startup();
+
+            var GameLoop = {};
+            GameLoop.keyDown = function (e) {
+                //log('Key down: ' + e);
+                for (var i = 0; i < components.length; ++i) {
+                    if (components[i].keyDown) {
+                        components[i].keyDown(e);
+                    }
+                }
+            }
+            GameLoop.keyUp = function (e) {
+                //log('Key up: ' + e);
+                for (var i = 0; i < components.length; ++i) {
+                    if (components[i].keyUp) {
+                        components[i].keyUp(e);
+                    }
+                }
+            }
+            GameLoop.mouseClick = function (e) {
+                //log('Mouse click: ' + e);
+                for (var i = 0; i < components.length; ++i) {
+                    if (components[i].mouseClick) {
+                        components[i].mouseClick(getMousePosition(e));
+                    }
+                }
+            }
+
+            return {
+                add: function (component) {
+                    addedComponents.push(component);
+                },
+                remove: function (component) {
+                    removedComponents.push(component);
+                }
+            }
+        }
     }
 );
