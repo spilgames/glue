@@ -13,26 +13,25 @@ module.exports = function (grunt) {
                     'build/src/engines.js': [
                         'bower_components/melonjs/build/melonJS-0.9.10.js'
                     ],
-                    'build/src/modules.js': [
-                        'js/modules/spilgames/*.js'
-                    ],
                     'build/src/adapters.js': [
                         'js/adapters/**/*'
                     ],
                     'build/src/base.js': [
                         'js/glue.js'
                     ],
-                    'build/src/gluemodules.js': [
-                        'js/modules/spilgames/entity/**/*.js',
+                    'build/src/sugar.js': [
+                        'js/modules/glue/sugar.js'
+                    ],
+                    'build/src/modules.js': [
                         'js/modules/glue/**/**/*.js'
                     ],
                     'build/glue.js': [
                         'build/src/libraries.js',
                         'build/src/engines.js',
-                        'build/src/modules.js',
+                        'build/src/sugar.js',
                         'build/src/adapters.js',
                         'build/src/base.js',
-                        'build/src/gluemodules.js'
+                        'build/src/modules.js'
                     ]
                 }
             },

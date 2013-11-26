@@ -17,10 +17,10 @@ glue.module.create(['glue'], function (Glue) {
                     'scrollbutton',
                     [
                         'glue',
-                        'glue/modules/spilgames/entity/base',
-                        'glue/modules/spilgames/entity/behaviour/hoverable',
-                        'glue/modules/spilgames/entity/behaviour/clickable',
-                        'glue/modules/spilgames/entity/behaviour/draggable'
+                        'glue/component/base',
+                        'glue/component/hoverable',
+                        'glue/component/clickable',
+                        'glue/component/draggable'
                     ],
                     function (Glue, Base, Hoverable, Clickable, Draggable) {
                         return function (x, y, settings) {

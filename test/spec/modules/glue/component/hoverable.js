@@ -5,8 +5,8 @@
 glue.module.create(
     [
         'glue',
-        'glue/modules/spilgames/entity/base',
-        'glue/modules/spilgames/entity/behaviour/hoverable'
+        'glue/component/base',
+        'glue/component/hoverable'
     ],
     function (Glue, Base, Hoverable) {
         describe('spilgames.entity.behaviour.hoverable', function () {

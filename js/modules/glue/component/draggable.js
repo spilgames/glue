@@ -6,7 +6,7 @@
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
-    'glue/entity/behaviour/draggable',
+    'glue/component/draggable',
     [
         'glue'
     ],

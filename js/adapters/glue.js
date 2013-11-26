@@ -5,7 +5,7 @@
  *  @copyright © 2013 - SpilGames
  */
 var adapters = adapters || {};
-adapters.glue = (function (win) {
+adapters.glue = (function (win, Glue) {
     'use strict';
     return {
         module: {
@@ -13,6 +13,7 @@ adapters.glue = (function (win) {
             get: win.require,
             config: win.requirejs.config
         },
+        sugar: Glue.sugar,
         component: function () {
             var self = this;
             return {
@@ -33,4 +34,4 @@ adapters.glue = (function (win) {
             };
         }
     };
-}(window));
+}(window, modules.glue));

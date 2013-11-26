@@ -7,13 +7,6 @@
 (function (MelonJSAdapter, MelonJS) {
     describe('base.glue.adapters.melonJS', function () {
         'use strict';
-        describe('Creation', function () {
-            describe('.name', function () {
-                it('Shoud be able to load the melonJS adapter', function () {
-                    expect(MelonJSAdapter.name).toBe('melonJS-adapter');
-                });
-            });
-        });
 
         describe('Audio', function () {
             describe('.audio.init', function () {

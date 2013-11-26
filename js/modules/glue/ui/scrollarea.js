@@ -2,8 +2,8 @@ glue.module.create(
     'glue/entity/ui/scrollarea',
     [
         'glue',
-        'glue/entity/base',
-        'glue/entity/behaviour/hoverable'
+        'glue/component/base',
+        'glue/component/hoverable'
     ],
     function (Glue, Base, Hoverable) {
         /**

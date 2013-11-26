@@ -6,7 +6,7 @@
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
-    'glue/entity/behaviour/hoverable',
+    'glue/component/hoverable',
     [
         'glue'
     ],

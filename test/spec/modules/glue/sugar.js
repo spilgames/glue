@@ -377,4 +377,4 @@
             });
         });
     });
-}(adapters.spilgames.sugar, window, window.document));
+}(adapters.glue.sugar, window, window.document));
