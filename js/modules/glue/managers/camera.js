@@ -1,5 +1,5 @@
 glue.module.create(
-    'glue/modules/entity/managers/camera',
+    'glue/entity/managers/camera',
     [
         'glue',
         'glue/modules/entity/base',

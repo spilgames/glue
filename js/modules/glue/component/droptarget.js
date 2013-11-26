@@ -6,7 +6,7 @@
  *  @copyright © 2013 - SpilGames
  */
 glue.module.create(
-    'glue/modules/spilgames/entity/behaviour/droptarget',
+    'glue/entity/behaviour/droptarget',
     [
         'glue'
     ],
