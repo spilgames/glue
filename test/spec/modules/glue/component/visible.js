@@ -24,32 +24,52 @@ glue.module.create(
                     ],
                     function (obj) {
                         glue.module.create('game.player', function () {
-                            var color = 'blue',
-                                position = {
-                                    x: 100,
-                                    y: 100
-                                },
-                                dimension = {
-                                    width: 100,
-                                    height: 100
-                                };
+                            var speed = 1,
+                                direction = 'right';
 
                             return function (config) {
                                 return obj.mix({
                                     update: function (deltaT) {
+                                        var canvasDimension = gg.canvas.getDimensions(),
+                                            playerDimension = this.visible.getDimension();
+
                                         this.base.update(deltaT);
+                                        //console.log(this.visible.position.x,
+                                        //    canvasDimension.width, playerDimension.width);
+                                        if (this.visible.position.x > canvasDimension.width -
+                                                playerDimension.width) {
+                                            direction = 'down';
+                                        }
+                                        if (this.visible.position.y > canvasDimension.height -
+                                                playerDimension.height) {
+                                            direction = 'left';
+                                        }
+                                        if (this.visible.position.x < 0) {
+                                            direction = 'up';
+                                        }
+                                        if (this.visible.position.y < 0) {
+                                            this.visible.position.y = 0;
+                                            direction = 'right';
+                                        }
+                                        switch (direction) {
+                                            case 'right':
+                                                this.visible.position.x += speed;
+                                            break;
+                                            case 'down':
+                                                this.visible.position.y += speed;
+                                            break;
+                                            case 'left':
+                                                this.visible.position.x -= speed;
+                                            break;
+                                            case 'up':
+                                                this.visible.position.y -= speed;
+                                            break;
+                                        }
                                         updateSpy(deltaT);
                                     },
                                     draw: function (deltaT, context) {
                                         this.visible.draw(deltaT, context);
                                         drawSpy(deltaT, context);
-                                        context.fillStyle = color;
-                                        context.fillRect(
-                                            position.x,
-                                            position.y,
-                                            dimension.width,
-                                            dimension.height
-                                        );
                                     }
                                 });
                             };
@@ -57,6 +77,18 @@ glue.module.create(
                         glue.module.get(['game.player'], function (Player) {
                             var player = Player();
                             player.name = 'testVisible';
+                            player.visible.setup({
+                                dimension: {
+                                    width: 125,
+                                    height: 92
+                                },
+                                image: {
+                                    src: 'http://www.spilgames.com/wp-content/themes/spilgames2/images/logo.png',
+                                    width: 200,
+                                    height: 100,
+                                    frameWidth: 100
+                                }
+                            });
                             gg.add(Player({}));
                             setTimeout(function () {
                                 var test = gg.get('testVisible');

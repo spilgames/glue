@@ -20069,13 +20069,51 @@ glue.module.create(
     ],
     function (Glue) {
         return function (obj) {
+            var position = {
+                    x: 0,
+                    y: 0
+                },
+                dimension = {
+                    width: 0,
+                    height: 0
+                },
+                image = {},
+                frameCount,
+                frame = 1;
+
             obj = obj || {};
             obj.visible = {
+                setup: function (settings) {
+                    settings = settings || {};
+                    if (settings.dimension) {
+                        dimension = settings.dimension;
+                    }
+                    if (settings.position) {
+                        position = settings.position;
+                    }
+                    if (settings.image) {
+                        image = settings.image;
+                    }
+                    image.obj = new Image(),
+                    image.loaded = false;
+                    image.obj.src = image.src;
+                    image.obj.addEventListener('load', function () {
+                        image.loaded = true;
+                    }, false);
+                    // This should also work for multi line animation sheets
+                    frameCount = dimension.width / image.frameWidth;
+                },
                 update: function (deltaT) {
-
+                    //console.log('update', deltaT)
                 },
                 draw: function (deltaT, context) {
-
+                    if (image.loaded) {
+                        context.drawImage(image.obj, position.x, position.y)
+                    }
+                },
+                position: position,
+                getDimension: function () {
+                    return dimension;
                 }
             };
             return obj;
@@ -20100,6 +20138,10 @@ glue.module.create(
                 backBuffer,
                 backBufferContext2D,
                 canvasSupported,
+                canvasDimensions = {
+                    width: 640,
+                    height: 480
+                },
                 doc = window.document,
                 initCanvas = function () {
                     canvas = document.querySelector('#' + canvasId);
@@ -20108,8 +20150,8 @@ glue.module.create(
                         canvas = document.createElement('canvas');
                         canvas.id = canvasId;
                         // temp
-                        canvas.width = 640;
-                        canvas.height = 480;
+                        canvas.width = canvasDimensions.width;
+                        canvas.height = canvasDimensions.height;
                         canvas.style.border = '1px solid #000';
                         document.body.appendChild(canvas);
                     }
@@ -20165,6 +20207,7 @@ glue.module.create(
                         deltaT = (currentFrame - lastFrame),
                         component;
 
+                    requestAnimationFrame(cycle);
                     lastFrame = currentFrame;
 
                     sort();
@@ -20187,9 +20230,7 @@ glue.module.create(
                     }
                 },
                 startup = function () {
-                    setInterval(function () {
-                        cycle();
-                    }, fps);
+                    cycle();
                 };
 
             initCanvas();
@@ -20239,6 +20280,11 @@ glue.module.create(
                         if (component.name === componentName) {
                             return component;
                         }
+                    }
+                },
+                canvas: {
+                    getDimensions: function () {
+                        return canvasDimensions;
                     }
                 }
             }

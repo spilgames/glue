@@ -15,6 +15,10 @@ glue.module.create(
                 backBuffer,
                 backBufferContext2D,
                 canvasSupported,
+                canvasDimensions = {
+                    width: 640,
+                    height: 480
+                },
                 doc = window.document,
                 initCanvas = function () {
                     canvas = document.querySelector('#' + canvasId);
@@ -23,8 +27,8 @@ glue.module.create(
                         canvas = document.createElement('canvas');
                         canvas.id = canvasId;
                         // temp
-                        canvas.width = 640;
-                        canvas.height = 480;
+                        canvas.width = canvasDimensions.width;
+                        canvas.height = canvasDimensions.height;
                         canvas.style.border = '1px solid #000';
                         document.body.appendChild(canvas);
                     }
@@ -80,6 +84,7 @@ glue.module.create(
                         deltaT = (currentFrame - lastFrame),
                         component;
 
+                    requestAnimationFrame(cycle);
                     lastFrame = currentFrame;
 
                     sort();
@@ -102,9 +107,7 @@ glue.module.create(
                     }
                 },
                 startup = function () {
-                    setInterval(function () {
-                        cycle();
-                    }, fps);
+                    cycle();
                 };
 
             initCanvas();
@@ -154,6 +157,11 @@ glue.module.create(
                         if (component.name === componentName) {
                             return component;
                         }
+                    }
+                },
+                canvas: {
+                    getDimensions: function () {
+                        return canvasDimensions;
                     }
                 }
             }
