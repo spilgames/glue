@@ -17893,6 +17893,20 @@ modules.glue.sugar = (function (win, doc) {
             return Object.prototype.toString.call(value) === '[object Function]';
         },
         /**
+         * Are the two given arrays identical (even when they have a different reference)
+         * @param {Array} first array to check
+         * @param {Array} second array to check
+         * @return {Boolean} true if they are identical, false if they are not
+         */
+        arrayMatch = function (a, b) {
+            var i = a.length;
+            if (i != b.length) return false;
+            while (i--) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
+        },
+        /**
          * Extends two objects by copying the properties
          * If a property is an object, it will be cloned
          * @param {Object} The first object
@@ -18751,7 +18765,8 @@ modules.glue.sugar = (function (win, doc) {
         $: $,
         setAnimationFrameTimeout: setAnimationFrameTimeout,
         animationEvent: animationEvent,
-        domReady: domReady
+        domReady: domReady,
+        arrayMatch: arrayMatch
     };
 }(window, window.document));
 
@@ -19000,7 +19015,7 @@ adapters.melonjs = (function (MelonJS) {
                 audio: adapters.melonjs.audio,
                 entity: adapters.melonjs.entity,
                 event: adapters.melonjs.event,
-                game: adapters.melonjs.game,
+                game: adapters.glue.game,
                 input: adapters.melonjs.input,
                 levelManager: adapters.melonjs.levelManager,
                 loader: adapters.melonjs.loader,
@@ -20940,29 +20955,10 @@ modules.spilgames.sugar = (function (win, doc) {
         domReady: domReady
     };
 }(window, window.document));
-glue.module.create(
-    'glue/component/base',
-    [
-        'glue'
-    ],
-    function (Glue) {
-        return function (obj) {
-            obj = obj || {};
-            obj.base = {
-                update: function (deltaT) {
-                    //console.log('update', deltaT);
-                }
-            };
-            return obj;
-        };
-    }
-);
-
 /*
  *  @module Clickable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity clickable
- *  @author Jeroen Reurings
  *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
@@ -21065,7 +21061,6 @@ glue.module.create(
  *  @module Draggable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity draggable
- *  @author Jeroen Reurings
  *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
@@ -21369,7 +21364,6 @@ glue.module.create(
  *  @module Droptarget
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity act as a droptarget
- *  @author Jeroen Reurings
  *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
@@ -21493,7 +21487,6 @@ glue.module.create(
  *  @module Hoverable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity hoverable
- *  @author Jeroen Reurings
  *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
@@ -21605,6 +21598,12 @@ glue.module.create(
     }
 );
 
+/*
+ *  @module Visible
+ *  @namespace component.visible
+ *  @desc Represents a visible component
+ *  @copyright © 2013 - The SpilGames Authors
+ */
 glue.module.create(
     'glue/component/visible',
     [
@@ -21612,47 +21611,61 @@ glue.module.create(
     ],
     function (Glue) {
         return function (obj) {
-            var position = {
-                    x: 0,
-                    y: 0
-                },
-                dimension = {
-                    width: 0,
-                    height: 0
-                },
-                image = {},
-                frameCount,
+            var position = null,
+                dimension = null,
+                image = null,
+                frameCount = 0,
                 frame = 1;
 
             obj = obj || {};
             obj.visible = {
+                ready: false,
                 setup: function (settings) {
-                    settings = settings || {};
-                    if (settings.dimension) {
-                        dimension = settings.dimension;
+                    var readyNeeded = [],
+                        readyList = [],
+                        successCallback,
+                        errorCallback,
+                        readyCheck = function () {
+                            if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
+                                successCallback();
+                            }
+                        },
+                        imageLoadHandler = function () {
+                            readyList.push('image');
+                            readyCheck();
+                        };
+
+                    if (settings) {
+                        if (settings.position) {
+                            position = settings.position;
+                        }
+                        if (settings.dimension) {
+                            dimension = settings.dimension;
+                        }
+                        if (settings.image) {
+                            readyNeeded.push('image');
+                            image = new Image();
+                            image.addEventListener('load', function () {
+                                imageLoadHandler();
+                            }, false);
+                            image.src = settings.image.src;
+                            if (image.frameWidth) {
+                                frameCount = dimension.width / image.frameWidth;
+                            }
+                        }
                     }
-                    if (settings.position) {
-                        position = settings.position;
-                    }
-                    if (settings.image) {
-                        image = settings.image;
-                    }
-                    image.obj = new Image(),
-                    image.loaded = false;
-                    image.obj.src = image.src;
-                    image.obj.addEventListener('load', function () {
-                        image.loaded = true;
-                    }, false);
-                    // This should also work for multi line animation sheets
-                    frameCount = dimension.width / image.frameWidth;
+                    return {
+                        then: function (onSuccess, onError) {
+                            successCallback = onSuccess;
+                            errorCallback = onError;
+                        }
+                    };
                 },
                 update: function (deltaT) {
-                    //console.log('update', deltaT)
+
                 },
                 draw: function (deltaT, context) {
-                    if (image.loaded) {
-                        context.drawImage(image.obj, position.x, position.y)
-                    }
+                    context.drawImage(image, position.x, position.y)
                 },
                 position: position,
                 getDimension: function () {
@@ -21670,168 +21683,176 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        return function (window, canvasId) {
-            var fps = 60,
-                components = [],
-                addedComponents = [],
-                removedComponents = [],
-                lastFrame = new Date().getTime(),
-                canvas,
-                context2D,
-                backBuffer,
-                backBufferContext2D,
-                canvasSupported,
-                canvasDimensions = {
-                    width: 640,
-                    height: 480
-                },
-                doc = window.document,
-                initCanvas = function () {
-                    canvas = document.querySelector('#' + canvasId);
-                    // creat canvas if it doesn't exist
-                    if (canvas === null) {
-                        canvas = document.createElement('canvas');
-                        canvas.id = canvasId;
-                        // temp
-                        canvas.width = canvasDimensions.width;
-                        canvas.height = canvasDimensions.height;
-                        canvas.style.border = '1px solid #000';
-                        document.body.appendChild(canvas);
-                    }
-
-                    if (canvas.getContext) {
-                        canvasSupported = true;
-                        context2D = canvas.getContext('2d');
-                        backBuffer = document.createElement('canvas');
-                        backBuffer.width = canvas.width;
-                        backBuffer.height = canvas.height;
-                        backBufferContext2D = backBuffer.getContext('2d');
-                    }
-                },
-                setEvents = function () {
-                    doc.addEventListener('keydown', function (e) {
-                        GameLoop.keyDown(e);
-                    });
-                    doc.addEventListener('keyup', function (e) {
-                        GameLoop.keyUp(e);
-                    });
-                    canvas.addEventListener('click', function (e) {
-                        GameLoop.mouseClick(e);
-                    });
-                },
-                sort = function() {
-                    components.sort(function(a, b) {
-                        return a.z - b.z;
-                    });
-                },
-                addComponents = function () {
-                    if (addedComponents.length) {
-                        for (var i = 0; i < addedComponents.length; ++i) {
-                            components.push(addedComponents[i]);
-                        };
-                        addedComponents = [];
-                        sort();
-                    }
-                },
-                removeComponents = function () {
-                    if (removedComponents.length) {
-                        for (var i = 0; i < removedComponents.length; ++i) {
-                            components.removeObject(removedComponents[i]);
-                        };
-                        removedComponents = [];
-                    }
-                },
-                redraw = function() {
-                    backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
-                    context2D.clearRect(0, 0, canvas.width, canvas.height);
+        var fps = 60,
+            components = [],
+            addedComponents = [],
+            removedComponents = [],
+            lastFrame = new Date().getTime(),
+            canvas,
+            context2D,
+            backBuffer,
+            backBufferContext2D,
+            canvasSupported,
+            canvasDimensions = {
+                width: 640,
+                height: 480
+            },
+            win,
+            canvasId,
+            doc,
+            setup = false,
+            initCanvas = function () {
+                canvas = document.querySelector('#' + canvasId);
+                // create canvas if it doesn't exist
+                if (canvas === null) {
+                    canvas = document.createElement('canvas');
+                    canvas.id = canvasId;
+                    canvas.width = canvasDimensions.width;
+                    canvas.height = canvasDimensions.height;
+                    // temporary canvas styling while still developing
+                    canvas.style.border = '1px solid #000';
+                    document.body.appendChild(canvas);
                 }
-                cycle = function () {
-                    var currentFrame = new Date().getTime(),
-                        deltaT = (currentFrame - lastFrame),
-                        component;
-
-                    requestAnimationFrame(cycle);
-                    lastFrame = currentFrame;
-
+                if (canvas.getContext) {
+                    canvasSupported = true;
+                    context2D = canvas.getContext('2d');
+                    backBuffer = document.createElement('canvas');
+                    backBuffer.width = canvas.width;
+                    backBuffer.height = canvas.height;
+                    backBufferContext2D = backBuffer.getContext('2d');
+                }
+            },
+            setEvents = function () {
+                doc.addEventListener('keydown', function (e) {
+                    GameLoop.keyDown(e);
+                });
+                doc.addEventListener('keyup', function (e) {
+                    GameLoop.keyUp(e);
+                });
+                canvas.addEventListener('click', function (e) {
+                    GameLoop.mouseClick(e);
+                });
+            },
+            sort = function() {
+                components.sort(function(a, b) {
+                    return a.z - b.z;
+                });
+            },
+            addComponents = function () {
+                if (addedComponents.length) {
+                    for (var i = 0; i < addedComponents.length; ++i) {
+                        components.push(addedComponents[i]);
+                    };
+                    addedComponents = [];
                     sort();
-
-                    if (canvasSupported) {
-                        redraw();
-                        removeComponents();
-                        addComponents();
-
-                        for (var i = 0; i < components.length; ++i) {
-                            component = components[i];
-                            if (component.update) {
-                                component.update(deltaT);
-                            }
-                            if (component.draw) {
-                                component.draw(deltaT, backBufferContext2D);
-                            }
-                        };
-                        context2D.drawImage(backBuffer, 0, 0);
-                    }
-                },
-                startup = function () {
-                    cycle();
-                };
-
-            initCanvas();
-            setEvents();
-            startup();
-
-            var GameLoop = {};
-            GameLoop.keyDown = function (e) {
-                //log('Key down: ' + e);
-                for (var i = 0; i < components.length; ++i) {
-                    if (components[i].keyDown) {
-                        components[i].keyDown(e);
-                    }
                 }
-            }
-            GameLoop.keyUp = function (e) {
-                //log('Key up: ' + e);
-                for (var i = 0; i < components.length; ++i) {
-                    if (components[i].keyUp) {
-                        components[i].keyUp(e);
-                    }
+            },
+            removeComponents = function () {
+                if (removedComponents.length) {
+                    for (var i = 0; i < removedComponents.length; ++i) {
+                        components.removeObject(removedComponents[i]);
+                    };
+                    removedComponents = [];
                 }
+            },
+            redraw = function() {
+                backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
+                context2D.clearRect(0, 0, canvas.width, canvas.height);
             }
-            GameLoop.mouseClick = function (e) {
-                //log('Mouse click: ' + e);
-                for (var i = 0; i < components.length; ++i) {
-                    if (components[i].mouseClick) {
-                        components[i].mouseClick(getMousePosition(e));
-                    }
-                }
-            }
+            cycle = function () {
+                var currentFrame = new Date().getTime(),
+                    deltaT = (currentFrame - lastFrame),
+                    component;
 
-            return {
-                add: function (component) {
-                    addedComponents.push(component);
-                },
-                remove: function (component) {
-                    removedComponents.push(component);
-                },
-                get: function (componentName) {
-                    var i,
-                        l,
-                        component;
+                requestAnimationFrame(cycle);
+                lastFrame = currentFrame;
 
-                    for (i = 0, l = components.length; i < l; ++i) {
+                sort();
+
+                if (canvasSupported) {
+                    redraw();
+                    removeComponents();
+                    addComponents();
+
+                    for (var i = 0; i < components.length; ++i) {
                         component = components[i];
-                        if (component.name === componentName) {
-                            return component;
+                        if (component.update) {
+                            component.update(deltaT);
+                        }
+                        if (component.draw) {
+                            component.draw(deltaT, backBufferContext2D);
+                        }
+                    };
+                    context2D.drawImage(backBuffer, 0, 0);
+                }
+            },
+            startup = function () {
+                cycle();
+            };
+
+        return {
+            setup: function (mainWindow, id) {
+                if (setup) {
+                    throw('Glue: The main game is already setup');
+                }
+                setup = true;
+                win = mainWindow;
+                doc = win.document;
+                canvasId = id;
+                initCanvas();
+                setEvents();
+                startup();
+
+                var GameLoop = {};
+                GameLoop.keyDown = function (e) {
+                    //log('Key down: ' + e);
+                    for (var i = 0; i < components.length; ++i) {
+                        if (components[i].keyDown) {
+                            components[i].keyDown(e);
                         }
                     }
-                },
-                canvas: {
-                    getDimensions: function () {
-                        return canvasDimensions;
+                }
+                GameLoop.keyUp = function (e) {
+                    //log('Key up: ' + e);
+                    for (var i = 0; i < components.length; ++i) {
+                        if (components[i].keyUp) {
+                            components[i].keyUp(e);
+                        }
                     }
                 }
+                GameLoop.mouseClick = function (e) {
+                    //log('Mouse click: ' + e);
+                    for (var i = 0; i < components.length; ++i) {
+                        if (components[i].mouseClick) {
+                            components[i].mouseClick(getMousePosition(e));
+                        }
+                    }
+                }
+            },
+            add: function (component) {
+                addedComponents.push(component);
+            },
+            remove: function (component) {
+                removedComponents.push(component);
+            },
+            get: function (componentName) {
+                var i,
+                    l,
+                    component;
+
+                for (i = 0, l = components.length; i < l; ++i) {
+                    component = components[i];
+                    if (component.name === componentName) {
+                        return component;
+                    }
+                }
+            },
+            canvas: {
+                getDimensions: function () {
+                    return canvasDimensions;
+                }
             }
-        }
+        };
     }
 );
 
@@ -21880,6 +21901,20 @@ modules.glue.sugar = (function (win, doc) {
          */
         isFunction = function (value) {
             return Object.prototype.toString.call(value) === '[object Function]';
+        },
+        /**
+         * Are the two given arrays identical (even when they have a different reference)
+         * @param {Array} first array to check
+         * @param {Array} second array to check
+         * @return {Boolean} true if they are identical, false if they are not
+         */
+        arrayMatch = function (a, b) {
+            var i = a.length;
+            if (i != b.length) return false;
+            while (i--) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
         },
         /**
          * Extends two objects by copying the properties
@@ -22740,6 +22775,7 @@ modules.glue.sugar = (function (win, doc) {
         $: $,
         setAnimationFrameTimeout: setAnimationFrameTimeout,
         animationEvent: animationEvent,
-        domReady: domReady
+        domReady: domReady,
+        arrayMatch: arrayMatch
     };
 }(window, window.document));

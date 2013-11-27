@@ -32,12 +32,10 @@ glue.module.create(
                 });
                 Glue.component().create(
                     [
-                        'glue/component/base',
                         'glue/component/visible',
                         'test.player'
                     ],
                     function (obj) {
-                        expect(obj.base.update).toBeTruthy();
                         expect(obj.visible.update).toBeTruthy();
                         expect(obj.visible.draw).toBeTruthy();
                         expect(obj.playerMethod()).toEqual('success');
@@ -121,7 +119,6 @@ glue.module.create(
                     'mixed',
                     [
                         'glue',
-                        'glue/component/base',
                         'glue/component/visible'
                     ],
                     function (Glue, BaseComponent, VisibleComponent) {
@@ -129,7 +126,6 @@ glue.module.create(
 
                             var obj = {
                                 update: function (deltaT) {
-                                    this.base.update(deltaT);
                                     this.visible.update(deltaT);
                                 },
                                 draw: function (deltaT, context) {

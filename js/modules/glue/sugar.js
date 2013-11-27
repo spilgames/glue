@@ -45,6 +45,20 @@ modules.glue.sugar = (function (win, doc) {
             return Object.prototype.toString.call(value) === '[object Function]';
         },
         /**
+         * Are the two given arrays identical (even when they have a different reference)
+         * @param {Array} first array to check
+         * @param {Array} second array to check
+         * @return {Boolean} true if they are identical, false if they are not
+         */
+        arrayMatch = function (a, b) {
+            var i = a.length;
+            if (i != b.length) return false;
+            while (i--) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
+        },
+        /**
          * Extends two objects by copying the properties
          * If a property is an object, it will be cloned
          * @param {Object} The first object
@@ -903,6 +917,7 @@ modules.glue.sugar = (function (win, doc) {
         $: $,
         setAnimationFrameTimeout: setAnimationFrameTimeout,
         animationEvent: animationEvent,
-        domReady: domReady
+        domReady: domReady,
+        arrayMatch: arrayMatch
     };
 }(window, window.document));

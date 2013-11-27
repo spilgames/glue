@@ -29,9 +29,8 @@
             //'spec/modules/glue/component/droptarget',
             //'spec/modules/glue/component/hoverable',
             
-            //'spec/modules/glue/component/base',
             'spec/modules/glue/component/visible',
-            'spec/modules/glue/component/mix',
+            //'spec/modules/glue/component/mix',
             //'spec/backend/api.js'
             //'spec/game/clickthrough'
         ],
@@ -117,10 +116,10 @@
                     // load spec modules
                     glue.module.get(
                         specs,
-                        function (GlueGame, Glue) {
+                        function (Game, Glue) {
                             // init Glue Game (temp)
                             if (useGlueEngine) {
-                                window['gg'] = GlueGame(window, 'canvas');
+                                Game.setup(window, 'canvas');
                                 // load jasmine
                                 loadJasmine();
                                 return;

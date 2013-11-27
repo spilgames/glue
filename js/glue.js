@@ -31,7 +31,7 @@
                 audio: adapters.melonjs.audio,
                 entity: adapters.melonjs.entity,
                 event: adapters.melonjs.event,
-                game: adapters.melonjs.game,
+                game: adapters.glue.game,
                 input: adapters.melonjs.input,
                 levelManager: adapters.melonjs.levelManager,
                 loader: adapters.melonjs.loader,
