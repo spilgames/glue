@@ -11,17 +11,17 @@
             // glue
             '../build/glue.js',
             // specs for wrapped functionality (glue internals)
-            'spec/adapters/melonjs.js',
-            'spec/modules/glue/sugar.js'
+            //'spec/adapters/melonjs.js',
+            //'spec/modules/glue/sugar.js'
         ],
         // glue specs
         specs = [
             //'spec/api',
-            'spec/modules/spilgames/entity/behaviour/mixin',
-            'spec/modules/spilgames/entity/behaviour/clickable',
-            'spec/modules/spilgames/entity/behaviour/draggable',
-            'spec/modules/spilgames/entity/behaviour/droptarget',
-            'spec/modules/spilgames/entity/behaviour/hoverable',
+            //'spec/modules/spilgames/entity/behaviour/mixin',
+            //'spec/modules/spilgames/entity/behaviour/clickable',
+            //'spec/modules/spilgames/entity/behaviour/draggable',
+            //'spec/modules/spilgames/entity/behaviour/droptarget',
+            //'spec/modules/spilgames/entity/behaviour/hoverable',
 
             //'spec/modules/glue/component/mixin',
             //'spec/modules/glue/component/clickable',
@@ -30,14 +30,14 @@
             //'spec/modules/glue/component/hoverable',
             
             //'spec/modules/glue/component/base',
-            //'spec/modules/glue/component/visible',
-            //'spec/modules/glue/component/mix',
+            'spec/modules/glue/component/visible',
+            'spec/modules/glue/component/mix',
             //'spec/backend/api.js'
-            'spec/game/clickthrough'
+            //'spec/game/clickthrough'
         ],
         // enable game canvas below for debugging
         showCanvas = false,
-        useGlueEngine = false,
+        useGlueEngine = true,
         loadCount = 0,
         game = {},
 
