@@ -5,14 +5,14 @@
 glue.module.create(
     [
         'glue',
-        'glue/component/base',
-        'glue/managers/camera',
-        'glue/component/ui/scrollbutton',
-        'glue/component/ui/scrollarea',
-        'glue/component/clickable',
-        'glue/component/draggable',
-        'glue/component/droptarget',
-        'glue/component/hoverable'
+        'glue/modules/spilgames/entity/base',
+        'glue/modules/spilgames/entity/managers/camera',
+        'glue/modules/spilgames/entity/ui/scrollbutton',
+        'glue/modules/spilgames/entity/ui/scrollarea',
+        'glue/modules/spilgames/entity/behaviour/clickable',
+        'glue/modules/spilgames/entity/behaviour/draggable',
+        'glue/modules/spilgames/entity/behaviour/droptarget',
+        'glue/modules/spilgames/entity/behaviour/hoverable'
     ], function (
         Glue,
         Base,

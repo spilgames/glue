@@ -19022,6 +19022,1925 @@ adapters.melonjs = (function (MelonJS) {
 }());
 
 glue.module.create(
+    'glue/modules/spilgames/entity/base',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        return function (x, y, settings) {
+            return {
+                inject: function (extention) {
+                    // get the base entity and extend it with a custom extention
+                    var obj = Glue.entity.base().extend(extention);
+                    // construct a new base entity instance
+                    obj = new obj(x, y, settings);
+                    // return the mixed object
+                    return obj;
+                }
+            };
+        };
+    }
+);
+
+/*
+ *  @module Clickable
+ *  @namespace modules.spilgames.entity.behaviour
+ *  @desc Used to make a game entity clickable
+ *  @copyright © 2013 - The SpilGames Authors
+ */
+glue.module.create(
+    'glue/modules/spilgames/entity/behaviour/clickable',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        /**
+         * Constructor
+         * @memberOf clickable
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (obj) {
+            var isPressed = false,
+                /**
+                 * Listens the POINTER_UP event
+                 * @name onPointerUp
+                 * @memberOf clickable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerUp = function (evt) {
+                    isPressed = false;
+                    // call the clicked method if it exists
+                    if (obj.clickUp) {
+                        obj.clickUp(evt);
+                    }
+                },
+                /**
+                 * Listens the POINTER_DOWN event
+                 * @name onPointerDown
+                 * @memberOf clickable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerDown = function (evt) {
+                    var localPosition = me.game.viewport.worldToLocal(
+                        evt.gameX,
+                        evt.gameY
+                    );
+                    if (obj.collisionBox && obj.collisionBox.containsPointV(localPosition)) {
+                        isPressed = true;
+                        // call the clicked method if it exists
+                        if (obj.clickDown) {
+                            obj.clickDown(evt);
+                        }
+                    }
+                },
+                /**
+                 * Sets up all events for this module
+                 * @name setupEvents
+                 * @memberOf clickable
+                 * @function
+                 */
+                setupEvents = function () {
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
+                },
+                /**
+                 * Tears down all events for this module
+                 * @name teardownEvents
+                 * @memberOf clickable
+                 * @function
+                 */
+                tearDownEvents = function () {
+                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.off(Glue.input.POINTER_UP, onPointerUp);
+                };
+
+            // setup the module events
+            setupEvents();
+
+            return obj.mix({
+                /**
+                 * Returns if this entity is pressed
+                 * @name isPressed
+                 * @memberOf clickable
+                 * @function
+                 */
+                isPressed: function () {
+                    return isPressed;
+                },
+                /**
+                 * Can be used to destruct this entity
+                 * @name destructClickable
+                 * @memberOf clickable
+                 * @function
+                 */
+                destructClickable: function () {
+                    tearDownEvents();
+                }
+            });
+        };
+    }
+);
+
+/*
+ *  @module Draggable
+ *  @namespace modules.spilgames.entity.behaviour
+ *  @desc Used to make a game entity draggable
+ *  @copyright © 2013 - The SpilGames Authors
+ */
+glue.module.create(
+    'glue/modules/spilgames/entity/behaviour/draggable',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        // - cross instance private members -
+        var highestEntity = null,
+            maxZ = 2,
+            customResetPosition,
+            resetCallback,
+            resetType;
+
+        /**
+         * Constructor
+         * @name init
+         * @memberOf Draggable
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (obj) {
+            // - per instance private members -
+            var position = {
+                    x: obj.pos.x,
+                    y: obj.pos.y
+                },
+                dropped = false,
+                resetted = false,
+                dragging = false,
+                dragId = null,
+                grabOffset = new Glue.math.vector(0, 0),
+                mouseDown = null,
+                mouseUp = null,
+                pointerId = null,
+                /**
+                 * Is used to reset the draggable to its initial position
+                 * @name reset
+                 * @memberOf Draggable
+                 * @function
+                 */
+                resetMe = function () {
+                    switch (resetType) {
+                        case obj.RESET_TYPE_X:
+                            obj.pos.x = position.x;
+                        break;
+                        case obj.RESET_TYPE_Y:
+                            obj.pos.y = position.y;
+                        break;
+                        case obj.RESET_TYPE_CUSTOM:
+                            obj.pos.x = customResetPosition.x || obj.pos.x;
+                            obj.pos.y = customResetPosition.y || obj.pos.y;
+                        break;
+                        case obj.RESET_TYPE_CALLBACK:
+                            resetCallback.apply(obj);
+                        break;
+                        default:
+                            obj.pos.x = position.x;
+                            obj.pos.y = position.y;
+                        break;
+                    }
+                },
+                /**
+                 * Gets called when the user starts dragging the entity
+                 * @name dragStart
+                 * @memberOf Draggable
+                 * @function
+                 * @param {Object} e: the pointer event
+                 */
+                dragStart = function (e, draggable) {
+                    if (draggable === obj) {
+                        dropped = false;
+                        resetted = false;
+                        // depth sorting
+                        if (highestEntity === null) {
+                            highestEntity = obj;
+                        } else {
+                            if (obj.z > highestEntity.z) {
+                                highestEntity = obj;
+                            }
+                        }
+                        if (dragging === false && obj === highestEntity) {
+                            // clicked entity goes on top
+                            obj.z = maxZ + 1;
+                            // save max z index of all draggables
+                            maxZ = obj.z;
+                            // re-sort all game entities
+                            me.game.world.sort();
+                            dragging = true;
+                            dragId = e.pointerId;
+                            grabOffset.set(e.gameX, e.gameY);
+                            grabOffset.sub(obj.pos);
+                            if (obj.dragStart) {
+                                obj.dragStart(e);
+                            }
+                            return false;
+                        }
+                    }
+                },
+                /**
+                 * Gets called when the user drags this entity around
+                 * @name dragMove
+                 * @memberOf Draggable
+                 * @function
+                 * @param {Object} e: the pointer event
+                 */
+                dragMove = function (e) {
+                    if (dragging === true) {
+                        if (dragId === e.pointerId) {
+                            obj.pos.set(e.gameX, e.gameY);
+                            obj.pos.sub(grabOffset);
+                            if (obj.dragMove) {
+                                obj.dragMove(e);
+                            }
+                        }
+                    }
+                },
+                /**
+                 * Gets called when the user stops dragging the entity
+                 * @name dragEnd
+                 * @memberOf Draggable
+                 * @function
+                 * @param {Object} e: the pointer event
+                 */
+                dragEnd = function (e, draggable) {
+                    if (draggable === obj) {
+                        highestEntity = null;
+                        if (dragging === true) {
+                            pointerId = undefined;
+                            dragging = false;
+                            if (obj.dragEnd) {
+                                obj.dragEnd(e, resetMe);
+                            }
+                            return false;
+                        }
+                    }
+                },
+                /**
+                 * Translates a pointer event to a me.event
+                 * @name init
+                 * @memberOf me.DraggableEntity
+                 * @function
+                 * @param {Object} e: the pointer event you want to translate
+                 * @param {String} translation: the me.event you want to translate
+                 * the event to
+                 */
+                translatePointerEvent = function (e, translation) {
+                    Glue.event.fire(translation, [e, obj, resetMe]);
+                },
+                /**
+                 * Initializes the events the modules needs to listen to
+                 * It translates the pointer events to me.events
+                 * in order to make them pass through the system and to make
+                 * this module testable. Then we subscribe this module to the
+                 * transformed events. This can be inproved by handling it
+                 * by the Glue.input module.
+                 * @name init
+                 * @memberOf me.DraggableEntity
+                 * @function
+                 */
+                 initEvents = function () {
+                    pointerDown = function (e) {
+                        translatePointerEvent(e, Glue.input.DRAG_START);
+                    };
+                    pointerUp = function (e) {
+                        translatePointerEvent(e, Glue.input.DRAG_END);
+                    };
+                    Glue.input.pointer.on(Glue.input.POINTER_DOWN, pointerDown, obj);
+                    Glue.input.pointer.on(Glue.input.POINTER_UP, pointerUp, obj);
+                    Glue.event.on(Glue.input.POINTER_MOVE, dragMove);
+                    Glue.event.on(Glue.input.DRAG_START, dragStart);
+                    Glue.event.on(Glue.input.DRAG_END, dragEnd);
+                };
+
+            // - external interface -
+            obj.mix({
+                /**
+                 * constant for the reset callback type
+                 * @desc Will call a callback function which can control the reset of the draggable
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name RESET_TYPE_CALLBACK
+                 */
+                RESET_TYPE_CALLBACK: 'reset-type-callback',
+                /**
+                 * constant for the reset custom type
+                 * @desc Will reset the position of the draggable to a custom configuarable position
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name RESET_TYPE_X
+                 */
+                RESET_TYPE_CUSTOM: 'reset-type-custom',
+                /**
+                 * constant for the reset x type
+                 * @desc Will only reset the x position of the draggable
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name RESET_TYPE_X
+                 */
+                RESET_TYPE_X: 'reset-type-x',
+                /**
+                 * constant for the reset y type
+                 * @desc Will only reset the y position of the draggable
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name RESET_TYPE_Y
+                 */
+                RESET_TYPE_Y: 'reset-type-y',
+                /**
+                 * Destructor
+                 * @name destructDraggable
+                 * @memberOf Draggable
+                 * @function
+                 */
+                destructDraggable: function () {
+                    // unregister system events
+                    Glue.event.off(Glue.input.DRAG_START, dragStart);
+                    Glue.event.off(Glue.input.POINTER_MOVE, dragMove);
+                    Glue.event.off(Glue.input.DRAG_END, dragEnd);
+                    // unregister pointer events
+                    Glue.input.pointer.off(Glue.input.POINTER_DOWN, obj);
+                    Glue.input.pointer.off(Glue.input.POINTER_UP, obj);
+                    // depth sorting fix will solve the need for this
+                    highestEntity = null;
+                },
+                /**
+                 * Sets the grab offset of this entity
+                 * @name setGrabOffset
+                 * @memberOf Draggable
+                 * @function
+                 * @param {Number} x: the horitontal offset
+                 * @param {Number} y: the vertical offset
+                 */
+                setGrabOffset: function (x, y) {
+                    grabOffset = new Glue.math.vector(x, y);
+                },
+                isResetted: function () {
+                    return resetted;
+                },
+                isDropped: function () {
+                    return dropped;
+                },
+                setDropped: function (value) {
+                    if (Glue.sugar.isBoolean(value)) {
+                        dropped = value;
+                    } else {
+                        throw('Please supply a boolean value');
+                    }
+                },
+                setResetted: function (value) {
+                    if (Glue.sugar.isBoolean(value)) {
+                        resetted = value;
+                    } else {
+                        throw('Please supply a boolean value');
+                    }
+                },
+                resetMe: function () {
+                    return resetMe;
+                },
+                setCustomResetPosition: function (value) {
+                    if (Glue.sugar.isObject(value)) {
+                        customResetPosition = value;
+                    } else {
+                        throw('Please supply an object value');
+                    }
+                },
+                setResetCallback: function (value) {
+                    if (Glue.sugar.isFunction(value)) {
+                        resetCallback = value;
+                    } else {
+                        throw('Please supply a function value');
+                    }
+                },
+                setResetType: function (value) {
+                    // improvement: check if the value is in the allowed constant array
+                    if (Glue.sugar.isString(value)) {
+                        resetType = value;
+                    } else {
+                        throw('Please supply a string value');
+                    }
+                }
+            });
+
+            // - initialisation logic -
+
+            // init drag related events
+            initEvents();
+            
+            // - return external interface -
+            return obj;
+        };
+    }
+);
+
+/*
+ *  @module Droptarget
+ *  @namespace modules.spilgames.entity.behaviour
+ *  @desc Used to make a game entity act as a droptarget
+ *  @copyright © 2013 - The SpilGames Authors
+ */
+glue.module.create(
+    'glue/modules/spilgames/entity/behaviour/droptarget',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        'use strict';
+        // - cross instance private members -
+        var resetTimeout = 100;
+
+        /**
+         * Constructor
+         * @name init
+         * @memberOf me.DroptargetEntity
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (obj) {
+            // - per instance private members -
+                /**
+                 * the checkmethod we want to use
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name checkMethod
+                 */
+            var checkMethod = null,
+                /**
+                 * Gets called when a draggable entity is dropped on the current entity
+                 * @name drop
+                 * @memberOf me.DroptargetEntity
+                 * @function
+                 * @param {Object} draggableEntity: the draggable entity that is dropped
+                 */
+                drop = function (draggableEntity) {
+                    // could be used to perform default drop logic
+                },
+                /**
+                 * Checks if a dropped entity is dropped on the current entity
+                 * @name checkOnMe
+                 * @memberOf me.DroptargetEntity
+                 * @function
+                 * @param {Object} e: the drag event
+                 * @param {Object} draggableEntity: the draggable entity that is dropped
+                 */
+                checkOnMe = function (e, draggableEntity, resetMe) {
+                    // the check if the draggable entity is this entity should work after
+                    // a total refactoring to the module pattern
+                    if (draggableEntity && draggableEntity !== obj &&
+                        obj[checkMethod](draggableEntity.collisionBox)) {
+                            // call the drop method on the current entity
+                            drop(draggableEntity);
+                            draggableEntity.setDropped(true);
+                            if (obj.drop) {
+                                obj.drop(draggableEntity);
+                            }
+                    } else {
+                        Glue.sugar.setAnimationFrameTimeout(function () {
+                            if (!draggableEntity.isResetted() && !draggableEntity.isDropped()) {
+                                resetMe();
+                                draggableEntity.setResetted(true);
+                            }
+                        }, resetTimeout);
+                    }
+                };
+
+            // - external interface -
+            obj.mix({
+                /**
+                 * constant for the overlaps method
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name CHECKMETHOD_OVERLAPS
+                 */
+                CHECKMETHOD_OVERLAPS: "overlaps",
+                /**
+                 * constant for the contains method
+                 * @public
+                 * @constant
+                 * @type String
+                 * @name CHECKMETHOD_CONTAINS
+                 */
+                CHECKMETHOD_CONTAINS: "contains",
+                /**
+                 * Sets the collision method which is going to be used to check a valid drop
+                 * @name setCheckMethod
+                 * @memberOf me.DroptargetEntity
+                 * @function
+                 * @param {Constant} checkMethod: the checkmethod (defaults to CHECKMETHOD_OVERLAP)
+                 */
+                setCheckMethod: function (value) {
+                    if (this[value] !== undefined) {
+                        checkMethod = value;
+                    }
+                },
+                /**
+                 * Destructor
+                 * @name destructDroptarget
+                 * @memberOf me.DroptargetEntity
+                 * @function
+                 */
+                destructDroptarget: function () {
+                    Glue.event.off(Glue.input.DRAG_END, checkOnMe);
+                }
+            });
+
+            // - initialisation logic -
+            Glue.event.on(Glue.input.DRAG_END, checkOnMe);
+            checkMethod = obj.CHECKMETHOD_OVERLAPS;
+            
+            // - return external interface -
+            return obj;
+        };
+    }
+);
+
+/*
+ *  @module Hoverable
+ *  @namespace modules.spilgames.entity.behaviour
+ *  @desc Used to make a game entity hoverable
+ *  @copyright © 2013 - The SpilGames Authors
+ */
+glue.module.create(
+    'glue/modules/spilgames/entity/behaviour/hoverable',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        /**
+         * Constructor
+         * @memberOf hoverable
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (obj) {
+            var isHovering = false,
+                hoverOverCalled = false,
+                hoverOutCalled = false,
+                /**
+                 * Checks if the user is hovering based on the pointer event
+                 * @name checkHovering
+                 * @memberOf hoverable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                checkHovering = function (evt, collisionBox, obj) {
+                    var localPosition = obj.floating ?
+                        me.game.viewport.worldToLocal(evt.gameX, evt.gameY) :
+                        {x: evt.gameX, y: evt.gameY};
+
+                    if (!collisionBox) {
+                        return;
+                    }
+                    if (collisionBox.containsPointV(localPosition)) {
+                        isHovering = true;
+                        if (obj.hoverOver && !hoverOverCalled) {
+                            hoverOverCalled = true;
+                            hoverOutCalled = false;
+                            obj.hoverOver(evt);
+                        }
+                    } else {
+                        isHovering = false;
+                        if (obj.hoverOut && !hoverOutCalled) {
+                            hoverOutCalled = true;
+                            hoverOverCalled = false;
+                            obj.hoverOut(evt);
+                        }
+                    }
+                },
+                /**
+                 * Listens the POINTER_DOWN event
+                 * @name onPointerDown
+                 * @memberOf hoverable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerDown = function (evt) {
+                    checkHovering(evt, obj.collisionBox, obj);
+                },
+                /**
+                 * Listens the POINTER_MOVE event
+                 * @name onPointerMove
+                 * @memberOf hoverable
+                 * @function
+                 * @param {Object} evt: The pointer event
+                 */
+                onPointerMove = function (evt) {
+                    checkHovering(evt, obj.collisionBox, obj);
+                },
+                /**
+                 * Sets up all events for this module
+                 * @name setupEvents
+                 * @memberOf hoverable
+                 * @function
+                 */
+                setupEvents = function () {
+                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.on(Glue.input.POINTER_MOVE, onPointerMove);
+                },
+                /**
+                 * Tears down all events for this module
+                 * @name teardownEvents
+                 * @memberOf hoverable
+                 * @function
+                 */
+                tearDownEvents = function () {
+                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
+                    Glue.event.off(Glue.input.POINTER_MOVE, onPointerMove);
+                };
+
+            // setup the module events
+            setupEvents();
+
+            return obj.mix({
+                isHovering: function () {
+                    return isHovering;
+                },
+                /**
+                 * Can be used to destruct this entity
+                 * @name destructHoverable
+                 * @memberOf hoverable
+                 * @function
+                 */
+                destructHoverable: function () {
+                    tearDownEvents();
+                }
+            });
+        };
+    }
+);
+
+glue.module.create(
+    'glue/modules/spilgames/entity/managers/camera',
+    [
+        'glue',
+        'glue/modules/spilgames/entity/base',
+    ],
+    function (Glue, Base) {
+        /**
+         * Constructor
+         * @memberOf scrollButton
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (x, y, settings) {
+                /**
+                 * Sets up all events for this module
+                 * @name setupEvents
+                 * @memberOf scrollButton
+                 * @function
+                 */
+            var setupEvents = function () {
+                    Glue.event.on('SCROLL_SCREEN', scrollScreen);
+                },
+                /**
+                 * Tears down all events for this module
+                 * @name teardownEvents
+                 * @memberOf scrollButton
+                 * @function
+                 */
+                tearDownEvents = function () {
+                    Glue.event.off('SCROLL_SCREEN', scrollScreen);
+                },
+                /**
+                 * Variables
+                 */
+                screenPosition = {
+                    x: 0,
+                    y: 0
+                },
+                /**
+                 * defines the scroll speed
+                 */
+                scrollSpeed = 20,
+                /**
+                 * defines the viewport bounds
+                 */
+                viewportBounds = {
+                    top: 0,
+                    left: 0,
+                    bottom: me.game.viewport.getHeight(),
+                    right: me.game.viewport.getWidth()
+                },
+                scrollScreen = function (direction) {
+                    switch(direction) {
+                        case 'left':  
+                            if((screenPosition.x - scrollSpeed) > viewportBounds.left) {
+                                screenPosition.x -= scrollSpeed;
+                            }else{
+                                screenPosition.x = 0;
+                            }
+                            break;
+                        case 'right': 
+                            if((screenPosition.x + scrollSpeed) < viewportBounds.right*2) {
+                                screenPosition.x += scrollSpeed;
+                            }else{
+                                screenPosition.x = viewportBounds.right*2;
+                            }
+                            break;
+                        default: break;
+                    }
+                    me.game.viewport.reset(screenPosition.x, 0);
+                },
+                /**
+                 * Returns the entity with its behaviours
+                 * @name obj
+                 * @memberOf scrollButton
+                 * @function
+                 */
+                obj = Base(x, y, settings).inject({
+                    draw: function (context) {
+                        this.parent(context);
+                    },
+                    update: function () {
+                        return true;
+                    },
+                    /**
+                     * gets the screen position
+                     */
+                    getScreenPosition: function () {
+                        return screenPosition;
+                    },
+                    /**
+                     * sets the screen position
+                     */
+                    setScreenPosition: function (position) {
+                        screenPosition = position;
+                    },
+                    /**
+                     * gets the screen speed
+                     */
+                    getScrollSpeed: function () {
+                        return scrollSpeed;
+                    },
+                    /**
+                     * sets the screen speed
+                     */
+                    setScrollSpeed: function (speed) {
+                        screenSpeed = speed;
+                    }
+                });
+            
+            obj.floating = true;
+
+            // setup the module events
+            setupEvents();
+
+            // adds the entity to the game
+            Glue.game.add(obj, settings.zIndex || 1);
+
+            // returns the entity with its behaviours
+            return obj;
+        };
+    }
+);
+
+glue.module.create(
+    'glue/modules/spilgames/entity/ui/scrollarea',
+    [
+        'glue',
+        'glue/modules/spilgames/entity/base',
+        'glue/modules/spilgames/entity/behaviour/hoverable'
+    ],
+    function (Glue, Base, Hoverable) {
+        /**
+         * Constructor
+         * @memberOf scrollArea
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (x, y, settings) {
+                /**
+                 * Sets up all events for this module
+                 * @name setupEvents
+                 * @memberOf scrollArea
+                 * @function
+                 */
+            var draggedObject = null,
+                dragStart = function (e, draggable) {
+                    isDragging = true;
+                    draggedObject = draggable;
+                },
+                dragEnd = function (e) {
+                    isDragging = false;
+                },
+                setupEvents = function () {
+                    Glue.event.on(Glue.input.DRAG_START, dragStart);
+                    Glue.event.on(Glue.input.DRAG_END, dragEnd);
+                },
+                /**
+                 * Tears down all events for this module
+                 * @name teardownEvents
+                 * @memberOf scrollArea
+                 * @function
+                 */
+                tearDownEvents = function () {
+                    Glue.event.off(Glue.input.DRAG_START, dragStart);
+                    Glue.event.off(Glue.input.DRAG_END, dragEnd);
+                },
+                /**
+                 * Variables
+                 */
+                isHovering = false,
+                isDragging = false,
+                hoverPosition = null,
+                /**
+                 * Returns the entity with its behaviours
+                 * @name obj
+                 * @memberOf scrollArea
+                 * @function
+                 */
+                obj = Base(x, y, settings).inject({
+                    draw: function (context) {
+                        this.parent(context);
+                        if (settings.debug) {
+                            context.fillStyle = 'blue';
+                            context.fillRect(this.pos.x,this.pos.y,this.width,this.height);
+                        }
+                    },
+                    hoverOver: function (e) {
+                        if (draggedObject) {
+                            hoverPosition = me.game.viewport.worldToLocal(
+                                draggedObject.pos.x,
+                                draggedObject.pos.y
+                            );
+                        }
+                        isHovering = true;
+                    },
+                    hoverOut: function () {
+                        isHovering = false;
+                    },
+                    update: function () {
+                        if(isDragging && this.isHovering()) {
+                            Glue.event.fire('SCROLL_SCREEN', [settings.direction]);
+                            draggedObject.pos.x = hoverPosition.x + me.game.viewport.pos.x;
+                            draggedObject.pos.y = hoverPosition.y + me.game.viewport.pos.y;
+                        }
+                        return true;
+                    },
+                    /**
+                     * Can be used to destruct this entity
+                     * @name destructClickable
+                     * @memberOf scrollArea
+                     * @function
+                     */
+                    destructClickable: function () {
+                        tearDownEvents();
+                    }
+                });
+            
+            obj.floating = true;
+
+            // setup the module events
+            setupEvents();
+
+            // setup the behaviours of this entity
+            Hoverable(obj);
+
+            // returns the entity with its behaviours
+            return obj;
+        };
+    }
+);
+
+glue.module.create(
+    'glue/modules/spilgames/entity/ui/scrollbutton',
+    [
+        'glue',
+        'glue/modules/spilgames/entity/base',
+        'glue/modules/spilgames/entity/behaviour/hoverable',
+        'glue/modules/spilgames/entity/behaviour/clickable'
+    ],
+    function (Glue, Base, Hoverable, Clickable) {
+        /**
+         * Constructor
+         * @memberOf scrollButton
+         * @function
+         * @param {Object} obj: the entity object
+         */
+        return function (x, y, settings) {
+                /**
+                 * Sets up all events for this module
+                 * @name setupEvents
+                 * @memberOf scrollButton
+                 * @function
+                 */
+            var setupEvents = function () {
+                },
+                /**
+                 * Tears down all events for this module
+                 * @name teardownEvents
+                 * @memberOf scrollButton
+                 * @function
+                 */
+                tearDownEvents = function () {
+                },
+                /**
+                 * Variables
+                 */
+                isHovered = false,
+                isClicked = false,
+                /**
+                 * Returns the entity with its behaviours
+                 * @name obj
+                 * @memberOf scrollButton
+                 * @function
+                 */
+                obj = Base(x, y, settings).inject({
+                    draw: function (context) {
+                        this.parent(context);
+                    },
+                    update: function () {
+                        if(isClicked) {
+                            Glue.event.fire('SCROLL_SCREEN', [settings.direction]);
+                        }
+                        return true;
+                    },
+                    clickUp: function (e) {
+                        isClicked = false;
+                    },
+                    hoverOver: function (e) {
+                        isHovering = true;
+                        if(this.renderable) {
+                            this.renderable.setCurrentAnimation('hovered');
+                        }
+                    },
+                    hoverOut: function (e) {
+                        isHovering = false;
+                        if(this.renderable) {
+                            this.renderable.setCurrentAnimation('normal');
+                        }
+                    },
+                    isHovering: function () {
+                        return isHovering;
+                    },
+                    /**
+                     * Returns if this entity is clicked
+                     * @name clicked
+                     * @memberOf scrollButton
+                     * @function
+                     */
+                    clickDown: function (e) {
+                        isClicked = true;
+                    },
+                    isClicked: function () {
+                        return isClicked;
+                    },
+                    /**
+                     * Can be used to destruct this entity
+                     * @name destructClickable
+                     * @memberOf scrollButton
+                     * @function
+                     */
+                    destructClickable: function () {
+                        tearDownEvents();
+                    }
+                });
+
+                if(obj.renderable) {
+                    obj.renderable.addAnimation('normal', [0]);
+                    obj.renderable.addAnimation('hovered', [1]);
+                }
+
+            // we assume that all scroll buttons are floating
+            obj.floating = true;
+
+            // setup the module events
+            setupEvents();
+
+            // setup the behaviours of this entity
+            Hoverable(obj);
+            Clickable(obj);
+
+            // returns the entity with its behaviours
+            return obj;
+        };
+    }
+);
+
+/**
+ *  @module Sugar
+ *  @namespace modules.spilgames
+ *  @desc Provides javascript sugar functions
+ *  @copyright © 2013 - The SpilGames Authors
+ */
+var modules = modules || {};
+modules.spilgames = modules.spilgames || {};
+
+modules.spilgames.sugar = (function (win, doc) {
+    'use strict';
+    var i,
+        /**
+         * Is a given value a string?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isString = function (value) {
+            return typeof value === 'string' || value instanceof String;
+        },
+        /**
+         * Is a given value an array?
+         * Delegates to ECMA5's native Array.isArray
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isArray = Array.prototype.isArray || function (value) {
+            return Object.prototype.toString.call(value) === '[object Array]';
+        },
+        /**
+         * Is a given value a literal object?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isObject = function (value) {
+            return Object.prototype.toString.call(value) === '[object Object]';
+        },
+        /**
+         * Is a given value a function?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isFunction = function (value) {
+            return Object.prototype.toString.call(value) === '[object Function]';
+        },
+        /**
+         * Extends two objects by copying the properties
+         * If a property is an object, it will be cloned
+         * @param {Object} The first object
+         * @param {Object} The second object
+         * @return {Object} The combined object
+         */
+        extend = function (obj1, obj2) {
+            var prop;
+            for (prop in obj2) {
+                if (obj2.hasOwnProperty(prop)) {
+                    if (this.isObject(obj2[prop])) {
+                        obj1[prop] = this.extend({}, obj2[prop]);
+                    } else {
+                        obj1[prop] = obj2[prop];
+                    }
+                }
+            }
+            return obj1;
+        },
+        /**
+         * Can be used to provide the same functionality as a self executing function used in the
+         * module pattern. The passed dependencies will by applied to the callback function.
+         * The modules can be located in multi-level namespaces. This is done by using dots as a separator.
+         * @name import
+         * @memberOf me
+         * @function
+         * @param {Array} dependencies: the dependencies you want to import
+         * @param {Function} callback: the callback function where the dependencies will be applied to
+         */
+        imports = function (dependencies, callback) {
+            var imports = [],
+                p,
+                d,
+                pLn,
+                dLn,
+                currentPart,
+                parent = win,
+                parts,
+                module;
+
+            // iterate over the dependencies
+            for (d = 0, dLn = dependencies.length; d < dLn; ++d) {
+                parent = win;
+                parts = dependencies[d].split('.');
+                if (parts.length === 1) {
+                    // get the module from global space
+                    module = win[parts];
+                } else {
+                    for (p = 0, pLn = parts.length; p < pLn; ++p) {
+                        currentPart = parts[p];
+                        if (p === (pLn - 1)) {
+                            // get the module from the namespace
+                            module = parent[currentPart];
+                        } else {
+                            if (parent[currentPart]) {
+                                parent = parent[currentPart];
+                            }
+                        }
+                    }
+                }
+                // check if the module is found and if the type is 'object' or 'function'
+                if (module && this.isFunction(module)) {
+                    // add the module to the imports array
+                    imports.push(module);
+                } else {
+                    // throw an error if the module is not found, or is not a function
+                    throw('glue.sugar.imports: Module ' + dependencies[d] + ' not found or not a function');
+                }
+            }
+            // apply the dependencies to the callback function and return it
+            return callback.apply(glue, imports);
+        },
+        /**
+         * An empty function
+         */
+        emptyFn = function () {},
+        /**
+         * Is a given value a number?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isNumber = function (obj) {
+            return Object.prototype.toString.call(obj) ===
+                '[object Number]';
+        },
+        /**
+         * Is a given value a boolean?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isBoolean = function (obj) {
+            return obj === true || obj === false ||
+                Object.prototype.toString.call(obj) === '[object Boolean]';
+        },
+        /**
+         * Is a given value a date?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isDate = function (obj) {
+            return Object.prototype.toString.call(obj) === '[object Date]';
+        },
+        /**
+         * Is a given value an integer?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isInt = function (obj) {
+            return parseFloat(obj) === parseInt(obj, 10) && !isNaN(obj);
+        },
+        /**
+         * Has own property?
+         * @param {Object}
+         * @param {String}
+         */
+        has = function (obj, key) {
+            return Object.prototype.hasOwnProperty.call(obj, key);
+        },
+        /**
+         * Is a given variable undefined?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isUndefined = function (obj) {
+            return obj === void 0;
+        },
+        /**
+         * Is a given variable defined?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isDefined = function (obj) {
+            return obj !== void 0;
+        },
+        /**
+         * Is a given variable empty?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isEmpty = function (obj) {
+            var temp;
+            if (obj === "" || obj === 0 || obj === "0" || obj === null ||
+                    obj === false || this.isUndefined(obj)) {
+                return true;
+            }
+            //  Check if the array is empty
+            if (this.isArray(obj) && obj.length === 0) {
+                return true;
+            }
+            //  Check if the object is empty
+            if (this.isObject(obj)) {
+                for (temp in obj) {
+                    if (this.has(obj, temp)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        },
+        /**
+         * Is a given variable an argument object?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isArgument = function (obj) {
+            return Object.prototype.toString.call(obj) ===
+                '[object Arguments]';
+        },
+        /**
+         * Will uppercase the first character of a given string
+         * @param {String}
+         * @return {String}
+         */
+        upperFirst = function (str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+        /**
+         * Will check all given arguments for a specific type
+         * @param arguments[0]: {String} the type to check for
+         * @param arguments[1-n]: {Argument} the objects to check
+         * @return {Boolean} true if all arguments are of the given type,
+         * false if one of them is not
+         */            
+        multiIs = function () {
+            var params = this.toArray(arguments),
+                method = this['is' + this.upperFirst(params.shift())],
+                max = params.length;
+
+            while (max--) {
+                if (!method.call(null, params[max])) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        /**
+         * Will combine two objects (or arrays)
+         * The properties of the second object will be added to the first
+         * If the second object contains the same property name as the first
+         * object, the property will be overwritten, so property two is
+         * leading
+         * @param {Object} The first object
+         * @param {Object} The second object
+         * @return {Object} If both params are objects: The combined first
+         * object
+         * @return {Object} If one of the params in not an object
+         * (or array): The first object
+         */
+        combine = function (obj1, obj2) {
+            var prop;
+            if (this.multiIs('array', obj1, obj2)) {
+                return obj1.concat(obj2);
+            }
+            for (prop in obj2) {
+                if (this.has(obj2, prop)) {
+                    if (this.isObject(obj2[prop])) {
+                        obj1[prop] = clone(obj2[prop]);
+                    } else {
+                        obj1[prop] = obj2[prop];
+                    }
+                }
+            }
+            return obj1;
+        },
+        /**
+         * Is a given variable a DOM node list?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isDomList = function (obj) {
+            return (/^\[object (HTMLCollection|NodeList|Object)\]$/).test(
+                toString.call(obj)) && this.isNumber(obj.length) &&
+                    (obj.length === 0 || (typeof obj[0] === "object" &&
+                        obj[0].nodeType > 0));
+        },
+        /**
+         * Converts any iterable type into an array
+         * @param {Object}
+         * @return {Array}
+         */
+        toArray = function (iterable) {
+            var name,
+                arr = [];
+
+            if (!iterable) {
+                return [iterable];
+            }
+            if (this.isArgument(iterable)) {
+                return Array.prototype.slice.call(iterable);
+            }
+            if (this.isString(iterable)) {
+                iterable.split('');
+            }
+            if (this.isArray(iterable)) {
+                return Array.prototype.slice.call(iterable);
+            }
+            if (this.isDomList(iterable)) {
+                return Array.prototype.slice.call(iterable);
+            }
+            for (name in iterable) {
+                if (this.has(iterable, name)) {
+                    arr.push(iterable[name]);
+                }
+            }
+            return arr;
+        },
+        /**
+         * function to check if a string, array, or object contains a needed
+         * string
+         * @param {Sting|Array|Object} obj
+         * @param {String} The needed string
+         */
+        contains = function (obj, needed) {
+            if (this.isString(obj)) {
+                if (obj.indexOf(needed) !== -1) {
+                    return true;
+                }
+                return false;
+            }
+            if (this.isArray(obj)) {
+                if (this.indexOf(obj, needed) !== -1) {
+                    return true;
+                }
+                return false;
+            }
+            return this.has(obj, needed);
+        },
+        /**
+         * Returns the position of the first occurrence of an item in an
+         * array, or -1 if the item is not included in the array.
+         * Delegates to ECMAScript 5's native indexOf if available.
+         */
+        indexOf = function (array, needs) {
+            var max = 0;
+            if (array === null) {
+                return -1;
+            }
+            if (array.indexOf) {
+                return array.indexOf(needs);
+            }
+            max = array.length;
+            while (max--) {
+                if (array[max] === needs) {
+                    return max;
+                }
+            }
+            return -1;
+        },
+        /**
+         * Is a given value a DOM element?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isElement = function (obj) {
+            return !!(obj && obj.nodeType === 1);
+        },
+        /**
+         * Will return the size of an object
+         * The object you pass in will be iterated
+         * The number of iterations will be counted and returned
+         * If you pass in another datatype, it will return the length
+         * property (if suitable)
+         * @param {Object} The object you want to know the size of
+         * @return {Number} The size of the object
+         */
+        size = function (obj) {
+            var size = 0,
+                key;
+            if (!obj) {
+                return 0;
+            }
+            if (this.isObject(obj)) {
+                for (key in obj) {
+                    if (this.has(obj, key)) {
+                        ++size;
+                    }
+                }
+            }
+            if (this.isString(obj) || this.isArray(obj) ||
+                this.isArguments(obj)) {
+                size = obj.length;
+            }
+            if (this.isNumber(obj)) {
+                size = obj.toString().length;
+            }
+            return size;
+        },
+        /**
+         * Will clone a object
+         * @param {Object} object that you want to clone
+         * @return cloned object.
+         */
+        clone = function (obj) {
+            return this.combine({}, obj, true);
+        },
+        /**
+         * Is a given value a regular expression?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isRegex = function (obj) {
+            return !!(obj && obj.test && obj.exec && (obj.ignoreCase ||
+                obj.ignoreCase === false));
+        },
+        /**
+         * Retrieve the names of an object's properties.
+         * Delegates to ECMAScript 5's native Object.keys
+         * @params {Object}
+         * returns {Array}
+         */
+        keys = Object.prototype.keys || function (obj) {
+            var keys = [],
+                key;
+            if (obj == Object(obj)) {
+                for (key in obj) {
+                    if (this.has(obj, key)) {
+                        keys[keys.length] = key;
+                    }
+                }
+            }
+            return keys;
+        },
+        /**
+         * Will ensure that the given function will be called only once.
+         * @param {Function}
+         * @param {Function}
+         */
+        once = function (func) {
+            var ran = false;
+            return function () {
+                if (ran) {
+                    return;
+                }
+                ran = true;
+                return func.apply(func, arguments);
+            };
+        },
+        /**
+         * Memoize an expensive function by storing its results.
+         * @param {Function}
+         * @param {Function} hasher, the hasher must return a hash of the
+         * arguments that are send to the function
+         */
+        memoize = function (func, hasher) {
+            var memo = {};
+            //  Check if hasher is set else use default hasher
+            hasher = hasher || function (key) {
+                return key;
+            };
+            //  Return function
+            return function () {
+                var key = hasher.apply(null, arguments);
+                return this.has(memo, key) ? memo[key] : (memo[key] =
+                    func.apply(func, arguments));
+            };
+        },
+        /**
+         * Removes an object from an array
+         * @param {Array} The array to remove the object from 
+         * @param {Obj} The object to reomve
+         */
+        removeObject = function (arr, obj) {
+            var i,
+                ln;
+
+            for (i = 0, ln = arr.length; i < ln; ++i) {       
+                if (arr[i] === obj) {
+                    arr.splice(i, 1);
+                    break;
+                }
+            }
+        },
+        getStyle = function (el, prop, asNumber) {
+            var style;
+            if (el.style && this.isEmpty(el.style[prop])) {
+                if (el.currentStyle) {
+                    style = el.currentStyle[prop];
+                }
+                else if (win.getComputedStyle) {
+                    style = doc.defaultView.getComputedStyle(el, null)
+                        .getPropertyValue(prop);
+                }
+            } else {
+                if (el.style) {
+                    style = el.style[prop];
+                }
+            }
+            return asNumber ? parseFloat(style) : style;
+        },
+        /**
+         * Checks if the given argument is an existing function, 
+         * using typeof
+         * @param {possibleFunction} The function to check if it exists
+         * returns {Boolean}
+         */
+        isFunctionByType = function (possibleFunction) {
+            return (typeof(possibleFunction) == typeof(Function));
+        },
+        /**
+         * Returns a node on the given coordinates if it's found
+         * @param {x} The x coordinate of the position to test
+         * @param {y} The y coordinate of the position to test
+         * @param {omitNode} The node to omit (f.e. when dragging)
+         * returns {Node} The node at the given coordinates
+         */
+        getNodeOnPoint = function (x, y, omitNode) {
+            var element;
+            if (omitNode) {
+                omitNode.style.display = 'none';
+            }
+            element = doc.elementFromPoint(x, y);
+            if (element && this && this.containsClass(element, 'omit')) {
+                element = getNodeOnPoint(x, y, element);
+            }
+            if (omitNode) {
+                omitNode.style.display = '';
+            }
+            return element;
+        },
+        /**
+         * Returns an array of nodes on the given coords, if any are found
+         * @param {x} The x coordinate of the position to test
+         * @param {y} The y coordinate of the position to test
+         * @param {omitNode} The node to omit (f.e. when dragging)
+         * returns {Array} An array of nodes found at the given
+         *         coordinates, topmost first
+         *
+         * Appears to be a bit hacky, we should replace this if
+         * we have the opportunity (and a better solution)
+         */
+        getNodesOnPoint = function (x, y, omitNode) {
+            var currentElement = false,
+                elements = [],
+                i;
+            if (omitNode) {
+                omitNode.style.display = 'none';
+            }
+            currentElement = doc.elementFromPoint(x,y);
+            while (currentElement && currentElement.tagName !== 'BODY' &&
+                currentElement.tagName !== 'HTML'){
+                elements.push(currentElement);
+                removeClass(currentElement, 'animated');
+                currentElement.style.display = 'none';
+                currentElement = doc.elementFromPoint(x,y);
+            }
+            for (i = 0; i < elements.length; ++i) {
+                elements[i].style.display = 'block';
+            }
+            if (omitNode) {
+                omitNode.style.display = 'block';
+            }
+            return elements;
+        },
+        /**
+         * getData and setData are used to get and set data attributes
+         * @param {Element} element, is the element to get/set the data from
+         * @param {String} data, is the name of the data to get/set
+         * @param {String} value (only in setData), is the value to set
+         * returns the value set or get.
+         */
+        getData = function (element, data) {
+            return element.getAttribute("data-"+data);
+        },
+        setData = function (element, data, value) {
+            return element.setAttribute("data-"+data, value);
+        },
+        /**
+         * Safe classList implementation - contains
+         * @param {Element} elem
+         * @param {String} className
+         * returns {Boolean} elem has className
+         * SOURCE: hacks.mozilla.org/2010/01/classlist-in-firefox-3-6
+         */
+        containsClass = function (elm, className) {
+            if (doc.documentElement.classList) {
+                containsClass = function (elm, className) {
+                    return elm.classList.contains(className);
+                }
+            } else {
+                containsClass = function (elm, className) {
+                    if (!elm || !elm.className) {
+                        return false;
+                    }
+                    var re = new RegExp('(^|\\s)' + className + '(\\s|$)');
+                    return elm.className.match(re);
+                }
+            }
+            return containsClass(elm, className);
+        },
+        /**
+         * Safe classList implementation - add
+         * @param {Element} elem
+         * @param {Mixed} className (Classname string or array with classes)
+         * returns {Function ref} the called function
+         * SOURCE: hacks.mozilla.org/2010/01/classlist-in-firefox-3-6
+         */
+        addClass = function (elm, className) {
+            var i, ln, self = this;
+            if (doc.documentElement.classList) {
+                addClass = function (elm, className) {
+                    if (self.isArray(className)) {
+                        for (i = 0, ln = className.length; i < ln; ++i) {
+                            elm.classList.add(className[i]);  
+                        }
+                    } else {
+                        elm.classList.add(className);
+                    }
+                }
+            } else {
+                addClass = function (elm, className) {
+                    if (!elm) {
+                        return false;
+                    }
+                    if (!containsClass(elm, className)) {
+                        if (self.isArray(className)) {
+                            for (i = 0, ln = className.length; i < ln; ++i) {
+                                elm.className += (elm.className ? ' ' : '') + 
+                                className[i];
+                            }
+                        } else {
+                            elm.className += (elm.className ? ' ' : '') + 
+                            className;
+                        }
+                    }
+                }
+            }
+            return addClass(elm, className);
+        },
+        /**
+         * Safe classList implementation - remove
+         * @param {Element} elem
+         * @param {String} className
+         * returns {Function ref} the called function
+         * SOURCE: hacks.mozilla.org/2010/01/classlist-in-firefox-3-6
+         */
+        removeClass = function (elm, className) {
+            if (doc.documentElement.classList) {
+                removeClass = function (elm, className) {
+                    elm.classList.remove(className);
+                }
+            } else {
+                removeClass = function (elm, className) {
+                    if (!elm || !elm.className) {
+                        return false;
+                    }
+                    var regexp = new RegExp("(^|\\s)" + className +
+                        "(\\s|$)", "g");
+                    elm.className = elm.className.replace(regexp, "$2");
+                }
+            }
+            return removeClass(elm, className);
+        },
+        removeClasses = function (elm) {
+            elm.className = '';
+            elm.setAttribute('class','');
+        },
+        /**
+         * Safe classList implementation - toggle
+         * @param {Element} elem
+         * @param {String} className
+         * returns {Boolean} elem had className added
+         * SOURCE: hacks.mozilla.org/2010/01/classlist-in-firefox-3-6
+         */
+        toggleClass = function (elm, className)
+        {
+            if (doc.documentElement.classList &&
+                doc.documentElement.classList.toggle) {
+                toggleClass = function (elm, className) {
+                    return elm.classList.toggle(className);
+                }
+            } else {
+                toggleClass = function (elm, className) {
+                    if (containsClass(elm, className))
+                    {
+                        removeClass(elm, className);
+                        return false;
+                    } else {
+                        addClass(elm, className);
+                        return true;
+                    }
+                }
+            }
+            return toggleClass(elm, className);
+        },
+        // Cross-browser helper for triggering events on elements
+        triggerEvent = function (el, type) {
+            if (document.createEvent) {
+                var evt = document.createEvent('MouseEvents');
+                evt.initEvent(type, true, false);
+                el.dispatchEvent(evt);
+                return true;
+            } else if (document.createEventObject) {
+                el.fireEvent('on' + type);
+                return true;
+            } else if (typeof el['on' + type] === 'function') {
+                el['on' + type]();
+                return true;
+            }
+            return false;
+        },
+        $ = function (query) {
+            return doc.querySelector(query);
+        },
+        setAnimationFrameTimeout = function (callback, timeout) {
+            var now = new Date().getTime(),
+                rafID = null;
+            
+            if (timeout === undefined) timeout = 1;
+            
+            function animationFrame() {
+                var later = new Date().getTime();
+                
+                if (later - now >= timeout) {
+                    callback();
+                } else {
+                    rafID = requestAnimationFrame(animationFrame);
+                }
+            }
+
+            animationFrame();
+            return {
+                /**
+                 * On supported browsers cancel this timeout.
+                 */
+                cancel: function() {
+                    if (typeof cancelAnimationFrame !== 'undefined') {
+                        cancelAnimationFrame(rafID);
+                    }
+                }
+            };
+        },
+        /**
+         * Adds or removes a CSS3 cross vendor animation listener to an element
+         * @param {Element} elememt: the element to add the listeners to
+         * @param {String} eventName: the event name you want to listen to:
+         * 'start', 'iteration' or 'end'
+         * @param {Function} callback: The callback function
+         * @param {String} type: The type of operation: 'add' or 'remove', defaults to 'add'
+         */
+        animationEvent = function (element, eventName, callback, type) {
+            var vendors = {
+                    start: ['animationstart', 'animationstart', 'webkitAnimationStart',
+                        'oanimationstart', 'MSAnimationStart'],
+                    iteration: ['animationiteration', 'animationiteration',
+                        'webkitAnimationIteration', 'oanimationiteration',
+                            'MSAnimationIteration'],
+                    end: ['animationend', 'animationend', 'webkitAnimationEnd',
+                        'oanimationend', 'MSAnimationEnd'],
+                    tend: ['transitionend', 'transitionend', 'webkitTransitionEnd',
+                          'otransitionend', 'MSTransitionEnd']
+                },
+                vendor = vendors[eventName] || [],
+                type = type || 'add',
+                l, i;
+
+            for (i = 0, l = vendor.length; i < l; ++i) {
+                if (type === 'add') {
+                    element.addEventListener(vendor[i], callback, false);
+                } else if (type === 'remove') {
+                    element.removeEventListener(vendor[i], callback, false);
+                }
+            }
+        },
+        domReady = function (callback) {
+            var state = doc.readyState;
+            if (state === 'complete' || state === 'interactive') {
+                callback();
+            } else {
+                if (!!(win.addEventListener)) {
+                    win.addEventListener('DOMContentLoaded', callback);
+                } else {
+                    win.attachEvent('onload', callback);
+                }
+            }
+        };
+
+    // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+    // http://my.opera.com/emoller/blog/2011/12/20
+    //  /requestanimationframe-for-smart-er-animating
+
+    // requestAnimationFrame polyfill by Erik M&#246;ller. fixes from
+    //  Paul Irish and Tino Zijdel
+
+    // MIT license
+    (function() {
+        var lastTime = 0;
+        var vendors = ['ms', 'moz', 'webkit', 'o'];
+        for(var x = 0; x < vendors.length && !win.requestAnimationFrame;
+            ++x) {
+                win.requestAnimationFrame = win[vendors[x]+
+                    'RequestAnimationFrame'];
+                win.cancelAnimationFrame = win[vendors[x]+
+                    'CancelAnimationFrame'] ||
+                win[vendors[x]+'CancelRequestAnimationFrame'];
+        }
+
+        if (!win.requestAnimationFrame) {
+            win.requestAnimationFrame = function(callback, element) {
+                var currTime = new Date().getTime();
+                var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                var id = w.setTimeout(
+                    function() {
+                        callback(currTime + timeToCall); 
+                    }, 
+                    timeToCall
+                );
+                lastTime = currTime + timeToCall;
+                return id;
+            };
+        }
+
+        if (!win.cancelAnimationFrame) {
+            win.cancelAnimationFrame = function(id) {
+                clearTimeout(id);
+            };
+        }
+
+        if (!Object.prototype.hasOwnProperty) {
+            Object.prototype.hasOwnProperty = function(prop) {
+                var proto = obj.__proto__ || obj.constructor.prototype;
+                return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
+            };
+        }
+
+        /**
+         * Can be used to mix modules, to combine abilities
+         * @name mix
+         * @memberOf Object.prototype
+         * @function
+         * @param {Object} mixin: the object you want to throw in the mix
+         */
+         // there ain't no problem we can't fix, cause we can do it in the mix
+        if (!Object.prototype.mix) {
+            Object.prototype.mix = function (mixin) {
+                var i,
+                    self = this;
+
+                // iterate over the mixin properties
+                for (i in mixin) {
+                    // if the current property belongs to the mixin
+                    if (mixin.hasOwnProperty(i)) {
+                        // add the property to the mix
+                        self[i] = mixin[i];
+                    }
+                }
+                // return the mixed object
+                return self;
+            };
+        }
+    }());
+
+    return {
+        isString: isString,
+        isArray: isArray,
+        isObject: isObject,
+        isFunction: isFunction,
+        emptyFn: emptyFn,
+        isNumber: isNumber,
+        isBoolean: isBoolean,
+        isDate: isDate,
+        isInt: isInt,
+        has: has,
+        isUndefined: isUndefined,
+        isDefined: isDefined,
+        isEmpty: isEmpty,
+        isArgument: isArgument,
+        upperFirst: upperFirst,
+        multiIs: multiIs,
+        combine: combine,
+        imports: imports,
+        isDomList: isDomList,
+        toArray: toArray,
+        contains: contains,
+        indexOf: indexOf,
+        isElement: isElement,
+        size: size,
+        clone: clone,
+        isRegex: isRegex,
+        keys: keys,
+        once: once,
+        memoize: memoize,
+        removeObject: removeObject,
+        getStyle: getStyle,
+        isFunctionByType: isFunctionByType,
+        getNodeOnPoint: getNodeOnPoint,
+        getNodesOnPoint: getNodesOnPoint,
+        getData: getData,
+        setData: setData,
+        containsClass: containsClass,
+        addClass: addClass,
+        removeClass: removeClass,
+        removeClasses: removeClasses,
+        toggleClass: toggleClass,
+        triggerEvent: triggerEvent,
+        $: $,
+        setAnimationFrameTimeout: setAnimationFrameTimeout,
+        animationEvent: animationEvent,
+        domReady: domReady
+    };
+}(window, window.document));
+glue.module.create(
     'glue/component/base',
     [
         'glue'
@@ -19913,131 +21832,6 @@ glue.module.create(
                 }
             }
         }
-    }
-);
-
-glue.module.create(
-    'glue/entity/managers/camera',
-    [
-        'glue',
-        'glue/modules/entity/base',
-    ],
-    function (Glue, Base) {
-        /**
-         * Constructor
-         * @memberOf scrollButton
-         * @function
-         * @param {Object} obj: the entity object
-         */
-        return function (x, y, settings) {
-                /**
-                 * Sets up all events for this module
-                 * @name setupEvents
-                 * @memberOf scrollButton
-                 * @function
-                 */
-            var setupEvents = function () {
-                    Glue.event.on('SCROLL_SCREEN', scrollScreen);
-                },
-                /**
-                 * Tears down all events for this module
-                 * @name teardownEvents
-                 * @memberOf scrollButton
-                 * @function
-                 */
-                tearDownEvents = function () {
-                    Glue.event.off('SCROLL_SCREEN', scrollScreen);
-                },
-                /**
-                 * Variables
-                 */
-                screenPosition = {
-                    x: 0,
-                    y: 0
-                },
-                /**
-                 * defines the scroll speed
-                 */
-                scrollSpeed = 20,
-                /**
-                 * defines the viewport bounds
-                 */
-                viewportBounds = {
-                    top: 0,
-                    left: 0,
-                    bottom: me.game.viewport.getHeight(),
-                    right: me.game.viewport.getWidth()
-                },
-                scrollScreen = function (direction) {
-                    switch(direction) {
-                        case 'left':  
-                            if((screenPosition.x - scrollSpeed) > viewportBounds.left) {
-                                screenPosition.x -= scrollSpeed;
-                            }else{
-                                screenPosition.x = 0;
-                            }
-                            break;
-                        case 'right': 
-                            if((screenPosition.x + scrollSpeed) < viewportBounds.right*2) {
-                                screenPosition.x += scrollSpeed;
-                            }else{
-                                screenPosition.x = viewportBounds.right*2;
-                            }
-                            break;
-                        default: break;
-                    }
-                    me.game.viewport.reset(screenPosition.x, 0);
-                },
-                /**
-                 * Returns the entity with its behaviours
-                 * @name obj
-                 * @memberOf scrollButton
-                 * @function
-                 */
-                obj = Base(x, y, settings).inject({
-                    draw: function (context) {
-                        this.parent(context);
-                    },
-                    update: function () {
-                        return true;
-                    },
-                    /**
-                     * gets the screen position
-                     */
-                    getScreenPosition: function () {
-                        return screenPosition;
-                    },
-                    /**
-                     * sets the screen position
-                     */
-                    setScreenPosition: function (position) {
-                        screenPosition = position;
-                    },
-                    /**
-                     * gets the screen speed
-                     */
-                    getScrollSpeed: function () {
-                        return scrollSpeed;
-                    },
-                    /**
-                     * sets the screen speed
-                     */
-                    setScrollSpeed: function (speed) {
-                        screenSpeed = speed;
-                    }
-                });
-            
-            obj.floating = true;
-
-            // setup the module events
-            setupEvents();
-
-            // adds the entity to the game
-            Glue.game.add(obj, settings.zIndex || 1);
-
-            // returns the entity with its behaviours
-            return obj;
-        };
     }
 );
 
@@ -20949,226 +22743,3 @@ modules.glue.sugar = (function (win, doc) {
         domReady: domReady
     };
 }(window, window.document));
-
-glue.module.create(
-    'glue/entity/ui/scrollarea',
-    [
-        'glue',
-        'glue/component/base',
-        'glue/component/hoverable'
-    ],
-    function (Glue, Base, Hoverable) {
-        /**
-         * Constructor
-         * @memberOf scrollArea
-         * @function
-         * @param {Object} obj: the entity object
-         */
-        return function (x, y, settings) {
-                /**
-                 * Sets up all events for this module
-                 * @name setupEvents
-                 * @memberOf scrollArea
-                 * @function
-                 */
-            var draggedObject = null,
-                dragStart = function (e, draggable) {
-                    isDragging = true;
-                    draggedObject = draggable;
-                },
-                dragEnd = function (e) {
-                    isDragging = false;
-                },
-                setupEvents = function () {
-                    Glue.event.on(Glue.input.DRAG_START, dragStart);
-                    Glue.event.on(Glue.input.DRAG_END, dragEnd);
-                },
-                /**
-                 * Tears down all events for this module
-                 * @name teardownEvents
-                 * @memberOf scrollArea
-                 * @function
-                 */
-                tearDownEvents = function () {
-                    Glue.event.off(Glue.input.DRAG_START, dragStart);
-                    Glue.event.off(Glue.input.DRAG_END, dragEnd);
-                },
-                /**
-                 * Variables
-                 */
-                isHovering = false,
-                isDragging = false,
-                hoverPosition = null,
-                /**
-                 * Returns the entity with its behaviours
-                 * @name obj
-                 * @memberOf scrollArea
-                 * @function
-                 */
-                obj = Base(x, y, settings).inject({
-                    draw: function (context) {
-                        this.parent(context);
-                        if (settings.debug) {
-                            context.fillStyle = 'blue';
-                            context.fillRect(this.pos.x,this.pos.y,this.width,this.height);
-                        }
-                    },
-                    hoverOver: function (e) {
-                        if (draggedObject) {
-                            hoverPosition = me.game.viewport.worldToLocal(
-                                draggedObject.pos.x,
-                                draggedObject.pos.y
-                            );
-                        }
-                        isHovering = true;
-                    },
-                    hoverOut: function () {
-                        isHovering = false;
-                    },
-                    update: function () {
-                        if(isDragging && this.isHovering()) {
-                            Glue.event.fire('SCROLL_SCREEN', [settings.direction]);
-                            draggedObject.pos.x = hoverPosition.x + me.game.viewport.pos.x;
-                            draggedObject.pos.y = hoverPosition.y + me.game.viewport.pos.y;
-                        }
-                        return true;
-                    },
-                    /**
-                     * Can be used to destruct this entity
-                     * @name destructClickable
-                     * @memberOf scrollArea
-                     * @function
-                     */
-                    destructClickable: function () {
-                        tearDownEvents();
-                    }
-                });
-            
-            obj.floating = true;
-
-            // setup the module events
-            setupEvents();
-
-            // setup the behaviours of this entity
-            Hoverable(obj);
-
-            // returns the entity with its behaviours
-            return obj;
-        };
-    }
-);
-
-glue.module.create(
-    'glue/modules/spilgames/entity/ui/scrollbutton',
-    [
-        'glue',
-        'glue/modules/spilgames/entity/base',
-        'glue/modules/spilgames/entity/behaviour/hoverable',
-        'glue/modules/spilgames/entity/behaviour/clickable'
-    ],
-    function (Glue, Base, Hoverable, Clickable) {
-        /**
-         * Constructor
-         * @memberOf scrollButton
-         * @function
-         * @param {Object} obj: the entity object
-         */
-        return function (x, y, settings) {
-                /**
-                 * Sets up all events for this module
-                 * @name setupEvents
-                 * @memberOf scrollButton
-                 * @function
-                 */
-            var setupEvents = function () {
-                },
-                /**
-                 * Tears down all events for this module
-                 * @name teardownEvents
-                 * @memberOf scrollButton
-                 * @function
-                 */
-                tearDownEvents = function () {
-                },
-                /**
-                 * Variables
-                 */
-                isHovered = false,
-                isClicked = false,
-                /**
-                 * Returns the entity with its behaviours
-                 * @name obj
-                 * @memberOf scrollButton
-                 * @function
-                 */
-                obj = Base(x, y, settings).inject({
-                    draw: function (context) {
-                        this.parent(context);
-                    },
-                    update: function () {
-                        if(isClicked) {
-                            Glue.event.fire('SCROLL_SCREEN', [settings.direction]);
-                        }
-                        return true;
-                    },
-                    clickUp: function (e) {
-                        isClicked = false;
-                    },
-                    hoverOver: function (e) {
-                        isHovering = true;
-                        if(this.renderable) {
-                            this.renderable.setCurrentAnimation('hovered');
-                        }
-                    },
-                    hoverOut: function (e) {
-                        isHovering = false;
-                        if(this.renderable) {
-                            this.renderable.setCurrentAnimation('normal');
-                        }
-                    },
-                    isHovering: function () {
-                        return isHovering;
-                    },
-                    /**
-                     * Returns if this entity is clicked
-                     * @name clicked
-                     * @memberOf scrollButton
-                     * @function
-                     */
-                    clickDown: function (e) {
-                        isClicked = true;
-                    },
-                    isClicked: function () {
-                        return isClicked;
-                    },
-                    /**
-                     * Can be used to destruct this entity
-                     * @name destructClickable
-                     * @memberOf scrollButton
-                     * @function
-                     */
-                    destructClickable: function () {
-                        tearDownEvents();
-                    }
-                });
-
-                if(obj.renderable) {
-                    obj.renderable.addAnimation('normal', [0]);
-                    obj.renderable.addAnimation('hovered', [1]);
-                }
-
-            // we assume that all scroll buttons are floating
-            obj.floating = true;
-
-            // setup the module events
-            setupEvents();
-
-            // setup the behaviours of this entity
-            Hoverable(obj);
-            Clickable(obj);
-
-            // returns the entity with its behaviours
-            return obj;
-        };
-    }
-);

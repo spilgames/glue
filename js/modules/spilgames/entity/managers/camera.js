@@ -1,8 +1,8 @@
 glue.module.create(
-    'glue/entity/managers/camera',
+    'glue/modules/spilgames/entity/managers/camera',
     [
         'glue',
-        'glue/modules/entity/base',
+        'glue/modules/spilgames/entity/base',
     ],
     function (Glue, Base) {
         /**
