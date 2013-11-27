@@ -48,6 +48,7 @@
     };
     window.game = {};
     glue.module.create('glue', function () {
+        glue.api = GameAPI;
         return glue;
     });
 }());

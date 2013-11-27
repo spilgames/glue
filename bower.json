@@ -1,17 +1,18 @@
 {
-    "name": "5-glue-engine",
-    "version": "0.2.0",
-    "author": {
-        "name": "Jeroen Reurings",
-        "email": "jeroen.reurings@spilgames.com"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/spilgames/5-glue-engine"
-    },
-    "dependencies": {
-        "jasmine": "https://github.com/pivotal/jasmine.git",
-        "melonjs": "https://github.com/melonjs/melonJS.git",
-        "requirejs": "https://github.com/jrburke/requirejs.git"
-    }
+  "name": "5-glue-engine",
+  "version": "0.2.0",
+  "author": {
+    "name": "Jeroen Reurings",
+    "email": "jeroen.reurings@spilgames.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spilgames/5-glue-engine"
+  },
+  "dependencies": {
+    "jasmine": "https://github.com/pivotal/jasmine.git",
+    "melonjs": "https://github.com/melonjs/melonJS.git",
+    "requirejs": "https://github.com/jrburke/requirejs.git",
+    "game-api": "git@github.com:spilgames/GameAPI.git"
+  }
 }

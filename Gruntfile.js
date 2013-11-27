@@ -8,7 +8,8 @@ module.exports = function (grunt) {
             dist: {
                 files: {
                     'build/src/libraries.js': [
-                        'bower_components/requirejs/require.js'
+                        'bower_components/requirejs/require.js',
+                        'bower_components/game-api/dist/gameapi.js'
                     ],
                     'build/src/engines.js': [
                         'bower_components/melonjs/build/melonJS-0.9.10.js'

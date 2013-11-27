@@ -12,11 +12,16 @@ glue.module.create(
 
             describe('Branding', function () {
                 it('Should be able to fetch image data', function (done) {
-                    var updateSpy = jasmine.createSpy('update'),
-                        drawSpy = jasmine.createSpy('draw');
-
-                    expect(true).toEqual(false);
-                    done();
+                    Glue.api.loadAPI(function(api) {
+                        var logoData = Glue.api.Branding.getLogo();
+                        expect(logoData).toEqual(jasmine.any(Object));
+                        expect(logoData.image).toEqual(jasmine.any(String));
+                        expect(logoData.link).toEqual(jasmine.any(String));
+                        expect(logoData.posX).toEqual(jasmine.any(Number));
+                        expect(logoData.posY).toEqual(jasmine.any(Number));
+                        expect(logoData.scale).toEqual(jasmine.any(Number));
+                        done();
+                    });
                 });
             });
         });
