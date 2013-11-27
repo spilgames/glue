@@ -2053,6 +2053,480 @@ var requirejs, require, define;
     req(cfg);
 }(this));
 
+/*! game-api - v0.0.0 - 2013-11-25 */
+
+// --- Source: api-wrapper-start.js ---
+(function(global) {
+    'use strict';
+
+
+// --- Source: Utils.js ---
+/**
+ * Converts arguments to array
+ * @param  {Arguments} args
+ * @return {Array}
+ */
+function argsToArray(args) {
+    return args ? Array.prototype.slice.apply(args) : [];
+}
+
+// Utility object
+var utils = {};
+utils.getEnvData  = function() {};
+utils.getGameData = function() {};
+utils.getUserData = function() {};
+utils.getRole     = function() {
+    var hasJSLib = ('function' === typeof SpilGames && SpilGamesBootstrap instanceof Array);
+
+    return hasJSLib ? 'master' : 'slave';
+};
+
+// --- Source: EventTracking.js ---
+/**
+ * @module EventTracking
+ * The Event Tracking module, allows to track game-related events and pass them to SET / GA
+ * @copyright 2013 SpilGames
+ */
+
+function GameAPIEventTracking(data, apiReady) {
+    this.data = data;
+    this.moduleReady = (apiReady) ? apiReady : false;
+    this.gamePlayTracking = {started: false, done: false, saved: false, uid: null, gid: null, timestamp: null};
+    this.timeInGameTracking = {started: false, done: false, saved: false, uid: null, gid: null, timestamp: null};
+};
+
+GameAPIEventTracking.prototype.trackGamePlay = function(uid, gid, timestamp) {
+    // make use of the api messenger to post messages to the parent window
+    // which will then call SET
+    if(this.gamePlayTracking.started /*|| this.gamePlayTracking.saved*/) {
+        return;
+    }
+
+    this.gamePlayTracking.uid = uid;
+    this.gamePlayTracking.gid = gid;
+    this.gamePlayTracking.timestamp = timestamp;
+    this.gamePlayTracking.started = true;
+
+    // TODO: discuss this later how we proceed with saving the events in SET
+    // this.save = function() {
+    //     //send SET event
+
+    //     //update status
+    //     gamePlayTracking.saved = true;
+    //     return gamePlayTracking;
+    // };
+
+    return this.gamePlayTracking;
+};
+
+GameAPIEventTracking.prototype.trackTimeInGame = function(uid, gid, timestamp) {
+    // make use of the api messenger to post messages to the parent window
+    // which will then call SET
+    if(this.timeInGameTracking.started /*|| this.timeInGameTracking.saved*/) {
+        return;
+    }
+
+    this.timeInGameTracking.uid = uid;
+    this.timeInGameTracking.gid = gid;
+    this.timeInGameTracking.timestamp = timestamp;
+    this.timeInGameTracking.started = true;
+
+    // TODO: discuss this later how we proceed with saving the events in SET
+    // this.save = function() {
+    //     //send SET event
+
+    //     //update status
+    //     timeInGameTracking.saved = true;
+    //     return timeInGameTracking;
+    // };
+
+    return this.timeInGameTracking;
+};
+
+GameAPIEventTracking.prototype.startInternalTracking = function(uid, gid, timestamp) {
+    if(!this.moduleReady) {
+        return {
+            error: 'This method cannot be called before the API is loaded'
+        };
+    }
+
+    // var gpt = this.trackGamePlay(uid, gid, timestamp),
+    //     tgt = this.trackTimeInGame(uid, gid, timestamp);
+
+    // return (gpt.started && tgt.started);
+};
+
+GameAPIEventTracking.prototype.stopInternalTracking = function(uid, gid, timestamp) {
+    if(!this.moduleReady) {
+        return {
+            error: 'This method cannot be called before the API is loaded'
+        };
+    }
+};
+
+// --- Source: Branding.js ---
+/**
+ * @module Branding
+ * The branding module, allows to retrieve spil logos and insert them into html5 games
+ * @copyright 2013 SpilGames
+ */
+
+function GameAPIBranding(data, apiReady) {
+    this.data = data;
+    this.moduleReady = (apiReady) ? apiReady : false;
+}
+
+/**
+ * Returns data for the logo
+ * Settings can be overwritten by a config object
+ * @example
+     api.Branding.getLogo({position: 'TOP_LEFT'});
+ * @param       {Object}    config
+ * @property    {String}    config.position
+ * @property    {Integer}   config.posX
+ * @property    {Integer}   config.posY
+ * @property    {Integer}   config.maxHeight
+ * @property    {Integer}   config.maxWidth
+ * @returns     {Object}    logoData
+ */
+GameAPIBranding.prototype.getLogo = function(config) {
+    if(!this.moduleReady) {
+        return {
+            error: 'This method cannot be called before the API is loaded'
+        };
+    }
+
+    var optionsSchema = {
+            position: 'String',
+            posX: 'Number',
+            posY: 'Number',
+            maxHeight: 'Number',
+            maxWidth: 'Number'
+        },
+        // TODO !!! Replace this with actual Configar default branding properties, something like :
+        // defaultConfig = _getConfigarDefaultBrandingProperties()
+        // Also think about:
+        //  - how do we decide which localmarket logo to send back ?
+        //  - from which location ? cdn ?
+        //  - How do we scale the logo ?
+        //  - Should we provide raw data or a premade component ?
+        //  - And if the latter, how do we detect which component to serve ? (unity / flash / html5)
+        defaultConfig = {
+            image: 'http://www.agame.com/wdg/header_logo-1.7.5/img/79.gif',
+            link: 'http://www.agame.com/',
+            posX: 10,
+            posY: 20,
+            scale: 1
+        };
+
+    // TODO !!! Talk to Mark about this
+    // function _getConfigarDefaultBrandingProperties() {};
+
+    function _validateOptions(opts) {
+        for(var key in opts) {
+            if(opts.hasOwnProperty(key)) {
+                if(!optionsSchema.hasOwnProperty(key)) {
+                    return {error: 'Wrong argument passed: ' + key};
+                }
+
+                if(optionsSchema.hasOwnProperty(key) && opts[key].constructor.name !== optionsSchema[key]) {
+                    return {error: 'Wrong value type for ' + key + ': expected ' + optionsSchema[key] + ', got ' + opts[key].constructor.name};
+                }
+
+                // TODO !!! Validate position argument against whitelist (need to define whitelist)
+            }
+        }
+
+        return {error: false};
+    }
+
+    function _overwriteConfig(opts) {
+        var def = defaultConfig;
+        for (var key in opts) {
+            if(opts.hasOwnProperty(key)) {
+                def[key] = opts[key];
+            }
+        }
+
+        return def;
+    }
+
+    if(config && 'object' === typeof config) {
+        var result = defaultConfig,
+            validation = _validateOptions(config);
+
+        if(!validation.error) {
+            result = _overwriteConfig(config);
+        } else {
+            // in case of an error, return the default config plus the error msg
+            result.error = validation.error;
+        }
+
+        return result;
+    }
+
+    return defaultConfig;
+};
+
+// --- Source: Message.js ---
+/*
+ * Decodes a message string back to an object
+ * @param  {String}  Encoded message
+ * @return {Object}  Decoded message
+ */
+function decodeMessage(encodedMessage) {
+    var parts  = encodedMessage.split('|'),
+        result = {
+            type       : parts.shift(),
+            callbackId : parseInt(parts.shift(), 10),
+            data       : JSON.parse(parts.join('|'))
+        };
+
+    return result;
+}
+
+/*
+ * Create a new Message
+ * @param {Object|String} message               A message object or a stringified message
+ * @param {String}        message.type          Type of message, e.g. 'jslib'
+ * @param {Number}        message.callbackId    ID of the callback to be executed once a result
+ *                                              has been received
+ * @param {Mixed}         message.data          Message data
+ */
+function GameAPIMessage(message) {
+    var msgObj = ('string' === typeof message) ? decodeMessage(message) : message;
+
+    this.type       = msgObj.type;
+    this.callbackId = msgObj.callbackId;
+    this.data       = msgObj.data;
+
+    return this;
+}
+
+/*
+ * Encodes the current message object to a string, ready to be published
+ *
+ * @example
+ *     new GameAPIMessage({ type: 'jslib', callbackId: 1, data: 'test' }).encode();
+ *     // => 'jslib|1|"test"'
+ * 
+ * @return {String}  Encoded message
+ */
+GameAPIMessage.prototype.encode = function() {
+    var result = [
+        this.type,
+        this.callbackId,
+        JSON.stringify(this.data)
+    ].join('|');
+
+    return result;
+};
+
+// --- Source: Messenger.js ---
+/*
+ * Creates a new Messenger instance
+ * @param {Boolean}        isMaster Whether this instance acts as the Master or a Slave
+ * @param {iFrameElement}  target   The target iFrame to connect to (e.g., window.parent or the
+ *                                  game iframe)
+ * @constructor
+ */
+function GameAPIMessenger(isMaster, target) {
+    this.IS_MASTER  = ('boolean' === typeof isMaster) ? isMaster : false;
+    this.IS_SLAVE   = !this.IS_MASTER;
+    this._target    = target || window.parent || window;
+    this._callbacks = [];
+
+    this._setupEventListener();
+}
+
+// Private methods
+
+/*
+ * Send a message from Slave to Master (or vice-versa) via postMessage
+ * @param  {Mixed}  data       The data to send, will be JSON-stringified
+ * @param  {Number} callbackId Callback to be executed once a result has been returned
+ * @private
+ */
+GameAPIMessenger.prototype._postMessage = function(data, callbackId) {
+    var cbId,
+        message;
+
+    if ('function' === typeof data[data.length - 1]) {
+        cbId = this._callbacks.push(data.pop()) - 1;
+    } else {
+        cbId = callbackId;
+    }
+
+    message = new GameAPIMessage({
+        type       : 'jslib',
+        callbackId : cbId,
+        data       : data
+    }).encode();
+
+    this._target.postMessage(
+        message,
+        '*'
+    );
+};
+
+/*
+ * Does a call to JSLib with the provided arguments
+ */
+GameAPIMessenger.prototype._callJSLib = function() {
+    SpilGames.apply(
+        SpilGames,
+        argsToArray(arguments)
+    );
+};
+
+/*
+ * Set up event listener to listen to postMessage events
+ */
+GameAPIMessenger.prototype._setupEventListener = function() {
+    var messenger = this;
+        
+    function messageEventHandler() {
+        messenger._handleMessage(argsToArray(arguments));
+    }
+
+    if (window.addEventListener) {
+        window.addEventListener('message', messageEventHandler, false);
+    } else if (window.attachEvent) {
+        window.attachEvent('onmessage', messageEventHandler);
+    }
+};
+
+/*
+ * Handles incoming postMessage events
+ * @param  {Event} event  The incoming event
+ */
+GameAPIMessenger.prototype._handleMessage = function(event) {
+    var messenger  = this,
+        message    = new GameAPIMessage(event[0].data),
+        type       = message.type,
+        callbackId = message.callbackId,
+        data       = message.data,
+        callback   = this._callbacks[callbackId] || false;
+
+    if (this.IS_MASTER) {
+        if ('jslib' === type) {
+            data.push(function messageWrapper(returnData) {
+                messenger._postMessage(returnData, callbackId);
+            });
+            this._callJSLib.apply(this, data);
+        }
+    } else if (this.IS_SLAVE) {
+        if ('function' === typeof callback) {
+            delete this._callbacks[callbackId];
+        }
+        callback.call(null, data);
+    }
+
+};
+
+// Public methods
+
+/*
+ * Send an event. Uses either postMessage or directly calls JSLib
+ */
+GameAPIMessenger.prototype.publish = function(/* args */) {
+    var messageData = argsToArray(arguments);
+
+    if (this.IS_SLAVE) {
+        this._postMessage(messageData);
+    } else {
+        this._callJSLib.apply(this, messageData);
+    }
+};
+
+// --- Source: GameAPI.js ---
+/**
+ * @module GameAPI
+ * The Game API core
+ * @copyright 2013 SpilGames
+ * @constructor
+ */
+function GameAPI() {
+    /*
+     * Current version
+     * @type {String}
+     */
+    this.version = '0.0.0';
+
+    /*
+     * Configuration parameters for the Game API
+     * REVIEW: Is this needed? All SPAPI calls will go through JSLib anyways.
+     *         Also, at the moment this is public, I don't think it should be (Guido)
+     * @type {Object}
+     */
+    this.config = {
+        'SPAPI': '//api.spilgames.com/'
+    };
+
+    /*
+     * Game API status
+     * @type {Boolean}
+     */
+    this.isReady = false;
+}
+
+/**
+ * Load the API
+ * Prefetches SPAPI data such as : game info, user data, env info
+ * @example
+ *   GameAPI.loadAPI(function(Api, Data) {
+ *       console.log(Data);
+ *       Api.Branding.getLogo();
+ *   });
+ * @param   {Function}  callback    the callback function to be passed
+ * @returns {Object}    api
+ */
+GameAPI.prototype.loadAPI = function(callback) {
+
+    var role = utils.getRole(),
+        data = {
+            user: {},
+            game: {},
+            env: {}
+        },
+        isMaster,
+        target;
+
+    // Get the current api instance's role
+    isMaster = ('master' === role);
+
+    // TODO: Should this ID be passed in the call to `loadAPI`?
+    target = isMaster ? document.getElementById('iframegame').contentWindow : window.parent;
+
+    if (isMaster) {
+        // Fetch the necessary data
+        data.user = utils.getUserData();
+        data.game = utils.getGameData();
+        data.env = utils.getEnvData();
+    } else {
+        console.log('I am a slave, I am waiting for my master to tell me what to do');
+    }
+
+    // REVIEW: I don't think we should expose the Messenger instance to the developers?
+    //         It should only be used by other API modules
+    this.Messenger = new GameAPIMessenger(isMaster, target);
+
+    // The exposed modules
+    this.Branding  = new GameAPIBranding(data, true); //pass the ready argument
+    this.EventTracking = new GameAPIEventTracking(data, true);
+
+    // Game API is ready to use!
+    this.isReady = true;
+
+    // Execute the callback (passing along the API instance) and return its result
+    return callback.call(this, this);
+};
+
+
+// --- Source: api-wrapper-end.js ---
+
+    global.GameAPI = new GameAPI();
+}(window));
 /**
  * @license MelonJS Game Engine
  * @copyright (C) 2011 - 2013 Olivier Biot, Jason Oster
@@ -19032,6 +19506,7 @@ adapters.melonjs = (function (MelonJS) {
     };
     window.game = {};
     glue.module.create('glue', function () {
+        glue.api = GameAPI;
         return glue;
     });
 }());

@@ -31,7 +31,7 @@
             
             'spec/modules/glue/component/visible',
             //'spec/modules/glue/component/mix',
-            //'spec/backend/api.js'
+            'spec/backend/api.js'
             //'spec/game/clickthrough'
         ],
         // enable game canvas below for debugging
