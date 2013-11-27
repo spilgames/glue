@@ -1,8 +1,6 @@
 /**
  *  @desc Tests for MelonJS adapter
- *  @author Marco Colombo
- *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 (function (MelonJSAdapter, MelonJS) {
     describe('base.glue.adapters.melonJS', function () {

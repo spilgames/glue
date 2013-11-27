@@ -23,6 +23,7 @@ module.exports = function (grunt) {
                         'js/modules/glue/sugar.js'
                     ],
                     'build/src/modules.js': [
+                        'js/modules/spilgames/**/**/*.js',
                         'js/modules/glue/**/**/*.js'
                     ],
                     'build/glue.js': [

@@ -1,7 +1,6 @@
 /**
  *  @desc Tests for Sugar module
- *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 (function (Sugar, win, doc) {
     'use strict';

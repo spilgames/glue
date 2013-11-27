@@ -2,11 +2,10 @@
  *  @module Draggable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity draggable
- *  @author Jeroen Reurings
  *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
-    'glue/component/draggable',
+    'glue/modules/spilgames/entity/behaviour/draggable',
     [
         'glue'
     ],

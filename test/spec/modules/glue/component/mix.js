@@ -1,6 +1,6 @@
 /**
  *  @desc Tests for mixin components
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
     [

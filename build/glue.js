@@ -17851,7 +17851,7 @@ window.me = window.me || {};
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 var modules = modules || {};
 modules.glue = modules.glue || {};
@@ -18759,7 +18759,7 @@ modules.glue.sugar = (function (win, doc) {
  *  @module Glue
  *  @namespace adapters
  *  @desc Provides adapters to interface with native Glue functionality
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 var adapters = adapters || {};
 adapters.glue = (function (win, Glue) {
@@ -18797,7 +18797,7 @@ adapters.glue = (function (win, Glue) {
  *  @module MelonJS
  *  @namespace adapters
  *  @desc Provides adapters to interface with MelonJS
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 var adapters = adapters || {};
 adapters.melonjs = (function (MelonJS) {
@@ -18970,7 +18970,7 @@ adapters.melonjs = (function (MelonJS) {
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 (function () {
     var profile1 = (function (adapters) {
@@ -19044,7 +19044,7 @@ glue.module.create(
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity clickable
  *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
     'glue/component/clickable',
@@ -19147,7 +19147,7 @@ glue.module.create(
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity draggable
  *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
     'glue/component/draggable',
@@ -19451,7 +19451,7 @@ glue.module.create(
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity act as a droptarget
  *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
     'glue/component/droptarget',
@@ -19575,7 +19575,7 @@ glue.module.create(
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity hoverable
  *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
     'glue/component/hoverable',
@@ -20046,7 +20046,7 @@ glue.module.create(
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 var modules = modules || {};
 modules.glue = modules.glue || {};

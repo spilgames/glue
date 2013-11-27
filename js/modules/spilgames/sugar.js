@@ -1,14 +1,13 @@
 /**
  *  @module Sugar
- *  @namespace modules.glue
+ *  @namespace modules.spilgames
  *  @desc Provides javascript sugar functions
- *  @author Jeroen Reurings
  *  @copyright © 2013 - The SpilGames Authors
  */
 var modules = modules || {};
-modules.glue = modules.glue || {};
+modules.spilgames = modules.spilgames || {};
 
-modules.glue.sugar = (function (win, doc) {
+modules.spilgames.sugar = (function (win, doc) {
     'use strict';
     var i,
         /**

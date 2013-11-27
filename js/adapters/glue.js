@@ -2,7 +2,7 @@
  *  @module Glue
  *  @namespace adapters
  *  @desc Provides adapters to interface with native Glue functionality
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 var adapters = adapters || {};
 adapters.glue = (function (win, Glue) {

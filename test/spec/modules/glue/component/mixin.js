@@ -1,7 +1,7 @@
 /**
  *  @desc Tests for the Scroll Button
  *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(['glue'], function (Glue) {
     describe('spilgames.entity.behaviour.mixin', function () {
