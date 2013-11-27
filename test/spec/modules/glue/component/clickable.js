@@ -5,8 +5,8 @@
 glue.module.create(
     [
         'glue',
-        'glue/modules/spilgames/entity/base',
-        'glue/modules/spilgames/entity/behaviour/clickable'
+        'glue/component/base',
+        'glue/component/clickable'
     ],
     function (Glue, Base, Clickable) {
         describe('spilgames.entity.behaviour.clickable', function () {

@@ -2,13 +2,12 @@
  *  @module MelonJS
  *  @namespace adapters
  *  @desc Provides adapters to interface with MelonJS
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 var adapters = adapters || {};
 adapters.melonjs = (function (MelonJS) {
     'use strict';
     return {
-        name: 'melonJS-adapter',
         audio: {
             init: function (formats) {
                 return MelonJS.audio.init(formats);

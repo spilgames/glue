@@ -5,8 +5,8 @@
 glue.module.create(
     [
         'glue',
-        'glue/modules/spilgames/entity/base',
-        'glue/modules/spilgames/entity/behaviour/draggable'
+        'glue/component/base',
+        'glue/component/draggable'
     ],
     function (Glue, Base, Draggable) {
         describe('spilgames.entity.behaviour.draggable', function () {

@@ -1,7 +1,6 @@
 /**
  *  @desc Tests for the Glue Api
- *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(['glue'], function (Glue) {
     describe('glue.api', function () {
@@ -34,7 +33,7 @@ glue.module.create(['glue'], function (Glue) {
                         'entity/player',
                         [
                             'glue',
-                            'glue/modules/spilgames/entity/base'
+                            'glue/component/base'
                         ],
                         function (Glue, Base) {
                             return function (x, y, settings) {

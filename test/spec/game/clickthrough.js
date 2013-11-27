@@ -1,25 +1,6 @@
 /**
  *  @desc Tests for basic clickthrough game functionality
- *  These tests are setup in response to a number of issues raised by the implementing developer,
- *  and will eventually include solutions for all of these:
- *  #101: [Glue] Reset position draggables
- *  https://spilgames.jira.com/browse/BLK-101
- *  #102: [Glue] Investigate to find a better way to combine hoverable behaviour on mobile/desktop
- *  https://spilgames.jira.com/browse/BLK-102
- *  #103: [Glue] Drag move take into account screen position
- *  https://spilgames.jira.com/browse/BLK-103
- *  #104: [Glue] Droptarget hit check method based on pointer position
- *  https://spilgames.jira.com/browse/BLK-104
- *  #105: [Glue] drag area and drag button together
- *  https://spilgames.jira.com/browse/BLK-105
- *  #106: [Glue] Supply (glue) MelonJS debug bar
- *  https://spilgames.jira.com/browse/BLK-106
- *  #107: [Glue] Integrate destroy methods
- *  https://spilgames.jira.com/browse/BLK-107
- *  #108: [Glue] Collisionbox based clickable
- *  https://spilgames.jira.com/browse/BLK-108
- *  @author Jeroen Reurings
- *  @copyright © 2013 - SpilGames
+ *  @copyright © 2013 - The SpilGames Authors
  */
 glue.module.create(
     [
@@ -45,7 +26,7 @@ glue.module.create(
     ) {
     describe('game.clickthrough', function () {
         'use strict';
-        var manualTest = true,
+        var manualTest = false,
             testTimeout = 3000,
             cameraManager,
             setUpGame = function () {
