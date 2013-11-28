@@ -2,7 +2,7 @@
 Copyright (C) 2013, Jeroen Reurings - SpilGames
 All rights reserved.
 
-![ListForks](https://raw.github.com/spilgames/5-glue-engine/master/img/glue-logo.jpg)
+![ListForks](https://raw.github.com/Buffer-Overflow/images/master/glue-logo.jpg)
 
 License
 BSD 3-Clause License
