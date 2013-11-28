@@ -1,13 +1,13 @@
 ![ListForks](https://raw.github.com/Buffer-Overflow/images/master/glue-logo.jpg)
 
 ##Glue Game Engine
-Copyright (C) 2013, SpilGames
-all rights reserved.
-author: Jeroen Reurings
+Copyright (C) 2013, SpilGames  
+all rights reserved.  
+author: Jeroen Reurings  
 
-License
-BSD 3-Clause License
-https://github.com/spilgames/5-glue-engine/blob/master/LICENSE
+License  
+BSD 3-Clause License:  
+https://github.com/spilgames/5-glue-engine/blob/master/LICENSE  
 
 ### What is Glue?
 
