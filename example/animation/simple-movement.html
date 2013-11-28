@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Simple movement</title>
+    <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style>
+        #canvas {
+            border: 1px solid #000;
+            border-radius: 10px;
+        }
+    </style>
+    <script src="../../build/glue.min.js"></script>
+    <script>
+        glue.module.get(
+            [
+                'glue/game',
+                'glue/component/visible'
+            ],
+            function (Game, VisibleComponent) {
+                'use strict';
+
+                Game.setup({
+                    canvas: {
+                        id: 'canvas',
+                        dimension: {
+                            width: 800,
+                            height: 600
+                        }
+                    }
+                }, function () {
+                    var component = VisibleComponent();
+                    component.visible.setup({
+                        position: {
+                            x: 0,
+                            y: 0
+                        },
+                        dimension: {
+                            width: 125,
+                            height: 92
+                        },
+                        image: {
+                            src: 'http://www.spilgames.com/wp-content/themes/spilgames2/images/logo.png',
+                            width: 200,
+                            height: 100,
+                            frameWidth: 100
+                        }
+                    }).then(function () {
+                        component.mix({
+                            update: function (deltaT) {
+                                //console.log('updating', deltaT);
+                            },
+                            draw: function (deltaT, context) {
+                                this.visible.draw(deltaT, context);
+                            },
+                            pointerDown: function (e) {
+                                console.log('Pointer down: ', e.position);
+                            },
+                            pointerMove: function (e) {
+                                console.log('Pointer move: ', e.position);
+                            },
+                            pointerUp: function (e) {
+                                console.log('Pointer up: ', e.position);
+                            }
+                        });
+                    });
+                    Game.add(component);
+                });
+            }
+        );
+    </script>
+</head>
+<body>
+</body>
+</html>
