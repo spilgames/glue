@@ -2053,6 +2053,480 @@ var requirejs, require, define;
     req(cfg);
 }(this));
 
+/*! game-api - v0.0.0 - 2013-11-25 */
+
+// --- Source: api-wrapper-start.js ---
+(function(global) {
+    'use strict';
+
+
+// --- Source: Utils.js ---
+/**
+ * Converts arguments to array
+ * @param  {Arguments} args
+ * @return {Array}
+ */
+function argsToArray(args) {
+    return args ? Array.prototype.slice.apply(args) : [];
+}
+
+// Utility object
+var utils = {};
+utils.getEnvData  = function() {};
+utils.getGameData = function() {};
+utils.getUserData = function() {};
+utils.getRole     = function() {
+    var hasJSLib = ('function' === typeof SpilGames && SpilGamesBootstrap instanceof Array);
+
+    return hasJSLib ? 'master' : 'slave';
+};
+
+// --- Source: EventTracking.js ---
+/**
+ * @module EventTracking
+ * The Event Tracking module, allows to track game-related events and pass them to SET / GA
+ * @copyright 2013 SpilGames
+ */
+
+function GameAPIEventTracking(data, apiReady) {
+    this.data = data;
+    this.moduleReady = (apiReady) ? apiReady : false;
+    this.gamePlayTracking = {started: false, done: false, saved: false, uid: null, gid: null, timestamp: null};
+    this.timeInGameTracking = {started: false, done: false, saved: false, uid: null, gid: null, timestamp: null};
+};
+
+GameAPIEventTracking.prototype.trackGamePlay = function(uid, gid, timestamp) {
+    // make use of the api messenger to post messages to the parent window
+    // which will then call SET
+    if(this.gamePlayTracking.started /*|| this.gamePlayTracking.saved*/) {
+        return;
+    }
+
+    this.gamePlayTracking.uid = uid;
+    this.gamePlayTracking.gid = gid;
+    this.gamePlayTracking.timestamp = timestamp;
+    this.gamePlayTracking.started = true;
+
+    // TODO: discuss this later how we proceed with saving the events in SET
+    // this.save = function() {
+    //     //send SET event
+
+    //     //update status
+    //     gamePlayTracking.saved = true;
+    //     return gamePlayTracking;
+    // };
+
+    return this.gamePlayTracking;
+};
+
+GameAPIEventTracking.prototype.trackTimeInGame = function(uid, gid, timestamp) {
+    // make use of the api messenger to post messages to the parent window
+    // which will then call SET
+    if(this.timeInGameTracking.started /*|| this.timeInGameTracking.saved*/) {
+        return;
+    }
+
+    this.timeInGameTracking.uid = uid;
+    this.timeInGameTracking.gid = gid;
+    this.timeInGameTracking.timestamp = timestamp;
+    this.timeInGameTracking.started = true;
+
+    // TODO: discuss this later how we proceed with saving the events in SET
+    // this.save = function() {
+    //     //send SET event
+
+    //     //update status
+    //     timeInGameTracking.saved = true;
+    //     return timeInGameTracking;
+    // };
+
+    return this.timeInGameTracking;
+};
+
+GameAPIEventTracking.prototype.startInternalTracking = function(uid, gid, timestamp) {
+    if(!this.moduleReady) {
+        return {
+            error: 'This method cannot be called before the API is loaded'
+        };
+    }
+
+    // var gpt = this.trackGamePlay(uid, gid, timestamp),
+    //     tgt = this.trackTimeInGame(uid, gid, timestamp);
+
+    // return (gpt.started && tgt.started);
+};
+
+GameAPIEventTracking.prototype.stopInternalTracking = function(uid, gid, timestamp) {
+    if(!this.moduleReady) {
+        return {
+            error: 'This method cannot be called before the API is loaded'
+        };
+    }
+};
+
+// --- Source: Branding.js ---
+/**
+ * @module Branding
+ * The branding module, allows to retrieve spil logos and insert them into html5 games
+ * @copyright 2013 SpilGames
+ */
+
+function GameAPIBranding(data, apiReady) {
+    this.data = data;
+    this.moduleReady = (apiReady) ? apiReady : false;
+}
+
+/**
+ * Returns data for the logo
+ * Settings can be overwritten by a config object
+ * @example
+     api.Branding.getLogo({position: 'TOP_LEFT'});
+ * @param       {Object}    config
+ * @property    {String}    config.position
+ * @property    {Integer}   config.posX
+ * @property    {Integer}   config.posY
+ * @property    {Integer}   config.maxHeight
+ * @property    {Integer}   config.maxWidth
+ * @returns     {Object}    logoData
+ */
+GameAPIBranding.prototype.getLogo = function(config) {
+    if(!this.moduleReady) {
+        return {
+            error: 'This method cannot be called before the API is loaded'
+        };
+    }
+
+    var optionsSchema = {
+            position: 'String',
+            posX: 'Number',
+            posY: 'Number',
+            maxHeight: 'Number',
+            maxWidth: 'Number'
+        },
+        // TODO !!! Replace this with actual Configar default branding properties, something like :
+        // defaultConfig = _getConfigarDefaultBrandingProperties()
+        // Also think about:
+        //  - how do we decide which localmarket logo to send back ?
+        //  - from which location ? cdn ?
+        //  - How do we scale the logo ?
+        //  - Should we provide raw data or a premade component ?
+        //  - And if the latter, how do we detect which component to serve ? (unity / flash / html5)
+        defaultConfig = {
+            image: 'http://www.agame.com/wdg/header_logo-1.7.5/img/79.gif',
+            link: 'http://www.agame.com/',
+            posX: 10,
+            posY: 20,
+            scale: 1
+        };
+
+    // TODO !!! Talk to Mark about this
+    // function _getConfigarDefaultBrandingProperties() {};
+
+    function _validateOptions(opts) {
+        for(var key in opts) {
+            if(opts.hasOwnProperty(key)) {
+                if(!optionsSchema.hasOwnProperty(key)) {
+                    return {error: 'Wrong argument passed: ' + key};
+                }
+
+                if(optionsSchema.hasOwnProperty(key) && opts[key].constructor.name !== optionsSchema[key]) {
+                    return {error: 'Wrong value type for ' + key + ': expected ' + optionsSchema[key] + ', got ' + opts[key].constructor.name};
+                }
+
+                // TODO !!! Validate position argument against whitelist (need to define whitelist)
+            }
+        }
+
+        return {error: false};
+    }
+
+    function _overwriteConfig(opts) {
+        var def = defaultConfig;
+        for (var key in opts) {
+            if(opts.hasOwnProperty(key)) {
+                def[key] = opts[key];
+            }
+        }
+
+        return def;
+    }
+
+    if(config && 'object' === typeof config) {
+        var result = defaultConfig,
+            validation = _validateOptions(config);
+
+        if(!validation.error) {
+            result = _overwriteConfig(config);
+        } else {
+            // in case of an error, return the default config plus the error msg
+            result.error = validation.error;
+        }
+
+        return result;
+    }
+
+    return defaultConfig;
+};
+
+// --- Source: Message.js ---
+/*
+ * Decodes a message string back to an object
+ * @param  {String}  Encoded message
+ * @return {Object}  Decoded message
+ */
+function decodeMessage(encodedMessage) {
+    var parts  = encodedMessage.split('|'),
+        result = {
+            type       : parts.shift(),
+            callbackId : parseInt(parts.shift(), 10),
+            data       : JSON.parse(parts.join('|'))
+        };
+
+    return result;
+}
+
+/*
+ * Create a new Message
+ * @param {Object|String} message               A message object or a stringified message
+ * @param {String}        message.type          Type of message, e.g. 'jslib'
+ * @param {Number}        message.callbackId    ID of the callback to be executed once a result
+ *                                              has been received
+ * @param {Mixed}         message.data          Message data
+ */
+function GameAPIMessage(message) {
+    var msgObj = ('string' === typeof message) ? decodeMessage(message) : message;
+
+    this.type       = msgObj.type;
+    this.callbackId = msgObj.callbackId;
+    this.data       = msgObj.data;
+
+    return this;
+}
+
+/*
+ * Encodes the current message object to a string, ready to be published
+ *
+ * @example
+ *     new GameAPIMessage({ type: 'jslib', callbackId: 1, data: 'test' }).encode();
+ *     // => 'jslib|1|"test"'
+ * 
+ * @return {String}  Encoded message
+ */
+GameAPIMessage.prototype.encode = function() {
+    var result = [
+        this.type,
+        this.callbackId,
+        JSON.stringify(this.data)
+    ].join('|');
+
+    return result;
+};
+
+// --- Source: Messenger.js ---
+/*
+ * Creates a new Messenger instance
+ * @param {Boolean}        isMaster Whether this instance acts as the Master or a Slave
+ * @param {iFrameElement}  target   The target iFrame to connect to (e.g., window.parent or the
+ *                                  game iframe)
+ * @constructor
+ */
+function GameAPIMessenger(isMaster, target) {
+    this.IS_MASTER  = ('boolean' === typeof isMaster) ? isMaster : false;
+    this.IS_SLAVE   = !this.IS_MASTER;
+    this._target    = target || window.parent || window;
+    this._callbacks = [];
+
+    this._setupEventListener();
+}
+
+// Private methods
+
+/*
+ * Send a message from Slave to Master (or vice-versa) via postMessage
+ * @param  {Mixed}  data       The data to send, will be JSON-stringified
+ * @param  {Number} callbackId Callback to be executed once a result has been returned
+ * @private
+ */
+GameAPIMessenger.prototype._postMessage = function(data, callbackId) {
+    var cbId,
+        message;
+
+    if ('function' === typeof data[data.length - 1]) {
+        cbId = this._callbacks.push(data.pop()) - 1;
+    } else {
+        cbId = callbackId;
+    }
+
+    message = new GameAPIMessage({
+        type       : 'jslib',
+        callbackId : cbId,
+        data       : data
+    }).encode();
+
+    this._target.postMessage(
+        message,
+        '*'
+    );
+};
+
+/*
+ * Does a call to JSLib with the provided arguments
+ */
+GameAPIMessenger.prototype._callJSLib = function() {
+    SpilGames.apply(
+        SpilGames,
+        argsToArray(arguments)
+    );
+};
+
+/*
+ * Set up event listener to listen to postMessage events
+ */
+GameAPIMessenger.prototype._setupEventListener = function() {
+    var messenger = this;
+        
+    function messageEventHandler() {
+        messenger._handleMessage(argsToArray(arguments));
+    }
+
+    if (window.addEventListener) {
+        window.addEventListener('message', messageEventHandler, false);
+    } else if (window.attachEvent) {
+        window.attachEvent('onmessage', messageEventHandler);
+    }
+};
+
+/*
+ * Handles incoming postMessage events
+ * @param  {Event} event  The incoming event
+ */
+GameAPIMessenger.prototype._handleMessage = function(event) {
+    var messenger  = this,
+        message    = new GameAPIMessage(event[0].data),
+        type       = message.type,
+        callbackId = message.callbackId,
+        data       = message.data,
+        callback   = this._callbacks[callbackId] || false;
+
+    if (this.IS_MASTER) {
+        if ('jslib' === type) {
+            data.push(function messageWrapper(returnData) {
+                messenger._postMessage(returnData, callbackId);
+            });
+            this._callJSLib.apply(this, data);
+        }
+    } else if (this.IS_SLAVE) {
+        if ('function' === typeof callback) {
+            delete this._callbacks[callbackId];
+        }
+        callback.call(null, data);
+    }
+
+};
+
+// Public methods
+
+/*
+ * Send an event. Uses either postMessage or directly calls JSLib
+ */
+GameAPIMessenger.prototype.publish = function(/* args */) {
+    var messageData = argsToArray(arguments);
+
+    if (this.IS_SLAVE) {
+        this._postMessage(messageData);
+    } else {
+        this._callJSLib.apply(this, messageData);
+    }
+};
+
+// --- Source: GameAPI.js ---
+/**
+ * @module GameAPI
+ * The Game API core
+ * @copyright 2013 SpilGames
+ * @constructor
+ */
+function GameAPI() {
+    /*
+     * Current version
+     * @type {String}
+     */
+    this.version = '0.0.0';
+
+    /*
+     * Configuration parameters for the Game API
+     * REVIEW: Is this needed? All SPAPI calls will go through JSLib anyways.
+     *         Also, at the moment this is public, I don't think it should be (Guido)
+     * @type {Object}
+     */
+    this.config = {
+        'SPAPI': '//api.spilgames.com/'
+    };
+
+    /*
+     * Game API status
+     * @type {Boolean}
+     */
+    this.isReady = false;
+}
+
+/**
+ * Load the API
+ * Prefetches SPAPI data such as : game info, user data, env info
+ * @example
+ *   GameAPI.loadAPI(function(Api, Data) {
+ *       console.log(Data);
+ *       Api.Branding.getLogo();
+ *   });
+ * @param   {Function}  callback    the callback function to be passed
+ * @returns {Object}    api
+ */
+GameAPI.prototype.loadAPI = function(callback) {
+
+    var role = utils.getRole(),
+        data = {
+            user: {},
+            game: {},
+            env: {}
+        },
+        isMaster,
+        target;
+
+    // Get the current api instance's role
+    isMaster = ('master' === role);
+
+    // TODO: Should this ID be passed in the call to `loadAPI`?
+    target = isMaster ? document.getElementById('iframegame').contentWindow : window.parent;
+
+    if (isMaster) {
+        // Fetch the necessary data
+        data.user = utils.getUserData();
+        data.game = utils.getGameData();
+        data.env = utils.getEnvData();
+    } else {
+        console.log('I am a slave, I am waiting for my master to tell me what to do');
+    }
+
+    // REVIEW: I don't think we should expose the Messenger instance to the developers?
+    //         It should only be used by other API modules
+    this.Messenger = new GameAPIMessenger(isMaster, target);
+
+    // The exposed modules
+    this.Branding  = new GameAPIBranding(data, true); //pass the ready argument
+    this.EventTracking = new GameAPIEventTracking(data, true);
+
+    // Game API is ready to use!
+    this.isReady = true;
+
+    // Execute the callback (passing along the API instance) and return its result
+    return callback.call(this, this);
+};
+
+
+// --- Source: api-wrapper-end.js ---
+
+    global.GameAPI = new GameAPI();
+}(window));
 /**
  * @license MelonJS Game Engine
  * @copyright (C) 2011 - 2013 Olivier Biot, Jason Oster
@@ -17851,7 +18325,8 @@ window.me = window.me || {};
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};
 modules.glue = modules.glue || {};
@@ -17891,6 +18366,20 @@ modules.glue.sugar = (function (win, doc) {
          */
         isFunction = function (value) {
             return Object.prototype.toString.call(value) === '[object Function]';
+        },
+        /**
+         * Are the two given arrays identical (even when they have a different reference)
+         * @param {Array} first array to check
+         * @param {Array} second array to check
+         * @return {Boolean} true if they are identical, false if they are not
+         */
+        arrayMatch = function (a, b) {
+            var i = a.length;
+            if (i != b.length) return false;
+            while (i--) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
         },
         /**
          * Extends two objects by copying the properties
@@ -18751,7 +19240,8 @@ modules.glue.sugar = (function (win, doc) {
         $: $,
         setAnimationFrameTimeout: setAnimationFrameTimeout,
         animationEvent: animationEvent,
-        domReady: domReady
+        domReady: domReady,
+        arrayMatch: arrayMatch
     };
 }(window, window.document));
 
@@ -18759,7 +19249,8 @@ modules.glue.sugar = (function (win, doc) {
  *  @module Glue
  *  @namespace adapters
  *  @desc Provides adapters to interface with native Glue functionality
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var adapters = adapters || {};
 adapters.glue = (function (win, Glue) {
@@ -18797,7 +19288,8 @@ adapters.glue = (function (win, Glue) {
  *  @module MelonJS
  *  @namespace adapters
  *  @desc Provides adapters to interface with MelonJS
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var adapters = adapters || {};
 adapters.melonjs = (function (MelonJS) {
@@ -18970,7 +19462,8 @@ adapters.melonjs = (function (MelonJS) {
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 (function () {
     var profile1 = (function (adapters) {
@@ -19000,7 +19493,7 @@ adapters.melonjs = (function (MelonJS) {
                 audio: adapters.melonjs.audio,
                 entity: adapters.melonjs.entity,
                 event: adapters.melonjs.event,
-                game: adapters.melonjs.game,
+                game: adapters.glue.game,
                 input: adapters.melonjs.input,
                 levelManager: adapters.melonjs.levelManager,
                 loader: adapters.melonjs.loader,
@@ -19017,6 +19510,7 @@ adapters.melonjs = (function (MelonJS) {
     };
     window.game = {};
     glue.module.create('glue', function () {
+        glue.api = GameAPI;
         return glue;
     });
 }());
@@ -19046,7 +19540,8 @@ glue.module.create(
  *  @module Clickable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity clickable
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/modules/spilgames/entity/behaviour/clickable',
@@ -19148,7 +19643,8 @@ glue.module.create(
  *  @module Draggable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity draggable
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/modules/spilgames/entity/behaviour/draggable',
@@ -19451,7 +19947,8 @@ glue.module.create(
  *  @module Droptarget
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity act as a droptarget
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/modules/spilgames/entity/behaviour/droptarget',
@@ -19574,7 +20071,8 @@ glue.module.create(
  *  @module Hoverable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity hoverable
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/modules/spilgames/entity/behaviour/hoverable',
@@ -20037,7 +20535,8 @@ glue.module.create(
  *  @module Sugar
  *  @namespace modules.spilgames
  *  @desc Provides javascript sugar functions
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};
 modules.spilgames = modules.spilgames || {};
@@ -20940,30 +21439,12 @@ modules.spilgames.sugar = (function (win, doc) {
         domReady: domReady
     };
 }(window, window.document));
-glue.module.create(
-    'glue/component/base',
-    [
-        'glue'
-    ],
-    function (Glue) {
-        return function (obj) {
-            obj = obj || {};
-            obj.base = {
-                update: function (deltaT) {
-                    //console.log('update', deltaT);
-                }
-            };
-            return obj;
-        };
-    }
-);
-
 /*
  *  @module Clickable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity clickable
- *  @author Jeroen Reurings
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/component/clickable',
@@ -21065,8 +21546,8 @@ glue.module.create(
  *  @module Draggable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity draggable
- *  @author Jeroen Reurings
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/component/draggable',
@@ -21369,8 +21850,8 @@ glue.module.create(
  *  @module Droptarget
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity act as a droptarget
- *  @author Jeroen Reurings
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/component/droptarget',
@@ -21493,8 +21974,8 @@ glue.module.create(
  *  @module Hoverable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity hoverable
- *  @author Jeroen Reurings
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/component/hoverable',
@@ -21605,6 +22086,13 @@ glue.module.create(
     }
 );
 
+/*
+ *  @module Visible
+ *  @namespace component.visible
+ *  @desc Represents a visible component
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
 glue.module.create(
     'glue/component/visible',
     [
@@ -21612,47 +22100,61 @@ glue.module.create(
     ],
     function (Glue) {
         return function (obj) {
-            var position = {
-                    x: 0,
-                    y: 0
-                },
-                dimension = {
-                    width: 0,
-                    height: 0
-                },
-                image = {},
-                frameCount,
+            var position = null,
+                dimension = null,
+                image = null,
+                frameCount = 0,
                 frame = 1;
 
             obj = obj || {};
             obj.visible = {
+                ready: false,
                 setup: function (settings) {
-                    settings = settings || {};
-                    if (settings.dimension) {
-                        dimension = settings.dimension;
+                    var readyNeeded = [],
+                        readyList = [],
+                        successCallback,
+                        errorCallback,
+                        readyCheck = function () {
+                            if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
+                                successCallback();
+                            }
+                        },
+                        imageLoadHandler = function () {
+                            readyList.push('image');
+                            readyCheck();
+                        };
+
+                    if (settings) {
+                        if (settings.position) {
+                            position = settings.position;
+                        }
+                        if (settings.dimension) {
+                            dimension = settings.dimension;
+                        }
+                        if (settings.image) {
+                            readyNeeded.push('image');
+                            image = new Image();
+                            image.addEventListener('load', function () {
+                                imageLoadHandler();
+                            }, false);
+                            image.src = settings.image.src;
+                            if (image.frameWidth) {
+                                frameCount = dimension.width / image.frameWidth;
+                            }
+                        }
                     }
-                    if (settings.position) {
-                        position = settings.position;
-                    }
-                    if (settings.image) {
-                        image = settings.image;
-                    }
-                    image.obj = new Image(),
-                    image.loaded = false;
-                    image.obj.src = image.src;
-                    image.obj.addEventListener('load', function () {
-                        image.loaded = true;
-                    }, false);
-                    // This should also work for multi line animation sheets
-                    frameCount = dimension.width / image.frameWidth;
+                    return {
+                        then: function (onSuccess, onError) {
+                            successCallback = onSuccess;
+                            errorCallback = onError;
+                        }
+                    };
                 },
                 update: function (deltaT) {
-                    //console.log('update', deltaT)
+
                 },
                 draw: function (deltaT, context) {
-                    if (image.loaded) {
-                        context.drawImage(image.obj, position.x, position.y)
-                    }
+                    context.drawImage(image, position.x, position.y)
                 },
                 position: position,
                 getDimension: function () {
@@ -21664,174 +22166,327 @@ glue.module.create(
     }
 );
 
+/*
+ *  @module System
+ *  @namespace event
+ *  @desc This module offers a very basic pub/sub system event system
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/event/system',
+    function () {
+        var listeners = [],
+            x,
+            emitEvent = function (emitter, name, data) {
+                var x,
+                    listener,
+                    ln = listeners.length;
+
+                if (ln > 0) {
+                    for (x = 0; x < ln; x++) {
+                        listener = listeners[x];
+                        if (listener && listener.name === name) {
+                            listener.callback.apply({
+                                name: name,
+                                emitter: emitter
+                            }, data);
+                        }
+                    }
+                }
+            };
+
+        return {
+            on: function (name, callback) {
+                listeners.push({name: name, callback: callback});
+                return [name, callback];
+            },
+            off: function (name, callback) {
+                var x,
+                    ln,
+                    listener;
+
+                for (x = 0, ln = listeners.length; x < ln; ++x) {
+                    listener = listeners[x];
+                    if (listener && listener.name === name &&
+                            listener.callback === callback) {
+                        listeners.splice(x, 1);
+                    }
+                }
+            },
+            fire: function (eventName) {
+                console.log('fire', eventName);
+                emitEvent('system',
+                    eventName,
+                    Array.prototype.slice.call(
+                        arguments,
+                        1,
+                        arguments.length
+                    )
+                );
+            }
+        };
+    }
+);
+
 glue.module.create(
     'glue/game',
     [
-        'glue'
+        'glue',
+        'glue/event/system'
     ],
-    function (Glue) {
-        return function (window, canvasId) {
-            var fps = 60,
-                components = [],
-                addedComponents = [],
-                removedComponents = [],
-                lastFrame = new Date().getTime(),
-                canvas,
-                context2D,
-                backBuffer,
-                backBufferContext2D,
-                canvasSupported,
-                canvasDimensions = {
-                    width: 640,
-                    height: 480
-                },
-                doc = window.document,
-                initCanvas = function () {
-                    canvas = document.querySelector('#' + canvasId);
-                    // creat canvas if it doesn't exist
-                    if (canvas === null) {
-                        canvas = document.createElement('canvas');
-                        canvas.id = canvasId;
-                        // temp
-                        canvas.width = canvasDimensions.width;
-                        canvas.height = canvasDimensions.height;
-                        canvas.style.border = '1px solid #000';
-                        document.body.appendChild(canvas);
-                    }
-
-                    if (canvas.getContext) {
-                        canvasSupported = true;
-                        context2D = canvas.getContext('2d');
-                        backBuffer = document.createElement('canvas');
-                        backBuffer.width = canvas.width;
-                        backBuffer.height = canvas.height;
-                        backBufferContext2D = backBuffer.getContext('2d');
-                    }
-                },
-                setEvents = function () {
-                    doc.addEventListener('keydown', function (e) {
-                        GameLoop.keyDown(e);
-                    });
-                    doc.addEventListener('keyup', function (e) {
-                        GameLoop.keyUp(e);
-                    });
-                    canvas.addEventListener('click', function (e) {
-                        GameLoop.mouseClick(e);
-                    });
-                },
-                sort = function() {
-                    components.sort(function(a, b) {
-                        return a.z - b.z;
-                    });
-                },
-                addComponents = function () {
-                    if (addedComponents.length) {
-                        for (var i = 0; i < addedComponents.length; ++i) {
-                            components.push(addedComponents[i]);
-                        };
-                        addedComponents = [];
-                        sort();
-                    }
-                },
-                removeComponents = function () {
-                    if (removedComponents.length) {
-                        for (var i = 0; i < removedComponents.length; ++i) {
-                            components.removeObject(removedComponents[i]);
-                        };
-                        removedComponents = [];
-                    }
-                },
-                redraw = function() {
-                    backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
-                    context2D.clearRect(0, 0, canvas.width, canvas.height);
+    function (Glue, Event) {
+        var fps = 60,
+            components = [],
+            addedComponents = [],
+            removedComponents = [],
+            lastFrame = new Date().getTime(),
+            canvas = null,
+            canvasId = 0,
+            context2D = null,
+            backBuffer = null,
+            backBufferContext2D = null,
+            canvasSupported = false,
+            canvasDimension = null,
+            win = null,
+            doc = null,
+            isRunning = false,
+            initCanvas = function () {
+                canvas = document.querySelector('#' + canvasId);
+                // create canvas if it doesn't exist
+                if (canvas === null) {
+                    canvas = document.createElement('canvas');
+                    canvas.id = canvasId;
+                    canvas.width = canvasDimension.width;
+                    canvas.height = canvasDimension.height;
+                    document.body.appendChild(canvas);
                 }
-                cycle = function () {
-                    var currentFrame = new Date().getTime(),
-                        deltaT = (currentFrame - lastFrame),
-                        component;
-
-                    requestAnimationFrame(cycle);
-                    lastFrame = currentFrame;
-
-                    sort();
-
-                    if (canvasSupported) {
-                        redraw();
-                        removeComponents();
-                        addComponents();
-
-                        for (var i = 0; i < components.length; ++i) {
-                            component = components[i];
-                            if (component.update) {
-                                component.update(deltaT);
-                            }
-                            if (component.draw) {
-                                component.draw(deltaT, backBufferContext2D);
-                            }
-                        };
-                        context2D.drawImage(backBuffer, 0, 0);
-                    }
-                },
-                startup = function () {
-                    cycle();
-                };
-
-            initCanvas();
-            setEvents();
-            startup();
-
-            var GameLoop = {};
-            GameLoop.keyDown = function (e) {
-                //log('Key down: ' + e);
-                for (var i = 0; i < components.length; ++i) {
-                    if (components[i].keyDown) {
-                        components[i].keyDown(e);
-                    }
+                if (canvas.getContext) {
+                    canvasSupported = true;
+                    context2D = canvas.getContext('2d');
+                    backBuffer = document.createElement('canvas');
+                    backBuffer.width = canvas.width;
+                    backBuffer.height = canvas.height;
+                    backBufferContext2D = backBuffer.getContext('2d');
                 }
-            }
-            GameLoop.keyUp = function (e) {
-                //log('Key up: ' + e);
-                for (var i = 0; i < components.length; ++i) {
-                    if (components[i].keyUp) {
-                        components[i].keyUp(e);
-                    }
-                }
-            }
-            GameLoop.mouseClick = function (e) {
-                //log('Mouse click: ' + e);
-                for (var i = 0; i < components.length; ++i) {
-                    if (components[i].mouseClick) {
-                        components[i].mouseClick(getMousePosition(e));
-                    }
-                }
-            }
-
-            return {
-                add: function (component) {
-                    addedComponents.push(component);
-                },
-                remove: function (component) {
-                    removedComponents.push(component);
-                },
-                get: function (componentName) {
-                    var i,
-                        l,
-                        component;
-
-                    for (i = 0, l = components.length; i < l; ++i) {
-                        component = components[i];
-                        if (component.name === componentName) {
-                            return component;
+            },
+            sort = function() {
+                components.sort(function(a, b) {
+                    return a.z - b.z;
+                });
+            },
+            addComponents = function () {
+                var component;
+                if (addedComponents.length) {
+                    for (var i = 0; i < addedComponents.length; ++i) {
+                        component = addedComponents[i];
+                        if (component.init) {
+                            component.init();
                         }
-                    }
-                },
-                canvas: {
-                    getDimensions: function () {
-                        return canvasDimensions;
+                        components.push(addedComponents[i]);
+                    };
+                    addedComponents = [];
+                    sort();
+                }
+            },
+            removeComponents = function () {
+                var component;
+                if (removedComponents.length) {
+                    for (var i = 0; i < removedComponents.length; ++i) {
+                        component = removedComponents[i];
+                        if (component.destroy) {
+                            component.destroy();
+                        }
+                        components.removeObject(component);
+                    };
+                    removedComponents = [];
+                }
+            },
+            redraw = function() {
+                backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
+                context2D.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            cycle = function () {
+                var currentFrame = new Date().getTime(),
+                    deltaT = (currentFrame - lastFrame),
+                    component;
+
+                requestAnimationFrame(cycle);
+                lastFrame = currentFrame;
+
+                sort();
+
+                if (canvasSupported) {
+                    redraw();
+                    removeComponents();
+                    addComponents();
+
+                    for (var i = 0; i < components.length; ++i) {
+                        component = components[i];
+                        if (component.update) {
+                            component.update(deltaT);
+                        }
+                        if (component.draw) {
+                            component.draw(deltaT, backBufferContext2D);
+                        }
+                    };
+                    context2D.drawImage(backBuffer, 0, 0);
+                }
+            },
+            startup = function () {
+                cycle();
+            },
+            pointerDown = function (e) {
+                //console.log('Pointer down: ', e.position);
+                var i,
+                    l,
+                    component;
+
+                for (i = 0, l = components.length; i < l; ++i) {
+                    component = components[i];
+                    if (component.pointerDown) {
+                        component.pointerDown(e);
                     }
                 }
+            },
+            pointerMove = function (e) {
+                //console.log('Pointer move: ', e.position);
+                var i,
+                    l,
+                    component;
+
+                for (i = 0, l = components.length; i < l; ++i) {
+                    component = components[i];
+                    if (component.pointerMove) {
+                        component.pointerMove(e);
+                    }
+                }
+            },
+            pointerUp = function (e) {
+                //console.log('Pointer up: ', e.position);
+                var i,
+                    l,
+                    component;
+
+                for (i = 0, l = components.length; i < l; ++i) {
+                    component = components[i];
+                    if (component.pointerUp) {
+                        component.pointerUp(e);
+                    }
+                }
+            },
+            touchStart = function (e) {
+                var touch = e.targetTouches[0];
+                e.preventDefault();
+                e.position = {
+                    x: touch.pageX - canvas.offsetLeft,
+                    y: touch.pageY - canvas.offsetTop
+                };
+                pointerDown(e);
+            },
+            touchMove = function (e) {
+                var touch = e.targetTouches[0];
+                e.preventDefault();
+                e.position = {
+                    x: touch.pageX - canvas.offsetLeft,
+                    y: touch.pageY - canvas.offsetTop
+                };
+                pointerMove(e);
+            },
+            touchEnd = function (e) {
+                var touch = e.changedTouches[0];
+                e.preventDefault();
+                e.position = {
+                    x: touch.pageX - canvas.offsetLeft,
+                    y: touch.pageY - canvas.offsetTop
+                };
+                pointerUp(e);
+            },
+            mouseDown = function (e) {
+                e.position = {
+                    x: e.clientX - canvas.offsetLeft,
+                    y: e.clientY - canvas.offsetTop
+                };
+                pointerDown(e);
+            },
+            mouseMove = function (e) {
+                e.position = {
+                    x: e.clientX - canvas.offsetLeft,
+                    y: e.clientY - canvas.offsetTop
+                };
+                pointerMove(e);
+            },
+            mouseUp = function (e) {
+                e.position = {
+                    x: e.clientX - canvas.offsetLeft,
+                    y: e.clientY - canvas.offsetTop
+                };
+                pointerUp(e);
+            },
+            setupEventListeners = function () {
+                if ('ontouchstart' in win) {
+                    canvas.addEventListener('touchstart', touchStart);
+                    canvas.addEventListener('touchmove', touchMove);
+                    canvas.addEventListener('touchend', touchEnd);
+                } else {
+                    canvas.addEventListener('mousedown', mouseDown);
+                    canvas.addEventListener('mousemove', mouseMove);
+                    canvas.addEventListener('mouseup', mouseUp);
+                }
+                Event.on('glue.pointer.down', pointerDown);
+                Event.on('glue.pointer.move', pointerMove);
+                Event.on('glue.pointer.up', pointerUp);
+            },
+            shutdown = function () {
+                canvas.removeEventListener('touchstart', touchStart);
+                canvas.removeEventListener('touchmove', touchMove);
+                canvas.removeEventListener('touchend', touchEnd);
+                Event.off('glue.pointer.down', pointerDown);
+                Event.off('glue.pointer.move', pointerMove);
+                Event.off('glue.pointer.up', pointerUp);
+            };
+
+        return {
+            setup: function (config, onReady) {
+                if (isRunning) {
+                    throw('Glue: The main game is already running');
+                }
+                isRunning = true;
+                win = window;
+                doc = win.document;
+                canvasId = config.canvas.id;
+                canvasDimension = config.canvas.dimension
+                initCanvas();
+                setupEventListeners();
+                startup();
+                if (onReady) {
+                    onReady();
+                }
+            },
+            add: function (component) {
+                addedComponents.push(component);
+            },
+            remove: function (component) {
+                removedComponents.push(component);
+            },
+            get: function (componentName) {
+                var i,
+                    l,
+                    component;
+
+                for (i = 0, l = components.length; i < l; ++i) {
+                    component = components[i];
+                    if (component.name === componentName) {
+                        return component;
+                    }
+                }
+            },
+            canvas: {
+                getDimensions: function () {
+                    return canvasDimensions;
+                }
             }
-        }
+        };
     }
 );
 
@@ -21840,7 +22495,8 @@ glue.module.create(
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};
 modules.glue = modules.glue || {};
@@ -21880,6 +22536,20 @@ modules.glue.sugar = (function (win, doc) {
          */
         isFunction = function (value) {
             return Object.prototype.toString.call(value) === '[object Function]';
+        },
+        /**
+         * Are the two given arrays identical (even when they have a different reference)
+         * @param {Array} first array to check
+         * @param {Array} second array to check
+         * @return {Boolean} true if they are identical, false if they are not
+         */
+        arrayMatch = function (a, b) {
+            var i = a.length;
+            if (i != b.length) return false;
+            while (i--) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
         },
         /**
          * Extends two objects by copying the properties
@@ -22740,6 +23410,7 @@ modules.glue.sugar = (function (win, doc) {
         $: $,
         setAnimationFrameTimeout: setAnimationFrameTimeout,
         animationEvent: animationEvent,
-        domReady: domReady
+        domReady: domReady,
+        arrayMatch: arrayMatch
     };
 }(window, window.document));

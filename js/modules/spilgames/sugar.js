@@ -2,7 +2,8 @@
  *  @module Sugar
  *  @namespace modules.spilgames
  *  @desc Provides javascript sugar functions
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};
 modules.spilgames = modules.spilgames || {};

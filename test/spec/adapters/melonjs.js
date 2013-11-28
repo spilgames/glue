@@ -1,6 +1,7 @@
 /**
  *  @desc Tests for MelonJS adapter
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 (function (MelonJSAdapter, MelonJS) {
     describe('base.glue.adapters.melonJS', function () {

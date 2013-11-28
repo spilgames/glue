@@ -1,6 +1,7 @@
 /**
  *  @desc Tests for mixin components
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     [
@@ -32,12 +33,10 @@ glue.module.create(
                 });
                 Glue.component().create(
                     [
-                        'glue/component/base',
                         'glue/component/visible',
                         'test.player'
                     ],
                     function (obj) {
-                        expect(obj.base.update).toBeTruthy();
                         expect(obj.visible.update).toBeTruthy();
                         expect(obj.visible.draw).toBeTruthy();
                         expect(obj.playerMethod()).toEqual('success');
@@ -121,7 +120,6 @@ glue.module.create(
                     'mixed',
                     [
                         'glue',
-                        'glue/component/base',
                         'glue/component/visible'
                     ],
                     function (Glue, BaseComponent, VisibleComponent) {
@@ -129,7 +127,6 @@ glue.module.create(
 
                             var obj = {
                                 update: function (deltaT) {
-                                    this.base.update(deltaT);
                                     this.visible.update(deltaT);
                                 },
                                 draw: function (deltaT, context) {

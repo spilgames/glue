@@ -1,7 +1,8 @@
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 (function () {
     var profile1 = (function (adapters) {
@@ -31,7 +32,7 @@
                 audio: adapters.melonjs.audio,
                 entity: adapters.melonjs.entity,
                 event: adapters.melonjs.event,
-                game: adapters.melonjs.game,
+                game: adapters.glue.game,
                 input: adapters.melonjs.input,
                 levelManager: adapters.melonjs.levelManager,
                 loader: adapters.melonjs.loader,
@@ -48,6 +49,7 @@
     };
     window.game = {};
     glue.module.create('glue', function () {
+        glue.api = GameAPI;
         return glue;
     });
 }());

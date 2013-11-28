@@ -1,105 +1,109 @@
 /**
  *  @desc Tests for visible components
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     [
         'glue',
         'glue/game',
+        'glue/event/system',
         'glue/component/visible'
     ],
-    function (Glue, Game, VisibleComponent) {
+    function (Glue, Game, Event, VisibleComponent) {
         describe('glue.component.visible', function () {
             'use strict';
 
-            it('Should be able to create a visible component',
-                function (done) {
-                var updateSpy = jasmine.createSpy('update'),
-                    drawSpy = jasmine.createSpy('draw');
-
-                Glue.component().create(
-                    [
-                        'glue/component/base',
-                        'glue/component/visible'
-                    ],
-                    function (obj) {
-                        glue.module.create('game.player', function () {
-                            var speed = 1,
-                                direction = 'right';
-
-                            return function (config) {
-                                return obj.mix({
-                                    update: function (deltaT) {
-                                        var canvasDimension = gg.canvas.getDimensions(),
-                                            playerDimension = this.visible.getDimension();
-
-                                        this.base.update(deltaT);
-                                        //console.log(this.visible.position.x,
-                                        //    canvasDimension.width, playerDimension.width);
-                                        if (this.visible.position.x > canvasDimension.width -
-                                                playerDimension.width) {
-                                            direction = 'down';
-                                        }
-                                        if (this.visible.position.y > canvasDimension.height -
-                                                playerDimension.height) {
-                                            direction = 'left';
-                                        }
-                                        if (this.visible.position.x < 0) {
-                                            direction = 'up';
-                                        }
-                                        if (this.visible.position.y < 0) {
-                                            this.visible.position.y = 0;
-                                            direction = 'right';
-                                        }
-                                        switch (direction) {
-                                            case 'right':
-                                                this.visible.position.x += speed;
-                                            break;
-                                            case 'down':
-                                                this.visible.position.y += speed;
-                                            break;
-                                            case 'left':
-                                                this.visible.position.x -= speed;
-                                            break;
-                                            case 'up':
-                                                this.visible.position.y -= speed;
-                                            break;
-                                        }
-                                        updateSpy(deltaT);
-                                    },
-                                    draw: function (deltaT, context) {
-                                        this.visible.draw(deltaT, context);
-                                        drawSpy(deltaT, context);
-                                    }
-                                });
-                            };
-                        });
-                        glue.module.get(['game.player'], function (Player) {
-                            var player = Player();
-                            player.name = 'testVisible';
-                            player.visible.setup({
-                                dimension: {
-                                    width: 125,
-                                    height: 92
-                                },
-                                image: {
-                                    src: 'http://www.spilgames.com/wp-content/themes/spilgames2/images/logo.png',
-                                    width: 200,
-                                    height: 100,
-                                    frameWidth: 100
-                                }
-                            });
-                            gg.add(Player({}));
-                            setTimeout(function () {
-                                var test = gg.get('testVisible');
-                                expect(test.name).toEqual('testVisible');
-                                expect(updateSpy).toHaveBeenCalledWith(jasmine.any(Number));
-                                expect(drawSpy).toHaveBeenCalledWith(jasmine.any(Number), jasmine.any(Object));
-                                done();
-                            }, 100);
-                        });
+            it('Should be able to create a visible component using an image', function (done) {
+                /*
+                // This is awesome
+                Game.add({
+                    update: function (deltaT) {
+                        console.log('update', deltaT);
+                    },
+                    draw: function (deltaT, context) {
+                        console.log('draw', deltaT, context);
                     }
-                );
+                });
+                */
+                var component = VisibleComponent();
+                component.visible.setup({
+                    position: {
+                        x: 0,
+                        y: 0
+                    },
+                    dimension: {
+                        width: 125,
+                        height: 92
+                    },
+                    image: {
+                        src: 'http://www.spilgames.com/wp-content/themes/spilgames2/images/logo.png',
+                        width: 200,
+                        height: 100,
+                        frameWidth: 100
+                    }
+                }).then(function () {
+                    component.mix({
+                        update: function (deltaT) {
+                            //console.log('updating', deltaT);
+                        },
+                        draw: function (deltaT, context) {
+                            this.visible.draw(deltaT, context);
+                        },
+                        pointerDown: function (e) {
+                            console.log('Pointer down: ', e.position);
+                        },
+                        pointerMove: function (e) {
+                            console.log('Pointer move: ', e.position);
+                        },
+                        pointerUp: function (e) {
+                            console.log('Pointer up: ', e.position);
+                        }
+                    });
+                    spyOn(component, 'pointerDown').andCallThrough();
+                    spyOn(component, 'pointerMove').andCallThrough();
+                    spyOn(component, 'pointerUp').andCallThrough();
+                    Game.add(component);
+                    setTimeout(function () {
+                        Event.fire('glue.pointer.down', {
+                            position: {
+                                x: 10,
+                                y: 20
+                            }
+                        });
+                        Event.fire('glue.pointer.move', {
+                            position: {
+                                x: 300,
+                                y: 230
+                            }
+                        });
+                        Event.fire('glue.pointer.up', {
+                            position: {
+                                x: 300,
+                                y: 230
+                            }
+                        });
+                        expect(component.pointerDown).toHaveBeenCalledWith({
+                            position: {
+                                x: 10,
+                                y: 20
+                            }
+                        });
+                        expect(component.pointerMove).toHaveBeenCalledWith({
+                            position: {
+                                x: 300,
+                                y: 230
+                            }
+                        });
+                        expect(component.pointerUp).toHaveBeenCalledWith({
+                            position: {
+                                x: 300,
+                                y: 230
+                            }
+                        });
+                        done();
+                    }, 30);
+                });
             });
         });
     }
