@@ -2,7 +2,8 @@
  *  @module Clickable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity clickable
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(

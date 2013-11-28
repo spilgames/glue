@@ -1,8 +1,9 @@
-##Glue Game Engine
-Copyright (C) 2013, Jeroen Reurings - SpilGames
-All rights reserved.
-
 ![ListForks](https://raw.github.com/Buffer-Overflow/images/master/glue-logo.jpg)
+
+##Glue Game Engine
+Copyright (C) 2013, SpilGames
+all rights reserved.
+author: Jeroen Reurings
 
 License
 BSD 3-Clause License

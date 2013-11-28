@@ -2,7 +2,8 @@
  *  @module Droptarget
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity act as a droptarget
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(

@@ -18325,7 +18325,8 @@ window.me = window.me || {};
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};
@@ -19249,7 +19250,8 @@ modules.glue.sugar = (function (win, doc) {
  *  @module Glue
  *  @namespace adapters
  *  @desc Provides adapters to interface with native Glue functionality
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var adapters = adapters || {};
@@ -19288,7 +19290,8 @@ adapters.glue = (function (win, Glue) {
  *  @module MelonJS
  *  @namespace adapters
  *  @desc Provides adapters to interface with MelonJS
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var adapters = adapters || {};
@@ -19462,7 +19465,8 @@ adapters.melonjs = (function (MelonJS) {
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 (function () {
@@ -19540,7 +19544,8 @@ glue.module.create(
  *  @module Clickable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity clickable
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -19643,7 +19648,8 @@ glue.module.create(
  *  @module Draggable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity draggable
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -19947,7 +19953,8 @@ glue.module.create(
  *  @module Droptarget
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity act as a droptarget
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -20071,7 +20078,8 @@ glue.module.create(
  *  @module Hoverable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity hoverable
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -20535,7 +20543,8 @@ glue.module.create(
  *  @module Sugar
  *  @namespace modules.spilgames
  *  @desc Provides javascript sugar functions
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};
@@ -21443,7 +21452,8 @@ modules.spilgames.sugar = (function (win, doc) {
  *  @module Clickable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity clickable
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -21546,7 +21556,8 @@ glue.module.create(
  *  @module Draggable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity draggable
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -21850,7 +21861,8 @@ glue.module.create(
  *  @module Droptarget
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity act as a droptarget
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -21974,7 +21986,8 @@ glue.module.create(
  *  @module Hoverable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity hoverable
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -22090,7 +22103,8 @@ glue.module.create(
  *  @module Visible
  *  @namespace component.visible
  *  @desc Represents a visible component
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -22170,7 +22184,8 @@ glue.module.create(
  *  @module System
  *  @namespace event
  *  @desc This module offers a very basic pub/sub system event system
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -22495,7 +22510,8 @@ glue.module.create(
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};

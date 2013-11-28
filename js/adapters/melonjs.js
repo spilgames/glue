@@ -2,7 +2,8 @@
  *  @module MelonJS
  *  @namespace adapters
  *  @desc Provides adapters to interface with MelonJS
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var adapters = adapters || {};
