@@ -7,18 +7,22 @@ glue.module.create(
     [
         'glue',
         'glue/game',
+        'glue/event/system',
         'glue/component/visible'
     ],
-    function (Glue, Game, VisibleComponent) {
+    function (Glue, Game, Event, VisibleComponent) {
         describe('glue.component.visible', function () {
             'use strict';
 
             it('Should be able to create a visible component using an image', function (done) {
                 /*
-                // This is amazing
+                // This is awesome
                 Game.add({
                     update: function (deltaT) {
-                        console.log('updating', deltaT);
+                        console.log('update', deltaT);
+                    },
+                    draw: function (deltaT, context) {
+                        console.log('draw', deltaT, context);
                     }
                 });
                 */
@@ -39,16 +43,67 @@ glue.module.create(
                         frameWidth: 100
                     }
                 }).then(function () {
-                    Game.add(component.mix({
+                    component.mix({
                         update: function (deltaT) {
                             //console.log('updating', deltaT);
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);
+                        },
+                        pointerDown: function (e) {
+                            console.log('Pointer down: ', e.position);
+                        },
+                        pointerMove: function (e) {
+                            console.log('Pointer move: ', e.position);
+                        },
+                        pointerUp: function (e) {
+                            console.log('Pointer up: ', e.position);
                         }
-                    }));
+                    });
+                    spyOn(component, 'pointerDown').andCallThrough();
+                    spyOn(component, 'pointerMove').andCallThrough();
+                    spyOn(component, 'pointerUp').andCallThrough();
+                    Game.add(component);
+                    setTimeout(function () {
+                        Event.fire('glue.pointer.down', {
+                            position: {
+                                x: 10,
+                                y: 20
+                            }
+                        });
+                        Event.fire('glue.pointer.move', {
+                            position: {
+                                x: 300,
+                                y: 230
+                            }
+                        });
+                        Event.fire('glue.pointer.up', {
+                            position: {
+                                x: 300,
+                                y: 230
+                            }
+                        });
+                        expect(component.pointerDown).toHaveBeenCalledWith({
+                            position: {
+                                x: 10,
+                                y: 20
+                            }
+                        });
+                        expect(component.pointerMove).toHaveBeenCalledWith({
+                            position: {
+                                x: 300,
+                                y: 230
+                            }
+                        });
+                        expect(component.pointerUp).toHaveBeenCalledWith({
+                            position: {
+                                x: 300,
+                                y: 230
+                            }
+                        });
+                        done();
+                    }, 30);
                 });
-                done();
             });
         });
     }

@@ -22166,40 +22166,99 @@ glue.module.create(
     }
 );
 
+/*
+ *  @module System
+ *  @namespace event
+ *  @desc This module offers a very basic pub/sub system event system
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/event/system',
+    function () {
+        var listeners = [],
+            x,
+            emitEvent = function (emitter, name, data) {
+                var x,
+                    listener,
+                    ln = listeners.length;
+
+                if (ln > 0) {
+                    for (x = 0; x < ln; x++) {
+                        listener = listeners[x];
+                        if (listener && listener.name === name) {
+                            listener.callback.apply({
+                                name: name,
+                                emitter: emitter
+                            }, data);
+                        }
+                    }
+                }
+            };
+
+        return {
+            on: function (name, callback) {
+                listeners.push({name: name, callback: callback});
+                return [name, callback];
+            },
+            off: function (name, callback) {
+                var x,
+                    ln,
+                    listener;
+
+                for (x = 0, ln = listeners.length; x < ln; ++x) {
+                    listener = listeners[x];
+                    if (listener && listener.name === name &&
+                            listener.callback === callback) {
+                        listeners.splice(x, 1);
+                    }
+                }
+            },
+            fire: function (eventName) {
+                console.log('fire', eventName);
+                emitEvent('system',
+                    eventName,
+                    Array.prototype.slice.call(
+                        arguments,
+                        1,
+                        arguments.length
+                    )
+                );
+            }
+        };
+    }
+);
+
 glue.module.create(
     'glue/game',
     [
-        'glue'
+        'glue',
+        'glue/event/system'
     ],
-    function (Glue) {
+    function (Glue, Event) {
         var fps = 60,
             components = [],
             addedComponents = [],
             removedComponents = [],
             lastFrame = new Date().getTime(),
-            canvas,
-            context2D,
-            backBuffer,
-            backBufferContext2D,
-            canvasSupported,
-            canvasDimensions = {
-                width: 640,
-                height: 480
-            },
-            win,
-            canvasId,
-            doc,
-            setup = false,
+            canvas = null,
+            canvasId = 0,
+            context2D = null,
+            backBuffer = null,
+            backBufferContext2D = null,
+            canvasSupported = false,
+            canvasDimension = null,
+            win = null,
+            doc = null,
+            isRunning = false,
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
                 if (canvas === null) {
                     canvas = document.createElement('canvas');
                     canvas.id = canvasId;
-                    canvas.width = canvasDimensions.width;
-                    canvas.height = canvasDimensions.height;
-                    // temporary canvas styling while still developing
-                    canvas.style.border = '1px solid #000';
+                    canvas.width = canvasDimension.width;
+                    canvas.height = canvasDimension.height;
                     document.body.appendChild(canvas);
                 }
                 if (canvas.getContext) {
@@ -22211,25 +22270,19 @@ glue.module.create(
                     backBufferContext2D = backBuffer.getContext('2d');
                 }
             },
-            setEvents = function () {
-                doc.addEventListener('keydown', function (e) {
-                    GameLoop.keyDown(e);
-                });
-                doc.addEventListener('keyup', function (e) {
-                    GameLoop.keyUp(e);
-                });
-                canvas.addEventListener('click', function (e) {
-                    GameLoop.mouseClick(e);
-                });
-            },
             sort = function() {
                 components.sort(function(a, b) {
                     return a.z - b.z;
                 });
             },
             addComponents = function () {
+                var component;
                 if (addedComponents.length) {
                     for (var i = 0; i < addedComponents.length; ++i) {
+                        component = addedComponents[i];
+                        if (component.init) {
+                            component.init();
+                        }
                         components.push(addedComponents[i]);
                     };
                     addedComponents = [];
@@ -22237,9 +22290,14 @@ glue.module.create(
                 }
             },
             removeComponents = function () {
+                var component;
                 if (removedComponents.length) {
                     for (var i = 0; i < removedComponents.length; ++i) {
-                        components.removeObject(removedComponents[i]);
+                        component = removedComponents[i];
+                        if (component.destroy) {
+                            component.destroy();
+                        }
+                        components.removeObject(component);
                     };
                     removedComponents = [];
                 }
@@ -22277,45 +22335,132 @@ glue.module.create(
             },
             startup = function () {
                 cycle();
+            },
+            pointerDown = function (e) {
+                //console.log('Pointer down: ', e.position);
+                var i,
+                    l,
+                    component;
+
+                for (i = 0, l = components.length; i < l; ++i) {
+                    component = components[i];
+                    if (component.pointerDown) {
+                        component.pointerDown(e);
+                    }
+                }
+            },
+            pointerMove = function (e) {
+                //console.log('Pointer move: ', e.position);
+                var i,
+                    l,
+                    component;
+
+                for (i = 0, l = components.length; i < l; ++i) {
+                    component = components[i];
+                    if (component.pointerMove) {
+                        component.pointerMove(e);
+                    }
+                }
+            },
+            pointerUp = function (e) {
+                //console.log('Pointer up: ', e.position);
+                var i,
+                    l,
+                    component;
+
+                for (i = 0, l = components.length; i < l; ++i) {
+                    component = components[i];
+                    if (component.pointerUp) {
+                        component.pointerUp(e);
+                    }
+                }
+            },
+            touchStart = function (e) {
+                var touch = e.targetTouches[0];
+                e.preventDefault();
+                e.position = {
+                    x: touch.pageX - canvas.offsetLeft,
+                    y: touch.pageY - canvas.offsetTop
+                };
+                pointerDown(e);
+            },
+            touchMove = function (e) {
+                var touch = e.targetTouches[0];
+                e.preventDefault();
+                e.position = {
+                    x: touch.pageX - canvas.offsetLeft,
+                    y: touch.pageY - canvas.offsetTop
+                };
+                pointerMove(e);
+            },
+            touchEnd = function (e) {
+                var touch = e.changedTouches[0];
+                e.preventDefault();
+                e.position = {
+                    x: touch.pageX - canvas.offsetLeft,
+                    y: touch.pageY - canvas.offsetTop
+                };
+                pointerUp(e);
+            },
+            mouseDown = function (e) {
+                e.position = {
+                    x: e.clientX - canvas.offsetLeft,
+                    y: e.clientY - canvas.offsetTop
+                };
+                pointerDown(e);
+            },
+            mouseMove = function (e) {
+                e.position = {
+                    x: e.clientX - canvas.offsetLeft,
+                    y: e.clientY - canvas.offsetTop
+                };
+                pointerMove(e);
+            },
+            mouseUp = function (e) {
+                e.position = {
+                    x: e.clientX - canvas.offsetLeft,
+                    y: e.clientY - canvas.offsetTop
+                };
+                pointerUp(e);
+            },
+            setupEventListeners = function () {
+                if ('ontouchstart' in win) {
+                    canvas.addEventListener('touchstart', touchStart);
+                    canvas.addEventListener('touchmove', touchMove);
+                    canvas.addEventListener('touchend', touchEnd);
+                } else {
+                    canvas.addEventListener('mousedown', mouseDown);
+                    canvas.addEventListener('mousemove', mouseMove);
+                    canvas.addEventListener('mouseup', mouseUp);
+                }
+                Event.on('glue.pointer.down', pointerDown);
+                Event.on('glue.pointer.move', pointerMove);
+                Event.on('glue.pointer.up', pointerUp);
+            },
+            shutdown = function () {
+                canvas.removeEventListener('touchstart', touchStart);
+                canvas.removeEventListener('touchmove', touchMove);
+                canvas.removeEventListener('touchend', touchEnd);
+                Event.off('glue.pointer.down', pointerDown);
+                Event.off('glue.pointer.move', pointerMove);
+                Event.off('glue.pointer.up', pointerUp);
             };
 
         return {
-            setup: function (mainWindow, id) {
-                if (setup) {
-                    throw('Glue: The main game is already setup');
+            setup: function (config, onReady) {
+                if (isRunning) {
+                    throw('Glue: The main game is already running');
                 }
-                setup = true;
-                win = mainWindow;
+                isRunning = true;
+                win = window;
                 doc = win.document;
-                canvasId = id;
+                canvasId = config.canvas.id;
+                canvasDimension = config.canvas.dimension
                 initCanvas();
-                setEvents();
+                setupEventListeners();
                 startup();
-
-                var GameLoop = {};
-                GameLoop.keyDown = function (e) {
-                    //log('Key down: ' + e);
-                    for (var i = 0; i < components.length; ++i) {
-                        if (components[i].keyDown) {
-                            components[i].keyDown(e);
-                        }
-                    }
-                }
-                GameLoop.keyUp = function (e) {
-                    //log('Key up: ' + e);
-                    for (var i = 0; i < components.length; ++i) {
-                        if (components[i].keyUp) {
-                            components[i].keyUp(e);
-                        }
-                    }
-                }
-                GameLoop.mouseClick = function (e) {
-                    //log('Mouse click: ' + e);
-                    for (var i = 0; i < components.length; ++i) {
-                        if (components[i].mouseClick) {
-                            components[i].mouseClick(getMousePosition(e));
-                        }
-                    }
+                if (onReady) {
+                    onReady();
                 }
             },
             add: function (component) {

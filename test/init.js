@@ -119,9 +119,18 @@
                         function (Game, Glue) {
                             // init Glue Game (temp)
                             if (useGlueEngine) {
-                                Game.setup(window, 'canvas');
-                                // load jasmine
-                                loadJasmine();
+                                Game.setup({
+                                    canvas: {
+                                        id: 'canvas',
+                                        dimension: {
+                                            width: 800,
+                                            height: 600
+                                        }
+                                    }
+                                }, function () {
+                                    // load jasmine
+                                    loadJasmine();
+                                });
                                 return;
                             }
                             // init used engines
