@@ -1,6 +1,7 @@
 /**
  *  @desc Tests for the Glue Api
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(['glue'], function (Glue) {
     describe('glue.api', function () {

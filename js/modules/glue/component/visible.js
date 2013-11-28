@@ -2,7 +2,8 @@
  *  @module Visible
  *  @namespace component.visible
  *  @desc Represents a visible component
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
     'glue/component/visible',

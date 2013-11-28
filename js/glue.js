@@ -1,7 +1,8 @@
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer to game engines
- *  @copyright © 2013 - The SpilGames Authors
+ *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 (function () {
     var profile1 = (function (adapters) {
