@@ -7,8 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <style>
         #canvas {
-            border: 1px solid #000;
-            border-radius: 10px;
+            border: 1px solid #00aa00;
         }
     </style>
     <script src="../../build/glue.min.js"></script>
@@ -41,15 +40,55 @@
                             height: 92
                         },
                         image: {
-                            src: 'http://www.spilgames.com/wp-content/themes/spilgames2/images/logo.png',
+                            src: '../image/glue-logo.png',
                             width: 200,
                             height: 100,
                             frameWidth: 100
                         }
                     }).then(function () {
+                        var canvasDimension = Game.canvas.getDimension(),
+                            playerDimension,
+                            playerPosition,
+                            speed = 1,
+                            direction = 'right';
+
                         component.mix({
                             update: function (deltaT) {
                                 //console.log('updating', deltaT);
+                                this.visible.update(deltaT);
+                                playerDimension = this.visible.getDimension();
+                                playerPosition = this.visible.getPosition();
+                                //console.log(playerPosition.x,
+                                //    canvasDimension.width, playerDimension.width);
+                                if (playerPosition.x > canvasDimension.width -
+                                        playerDimension.width) {
+                                    direction = 'down';
+                                }
+                                if (playerPosition.y > canvasDimension.height -
+                                        playerDimension.height) {
+                                    direction = 'left';
+                                }
+                                if (playerPosition.x < 0) {
+                                    direction = 'up';
+                                }
+                                if (playerPosition.y < 0) {
+                                    playerPosition.y = 0;
+                                    direction = 'right';
+                                }
+                                switch (direction) {
+                                    case 'right':
+                                        playerPosition.x += speed;
+                                    break;
+                                    case 'down':
+                                        playerPosition.y += speed;
+                                    break;
+                                    case 'left':
+                                        playerPosition.x -= speed;
+                                    break;
+                                    case 'up':
+                                        playerPosition.y -= speed;
+                                    break;
+                                }
                             },
                             draw: function (deltaT, context) {
                                 this.visible.draw(deltaT, context);

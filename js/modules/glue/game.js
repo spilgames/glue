@@ -251,8 +251,8 @@ glue.module.create(
                 }
             },
             canvas: {
-                getDimensions: function () {
-                    return canvasDimensions;
+                getDimension: function () {
+                    return canvasDimension;
                 }
             }
         };

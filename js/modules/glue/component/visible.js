@@ -4,6 +4,9 @@
  *  @desc Represents a visible component
  *  @copyright (C) 2013 Jeroen Reurings, SpilGames
  *  @license BSD 3-Clause License (see LICENSE file in project root)
+ *
+ *  Setup with and height of image automatically
+ *  Removed the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/visible',
@@ -68,7 +71,9 @@ glue.module.create(
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)
                 },
-                position: position,
+                getPosition: function () {
+                    return position
+                },
                 getDimension: function () {
                     return dimension;
                 }
