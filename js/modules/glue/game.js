@@ -41,7 +41,9 @@ glue.module.create(
             },
             sort = function() {
                 components.sort(function(a, b) {
-                    return a.z - b.z;
+                    if (a.visible && b.visible) {
+                        return a.visible.z - b.visible.z;
+                    }
                 });
             },
             addComponents = function () {

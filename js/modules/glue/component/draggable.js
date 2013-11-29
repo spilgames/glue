@@ -86,7 +86,7 @@ glue.module.create(
                         dragId = undefined;
                         dragging = false;
                         if (obj.dragEnd) {
-                            obj.dragEnd(e, resetMe);
+                            obj.dragEnd(e, function () {});
                         }
                         return false;
                     }

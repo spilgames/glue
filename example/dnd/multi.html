@@ -22,6 +22,30 @@
             function (Game, Component, Visible, Draggable) {
                 'use strict';
 
+                var myComponent = {
+                        init: function () {
+                            this.visible.z = this.visible.getPosition().y;
+                        },
+                        draw: function (deltaT, context) {
+                            this.visible.draw(deltaT, context);
+                        },
+                        pointerDown: function (e) {
+                            this.draggable.pointerDown(e);
+                        },
+                        pointerMove: function (e) {
+                            this.draggable.pointerMove(e);
+                        },
+                        pointerUp: function (e) {
+                            this.draggable.pointerUp(e);
+                        },
+                        dragStart: function (e) {
+                            this.visible.z = 9999;
+                        },
+                        dragMove: function (e) {
+                            this.visible.z = this.visible.getPosition().y;
+                        }
+                    };
+
                 Game.setup({
                     canvas: {
                         id: 'canvas',
@@ -31,21 +55,7 @@
                         }
                     }
                 }, function () {
-                    var glueObject = Component(Visible, Draggable).add({
-                            draw: function (deltaT, context) {
-                                this.visible.draw(deltaT, context);
-                            },
-                            pointerDown: function (e) {
-                                this.draggable.pointerDown(e);
-                            },
-                            pointerMove: function (e) {
-                                this.draggable.pointerMove(e);
-                            },
-                            pointerUp: function (e) {
-                                this.draggable.pointerUp(e);
-                            }
-                        });
-
+                    var glueObject = Component(Visible, Draggable).add(myComponent);
                     glueObject.visible.setup({
                         image: {
                             src: '../image/glue-logo.png'
@@ -54,21 +64,7 @@
                         Game.add(glueObject);
                     });
 
-                    var spilObject = Component(Visible, Draggable).add({
-                            draw: function (deltaT, context) {
-                                this.visible.draw(deltaT, context);
-                            },
-                            pointerDown: function (e) {
-                                this.draggable.pointerDown(e);
-                            },
-                            pointerMove: function (e) {
-                                this.draggable.pointerMove(e);
-                            },
-                            pointerUp: function (e) {
-                                this.draggable.pointerUp(e);
-                            }
-                        });
-
+                    var spilObject = Component(Visible, Draggable).add(myComponent);
                     spilObject.visible.setup({
                         position: {
                             x: 200,

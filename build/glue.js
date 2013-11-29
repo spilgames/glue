@@ -21462,7 +21462,8 @@ glue.module.create(
     ],
     function (Glue) {
         return function () {
-            var obj = {
+            var name = 'undefined',
+                obj = {
                     add: function (value) {
                         this.mix(value);
                         return this;
@@ -21477,7 +21478,14 @@ glue.module.create(
                 mixin = mixins[i];
                 mixin(obj);
             }
-            return obj;
+            return obj.mix({
+                setName: function (value) {
+                    name = value;
+                },
+                getName: function (value) {
+                    return name;
+                }
+            })
         };
     }
 );
@@ -21674,7 +21682,7 @@ glue.module.create(
                         dragId = undefined;
                         dragging = false;
                         if (obj.dragEnd) {
-                            obj.dragEnd(e, resetMe);
+                            obj.dragEnd(e, function () {});
                         }
                         return false;
                     }
@@ -22156,7 +22164,9 @@ glue.module.create(
             },
             sort = function() {
                 components.sort(function(a, b) {
-                    return a.z - b.z;
+                    if (a.visible && b.visible) {
+                        return a.visible.z - b.visible.z;
+                    }
                 });
             },
             addComponents = function () {

@@ -12,7 +12,8 @@ glue.module.create(
     ],
     function (Glue) {
         return function () {
-            var obj = {
+            var name = 'undefined',
+                obj = {
                     add: function (value) {
                         this.mix(value);
                         return this;
@@ -27,7 +28,14 @@ glue.module.create(
                 mixin = mixins[i];
                 mixin(obj);
             }
-            return obj;
+            return obj.mix({
+                setName: function (value) {
+                    name = value;
+                },
+                getName: function (value) {
+                    return name;
+                }
+            })
         };
     }
 );
