@@ -2,7 +2,8 @@
  *  @module Visible
  *  @namespace component.visible
  *  @desc Represents a visible component
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
  *  Setup with and height of image automatically

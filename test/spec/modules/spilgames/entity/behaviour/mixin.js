@@ -1,7 +1,8 @@
 /**
  *  @desc Tests for the Scroll Button
  *  @author Jeroen Reurings
- *  @copyright (C) 2013 Jeroen Reurings, SpilGames
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(['glue'], function (Glue) {
