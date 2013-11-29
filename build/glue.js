@@ -21449,6 +21449,48 @@ modules.spilgames.sugar = (function (win, doc) {
     };
 }(window, window.document));
 /*
+ *  @module Component
+ *  @desc Represents a component
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/component',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        return function () {
+            var name = 'undefined',
+                obj = {
+                    add: function (value) {
+                        this.mix(value);
+                        return this;
+                    }
+                },
+                mixins = Array.prototype.slice.call(arguments),
+                mixin = null,
+                l = mixins.length,
+                i = 0;
+
+            for (i; i < l; ++i) {
+                mixin = mixins[i];
+                mixin(obj);
+            }
+            return obj.mix({
+                setName: function (value) {
+                    name = value;
+                },
+                getName: function (value) {
+                    return name;
+                }
+            })
+        };
+    }
+);
+
+/*
  *  @module Clickable
  *  @namespace modules.spilgames.entity.behaviour
  *  @desc Used to make a game entity clickable
@@ -21566,59 +21608,22 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        // - cross instance private members -
-        var highestEntity = null,
-            maxZ = 2,
-            customResetPosition,
-            resetCallback,
-            resetType;
-
-        /**
-         * Constructor
-         * @name init
-         * @memberOf Draggable
-         * @function
-         * @param {Object} obj: the entity object
-         */
         return function (obj) {
-            // - per instance private members -
-            var position = {
-                    x: obj.pos.x,
-                    y: obj.pos.y
+            var dragging = false,
+                dragId,
+                // TODO: Change to Glue Vector
+                grabOffset = {
+                    x: 0,
+                    y: 0
                 },
-                dropped = false,
-                resetted = false,
-                dragging = false,
-                dragId = null,
-                grabOffset = new Glue.math.vector(0, 0),
-                mouseDown = null,
-                mouseUp = null,
-                pointerId = null,
-                /**
-                 * Is used to reset the draggable to its initial position
-                 * @name reset
-                 * @memberOf Draggable
-                 * @function
-                 */
-                resetMe = function () {
-                    switch (resetType) {
-                        case obj.RESET_TYPE_X:
-                            obj.pos.x = position.x;
-                        break;
-                        case obj.RESET_TYPE_Y:
-                            obj.pos.y = position.y;
-                        break;
-                        case obj.RESET_TYPE_CUSTOM:
-                            obj.pos.x = customResetPosition.x || obj.pos.x;
-                            obj.pos.y = customResetPosition.y || obj.pos.y;
-                        break;
-                        case obj.RESET_TYPE_CALLBACK:
-                            resetCallback.apply(obj);
-                        break;
-                        default:
-                            obj.pos.x = position.x;
-                            obj.pos.y = position.y;
-                        break;
+                checkOnMe = function (e) {
+                    var position = e.position,
+                        boundingBox = obj.visible.getBoundingBox();
+
+                    // TODO: abstract this to overlaps utility method
+                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
+                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                        return true;
                     }
                 },
                 /**
@@ -21628,34 +21633,20 @@ glue.module.create(
                  * @function
                  * @param {Object} e: the pointer event
                  */
-                dragStart = function (e, draggable) {
-                    if (draggable === obj) {
-                        dropped = false;
-                        resetted = false;
-                        // depth sorting
-                        if (highestEntity === null) {
-                            highestEntity = obj;
-                        } else {
-                            if (obj.z > highestEntity.z) {
-                                highestEntity = obj;
-                            }
+                dragStart = function (e) {
+                    var objectPosition;
+                    if (checkOnMe(e) && dragging === false) {
+                        objectPosition = obj.visible.getPosition();
+                        dragging = true;
+                        dragId = e.pointerId;
+                        grabOffset = {
+                            x: e.position.x - objectPosition.x,
+                            y: e.position.y - objectPosition.y
+                        };
+                        if (obj.dragStart) {
+                            obj.dragStart(e);
                         }
-                        if (dragging === false && obj === highestEntity) {
-                            // clicked entity goes on top
-                            obj.z = maxZ + 1;
-                            // save max z index of all draggables
-                            maxZ = obj.z;
-                            // re-sort all game entities
-                            me.game.world.sort();
-                            dragging = true;
-                            dragId = e.pointerId;
-                            grabOffset.set(e.gameX, e.gameY);
-                            grabOffset.sub(obj.pos);
-                            if (obj.dragStart) {
-                                obj.dragStart(e);
-                            }
-                            return false;
-                        }
+                        return false;
                     }
                 },
                 /**
@@ -21668,8 +21659,11 @@ glue.module.create(
                 dragMove = function (e) {
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            obj.pos.set(e.gameX, e.gameY);
-                            obj.pos.sub(grabOffset);
+                            // TODO: Change to Glue vector math
+                            obj.visible.setPosition({
+                                x: e.position.x - grabOffset.x,
+                                y: e.position.y - grabOffset.y
+                            });
                             if (obj.dragMove) {
                                 obj.dragMove(e);
                             }
@@ -21683,175 +21677,35 @@ glue.module.create(
                  * @function
                  * @param {Object} e: the pointer event
                  */
-                dragEnd = function (e, draggable) {
-                    if (draggable === obj) {
-                        highestEntity = null;
-                        if (dragging === true) {
-                            pointerId = undefined;
-                            dragging = false;
-                            if (obj.dragEnd) {
-                                obj.dragEnd(e, resetMe);
-                            }
-                            return false;
+                dragEnd = function (e) {
+                    if (dragging === true) {
+                        dragId = undefined;
+                        dragging = false;
+                        if (obj.dragEnd) {
+                            obj.dragEnd(e, function () {});
                         }
+                        return false;
                     }
-                },
-                /**
-                 * Translates a pointer event to a me.event
-                 * @name init
-                 * @memberOf me.DraggableEntity
-                 * @function
-                 * @param {Object} e: the pointer event you want to translate
-                 * @param {String} translation: the me.event you want to translate
-                 * the event to
-                 */
-                translatePointerEvent = function (e, translation) {
-                    Glue.event.fire(translation, [e, obj, resetMe]);
-                },
-                /**
-                 * Initializes the events the modules needs to listen to
-                 * It translates the pointer events to me.events
-                 * in order to make them pass through the system and to make
-                 * this module testable. Then we subscribe this module to the
-                 * transformed events. This can be inproved by handling it
-                 * by the Glue.input module.
-                 * @name init
-                 * @memberOf me.DraggableEntity
-                 * @function
-                 */
-                 initEvents = function () {
-                    pointerDown = function (e) {
-                        translatePointerEvent(e, Glue.input.DRAG_START);
-                    };
-                    pointerUp = function (e) {
-                        translatePointerEvent(e, Glue.input.DRAG_END);
-                    };
-                    Glue.input.pointer.on(Glue.input.POINTER_DOWN, pointerDown, obj);
-                    Glue.input.pointer.on(Glue.input.POINTER_UP, pointerUp, obj);
-                    Glue.event.on(Glue.input.POINTER_MOVE, dragMove);
-                    Glue.event.on(Glue.input.DRAG_START, dragStart);
-                    Glue.event.on(Glue.input.DRAG_END, dragEnd);
                 };
 
-            // - external interface -
-            obj.mix({
-                /**
-                 * constant for the reset callback type
-                 * @desc Will call a callback function which can control the reset of the draggable
-                 * @public
-                 * @constant
-                 * @type String
-                 * @name RESET_TYPE_CALLBACK
-                 */
-                RESET_TYPE_CALLBACK: 'reset-type-callback',
-                /**
-                 * constant for the reset custom type
-                 * @desc Will reset the position of the draggable to a custom configuarable position
-                 * @public
-                 * @constant
-                 * @type String
-                 * @name RESET_TYPE_X
-                 */
-                RESET_TYPE_CUSTOM: 'reset-type-custom',
-                /**
-                 * constant for the reset x type
-                 * @desc Will only reset the x position of the draggable
-                 * @public
-                 * @constant
-                 * @type String
-                 * @name RESET_TYPE_X
-                 */
-                RESET_TYPE_X: 'reset-type-x',
-                /**
-                 * constant for the reset y type
-                 * @desc Will only reset the y position of the draggable
-                 * @public
-                 * @constant
-                 * @type String
-                 * @name RESET_TYPE_Y
-                 */
-                RESET_TYPE_Y: 'reset-type-y',
-                /**
-                 * Destructor
-                 * @name destructDraggable
-                 * @memberOf Draggable
-                 * @function
-                 */
-                destructDraggable: function () {
-                    // unregister system events
-                    Glue.event.off(Glue.input.DRAG_START, dragStart);
-                    Glue.event.off(Glue.input.POINTER_MOVE, dragMove);
-                    Glue.event.off(Glue.input.DRAG_END, dragEnd);
-                    // unregister pointer events
-                    Glue.input.pointer.off(Glue.input.POINTER_DOWN, obj);
-                    Glue.input.pointer.off(Glue.input.POINTER_UP, obj);
-                    // depth sorting fix will solve the need for this
-                    highestEntity = null;
+            obj = obj || {};
+            obj.draggable = {
+                setup: function (settings) {
+
                 },
-                /**
-                 * Sets the grab offset of this entity
-                 * @name setGrabOffset
-                 * @memberOf Draggable
-                 * @function
-                 * @param {Number} x: the horitontal offset
-                 * @param {Number} y: the vertical offset
-                 */
-                setGrabOffset: function (x, y) {
-                    grabOffset = new Glue.math.vector(x, y);
+                update: function (deltaT) {
+
                 },
-                isResetted: function () {
-                    return resetted;
+                pointerDown: function (e) {
+                    dragStart(e);
                 },
-                isDropped: function () {
-                    return dropped;
+                pointerMove: function (e) {
+                    dragMove(e);
                 },
-                setDropped: function (value) {
-                    if (Glue.sugar.isBoolean(value)) {
-                        dropped = value;
-                    } else {
-                        throw('Please supply a boolean value');
-                    }
-                },
-                setResetted: function (value) {
-                    if (Glue.sugar.isBoolean(value)) {
-                        resetted = value;
-                    } else {
-                        throw('Please supply a boolean value');
-                    }
-                },
-                resetMe: function () {
-                    return resetMe;
-                },
-                setCustomResetPosition: function (value) {
-                    if (Glue.sugar.isObject(value)) {
-                        customResetPosition = value;
-                    } else {
-                        throw('Please supply an object value');
-                    }
-                },
-                setResetCallback: function (value) {
-                    if (Glue.sugar.isFunction(value)) {
-                        resetCallback = value;
-                    } else {
-                        throw('Please supply a function value');
-                    }
-                },
-                setResetType: function (value) {
-                    // improvement: check if the value is in the allowed constant array
-                    if (Glue.sugar.isString(value)) {
-                        resetType = value;
-                    } else {
-                        throw('Please supply a string value');
-                    }
+                pointerUp: function (e) {
+                    dragEnd(e);
                 }
-            });
-
-            // - initialisation logic -
-
-            // init drag related events
-            initEvents();
-            
-            // - return external interface -
+            };
             return obj;
         };
     }
@@ -22106,6 +21960,9 @@ glue.module.create(
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
+ *
+ *  Setup with and height of image automatically
+ *  Removed the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/visible',
@@ -22114,7 +21971,10 @@ glue.module.create(
     ],
     function (Glue) {
         return function (obj) {
-            var position = null,
+            var position = {
+                    x: 0,
+                    y: 0
+                },
                 dimension = null,
                 image = null,
                 frameCount = 0,
@@ -22134,6 +21994,10 @@ glue.module.create(
                             }
                         },
                         imageLoadHandler = function () {
+                            dimension = {
+                                width: image.naturalWidth,
+                                height: image.naturalHeight
+                            };
                             readyList.push('image');
                             readyCheck();
                         };
@@ -22170,9 +22034,22 @@ glue.module.create(
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)
                 },
-                position: position,
+                getPosition: function () {
+                    return position;
+                },
+                setPosition: function (value) {
+                    position = value;
+                },
                 getDimension: function () {
                     return dimension;
+                },
+                getBoundingBox: function () {
+                    return {
+                        left: position.x,
+                        right: position.x + dimension.width,
+                        top: position.y,
+                        bottom: position.y + dimension.height
+                    };
                 }
             };
             return obj;
@@ -22287,7 +22164,9 @@ glue.module.create(
             },
             sort = function() {
                 components.sort(function(a, b) {
-                    return a.z - b.z;
+                    if (a.visible && b.visible) {
+                        return a.visible.z - b.visible.z;
+                    }
                 });
             },
             addComponents = function () {
@@ -22497,10 +22376,127 @@ glue.module.create(
                 }
             },
             canvas: {
-                getDimensions: function () {
-                    return canvasDimensions;
+                getDimension: function () {
+                    return canvasDimension;
                 }
             }
+        };
+    }
+);
+
+/**
+ *  @module Math
+ *  @desc The math module
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math',
+    [
+        'glue/math/dimension',
+        'glue/math/matrix',
+        'glue/math/vector'
+    ],
+    function (Dimension, Matrix, Vector) {
+        'use strict';
+        return function () {
+            return {
+                Dimension: Dimension,
+                Matrix: Matrix,
+                Vector: Vector
+            };
+        };
+    }
+);
+
+/**
+ *  @module Dimension
+ *  @namespace math
+ *  @desc Represents a dimension
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/dimension',
+    function () {
+        'use strict';
+        var dim;
+        return function (width, height, depth) {
+            dim = {
+                width: width,
+                height: height,
+                depth: depth || 0
+            };
+            return {
+                get: function () {
+                    return dim;
+                }
+            };
+        };
+    }
+);
+
+/**
+ *  @module Matrix
+ *  @namespace math
+ *  @desc Represents a matrix
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/matrix',
+    function () {
+        'use strict';
+        var mat = [];
+        return function (m, n, initial) {
+            var a,
+                row,
+                col;
+
+            for (row = 0; row < m; ++row) {
+                a = [];
+                for (col = 0; col < n; ++col) {
+                    a[col] = initial || 0;
+                }
+                mat[row] = a;
+            }
+
+            return {
+                get: function () {
+                    return mat;
+                }
+            };
+        };
+    }
+);
+
+/**
+ *  @module Vector
+ *  @namespace math
+ *  @desc Represents a vector
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/vector',
+    function () {
+        'use strict';
+        var coordinates;
+        return function (x, y, z) {
+            coordinates = {
+                x: x,
+                y: y,
+                z: z || 0
+            };
+            return {
+                get: function () {
+                    return coordinates;
+                }
+            };
         };
     }
 );

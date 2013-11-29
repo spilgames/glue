@@ -1,0 +1,100 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Simple movement</title>
+    <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style>
+        #canvas {
+            border: 1px solid #00aa00;
+        }
+    </style>
+    <script src="../../build/glue.min.js"></script>
+    <script>
+        glue.module.get(
+            [
+                'glue/game',
+                'glue/component',
+                'glue/component/visible'
+            ],
+            function (Game, Component, Visible) {
+                'use strict';
+
+                Game.setup({
+                    canvas: {
+                        id: 'canvas',
+                        dimension: {
+                            width: 800,
+                            height: 600
+                        }
+                    }
+                }, function () {
+                    var canvasDimension = Game.canvas.getDimension(),
+                        playerDimension,
+                        playerPosition,
+                        speed = 1,
+                        direction = 'right',
+                        component = Component(Visible).add({
+                            update: function (deltaT) {
+                                playerDimension = this.visible.getDimension();
+                                playerPosition = this.visible.getPosition();
+                                if (playerPosition.x > canvasDimension.width -
+                                        playerDimension.width) {
+                                    direction = 'down';
+                                }
+                                if (playerPosition.y > canvasDimension.height -
+                                        playerDimension.height) {
+                                    direction = 'left';
+                                }
+                                if (playerPosition.x < 0) {
+                                    direction = 'up';
+                                }
+                                if (playerPosition.y < 0) {
+                                    playerPosition.y = 0;
+                                    direction = 'right';
+                                }
+                                switch (direction) {
+                                    case 'right':
+                                        playerPosition.x += speed;
+                                    break;
+                                    case 'down':
+                                        playerPosition.y += speed;
+                                    break;
+                                    case 'left':
+                                        playerPosition.x -= speed;
+                                    break;
+                                    case 'up':
+                                        playerPosition.y -= speed;
+                                    break;
+                                }
+                            },
+                            draw: function (deltaT, context) {
+                                this.visible.draw(deltaT, context);
+                            },
+                            pointerDown: function (e) {
+                                console.log('Pointer down: ', e.position);
+                            },
+                            pointerMove: function (e) {
+                                console.log('Pointer move: ', e.position);
+                            },
+                            pointerUp: function (e) {
+                                console.log('Pointer up: ', e.position);
+                            }
+                        });
+
+                    component.visible.setup({
+                        image: {
+                            src: '../image/glue-logo.png'
+                        }
+                    }).then(function () {
+                        Game.add(component);
+                    });
+                });
+            }
+        );
+    </script>
+</head>
+<body>
+</body>
+</html>

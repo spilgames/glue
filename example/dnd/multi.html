@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Drag & Drop</title>
+    <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style>
+        #canvas {
+            border: 1px solid #00aa00;
+        }
+    </style>
+    <script src="../../build/glue.min.js"></script>
+    <script>
+        glue.module.get(
+            [
+                'glue/game',
+                'glue/component',
+                'glue/component/visible',
+                'glue/component/draggable'
+            ],
+            function (Game, Component, Visible, Draggable) {
+                'use strict';
+
+                var myComponent = {
+                        init: function () {
+                            this.visible.z = this.visible.getPosition().y;
+                        },
+                        draw: function (deltaT, context) {
+                            this.visible.draw(deltaT, context);
+                        },
+                        pointerDown: function (e) {
+                            this.draggable.pointerDown(e);
+                        },
+                        pointerMove: function (e) {
+                            this.draggable.pointerMove(e);
+                        },
+                        pointerUp: function (e) {
+                            this.draggable.pointerUp(e);
+                        },
+                        dragStart: function (e) {
+                            this.visible.z = 9999;
+                        },
+                        dragMove: function (e) {
+                            this.visible.z = this.visible.getPosition().y;
+                        }
+                    };
+
+                Game.setup({
+                    canvas: {
+                        id: 'canvas',
+                        dimension: {
+                            width: 800,
+                            height: 600
+                        }
+                    }
+                }, function () {
+                    var glueObject = Component(Visible, Draggable).add(myComponent);
+                    glueObject.visible.setup({
+                        image: {
+                            src: '../image/glue-logo.png'
+                        }
+                    }).then(function () {
+                        Game.add(glueObject);
+                    });
+
+                    var spilObject = Component(Visible, Draggable).add(myComponent);
+                    spilObject.visible.setup({
+                        position: {
+                            x: 200,
+                            y: 200
+                        },
+                        image: {
+                            src: '../image/spil-logo.png'
+                        }
+                    }).then(function () {
+                        Game.add(spilObject);
+                    });
+                });
+            }
+        );
+    </script>
+</head>
+<body>
+</body>
+</html>

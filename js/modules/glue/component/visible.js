@@ -5,6 +5,9 @@
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
+ *
+ *  Setup with and height of image automatically
+ *  Removed the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/visible',
@@ -13,7 +16,10 @@ glue.module.create(
     ],
     function (Glue) {
         return function (obj) {
-            var position = null,
+            var position = {
+                    x: 0,
+                    y: 0
+                },
                 dimension = null,
                 image = null,
                 frameCount = 0,
@@ -33,6 +39,10 @@ glue.module.create(
                             }
                         },
                         imageLoadHandler = function () {
+                            dimension = {
+                                width: image.naturalWidth,
+                                height: image.naturalHeight
+                            };
                             readyList.push('image');
                             readyCheck();
                         };
@@ -69,9 +79,22 @@ glue.module.create(
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)
                 },
-                position: position,
+                getPosition: function () {
+                    return position;
+                },
+                setPosition: function (value) {
+                    position = value;
+                },
                 getDimension: function () {
                     return dimension;
+                },
+                getBoundingBox: function () {
+                    return {
+                        left: position.x,
+                        right: position.x + dimension.width,
+                        top: position.y,
+                        bottom: position.y + dimension.height
+                    };
                 }
             };
             return obj;
