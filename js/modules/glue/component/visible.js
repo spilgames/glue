@@ -16,7 +16,10 @@ glue.module.create(
     ],
     function (Glue) {
         return function (obj) {
-            var position = null,
+            var position = {
+                    x: 0,
+                    y: 0
+                },
                 dimension = null,
                 image = null,
                 frameCount = 0,
@@ -36,6 +39,10 @@ glue.module.create(
                             }
                         },
                         imageLoadHandler = function () {
+                            dimension = {
+                                width: image.naturalWidth,
+                                height: image.naturalHeight
+                            };
                             readyList.push('image');
                             readyCheck();
                         };
@@ -73,7 +80,10 @@ glue.module.create(
                     context.drawImage(image, position.x, position.y)
                 },
                 getPosition: function () {
-                    return position
+                    return position;
+                },
+                setPosition: function (value) {
+                    position = value;
                 },
                 getDimension: function () {
                     return dimension;

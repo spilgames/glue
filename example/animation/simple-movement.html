@@ -15,9 +15,10 @@
         glue.module.get(
             [
                 'glue/game',
+                'glue/component',
                 'glue/component/visible'
             ],
-            function (Game, VisibleComponent) {
+            function (Game, Component, Visible) {
                 'use strict';
 
                 Game.setup({
@@ -29,37 +30,15 @@
                         }
                     }
                 }, function () {
-                    var component = VisibleComponent();
-                    component.visible.setup({
-                        position: {
-                            x: 0,
-                            y: 0
-                        },
-                        dimension: {
-                            width: 125,
-                            height: 92
-                        },
-                        image: {
-                            src: '../image/glue-logo.png',
-                            width: 200,
-                            height: 100,
-                            frameWidth: 100
-                        }
-                    }).then(function () {
-                        var canvasDimension = Game.canvas.getDimension(),
-                            playerDimension,
-                            playerPosition,
-                            speed = 1,
-                            direction = 'right';
-
-                        component.mix({
+                    var canvasDimension = Game.canvas.getDimension(),
+                        playerDimension,
+                        playerPosition,
+                        speed = 1,
+                        direction = 'right',
+                        component = Component(Visible).add({
                             update: function (deltaT) {
-                                //console.log('updating', deltaT);
-                                this.visible.update(deltaT);
                                 playerDimension = this.visible.getDimension();
                                 playerPosition = this.visible.getPosition();
-                                //console.log(playerPosition.x,
-                                //    canvasDimension.width, playerDimension.width);
                                 if (playerPosition.x > canvasDimension.width -
                                         playerDimension.width) {
                                     direction = 'down';
@@ -103,8 +82,14 @@
                                 console.log('Pointer up: ', e.position);
                             }
                         });
+
+                    component.visible.setup({
+                        image: {
+                            src: '../image/glue-logo.png'
+                        }
+                    }).then(function () {
+                        Game.add(component);
                     });
-                    Game.add(component);
                 });
             }
         );
