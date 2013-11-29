@@ -15,6 +15,21 @@ glue.module.create(
         return function (obj) {
             var dragging = false,
                 dragId,
+                // TODO: Change to Glue Vector
+                grabOffset = {
+                    x: 0,
+                    y: 0
+                },
+                checkOnMe = function (e) {
+                    var position = e.position,
+                        boundingBox = obj.visible.getBoundingBox();
+
+                    // TODO: abstract this to overlaps utility method
+                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
+                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                        return true;
+                    }
+                },
                 /**
                  * Gets called when the user starts dragging the entity
                  * @name dragStart
@@ -23,9 +38,15 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
-                    if (dragging === false) {
+                    var objectPosition;
+                    if (checkOnMe(e) && dragging === false) {
+                        objectPosition = obj.visible.getPosition();
                         dragging = true;
                         dragId = e.pointerId;
+                        grabOffset = {
+                            x: e.position.x - objectPosition.x,
+                            y: e.position.y - objectPosition.y
+                        };
                         if (obj.dragStart) {
                             obj.dragStart(e);
                         }
@@ -42,7 +63,11 @@ glue.module.create(
                 dragMove = function (e) {
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            obj.visible.setPosition(e.position);
+                            // TODO: Change to Glue vector math
+                            obj.visible.setPosition({
+                                x: e.position.x - grabOffset.x,
+                                y: e.position.y - grabOffset.y
+                            });
                             if (obj.dragMove) {
                                 obj.dragMove(e);
                             }

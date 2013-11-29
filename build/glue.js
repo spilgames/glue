@@ -21603,6 +21603,21 @@ glue.module.create(
         return function (obj) {
             var dragging = false,
                 dragId,
+                // TODO: Change to Glue Vector
+                grabOffset = {
+                    x: 0,
+                    y: 0
+                },
+                checkOnMe = function (e) {
+                    var position = e.position,
+                        boundingBox = obj.visible.getBoundingBox();
+
+                    // TODO: abstract this to overlaps utility method
+                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
+                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                        return true;
+                    }
+                },
                 /**
                  * Gets called when the user starts dragging the entity
                  * @name dragStart
@@ -21611,9 +21626,15 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
-                    if (dragging === false) {
+                    var objectPosition;
+                    if (checkOnMe(e) && dragging === false) {
+                        objectPosition = obj.visible.getPosition();
                         dragging = true;
                         dragId = e.pointerId;
+                        grabOffset = {
+                            x: e.position.x - objectPosition.x,
+                            y: e.position.y - objectPosition.y
+                        };
                         if (obj.dragStart) {
                             obj.dragStart(e);
                         }
@@ -21630,7 +21651,11 @@ glue.module.create(
                 dragMove = function (e) {
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            obj.visible.setPosition(e.position);
+                            // TODO: Change to Glue vector math
+                            obj.visible.setPosition({
+                                x: e.position.x - grabOffset.x,
+                                y: e.position.y - grabOffset.y
+                            });
                             if (obj.dragMove) {
                                 obj.dragMove(e);
                             }
@@ -22009,6 +22034,14 @@ glue.module.create(
                 },
                 getDimension: function () {
                     return dimension;
+                },
+                getBoundingBox: function () {
+                    return {
+                        left: position.x,
+                        right: position.x + dimension.width,
+                        top: position.y,
+                        bottom: position.y + dimension.height
+                    };
                 }
             };
             return obj;
@@ -22337,6 +22370,123 @@ glue.module.create(
                     return canvasDimension;
                 }
             }
+        };
+    }
+);
+
+/**
+ *  @module Math
+ *  @desc The math module
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math',
+    [
+        'glue/math/dimension',
+        'glue/math/matrix',
+        'glue/math/vector'
+    ],
+    function (Dimension, Matrix, Vector) {
+        'use strict';
+        return function () {
+            return {
+                Dimension: Dimension,
+                Matrix: Matrix,
+                Vector: Vector
+            };
+        };
+    }
+);
+
+/**
+ *  @module Dimension
+ *  @namespace math
+ *  @desc Represents a dimension
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/dimension',
+    function () {
+        'use strict';
+        var dim;
+        return function (width, height, depth) {
+            dim = {
+                width: width,
+                height: height,
+                depth: depth || 0
+            };
+            return {
+                get: function () {
+                    return dim;
+                }
+            };
+        };
+    }
+);
+
+/**
+ *  @module Matrix
+ *  @namespace math
+ *  @desc Represents a matrix
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/matrix',
+    function () {
+        'use strict';
+        var mat = [];
+        return function (m, n, initial) {
+            var a,
+                row,
+                col;
+
+            for (row = 0; row < m; ++row) {
+                a = [];
+                for (col = 0; col < n; ++col) {
+                    a[col] = initial || 0;
+                }
+                mat[row] = a;
+            }
+
+            return {
+                get: function () {
+                    return mat;
+                }
+            };
+        };
+    }
+);
+
+/**
+ *  @module Vector
+ *  @namespace math
+ *  @desc Represents a vector
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/vector',
+    function () {
+        'use strict';
+        var coordinates;
+        return function (x, y, z) {
+            coordinates = {
+                x: x,
+                y: y,
+                z: z || 0
+            };
+            return {
+                get: function () {
+                    return coordinates;
+                }
+            };
         };
     }
 );
