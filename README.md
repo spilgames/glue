@@ -6,7 +6,7 @@ http://www.spilgames.com
 all rights reserved
 
 licensed under the BSD 3-Clause license, see the [license file](https://github.com/spilgames/5-glue-engine/blob/master/LICENSE)  
-maintained by [Buffer-Overflow](https://github.com/Buffer-Overflow)  
+created & maintained by [Buffer-Overflow](https://github.com/Buffer-Overflow)  
 
 ### What is Glue?
 
