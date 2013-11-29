@@ -2,13 +2,12 @@
 
 ##Glue Game Engine
 Copyright (C) 2013, SpilGames  
-all rights reserved.  
-author: Jeroen Reurings  
+http://www.spilgames.com
+all rights reserved
 
-License  
-BSD 3-Clause License:  
-https://github.com/spilgames/5-glue-engine/blob/master/LICENSE  
+licensed under the BSD 3-Clause license, see the [license file](https://github.com/spilgames/5-glue-engine/blob/master/LICENSE)  
+maintained by [Buffer-Overflow](https://github.com/Buffer-Overflow)  
 
 ### What is Glue?
 
-Glue is a Canvas based JavaScript game engine. Glue offers a game API that can be used to create JavasScript games. To provide her functionality, Glue uses component based game modules, and can also delegate specific tasks to other open source software.
+Glue is a Canvas based JavaScript game engine. Glue offers a game API that can be used to create JavasScript games. Glue uses component based game modules to provide her functionality and has a lightweight footprint.
