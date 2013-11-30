@@ -21605,9 +21605,13 @@ glue.module.create(
 glue.module.create(
     'glue/component/draggable',
     [
-        'glue'
+        'glue',
+        'glue/event/system'
     ],
-    function (Glue) {
+    function (Glue, Event) {
+        var draggables = [],
+            dragStartTimeout = 30;
+
         return function (obj) {
             var dragging = false,
                 dragId,
@@ -21615,6 +21619,21 @@ glue.module.create(
                 grabOffset = {
                     x: 0,
                     y: 0
+                },
+                isHeighestDraggable = function (obj) {
+                    var i = 0,
+                        l = draggables.length,
+                        draggable,
+                        result = true;
+
+                    for (i; i < l; ++i) {
+                        draggable = draggables[i];
+                        if (draggable !== obj && draggable.visible.z > obj.visible.z) {
+                            result = false;
+                            break;
+                        }
+                    }
+                    return result;
                 },
                 checkOnMe = function (e) {
                     var position = e.position,
@@ -21636,17 +21655,22 @@ glue.module.create(
                 dragStart = function (e) {
                     var objectPosition;
                     if (checkOnMe(e) && dragging === false) {
-                        objectPosition = obj.visible.getPosition();
-                        dragging = true;
-                        dragId = e.pointerId;
-                        grabOffset = {
-                            x: e.position.x - objectPosition.x,
-                            y: e.position.y - objectPosition.y
-                        };
-                        if (obj.dragStart) {
-                            obj.dragStart(e);
-                        }
-                        return false;
+                        draggables.push(obj);
+                        setTimeout(function () {
+                            if (isHeighestDraggable(obj)) {
+                                objectPosition = obj.visible.getPosition();
+                                dragging = true;
+                                dragId = e.pointerId;
+                                grabOffset = {
+                                    x: e.position.x - objectPosition.x,
+                                    y: e.position.y - objectPosition.y
+                                };
+                                if (obj.dragStart) {
+                                    obj.dragStart(e);
+                                }
+                                return false;
+                            }
+                        }, dragStartTimeout);
                     }
                 },
                 /**
@@ -21679,6 +21703,8 @@ glue.module.create(
                  */
                 dragEnd = function (e) {
                     if (dragging === true) {
+                        Event.fire('draggable.drop', obj, e);
+                        draggables = [];
                         dragId = undefined;
                         dragging = false;
                         if (obj.dragEnd) {
@@ -21704,6 +21730,9 @@ glue.module.create(
                 },
                 pointerUp: function (e) {
                     dragEnd(e);
+                },
+                dragStartTimeout: function (value) {
+                    dragStartTimeout = value;
                 }
             };
             return obj;
@@ -21714,7 +21743,7 @@ glue.module.create(
 /*
  *  @module Droptarget
  *  @namespace modules.spilgames.entity.behaviour
- *  @desc Used to make a game entity act as a droptarget
+ *  @desc Used to make a game entity behave as a droptarget
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
@@ -21722,115 +21751,40 @@ glue.module.create(
 glue.module.create(
     'glue/component/droptarget',
     [
-        'glue'
+        'glue',
+        'glue/event/system'
     ],
-    function (Glue) {
-        'use strict';
-        // - cross instance private members -
-        var resetTimeout = 100;
-
-        /**
-         * Constructor
-         * @name init
-         * @memberOf me.DroptargetEntity
-         * @function
-         * @param {Object} obj: the entity object
-         */
+    function (Glue, Event) {
         return function (obj) {
-            // - per instance private members -
-                /**
-                 * the checkmethod we want to use
-                 * @public
-                 * @constant
-                 * @type String
-                 * @name checkMethod
-                 */
-            var checkMethod = null,
-                /**
-                 * Gets called when a draggable entity is dropped on the current entity
-                 * @name drop
-                 * @memberOf me.DroptargetEntity
-                 * @function
-                 * @param {Object} draggableEntity: the draggable entity that is dropped
-                 */
-                drop = function (draggableEntity) {
-                    // could be used to perform default drop logic
+            var droppedOnMe = function (draggable, e) {
+                    // TODO: add more methods (constants) to check on me
+                    var position = e.position,
+                        boundingBox = obj.visible.getBoundingBox();
+
+                    // TODO: abstract this to overlaps utility method
+                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
+                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                        return true;
+                    }
                 },
-                /**
-                 * Checks if a dropped entity is dropped on the current entity
-                 * @name checkOnMe
-                 * @memberOf me.DroptargetEntity
-                 * @function
-                 * @param {Object} e: the drag event
-                 * @param {Object} draggableEntity: the draggable entity that is dropped
-                 */
-                checkOnMe = function (e, draggableEntity, resetMe) {
-                    // the check if the draggable entity is this entity should work after
-                    // a total refactoring to the module pattern
-                    if (draggableEntity && draggableEntity !== obj &&
-                        obj[checkMethod](draggableEntity.collisionBox)) {
-                            // call the drop method on the current entity
-                            drop(draggableEntity);
-                            draggableEntity.setDropped(true);
-                            if (obj.drop) {
-                                obj.drop(draggableEntity);
-                            }
-                    } else {
-                        Glue.sugar.setAnimationFrameTimeout(function () {
-                            if (!draggableEntity.isResetted() && !draggableEntity.isDropped()) {
-                                resetMe();
-                                draggableEntity.setResetted(true);
-                            }
-                        }, resetTimeout);
+                draggableDropHandler = function (draggable, e) {
+                    if (droppedOnMe(obj, e) && obj.onDrop) {
+                        obj.onDrop(obj, e);
                     }
                 };
 
-            // - external interface -
-            obj.mix({
-                /**
-                 * constant for the overlaps method
-                 * @public
-                 * @constant
-                 * @type String
-                 * @name CHECKMETHOD_OVERLAPS
-                 */
-                CHECKMETHOD_OVERLAPS: "overlaps",
-                /**
-                 * constant for the contains method
-                 * @public
-                 * @constant
-                 * @type String
-                 * @name CHECKMETHOD_CONTAINS
-                 */
-                CHECKMETHOD_CONTAINS: "contains",
-                /**
-                 * Sets the collision method which is going to be used to check a valid drop
-                 * @name setCheckMethod
-                 * @memberOf me.DroptargetEntity
-                 * @function
-                 * @param {Constant} checkMethod: the checkmethod (defaults to CHECKMETHOD_OVERLAP)
-                 */
-                setCheckMethod: function (value) {
-                    if (this[value] !== undefined) {
-                        checkMethod = value;
-                    }
+            obj = obj || {};
+            obj.droptarget = {
+                setup: function (settings) {
+                    Event.on('draggable.drop', draggableDropHandler);
                 },
-                /**
-                 * Destructor
-                 * @name destructDroptarget
-                 * @memberOf me.DroptargetEntity
-                 * @function
-                 */
-                destructDroptarget: function () {
-                    Glue.event.off(Glue.input.DRAG_END, checkOnMe);
-                }
-            });
+                destroy: function () {
+                    Event.off('draggable.drop', draggableDropHandler);
+                },
+                update: function (deltaT) {
 
-            // - initialisation logic -
-            Glue.event.on(Glue.input.DRAG_END, checkOnMe);
-            checkMethod = obj.CHECKMETHOD_OVERLAPS;
-            
-            // - return external interface -
+                }
+            };
             return obj;
         };
     }
@@ -22043,6 +21997,9 @@ glue.module.create(
                 getDimension: function () {
                     return dimension;
                 },
+                setDimension: function () {
+                    return dimension;
+                },
                 getBoundingBox: function () {
                     return {
                         left: position.x,
@@ -22076,7 +22033,7 @@ glue.module.create(
                     ln = listeners.length;
 
                 if (ln > 0) {
-                    for (x = 0; x < ln; x++) {
+                    for (x = 0; x < ln; ++x) {
                         listener = listeners[x];
                         if (listener && listener.name === name) {
                             listener.callback.apply({
@@ -22107,7 +22064,6 @@ glue.module.create(
                 }
             },
             fire: function (eventName) {
-                console.log('fire', eventName);
                 emitEvent('system',
                     eventName,
                     Array.prototype.slice.call(
@@ -22121,6 +22077,13 @@ glue.module.create(
     }
 );
 
+/*
+ *  @module Game
+ *  @desc Represents a Glue game
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
 glue.module.create(
     'glue/game',
     [

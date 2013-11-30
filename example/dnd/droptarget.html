@@ -17,12 +17,22 @@
                 'glue/game',
                 'glue/component',
                 'glue/component/visible',
-                'glue/component/draggable'
+                'glue/component/draggable',
+                'glue/component/droptarget'
             ],
-            function (Game, Component, Visible, Draggable) {
+            function (Game, Component, Visible, Draggable, Droptarget) {
                 'use strict';
 
-                var myComponent = {
+                Game.setup({
+                    canvas: {
+                        id: 'canvas',
+                        dimension: {
+                            width: 800,
+                            height: 600
+                        }
+                    }
+                }, function () {
+                    var glueComponent = Component(Visible, Draggable).add({
                         init: function () {
                             this.visible.z = this.visible.getPosition().y;
                         },
@@ -47,39 +57,39 @@
                         dragEnd: function (e) {
                             this.visible.z = this.visible.getPosition().y;
                         }
-                    };
-
-                Game.setup({
-                    canvas: {
-                        id: 'canvas',
-                        dimension: {
-                            width: 800,
-                            height: 600
-                        }
-                    }
-                }, function () {
-                    var glueObject = Component(Visible, Draggable).add(myComponent);
-                    glueObject.visible.setup({
+                    });
+                    glueComponent.visible.setup({
                         image: {
                             src: '../image/glue-logo.png'
                         }
                     }).then(function () {
-                        glueObject.setName('glue');
-                        Game.add(glueObject);
+                        glueComponent.setName('glue');
+                        Game.add(glueComponent);
                     });
 
-                    var spilObject = Component(Visible, Draggable).add(myComponent);
-                    spilObject.visible.setup({
+                    var dropComponent = Component(Visible, Droptarget).add({
+                        init: function () {
+                            this.visible.z = this.visible.getPosition().y;
+                        },
+                        draw: function (deltaT, context) {
+                            this.visible.draw(deltaT, context);
+                        },
+                        onDrop: function (obj, e) {
+                            console.log('dropped', obj, e);
+                        }
+                    });
+                    dropComponent.visible.setup({
                         position: {
-                            x: 200,
-                            y: 200
+                            x: 250,
+                            y: 222
                         },
                         image: {
                             src: '../image/spil-logo.png'
                         }
                     }).then(function () {
-                        spilObject.setName('spil');
-                        Game.add(spilObject);
+                        dropComponent.setName('droptarget');
+                        dropComponent.droptarget.setup();
+                        Game.add(dropComponent);
                     });
                 });
             }
