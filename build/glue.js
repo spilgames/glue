@@ -21608,6 +21608,9 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
+        var draggables = [],
+            dragStartTimeout = 30;
+
         return function (obj) {
             var dragging = false,
                 dragId,
@@ -21615,6 +21618,21 @@ glue.module.create(
                 grabOffset = {
                     x: 0,
                     y: 0
+                },
+                isHeighestDraggable = function (obj) {
+                    var i = 0,
+                        l = draggables.length,
+                        draggable,
+                        result = true;
+
+                    for (i; i < l; ++i) {
+                        draggable = draggables[i];
+                        if (draggable !== obj && draggable.visible.z > obj.visible.z) {
+                            result = false;
+                            break;
+                        }
+                    }
+                    return result;
                 },
                 checkOnMe = function (e) {
                     var position = e.position,
@@ -21636,17 +21654,22 @@ glue.module.create(
                 dragStart = function (e) {
                     var objectPosition;
                     if (checkOnMe(e) && dragging === false) {
-                        objectPosition = obj.visible.getPosition();
-                        dragging = true;
-                        dragId = e.pointerId;
-                        grabOffset = {
-                            x: e.position.x - objectPosition.x,
-                            y: e.position.y - objectPosition.y
-                        };
-                        if (obj.dragStart) {
-                            obj.dragStart(e);
-                        }
-                        return false;
+                        draggables.push(obj);
+                        setTimeout(function () {
+                            if (isHeighestDraggable(obj)) {
+                                objectPosition = obj.visible.getPosition();
+                                dragging = true;
+                                dragId = e.pointerId;
+                                grabOffset = {
+                                    x: e.position.x - objectPosition.x,
+                                    y: e.position.y - objectPosition.y
+                                };
+                                if (obj.dragStart) {
+                                    obj.dragStart(e);
+                                }
+                                return false;
+                            }
+                        }, dragStartTimeout);
                     }
                 },
                 /**
@@ -21679,6 +21702,7 @@ glue.module.create(
                  */
                 dragEnd = function (e) {
                     if (dragging === true) {
+                        draggables = [];
                         dragId = undefined;
                         dragging = false;
                         if (obj.dragEnd) {
@@ -21704,6 +21728,9 @@ glue.module.create(
                 },
                 pointerUp: function (e) {
                     dragEnd(e);
+                },
+                dragStartTimeout: function (value) {
+                    dragStartTimeout = value;
                 }
             };
             return obj;

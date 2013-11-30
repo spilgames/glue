@@ -22,23 +22,7 @@
             function (Game, Component, Visible, Draggable) {
                 'use strict';
 
-                var draggables = [],
-                    isHeighestDraggable = function (obj) {
-                        var i = 0,
-                            l = draggables.length,
-                            draggable,
-                            result = true;
-
-                        for (i; i < l; ++i) {
-                            draggable = draggables[i];
-                            if (draggable !== obj && draggable.visible.z > obj.visible.z) {
-                                result = false;
-                                break;
-                            }
-                        }
-                        return result;
-                    },
-                    myComponent = {
+                var myComponent = {
                         init: function () {
                             this.visible.z = this.visible.getPosition().y;
                         },
@@ -55,21 +39,12 @@
                             this.draggable.pointerUp(e);
                         },
                         dragStart: function (e) {
-                            console.log('dragStart', this.getName());
-                            draggables.push(this);
-                            var self = this;
-                            setTimeout(function () {
-                                if (isHeighestDraggable(self)) {
-                                    console.log(self.getName(), 'is heighest', draggables.length);
-                                    self.visible.z = 9999;
-                                }
-                            }, 100);
+                            this.visible.z = 9999;
                         },
                         dragMove: function (e) {
                             this.visible.z = this.visible.getPosition().y;
                         },
                         dragEnd: function (e) {
-                            draggables = [];
                             this.visible.z = this.visible.getPosition().y;
                         }
                     };
