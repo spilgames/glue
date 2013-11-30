@@ -9,9 +9,10 @@
 glue.module.create(
     'glue/component/draggable',
     [
-        'glue'
+        'glue',
+        'glue/event/system'
     ],
-    function (Glue) {
+    function (Glue, Event) {
         var draggables = [],
             dragStartTimeout = 30;
 
@@ -106,6 +107,7 @@ glue.module.create(
                  */
                 dragEnd = function (e) {
                     if (dragging === true) {
+                        Event.fire('draggable.drop', obj, e);
                         draggables = [];
                         dragId = undefined;
                         dragging = false;

@@ -88,6 +88,9 @@ glue.module.create(
                 getDimension: function () {
                     return dimension;
                 },
+                setDimension: function () {
+                    return dimension;
+                },
                 getBoundingBox: function () {
                     return {
                         left: position.x,

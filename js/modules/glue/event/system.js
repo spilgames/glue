@@ -17,7 +17,7 @@ glue.module.create(
                     ln = listeners.length;
 
                 if (ln > 0) {
-                    for (x = 0; x < ln; x++) {
+                    for (x = 0; x < ln; ++x) {
                         listener = listeners[x];
                         if (listener && listener.name === name) {
                             listener.callback.apply({
@@ -48,7 +48,6 @@ glue.module.create(
                 }
             },
             fire: function (eventName) {
-                console.log('fire', eventName);
                 emitEvent('system',
                     eventName,
                     Array.prototype.slice.call(
