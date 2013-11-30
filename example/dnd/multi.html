@@ -22,7 +22,23 @@
             function (Game, Component, Visible, Draggable) {
                 'use strict';
 
-                var myComponent = {
+                var draggables = [],
+                    isHeighestDraggable = function (obj) {
+                        var i = 0,
+                            l = draggables.length,
+                            draggable,
+                            result = true;
+
+                        for (i; i < l; ++i) {
+                            draggable = draggables[i];
+                            if (draggable !== obj && draggable.visible.z > obj.visible.z) {
+                                result = false;
+                                break;
+                            }
+                        }
+                        return result;
+                    },
+                    myComponent = {
                         init: function () {
                             this.visible.z = this.visible.getPosition().y;
                         },
@@ -39,9 +55,21 @@
                             this.draggable.pointerUp(e);
                         },
                         dragStart: function (e) {
-                            this.visible.z = 9999;
+                            console.log('dragStart', this.getName());
+                            draggables.push(this);
+                            var self = this;
+                            setTimeout(function () {
+                                if (isHeighestDraggable(self)) {
+                                    console.log(self.getName(), 'is heighest', draggables.length);
+                                    self.visible.z = 9999;
+                                }
+                            }, 100);
                         },
                         dragMove: function (e) {
+                            this.visible.z = this.visible.getPosition().y;
+                        },
+                        dragEnd: function (e) {
+                            draggables = [];
                             this.visible.z = this.visible.getPosition().y;
                         }
                     };
@@ -61,6 +89,7 @@
                             src: '../image/glue-logo.png'
                         }
                     }).then(function () {
+                        glueObject.setName('glue');
                         Game.add(glueObject);
                     });
 
@@ -74,6 +103,7 @@
                             src: '../image/spil-logo.png'
                         }
                     }).then(function () {
+                        spilObject.setName('spil');
                         Game.add(spilObject);
                     });
                 });
