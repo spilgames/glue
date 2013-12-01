@@ -27,7 +27,7 @@ glue.module.create(
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(obj, e) && obj.onDrop) {
-                        obj.onDrop(obj, e);
+                        obj.onDrop(draggable, e);
                     }
                 };
 
