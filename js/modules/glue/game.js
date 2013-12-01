@@ -183,8 +183,8 @@ glue.module.create(
                 var touch = e.targetTouches[0];
                 e.preventDefault();
                 e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
+                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
+                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
                 };
                 pointerDown(e);
             },
@@ -192,8 +192,8 @@ glue.module.create(
                 var touch = e.targetTouches[0];
                 e.preventDefault();
                 e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
+                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
+                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
                 };
                 pointerMove(e);
             },
@@ -201,8 +201,8 @@ glue.module.create(
                 var touch = e.changedTouches[0];
                 e.preventDefault();
                 e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
+                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
+                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
                 };
                 pointerUp(e);
             },
