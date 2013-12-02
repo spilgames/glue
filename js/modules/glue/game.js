@@ -9,9 +9,10 @@ glue.module.create(
     'glue/game',
     [
         'glue',
+        'glue/math/vector',
         'glue/event/system'
     ],
-    function (Glue, Event) {
+    function (Glue, Vector, Event) {
         var fps = 60,
             components = [],
             addedComponents = [],
@@ -179,55 +180,52 @@ glue.module.create(
                     }
                 }
             },
-            touchStart = function (e) {
+            addTouchPosition = function (e) {
                 var touch = e.targetTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
-                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
-                };
+                e.position = Vector(
+                    (touch.pageX - canvas.offsetLeft) / canvasScale.x,
+                    (touch.pageY - canvas.offsetTop) / canvasScale.y
+                );
+            },
+            addMousePosition = function (e) {
+                e.position = Vector(
+                    (e.clientX - canvas.offsetLeft) / canvasScale.x,
+                    (e.clientY - canvas.offsetTop) / canvasScale.y
+                );
+            },
+            touchStart = function (e) {
+                e.preventDefault();
+                addTouchPosition(e);
                 pointerDown(e);
             },
             touchMove = function (e) {
-                var touch = e.targetTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
-                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
-                };
+                addTouchPosition(e);
                 pointerMove(e);
             },
             touchEnd = function (e) {
-                var touch = e.changedTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
-                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
-                };
+                addTouchPosition(e);
                 pointerUp(e);
             },
             mouseDown = function (e) {
-                e.position = {
-                    x: (e.clientX - canvas.offsetLeft) / canvasScale.x,
-                    y: (e.clientY - canvas.offsetTop) / canvasScale.y
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerDown(e);
             },
             mouseMove = function (e) {
-                e.position = {
-                    x: (e.clientX - canvas.offsetLeft) / canvasScale.x,
-                    y: (e.clientY - canvas.offsetTop) / canvasScale.y
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerMove(e);
             },
             mouseUp = function (e) {
-                e.position = {
-                    x: (e.clientX - canvas.offsetLeft) / canvasScale.x,
-                    y: (e.clientY - canvas.offsetTop) / canvasScale.y
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerUp(e);
             },
             setupEventListeners = function () {
+                // main input listeners
                 if ('ontouchstart' in win) {
                     canvas.addEventListener('touchstart', touchStart);
                     canvas.addEventListener('touchmove', touchMove);
@@ -237,22 +235,32 @@ glue.module.create(
                     canvas.addEventListener('mousemove', mouseMove);
                     canvas.addEventListener('mouseup', mouseUp);
                 }
+                // automated test listeners
                 Event.on('glue.pointer.down', pointerDown);
                 Event.on('glue.pointer.move', pointerMove);
                 Event.on('glue.pointer.up', pointerUp);
 
+                // window resize listeners
                 window.addEventListener('resize', resizeGame, false);
                 window.addEventListener('orientationchange', resizeGame, false);
 
+                // touch device listeners to stop default behaviour
                 document.body.addEventListener('touchstart', function (e) {
-                    if (e && e.preventDefault) { e.preventDefault(); }
-                    if (e && e.stopPropagation) { e.stopPropagation(); }
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                    }
                     return false;
                 });
-
                 document.body.addEventListener('touchmove', function (e) {
-                    if (e && e.preventDefault) { e.preventDefault(); }
-                    if (e && e.stopPropagation) { e.stopPropagation(); }
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                    }
                     return false;
                 });
             },

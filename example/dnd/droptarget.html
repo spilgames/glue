@@ -6,17 +6,18 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="stylesheet" href="../css/style.css" />
-    <script src="../../build/glue.min.js"></script>
+    <script src="../../build/glue.js"></script>
     <script>
         glue.module.get(
             [
                 'glue/game',
+                'glue/math/vector',
                 'glue/component',
                 'glue/component/visible',
                 'glue/component/draggable',
                 'glue/component/droptarget'
             ],
-            function (Game, Component, Visible, Draggable, Droptarget) {
+            function (Game, Vector, Component, Visible, Draggable, Droptarget) {
                 'use strict';
 
                 Game.setup({
@@ -75,10 +76,7 @@
                         }
                     });
                     dropComponent.visible.setup({
-                        position: {
-                            x: 250,
-                            y: 222
-                        },
+                        position: Vector(250, 222),
                         image: {
                             src: '../image/spil-logo.png'
                         }

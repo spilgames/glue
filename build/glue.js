@@ -21606,9 +21606,10 @@ glue.module.create(
     'glue/component/draggable',
     [
         'glue',
+        'glue/math/vector',
         'glue/event/system'
     ],
-    function (Glue, Event) {
+    function (Glue, Vector, Event) {
         var draggables = [],
             dragStartTimeout = 30;
 
@@ -21636,7 +21637,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    var position = e.position,
+                    var position = e.position.get(),
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method
@@ -21653,17 +21654,20 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
-                    var objectPosition;
+                    var pointerPostion,
+                        objectPosition;
+
                     if (checkOnMe(e) && dragging === false) {
                         draggables.push(obj);
                         setTimeout(function () {
                             if (isHeighestDraggable(obj)) {
+                                pointerPosition = e.position.get();
                                 objectPosition = obj.visible.getPosition();
                                 dragging = true;
                                 dragId = e.pointerId;
                                 grabOffset = {
-                                    x: e.position.x - objectPosition.x,
-                                    y: e.position.y - objectPosition.y
+                                    x: pointerPosition.x - objectPosition.x,
+                                    y: pointerPosition.y - objectPosition.y
                                 };
                                 if (obj.dragStart) {
                                     obj.dragStart(e);
@@ -21681,13 +21685,13 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragMove = function (e) {
+                    var pointerPosition = e.position.get();
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            // TODO: Change to Glue vector math
-                            obj.visible.setPosition({
-                                x: e.position.x - grabOffset.x,
-                                y: e.position.y - grabOffset.y
-                            });
+                            obj.visible.setPosition(Vector(
+                                pointerPosition.x - grabOffset.x,
+                                pointerPosition.y - grabOffset.y
+                            ));
                             if (obj.dragMove) {
                                 obj.dragMove(e);
                             }
@@ -21758,7 +21762,7 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position,
+                    var position = e.position.get(),
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method
@@ -21921,18 +21925,17 @@ glue.module.create(
 glue.module.create(
     'glue/component/visible',
     [
-        'glue'
+        'glue',
+        'glue/math/vector'
     ],
-    function (Glue) {
+    function (Glue, Vector) {
         return function (obj) {
-            var position = {
-                    x: 0,
-                    y: 0
-                },
+            var position = Vector(0, 0).get(),
                 dimension = null,
                 image = null,
                 frameCount = 0,
-                frame = 1;
+                frame = 1,
+                rectangle 
 
             obj = obj || {};
             obj.visible = {
@@ -21942,6 +21945,7 @@ glue.module.create(
                         readyList = [],
                         successCallback,
                         errorCallback,
+                        customPosition,
                         readyCheck = function () {
                             if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
                                 successCallback();
@@ -21958,7 +21962,12 @@ glue.module.create(
 
                     if (settings) {
                         if (settings.position) {
-                            position = settings.position;
+                            // using proper rounding (http://jsperf.com/math-round-vs-hack/66)
+                            customPosition = settings.position.get();
+                            position = Vector(
+                                Math.round(customPosition.x),
+                                Math.round(customPosition.y)
+                            ).get();
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
@@ -21992,7 +22001,7 @@ glue.module.create(
                     return position;
                 },
                 setPosition: function (value) {
-                    position = value;
+                    position = value.get();
                 },
                 getDimension: function () {
                     return dimension;
@@ -22088,9 +22097,10 @@ glue.module.create(
     'glue/game',
     [
         'glue',
+        'glue/math/vector',
         'glue/event/system'
     ],
-    function (Glue, Event) {
+    function (Glue, Vector, Event) {
         var fps = 60,
             components = [],
             addedComponents = [],
@@ -22258,55 +22268,52 @@ glue.module.create(
                     }
                 }
             },
-            touchStart = function (e) {
+            addTouchPosition = function (e) {
                 var touch = e.targetTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
-                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
-                };
+                e.position = Vector(
+                    (touch.pageX - canvas.offsetLeft) / canvasScale.x,
+                    (touch.pageY - canvas.offsetTop) / canvasScale.y
+                );
+            },
+            addMousePosition = function (e) {
+                e.position = Vector(
+                    (e.clientX - canvas.offsetLeft) / canvasScale.x,
+                    (e.clientY - canvas.offsetTop) / canvasScale.y
+                );
+            },
+            touchStart = function (e) {
+                e.preventDefault();
+                addTouchPosition(e);
                 pointerDown(e);
             },
             touchMove = function (e) {
-                var touch = e.targetTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
-                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
-                };
+                addTouchPosition(e);
                 pointerMove(e);
             },
             touchEnd = function (e) {
-                var touch = e.changedTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: (touch.pageX - canvas.offsetLeft) / canvasScale.x,
-                    y: (touch.pageY - canvas.offsetTop) / canvasScale.y
-                };
+                addTouchPosition(e);
                 pointerUp(e);
             },
             mouseDown = function (e) {
-                e.position = {
-                    x: (e.clientX - canvas.offsetLeft) / canvasScale.x,
-                    y: (e.clientY - canvas.offsetTop) / canvasScale.y
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerDown(e);
             },
             mouseMove = function (e) {
-                e.position = {
-                    x: (e.clientX - canvas.offsetLeft) / canvasScale.x,
-                    y: (e.clientY - canvas.offsetTop) / canvasScale.y
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerMove(e);
             },
             mouseUp = function (e) {
-                e.position = {
-                    x: (e.clientX - canvas.offsetLeft) / canvasScale.x,
-                    y: (e.clientY - canvas.offsetTop) / canvasScale.y
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerUp(e);
             },
             setupEventListeners = function () {
+                // main input listeners
                 if ('ontouchstart' in win) {
                     canvas.addEventListener('touchstart', touchStart);
                     canvas.addEventListener('touchmove', touchMove);
@@ -22316,22 +22323,32 @@ glue.module.create(
                     canvas.addEventListener('mousemove', mouseMove);
                     canvas.addEventListener('mouseup', mouseUp);
                 }
+                // automated test listeners
                 Event.on('glue.pointer.down', pointerDown);
                 Event.on('glue.pointer.move', pointerMove);
                 Event.on('glue.pointer.up', pointerUp);
 
+                // window resize listeners
                 window.addEventListener('resize', resizeGame, false);
                 window.addEventListener('orientationchange', resizeGame, false);
 
+                // touch device listeners to stop default behaviour
                 document.body.addEventListener('touchstart', function (e) {
-                    if (e && e.preventDefault) { e.preventDefault(); }
-                    if (e && e.stopPropagation) { e.stopPropagation(); }
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                    }
                     return false;
                 });
-
                 document.body.addEventListener('touchmove', function (e) {
-                    if (e && e.preventDefault) { e.preventDefault(); }
-                    if (e && e.stopPropagation) { e.stopPropagation(); }
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                    }
                     return false;
                 });
             },
@@ -22471,6 +22488,35 @@ glue.module.create(
             return {
                 get: function () {
                     return mat;
+                }
+            };
+        };
+    }
+);
+
+/**
+ *  @module Rectangle
+ *  @namespace math
+ *  @desc Represents a rectangle
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/rectangle',
+    function () {
+        'use strict';
+        var rectangle;
+        return function (x1, y1, x2, y2) {
+            rectangle = {
+                x1: x1,
+                y1: y1,
+                x2: x2,
+                y2: y2
+            };
+            return {
+                get: function () {
+                    return rectangle;
                 }
             };
         };
