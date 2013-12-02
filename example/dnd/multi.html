@@ -11,11 +11,12 @@
         glue.module.get(
             [
                 'glue/game',
+                'glue/math/vector',
                 'glue/component',
                 'glue/component/visible',
                 'glue/component/draggable'
             ],
-            function (Game, Component, Visible, Draggable) {
+            function (Game, Vector, Component, Visible, Draggable) {
                 'use strict';
 
                 var myComponent = {
@@ -66,10 +67,7 @@
 
                     var spilObject = Component(Visible, Draggable).add(myComponent);
                     spilObject.visible.setup({
-                        position: {
-                            x: 200,
-                            y: 200
-                        },
+                        position: Vector(200, 200),
                         image: {
                             src: '../image/spil-logo.png'
                         }
