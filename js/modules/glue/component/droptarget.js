@@ -1,6 +1,6 @@
 /*
  *  @module Droptarget
- *  @namespace modules.spilgames.entity.behaviour
+ *  @namespace component
  *  @desc Used to make a game entity behave as a droptarget
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings

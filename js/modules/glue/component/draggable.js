@@ -1,6 +1,6 @@
 /*
  *  @module Draggable
- *  @namespace modules.spilgames.entity.behaviour
+ *  @namespace component
  *  @desc Used to make a game entity draggable
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings

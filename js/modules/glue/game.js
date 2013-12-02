@@ -181,7 +181,7 @@ glue.module.create(
                 }
             },
             addTouchPosition = function (e) {
-                var touch = e.targetTouches[0];
+                var touch = e.changedTouches[0];
                 e.preventDefault();
                 e.position = Vector(
                     (touch.pageX - canvas.offsetLeft) / canvasScale.x,
