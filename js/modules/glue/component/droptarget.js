@@ -1,6 +1,6 @@
 /*
  *  @module Droptarget
- *  @namespace modules.spilgames.entity.behaviour
+ *  @namespace component
  *  @desc Used to make a game entity behave as a droptarget
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
@@ -16,7 +16,7 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position,
+                    var position = e.position.get(),
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method
@@ -27,7 +27,7 @@ glue.module.create(
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(obj, e) && obj.onDrop) {
-                        obj.onDrop(obj, e);
+                        obj.onDrop(draggable, e);
                     }
                 };
 

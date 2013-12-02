@@ -1,29 +1,27 @@
 /*
  *  @module Visible
- *  @namespace component.visible
+ *  @namespace component
  *  @desc Represents a visible component
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
- *  Setup with and height of image automatically
- *  Removed the need for getters and setters in visible
+ *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/visible',
     [
-        'glue'
+        'glue',
+        'glue/math/vector'
     ],
-    function (Glue) {
+    function (Glue, Vector) {
         return function (obj) {
-            var position = {
-                    x: 0,
-                    y: 0
-                },
+            var position = Vector(0, 0).get(),
                 dimension = null,
                 image = null,
                 frameCount = 0,
-                frame = 1;
+                frame = 1,
+                rectangle 
 
             obj = obj || {};
             obj.visible = {
@@ -33,6 +31,7 @@ glue.module.create(
                         readyList = [],
                         successCallback,
                         errorCallback,
+                        customPosition,
                         readyCheck = function () {
                             if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
                                 successCallback();
@@ -49,7 +48,12 @@ glue.module.create(
 
                     if (settings) {
                         if (settings.position) {
-                            position = settings.position;
+                            // using proper rounding (http://jsperf.com/math-round-vs-hack/66)
+                            customPosition = settings.position.get();
+                            position = Vector(
+                                Math.round(customPosition.x),
+                                Math.round(customPosition.y)
+                            ).get();
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
@@ -83,7 +87,7 @@ glue.module.create(
                     return position;
                 },
                 setPosition: function (value) {
-                    position = value;
+                    position = value.get();
                 },
                 getDimension: function () {
                     return dimension;

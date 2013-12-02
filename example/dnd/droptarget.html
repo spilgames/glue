@@ -1,26 +1,25 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Drag & Drop</title>
+    <title>Drag &amp; Drop</title>
     <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <style>
-        #canvas {
-            border: 1px solid #00aa00;
-        }
-    </style>
-    <script src="../../build/glue.min.js"></script>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script src="../../build/glue.js"></script>
     <script>
         glue.module.get(
             [
                 'glue/game',
+                'glue/math/vector',
                 'glue/component',
                 'glue/component/visible',
                 'glue/component/draggable',
-                'glue/component/droptarget'
+                'glue/component/droptarget',
+                'glue/component/hoverable',
+                'glue/component/clickable'
             ],
-            function (Game, Component, Visible, Draggable, Droptarget) {
+            function (Game, Vector, Component, Visible, Draggable, Droptarget, Hoverable, Clickable) {
                 'use strict';
 
                 Game.setup({
@@ -32,7 +31,7 @@
                         }
                     }
                 }, function () {
-                    var glueComponent = Component(Visible, Draggable).add({
+                    var glueComponent = Component(Visible, Draggable, Hoverable, Clickable).add({
                         init: function () {
                             this.visible.z = this.visible.getPosition().y;
                         },
@@ -41,9 +40,11 @@
                         },
                         pointerDown: function (e) {
                             this.draggable.pointerDown(e);
+                            this.clickable.pointerDown(e);
                         },
                         pointerMove: function (e) {
                             this.draggable.pointerMove(e);
+                            this.hoverable.pointerMove(e);
                         },
                         pointerUp: function (e) {
                             this.draggable.pointerUp(e);
@@ -56,6 +57,15 @@
                         },
                         dragEnd: function (e) {
                             this.visible.z = this.visible.getPosition().y;
+                        },
+                        hoverOver: function (e) {
+                            console.log('glue is hovered...');
+                        },
+                        hoverOut: function (e) {
+                            console.log('glue is not hovered anymore...');
+                        },
+                        onClick: function (e) {
+                            console.log('glue is clicked...');
                         }
                     });
                     glueComponent.visible.setup({
@@ -79,10 +89,7 @@
                         }
                     });
                     dropComponent.visible.setup({
-                        position: {
-                            x: 250,
-                            y: 222
-                        },
+                        position: Vector(250, 222),
                         image: {
                             src: '../image/spil-logo.png'
                         }

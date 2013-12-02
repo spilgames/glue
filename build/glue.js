@@ -21492,8 +21492,8 @@ glue.module.create(
 
 /*
  *  @module Clickable
- *  @namespace modules.spilgames.entity.behaviour
- *  @desc Used to make a game entity clickable
+ *  @namespace component
+ *  @desc Used to make a game component perfom an action when she's clicked
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
@@ -21504,99 +21504,47 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        /**
-         * Constructor
-         * @memberOf clickable
-         * @function
-         * @param {Object} obj: the entity object
-         */
         return function (obj) {
-            var isPressed = false,
-                /**
-                 * Listens the POINTER_UP event
-                 * @name onPointerUp
-                 * @memberOf clickable
-                 * @function
-                 * @param {Object} evt: The pointer event
-                 */
-                onPointerUp = function (evt) {
-                    isPressed = false;
-                    // call the clicked method if it exists
-                    if (obj.clickUp) {
-                        obj.clickUp(evt);
+            var isClicked = function (e) {
+                    // TODO: add more methods (constants) to check on me
+                    var position = e.position.get(),
+                        boundingBox = obj.visible.getBoundingBox();
+
+                    // TODO: abstract this to overlaps utility method
+                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
+                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                        return true;
                     }
                 },
-                /**
-                 * Listens the POINTER_DOWN event
-                 * @name onPointerDown
-                 * @memberOf clickable
-                 * @function
-                 * @param {Object} evt: The pointer event
-                 */
-                onPointerDown = function (evt) {
-                    var localPosition = me.game.viewport.worldToLocal(
-                        evt.gameX,
-                        evt.gameY
-                    );
-                    if (obj.collisionBox && obj.collisionBox.containsPointV(localPosition)) {
-                        isPressed = true;
-                        // call the clicked method if it exists
-                        if (obj.clickDown) {
-                            obj.clickDown(evt);
-                        }
+                pointerDownHandler = function (e) {
+                    if (isClicked(e) && obj.onClick) {
+                        obj.onClick(e);
                     }
-                },
-                /**
-                 * Sets up all events for this module
-                 * @name setupEvents
-                 * @memberOf clickable
-                 * @function
-                 */
-                setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
-                },
-                /**
-                 * Tears down all events for this module
-                 * @name teardownEvents
-                 * @memberOf clickable
-                 * @function
-                 */
-                tearDownEvents = function () {
-                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.off(Glue.input.POINTER_UP, onPointerUp);
                 };
 
-            // setup the module events
-            setupEvents();
+            obj = obj || {};
+            obj.clickable = {
+                setup: function (settings) {
 
-            return obj.mix({
-                /**
-                 * Returns if this entity is pressed
-                 * @name isPressed
-                 * @memberOf clickable
-                 * @function
-                 */
-                isPressed: function () {
-                    return isPressed;
                 },
-                /**
-                 * Can be used to destruct this entity
-                 * @name destructClickable
-                 * @memberOf clickable
-                 * @function
-                 */
-                destructClickable: function () {
-                    tearDownEvents();
+                destroy: function () {
+
+                },
+                update: function (deltaT) {
+
+                },
+                pointerDown: function (e) {
+                    pointerDownHandler(e);
                 }
-            });
+            };
+            return obj;
         };
     }
 );
 
 /*
  *  @module Draggable
- *  @namespace modules.spilgames.entity.behaviour
+ *  @namespace component
  *  @desc Used to make a game entity draggable
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
@@ -21606,9 +21554,10 @@ glue.module.create(
     'glue/component/draggable',
     [
         'glue',
+        'glue/math/vector',
         'glue/event/system'
     ],
-    function (Glue, Event) {
+    function (Glue, Vector, Event) {
         var draggables = [],
             dragStartTimeout = 30;
 
@@ -21636,7 +21585,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    var position = e.position,
+                    var position = e.position.get(),
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method
@@ -21653,17 +21602,20 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
-                    var objectPosition;
+                    var pointerPostion,
+                        objectPosition;
+
                     if (checkOnMe(e) && dragging === false) {
                         draggables.push(obj);
                         setTimeout(function () {
                             if (isHeighestDraggable(obj)) {
+                                pointerPosition = e.position.get();
                                 objectPosition = obj.visible.getPosition();
                                 dragging = true;
                                 dragId = e.pointerId;
                                 grabOffset = {
-                                    x: e.position.x - objectPosition.x,
-                                    y: e.position.y - objectPosition.y
+                                    x: pointerPosition.x - objectPosition.x,
+                                    y: pointerPosition.y - objectPosition.y
                                 };
                                 if (obj.dragStart) {
                                     obj.dragStart(e);
@@ -21681,13 +21633,13 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragMove = function (e) {
+                    var pointerPosition = e.position.get();
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            // TODO: Change to Glue vector math
-                            obj.visible.setPosition({
-                                x: e.position.x - grabOffset.x,
-                                y: e.position.y - grabOffset.y
-                            });
+                            obj.visible.setPosition(Vector(
+                                pointerPosition.x - grabOffset.x,
+                                pointerPosition.y - grabOffset.y
+                            ));
                             if (obj.dragMove) {
                                 obj.dragMove(e);
                             }
@@ -21742,7 +21694,7 @@ glue.module.create(
 
 /*
  *  @module Droptarget
- *  @namespace modules.spilgames.entity.behaviour
+ *  @namespace component
  *  @desc Used to make a game entity behave as a droptarget
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
@@ -21758,7 +21710,7 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position,
+                    var position = e.position.get(),
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method
@@ -21769,7 +21721,7 @@ glue.module.create(
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(obj, e) && obj.onDrop) {
-                        obj.onDrop(obj, e);
+                        obj.onDrop(draggable, e);
                     }
                 };
 
@@ -21792,8 +21744,8 @@ glue.module.create(
 
 /*
  *  @module Hoverable
- *  @namespace modules.spilgames.entity.behaviour
- *  @desc Used to make a game entity hoverable
+ *  @namespace component
+ *  @desc Used to make a game component perfom an action when she's hovered over
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
@@ -21804,135 +21756,82 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        /**
-         * Constructor
-         * @memberOf hoverable
-         * @function
-         * @param {Object} obj: the entity object
-         */
         return function (obj) {
-            var isHovering = false,
-                hoverOverCalled = false,
-                hoverOutCalled = false,
-                /**
-                 * Checks if the user is hovering based on the pointer event
-                 * @name checkHovering
-                 * @memberOf hoverable
-                 * @function
-                 * @param {Object} evt: The pointer event
-                 */
-                checkHovering = function (evt, collisionBox, obj) {
-                    var localPosition = obj.floating ?
-                        me.game.viewport.worldToLocal(evt.gameX, evt.gameY) :
-                        {x: evt.gameX, y: evt.gameY};
+            // TODO: add state constants
+            var state = 'not hovered',
+                isHovered = function (e) {
+                    // TODO: add more methods (constants) to check on me
+                    var position = e.position.get(),
+                        boundingBox = obj.visible.getBoundingBox();
 
-                    if (!collisionBox) {
-                        return;
+                    // TODO: abstract this to overlaps utility method
+                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
+                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                        return true;
                     }
-                    if (collisionBox.containsPointV(localPosition)) {
-                        isHovering = true;
-                        if (obj.hoverOver && !hoverOverCalled) {
-                            hoverOverCalled = true;
-                            hoverOutCalled = false;
-                            obj.hoverOver(evt);
+                },
+                pointerMoveHandler = function (e) {
+                    if (isHovered(e)) {
+                        if (state === 'not hovered') {
+                            if (obj.hoverOver) {
+                                obj.hoverOver(e);
+                            }
+                            state = 'hovered';
                         }
                     } else {
-                        isHovering = false;
-                        if (obj.hoverOut && !hoverOutCalled) {
-                            hoverOutCalled = true;
-                            hoverOverCalled = false;
-                            obj.hoverOut(evt);
+                        if (state === 'hovered') {
+                            if (obj.hoverOut) {
+                                obj.hoverOut(e);
+                            }
+                            state = 'not hovered';
                         }
                     }
-                },
-                /**
-                 * Listens the POINTER_DOWN event
-                 * @name onPointerDown
-                 * @memberOf hoverable
-                 * @function
-                 * @param {Object} evt: The pointer event
-                 */
-                onPointerDown = function (evt) {
-                    checkHovering(evt, obj.collisionBox, obj);
-                },
-                /**
-                 * Listens the POINTER_MOVE event
-                 * @name onPointerMove
-                 * @memberOf hoverable
-                 * @function
-                 * @param {Object} evt: The pointer event
-                 */
-                onPointerMove = function (evt) {
-                    checkHovering(evt, obj.collisionBox, obj);
-                },
-                /**
-                 * Sets up all events for this module
-                 * @name setupEvents
-                 * @memberOf hoverable
-                 * @function
-                 */
-                setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.on(Glue.input.POINTER_MOVE, onPointerMove);
-                },
-                /**
-                 * Tears down all events for this module
-                 * @name teardownEvents
-                 * @memberOf hoverable
-                 * @function
-                 */
-                tearDownEvents = function () {
-                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.off(Glue.input.POINTER_MOVE, onPointerMove);
                 };
 
-            // setup the module events
-            setupEvents();
+            obj = obj || {};
+            obj.hoverable = {
+                setup: function (settings) {
 
-            return obj.mix({
-                isHovering: function () {
-                    return isHovering;
                 },
-                /**
-                 * Can be used to destruct this entity
-                 * @name destructHoverable
-                 * @memberOf hoverable
-                 * @function
-                 */
-                destructHoverable: function () {
-                    tearDownEvents();
+                destroy: function () {
+
+                },
+                update: function (deltaT) {
+
+                },
+                pointerMove: function (e) {
+                    pointerMoveHandler(e);
                 }
-            });
+            };
+            return obj;
         };
     }
 );
 
 /*
  *  @module Visible
- *  @namespace component.visible
+ *  @namespace component
  *  @desc Represents a visible component
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
- *  Setup with and height of image automatically
- *  Removed the need for getters and setters in visible
+ *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/visible',
     [
-        'glue'
+        'glue',
+        'glue/math/vector'
     ],
-    function (Glue) {
+    function (Glue, Vector) {
         return function (obj) {
-            var position = {
-                    x: 0,
-                    y: 0
-                },
+            var position = Vector(0, 0).get(),
                 dimension = null,
                 image = null,
                 frameCount = 0,
-                frame = 1;
+                frame = 1,
+                rectangle 
 
             obj = obj || {};
             obj.visible = {
@@ -21942,6 +21841,7 @@ glue.module.create(
                         readyList = [],
                         successCallback,
                         errorCallback,
+                        customPosition,
                         readyCheck = function () {
                             if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
                                 successCallback();
@@ -21958,7 +21858,12 @@ glue.module.create(
 
                     if (settings) {
                         if (settings.position) {
-                            position = settings.position;
+                            // using proper rounding (http://jsperf.com/math-round-vs-hack/66)
+                            customPosition = settings.position.get();
+                            position = Vector(
+                                Math.round(customPosition.x),
+                                Math.round(customPosition.y)
+                            ).get();
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
@@ -21992,7 +21897,7 @@ glue.module.create(
                     return position;
                 },
                 setPosition: function (value) {
-                    position = value;
+                    position = value.get();
                 },
                 getDimension: function () {
                     return dimension;
@@ -22088,9 +21993,10 @@ glue.module.create(
     'glue/game',
     [
         'glue',
+        'glue/math/vector',
         'glue/event/system'
     ],
-    function (Glue, Event) {
+    function (Glue, Vector, Event) {
         var fps = 60,
             components = [],
             addedComponents = [],
@@ -22103,6 +22009,7 @@ glue.module.create(
             backBufferContext2D = null,
             canvasSupported = false,
             canvasDimension = null,
+            canvasScale = {},
             win = null,
             doc = null,
             isRunning = false,
@@ -22114,8 +22021,13 @@ glue.module.create(
                     canvas.id = canvasId;
                     canvas.width = canvasDimension.width;
                     canvas.height = canvasDimension.height;
-                    document.body.appendChild(canvas);
+                    if (document.getElementById('wrapper') !== null) {
+                        document.getElementById('wrapper').appendChild(canvas);    
+                    } else {
+                        document.body.appendChild(canvas);
+                    }
                 }
+                resizeGame();
                 if (canvas.getContext) {
                     canvasSupported = true;
                     context2D = canvas.getContext('2d');
@@ -22124,6 +22036,26 @@ glue.module.create(
                     backBuffer.height = canvas.height;
                     backBufferContext2D = backBuffer.getContext('2d');
                 }
+            },
+            resizeGame = function () {
+                var canvasRatio = canvas.height / canvas.width,
+                    windowRatio = window.innerHeight / window.innerWidth,
+                    width,
+                    height;
+
+                if (windowRatio < canvasRatio) {
+                    height = window.innerHeight;
+                    width = height / canvasRatio;
+                } else {
+                    width = window.innerWidth;
+                    height = width * canvasRatio;
+                }
+
+                canvasScale.x = width / canvasDimension.width;
+                canvasScale.y = height / canvasDimension.height;
+
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
             },
             sort = function() {
                 components.sort(function(a, b) {
@@ -22232,55 +22164,52 @@ glue.module.create(
                     }
                 }
             },
-            touchStart = function (e) {
-                var touch = e.targetTouches[0];
+            addTouchPosition = function (e) {
+                var touch = e.changedTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
-                };
+                e.position = Vector(
+                    (touch.pageX - canvas.offsetLeft) / canvasScale.x,
+                    (touch.pageY - canvas.offsetTop) / canvasScale.y
+                );
+            },
+            addMousePosition = function (e) {
+                e.position = Vector(
+                    (e.clientX - canvas.offsetLeft) / canvasScale.x,
+                    (e.clientY - canvas.offsetTop) / canvasScale.y
+                );
+            },
+            touchStart = function (e) {
+                e.preventDefault();
+                addTouchPosition(e);
                 pointerDown(e);
             },
             touchMove = function (e) {
-                var touch = e.targetTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
-                };
+                addTouchPosition(e);
                 pointerMove(e);
             },
             touchEnd = function (e) {
-                var touch = e.changedTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
-                };
+                addTouchPosition(e);
                 pointerUp(e);
             },
             mouseDown = function (e) {
-                e.position = {
-                    x: e.clientX - canvas.offsetLeft,
-                    y: e.clientY - canvas.offsetTop
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerDown(e);
             },
             mouseMove = function (e) {
-                e.position = {
-                    x: e.clientX - canvas.offsetLeft,
-                    y: e.clientY - canvas.offsetTop
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerMove(e);
             },
             mouseUp = function (e) {
-                e.position = {
-                    x: e.clientX - canvas.offsetLeft,
-                    y: e.clientY - canvas.offsetTop
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerUp(e);
             },
             setupEventListeners = function () {
+                // main input listeners
                 if ('ontouchstart' in win) {
                     canvas.addEventListener('touchstart', touchStart);
                     canvas.addEventListener('touchmove', touchMove);
@@ -22290,9 +22219,34 @@ glue.module.create(
                     canvas.addEventListener('mousemove', mouseMove);
                     canvas.addEventListener('mouseup', mouseUp);
                 }
+                // automated test listeners
                 Event.on('glue.pointer.down', pointerDown);
                 Event.on('glue.pointer.move', pointerMove);
                 Event.on('glue.pointer.up', pointerUp);
+
+                // window resize listeners
+                window.addEventListener('resize', resizeGame, false);
+                window.addEventListener('orientationchange', resizeGame, false);
+
+                // touch device listeners to stop default behaviour
+                document.body.addEventListener('touchstart', function (e) {
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                    }
+                    return false;
+                });
+                document.body.addEventListener('touchmove', function (e) {
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                    }
+                    return false;
+                });
             },
             shutdown = function () {
                 canvas.removeEventListener('touchstart', touchStart);
@@ -22430,6 +22384,35 @@ glue.module.create(
             return {
                 get: function () {
                     return mat;
+                }
+            };
+        };
+    }
+);
+
+/**
+ *  @module Rectangle
+ *  @namespace math
+ *  @desc Represents a rectangle
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/rectangle',
+    function () {
+        'use strict';
+        var rectangle;
+        return function (x1, y1, x2, y2) {
+            rectangle = {
+                x1: x1,
+                y1: y1,
+                x2: x2,
+                y2: y2
+            };
+            return {
+                get: function () {
+                    return rectangle;
                 }
             };
         };

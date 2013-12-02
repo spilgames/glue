@@ -1,7 +1,7 @@
 /*
  *  @module Clickable
- *  @namespace modules.spilgames.entity.behaviour
- *  @desc Used to make a game entity clickable
+ *  @namespace component
+ *  @desc Used to make a game component perfom an action when she's clicked
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
@@ -12,92 +12,40 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        /**
-         * Constructor
-         * @memberOf clickable
-         * @function
-         * @param {Object} obj: the entity object
-         */
         return function (obj) {
-            var isPressed = false,
-                /**
-                 * Listens the POINTER_UP event
-                 * @name onPointerUp
-                 * @memberOf clickable
-                 * @function
-                 * @param {Object} evt: The pointer event
-                 */
-                onPointerUp = function (evt) {
-                    isPressed = false;
-                    // call the clicked method if it exists
-                    if (obj.clickUp) {
-                        obj.clickUp(evt);
+            var isClicked = function (e) {
+                    // TODO: add more methods (constants) to check on me
+                    var position = e.position.get(),
+                        boundingBox = obj.visible.getBoundingBox();
+
+                    // TODO: abstract this to overlaps utility method
+                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
+                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                        return true;
                     }
                 },
-                /**
-                 * Listens the POINTER_DOWN event
-                 * @name onPointerDown
-                 * @memberOf clickable
-                 * @function
-                 * @param {Object} evt: The pointer event
-                 */
-                onPointerDown = function (evt) {
-                    var localPosition = me.game.viewport.worldToLocal(
-                        evt.gameX,
-                        evt.gameY
-                    );
-                    if (obj.collisionBox && obj.collisionBox.containsPointV(localPosition)) {
-                        isPressed = true;
-                        // call the clicked method if it exists
-                        if (obj.clickDown) {
-                            obj.clickDown(evt);
-                        }
+                pointerDownHandler = function (e) {
+                    if (isClicked(e) && obj.onClick) {
+                        obj.onClick(e);
                     }
-                },
-                /**
-                 * Sets up all events for this module
-                 * @name setupEvents
-                 * @memberOf clickable
-                 * @function
-                 */
-                setupEvents = function () {
-                    Glue.event.on(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.on(Glue.input.POINTER_UP, onPointerUp);
-                },
-                /**
-                 * Tears down all events for this module
-                 * @name teardownEvents
-                 * @memberOf clickable
-                 * @function
-                 */
-                tearDownEvents = function () {
-                    Glue.event.off(Glue.input.POINTER_DOWN, onPointerDown);
-                    Glue.event.off(Glue.input.POINTER_UP, onPointerUp);
                 };
 
-            // setup the module events
-            setupEvents();
+            obj = obj || {};
+            obj.clickable = {
+                setup: function (settings) {
 
-            return obj.mix({
-                /**
-                 * Returns if this entity is pressed
-                 * @name isPressed
-                 * @memberOf clickable
-                 * @function
-                 */
-                isPressed: function () {
-                    return isPressed;
                 },
-                /**
-                 * Can be used to destruct this entity
-                 * @name destructClickable
-                 * @memberOf clickable
-                 * @function
-                 */
-                destructClickable: function () {
-                    tearDownEvents();
+                destroy: function () {
+
+                },
+                update: function (deltaT) {
+
+                },
+                pointerDown: function (e) {
+                    pointerDownHandler(e);
                 }
-            });
+            };
+            return obj;
         };
     }
 );

@@ -5,21 +5,18 @@
     <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <style>
-        #canvas {
-            border: 1px solid #00aa00;
-        }
-    </style>
-    <script src="../../build/glue.min.js"></script>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script src="../../build/glue.js"></script>
     <script>
         glue.module.get(
             [
                 'glue/game',
+                'glue/math/vector',
                 'glue/component',
                 'glue/component/visible',
                 'glue/component/draggable'
             ],
-            function (Game, Component, Visible, Draggable) {
+            function (Game, Vector, Component, Visible, Draggable) {
                 'use strict';
 
                 var myComponent = {
@@ -70,10 +67,7 @@
 
                     var spilObject = Component(Visible, Draggable).add(myComponent);
                     spilObject.visible.setup({
-                        position: {
-                            x: 200,
-                            y: 200
-                        },
+                        position: Vector(200, 200),
                         image: {
                             src: '../image/spil-logo.png'
                         }

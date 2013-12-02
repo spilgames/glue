@@ -9,9 +9,10 @@ glue.module.create(
     'glue/game',
     [
         'glue',
+        'glue/math/vector',
         'glue/event/system'
     ],
-    function (Glue, Event) {
+    function (Glue, Vector, Event) {
         var fps = 60,
             components = [],
             addedComponents = [],
@@ -24,6 +25,7 @@ glue.module.create(
             backBufferContext2D = null,
             canvasSupported = false,
             canvasDimension = null,
+            canvasScale = {},
             win = null,
             doc = null,
             isRunning = false,
@@ -35,8 +37,13 @@ glue.module.create(
                     canvas.id = canvasId;
                     canvas.width = canvasDimension.width;
                     canvas.height = canvasDimension.height;
-                    document.body.appendChild(canvas);
+                    if (document.getElementById('wrapper') !== null) {
+                        document.getElementById('wrapper').appendChild(canvas);    
+                    } else {
+                        document.body.appendChild(canvas);
+                    }
                 }
+                resizeGame();
                 if (canvas.getContext) {
                     canvasSupported = true;
                     context2D = canvas.getContext('2d');
@@ -45,6 +52,26 @@ glue.module.create(
                     backBuffer.height = canvas.height;
                     backBufferContext2D = backBuffer.getContext('2d');
                 }
+            },
+            resizeGame = function () {
+                var canvasRatio = canvas.height / canvas.width,
+                    windowRatio = window.innerHeight / window.innerWidth,
+                    width,
+                    height;
+
+                if (windowRatio < canvasRatio) {
+                    height = window.innerHeight;
+                    width = height / canvasRatio;
+                } else {
+                    width = window.innerWidth;
+                    height = width * canvasRatio;
+                }
+
+                canvasScale.x = width / canvasDimension.width;
+                canvasScale.y = height / canvasDimension.height;
+
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
             },
             sort = function() {
                 components.sort(function(a, b) {
@@ -153,55 +180,52 @@ glue.module.create(
                     }
                 }
             },
-            touchStart = function (e) {
-                var touch = e.targetTouches[0];
+            addTouchPosition = function (e) {
+                var touch = e.changedTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
-                };
+                e.position = Vector(
+                    (touch.pageX - canvas.offsetLeft) / canvasScale.x,
+                    (touch.pageY - canvas.offsetTop) / canvasScale.y
+                );
+            },
+            addMousePosition = function (e) {
+                e.position = Vector(
+                    (e.clientX - canvas.offsetLeft) / canvasScale.x,
+                    (e.clientY - canvas.offsetTop) / canvasScale.y
+                );
+            },
+            touchStart = function (e) {
+                e.preventDefault();
+                addTouchPosition(e);
                 pointerDown(e);
             },
             touchMove = function (e) {
-                var touch = e.targetTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
-                };
+                addTouchPosition(e);
                 pointerMove(e);
             },
             touchEnd = function (e) {
-                var touch = e.changedTouches[0];
                 e.preventDefault();
-                e.position = {
-                    x: touch.pageX - canvas.offsetLeft,
-                    y: touch.pageY - canvas.offsetTop
-                };
+                addTouchPosition(e);
                 pointerUp(e);
             },
             mouseDown = function (e) {
-                e.position = {
-                    x: e.clientX - canvas.offsetLeft,
-                    y: e.clientY - canvas.offsetTop
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerDown(e);
             },
             mouseMove = function (e) {
-                e.position = {
-                    x: e.clientX - canvas.offsetLeft,
-                    y: e.clientY - canvas.offsetTop
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerMove(e);
             },
             mouseUp = function (e) {
-                e.position = {
-                    x: e.clientX - canvas.offsetLeft,
-                    y: e.clientY - canvas.offsetTop
-                };
+                e.preventDefault();
+                addMousePosition(e);
                 pointerUp(e);
             },
             setupEventListeners = function () {
+                // main input listeners
                 if ('ontouchstart' in win) {
                     canvas.addEventListener('touchstart', touchStart);
                     canvas.addEventListener('touchmove', touchMove);
@@ -211,9 +235,34 @@ glue.module.create(
                     canvas.addEventListener('mousemove', mouseMove);
                     canvas.addEventListener('mouseup', mouseUp);
                 }
+                // automated test listeners
                 Event.on('glue.pointer.down', pointerDown);
                 Event.on('glue.pointer.move', pointerMove);
                 Event.on('glue.pointer.up', pointerUp);
+
+                // window resize listeners
+                window.addEventListener('resize', resizeGame, false);
+                window.addEventListener('orientationchange', resizeGame, false);
+
+                // touch device listeners to stop default behaviour
+                document.body.addEventListener('touchstart', function (e) {
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                    }
+                    return false;
+                });
+                document.body.addEventListener('touchmove', function (e) {
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (e && e.stopPropagation) {
+                        e.stopPropagation();
+                    }
+                    return false;
+                });
             },
             shutdown = function () {
                 canvas.removeEventListener('touchstart', touchStart);
