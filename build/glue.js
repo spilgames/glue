@@ -22125,8 +22125,8 @@ glue.module.create(
                     }
                 }
             },
-            addTouchPosition = function (e) {
-                var touch = e.changedTouches[0];
+            addTouchPosition = function (e, isTouchEnd) {
+                var touch = !isTouchEnd ? e.targetTouches[0] : e.changedTouches[0];
                 e.preventDefault();
                 e.position = Vector(
                     (touch.pageX - canvas.offsetLeft) / canvasScale.x,
@@ -22151,7 +22151,7 @@ glue.module.create(
             },
             touchEnd = function (e) {
                 e.preventDefault();
-                addTouchPosition(e);
+                addTouchPosition(e, true);
                 pointerUp(e);
             },
             mouseDown = function (e) {
