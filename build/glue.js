@@ -21555,9 +21555,10 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
+        'glue/math/rectangle',
         'glue/event/system'
     ],
-    function (Glue, Vector, Event) {
+    function (Glue, Vector, Rectangle, Event) {
         var draggables = [],
             dragStartTimeout = 30;
 
@@ -21582,11 +21583,21 @@ glue.module.create(
                 },
                 checkOnMe = function (e) {
                     var position = e.position,
-                        boundingBox = obj.visible.getBoundingBox();
+                        objectPosition = obj.visible.getPosition(),
+                        objectDimension = obj.visible.getDimension();
+
+                        boundingBox = Rectangle(
+                            objectPosition.x,
+                            objectPosition.y,
+                            objectPosition.x + objectDimension.width,
+                            objectPosition.y + objectDimension.height
+                        );
+                        console.log(boundingBox, position)
 
                     // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                    if (position.x >= boundingBox.x1 && position.x <= boundingBox.x2 &&
+                        position.y >= boundingBox.y1 && position.y <= boundingBox.y2) {
+                        console.log('hit')
                         return true;
                     }
                 },
@@ -21807,16 +21818,17 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/math/dimension'
+        'glue/math/dimension',
+        'glue/math/rectangle'
     ],
-    function (Glue, Vector, Dimension) {
+    function (Glue, Vector, Dimension, Rectangle) {
         return function (obj) {
             var position = Vector(0, 0),
                 dimension = null,
                 image = null,
                 frameCount = 0,
                 frame = 1,
-                rectangle 
+                rectangle;
 
             obj = obj || {};
             obj.visible = {
@@ -21837,6 +21849,12 @@ glue.module.create(
                                 width: image.naturalWidth,
                                 height: image.naturalHeight
                             };
+                            rectangle = Rectangle(
+                                position.x,
+                                position.y,
+                                position.x + dimension.width,
+                                position.y + dimension.height
+                            );
                             readyList.push('image');
                             readyCheck();
                         };
@@ -21845,7 +21863,7 @@ glue.module.create(
                         if (settings.position) {
                             // using proper rounding:
                             // http://jsperf.com/math-round-vs-hack/66
-                            customPosition = settings.position.get();
+                            customPosition = settings.position;
                             position = Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
@@ -21888,16 +21906,11 @@ glue.module.create(
                 getDimension: function () {
                     return dimension;
                 },
-                setDimension: function () {
-                    return dimension;
+                setDimension: function (value) {
+                    dimension = value;
                 },
                 getBoundingBox: function () {
-                    return {
-                        left: position.x,
-                        right: position.x + dimension.width,
-                        top: position.y,
-                        bottom: position.y + dimension.height
-                    };
+                    return rectangle;
                 }
             };
             return obj;
@@ -22391,19 +22404,18 @@ glue.module.create(
     function () {
         'use strict';
         return function (x1, y1, x2, y2) {
-            var rectangle = {
+            return {
                 x1: x1,
                 y1: y1,
                 x2: x2,
-                y2: y2
-            };
-            return {
-                x1: rectangle.x1,
-                y1: rectangle.y1,
-                x2: rectangle.x2,
-                y2: rectangle.y2,
+                y2: y2,
                 get: function () {
-                    return rectangle;
+                    return {
+                        x1: this.x1,
+                        y1: this.y1,
+                        x2: this.x2,
+                        y2: this.y2
+                    };
                 }
             };
         };

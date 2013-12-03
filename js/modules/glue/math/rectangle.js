@@ -11,19 +11,18 @@ glue.module.create(
     function () {
         'use strict';
         return function (x1, y1, x2, y2) {
-            var rectangle = {
+            return {
                 x1: x1,
                 y1: y1,
                 x2: x2,
-                y2: y2
-            };
-            return {
-                x1: rectangle.x1,
-                y1: rectangle.y1,
-                x2: rectangle.x2,
-                y2: rectangle.y2,
+                y2: y2,
                 get: function () {
-                    return rectangle;
+                    return {
+                        x1: this.x1,
+                        y1: this.y1,
+                        x2: this.x2,
+                        y2: this.y2
+                    };
                 }
             };
         };

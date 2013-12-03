@@ -13,16 +13,17 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/math/dimension'
+        'glue/math/dimension',
+        'glue/math/rectangle'
     ],
-    function (Glue, Vector, Dimension) {
+    function (Glue, Vector, Dimension, Rectangle) {
         return function (obj) {
             var position = Vector(0, 0),
                 dimension = null,
                 image = null,
                 frameCount = 0,
                 frame = 1,
-                rectangle 
+                rectangle;
 
             obj = obj || {};
             obj.visible = {
@@ -43,6 +44,12 @@ glue.module.create(
                                 width: image.naturalWidth,
                                 height: image.naturalHeight
                             };
+                            rectangle = Rectangle(
+                                position.x,
+                                position.y,
+                                position.x + dimension.width,
+                                position.y + dimension.height
+                            );
                             readyList.push('image');
                             readyCheck();
                         };
@@ -51,7 +58,7 @@ glue.module.create(
                         if (settings.position) {
                             // using proper rounding:
                             // http://jsperf.com/math-round-vs-hack/66
-                            customPosition = settings.position.get();
+                            customPosition = settings.position;
                             position = Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
@@ -94,16 +101,11 @@ glue.module.create(
                 getDimension: function () {
                     return dimension;
                 },
-                setDimension: function () {
-                    return dimension;
+                setDimension: function (value) {
+                    dimension = value;
                 },
                 getBoundingBox: function () {
-                    return {
-                        left: position.x,
-                        right: position.x + dimension.width,
-                        top: position.y,
-                        bottom: position.y + dimension.height
-                    };
+                    return rectangle;
                 }
             };
             return obj;

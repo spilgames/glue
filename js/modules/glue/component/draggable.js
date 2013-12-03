@@ -11,9 +11,10 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
+        'glue/math/rectangle',
         'glue/event/system'
     ],
-    function (Glue, Vector, Event) {
+    function (Glue, Vector, Rectangle, Event) {
         var draggables = [],
             dragStartTimeout = 30;
 
@@ -38,11 +39,19 @@ glue.module.create(
                 },
                 checkOnMe = function (e) {
                     var position = e.position,
-                        boundingBox = obj.visible.getBoundingBox();
+                        objectPosition = obj.visible.getPosition(),
+                        objectDimension = obj.visible.getDimension();
+
+                        boundingBox = Rectangle(
+                            objectPosition.x,
+                            objectPosition.y,
+                            objectPosition.x + objectDimension.width,
+                            objectPosition.y + objectDimension.height
+                        );
 
                     // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
+                    if (position.x >= boundingBox.x1 && position.x <= boundingBox.x2 &&
+                        position.y >= boundingBox.y1 && position.y <= boundingBox.y2) {
                         return true;
                     }
                 },
