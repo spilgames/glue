@@ -20,7 +20,6 @@ glue.module.create(
         return function (obj) {
             var dragging = false,
                 dragId,
-                // TODO: Change to Glue Vector
                 grabOffset = Vector(0, 0),
                 isHeighestDraggable = function (obj) {
                     var i = 0,
@@ -38,7 +37,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    var position = e.position.get(),
+                    var position = e.position,
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method

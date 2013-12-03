@@ -21507,7 +21507,7 @@ glue.module.create(
         return function (obj) {
             var isClicked = function (e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
+                    var position = e.position,
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method
@@ -21564,7 +21564,6 @@ glue.module.create(
         return function (obj) {
             var dragging = false,
                 dragId,
-                // TODO: Change to Glue Vector
                 grabOffset = Vector(0, 0),
                 isHeighestDraggable = function (obj) {
                     var i = 0,
@@ -21582,7 +21581,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    var position = e.position.get(),
+                    var position = e.position,
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method
@@ -21695,7 +21694,7 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
+                    var position = e.position,
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method

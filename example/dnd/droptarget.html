@@ -84,15 +84,22 @@
                         Game.add(glueComponent);
                     });
 
-                    var dropComponent = Component(Visible, Droptarget).add({
+                    var dropText = '',
+                        dropComponent = Component(Visible, Droptarget).add({
                         init: function () {
                             this.visible.z = this.visible.getPosition().y;
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);
+                            context.fillStyle = 'blue';
+                            context.font = 'bold 16px Arial';
+                            context.fillText(dropText, 255, 180);
                         },
                         onDrop: function (obj, e) {
-                            console.log('dropped', obj, e);
+                            dropText = obj.getName() + ' dropped';
+                            setTimeout(function () {
+                                dropText = '';
+                            }, 2000);
                         }
                     });
                     dropComponent.visible.setup({

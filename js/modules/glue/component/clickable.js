@@ -15,7 +15,7 @@ glue.module.create(
         return function (obj) {
             var isClicked = function (e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
+                    var position = e.position,
                         boundingBox = obj.visible.getBoundingBox();
 
                     // TODO: abstract this to overlaps utility method
