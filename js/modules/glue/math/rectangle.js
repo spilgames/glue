@@ -10,15 +10,18 @@ glue.module.create(
     'glue/math/rectangle',
     function () {
         'use strict';
-        var rectangle;
         return function (x1, y1, x2, y2) {
-            rectangle = {
+            var rectangle = {
                 x1: x1,
                 y1: y1,
                 x2: x2,
                 y2: y2
             };
             return {
+                x1: rectangle.x1,
+                y1: rectangle.y1,
+                x2: rectangle.x2,
+                y2: rectangle.y2,
                 get: function () {
                     return rectangle;
                 }

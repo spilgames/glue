@@ -10,16 +10,18 @@ glue.module.create(
     'glue/math/dimension',
     function () {
         'use strict';
-        var dim;
         return function (width, height, depth) {
-            dim = {
+            var dimension = {
                 width: width,
                 height: height,
                 depth: depth || 0
             };
             return {
+                width: dimension.width,
+                height: dimension.height,
+                depth: dimension.depth,
                 get: function () {
-                    return dim;
+                    return dimension;
                 }
             };
         };

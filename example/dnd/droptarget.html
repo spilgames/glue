@@ -12,6 +12,7 @@
             [
                 'glue/game',
                 'glue/math/vector',
+                'glue/math/dimension',
                 'glue/component',
                 'glue/component/visible',
                 'glue/component/draggable',
@@ -19,16 +20,22 @@
                 'glue/component/hoverable',
                 'glue/component/clickable'
             ],
-            function (Game, Vector, Component, Visible, Draggable, Droptarget, Hoverable, Clickable) {
+            function (
+                Game,
+                Vector,
+                Dimension,
+                Component,
+                Visible,
+                Draggable,
+                Droptarget,
+                Hoverable,
+                Clickable) {
                 'use strict';
 
                 Game.setup({
                     canvas: {
                         id: 'canvas',
-                        dimension: {
-                            width: 800,
-                            height: 600
-                        }
+                        dimension: Dimension(800, 600)
                     }
                 }, function () {
                     var glueComponent = Component(Visible, Draggable, Hoverable, Clickable).add({

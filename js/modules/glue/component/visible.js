@@ -12,11 +12,12 @@ glue.module.create(
     'glue/component/visible',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/math/dimension'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Dimension) {
         return function (obj) {
-            var position = Vector(0, 0).get(),
+            var position = Vector(0, 0),
                 dimension = null,
                 image = null,
                 frameCount = 0,
@@ -48,12 +49,13 @@ glue.module.create(
 
                     if (settings) {
                         if (settings.position) {
-                            // using proper rounding (http://jsperf.com/math-round-vs-hack/66)
+                            // using proper rounding:
+                            // http://jsperf.com/math-round-vs-hack/66
                             customPosition = settings.position.get();
                             position = Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
-                            ).get();
+                            );
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
@@ -87,7 +89,7 @@ glue.module.create(
                     return position;
                 },
                 setPosition: function (value) {
-                    position = value.get();
+                    position = value;
                 },
                 getDimension: function () {
                     return dimension;

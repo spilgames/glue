@@ -10,9 +10,9 @@ glue.module.create(
     'glue/math/matrix',
     function () {
         'use strict';
-        var mat = [];
         return function (m, n, initial) {
-            var a,
+            var mat = [],
+                a,
                 row,
                 col;
 

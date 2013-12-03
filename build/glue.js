@@ -21565,10 +21565,7 @@ glue.module.create(
             var dragging = false,
                 dragId,
                 // TODO: Change to Glue Vector
-                grabOffset = {
-                    x: 0,
-                    y: 0
-                },
+                grabOffset = Vector(0, 0),
                 isHeighestDraggable = function (obj) {
                     var i = 0,
                         l = draggables.length,
@@ -21602,21 +21599,13 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
-                    var pointerPostion,
-                        objectPosition;
-
                     if (checkOnMe(e) && dragging === false) {
                         draggables.push(obj);
                         setTimeout(function () {
                             if (isHeighestDraggable(obj)) {
-                                pointerPosition = e.position.get();
-                                objectPosition = obj.visible.getPosition();
                                 dragging = true;
                                 dragId = e.pointerId;
-                                grabOffset = {
-                                    x: pointerPosition.x - objectPosition.x,
-                                    y: pointerPosition.y - objectPosition.y
-                                };
+                                grabOffset = e.position.substract(obj.visible.getPosition());
                                 if (obj.dragStart) {
                                     obj.dragStart(e);
                                 }
@@ -21633,13 +21622,9 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragMove = function (e) {
-                    var pointerPosition = e.position.get();
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            obj.visible.setPosition(Vector(
-                                pointerPosition.x - grabOffset.x,
-                                pointerPosition.y - grabOffset.y
-                            ));
+                            obj.visible.setPosition(e.position.substract(grabOffset));
                             if (obj.dragMove) {
                                 obj.dragMove(e);
                             }
@@ -21822,11 +21807,12 @@ glue.module.create(
     'glue/component/visible',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/math/dimension'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Dimension) {
         return function (obj) {
-            var position = Vector(0, 0).get(),
+            var position = Vector(0, 0),
                 dimension = null,
                 image = null,
                 frameCount = 0,
@@ -21858,12 +21844,13 @@ glue.module.create(
 
                     if (settings) {
                         if (settings.position) {
-                            // using proper rounding (http://jsperf.com/math-round-vs-hack/66)
+                            // using proper rounding:
+                            // http://jsperf.com/math-round-vs-hack/66
                             customPosition = settings.position.get();
                             position = Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
-                            ).get();
+                            );
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
@@ -21897,7 +21884,7 @@ glue.module.create(
                     return position;
                 },
                 setPosition: function (value) {
-                    position = value.get();
+                    position = value;
                 },
                 getDimension: function () {
                     return dimension;
@@ -22339,16 +22326,18 @@ glue.module.create(
     'glue/math/dimension',
     function () {
         'use strict';
-        var dim;
         return function (width, height, depth) {
-            dim = {
+            var dimension = {
                 width: width,
                 height: height,
                 depth: depth || 0
             };
             return {
+                width: dimension.width,
+                height: dimension.height,
+                depth: dimension.depth,
                 get: function () {
-                    return dim;
+                    return dimension;
                 }
             };
         };
@@ -22367,9 +22356,9 @@ glue.module.create(
     'glue/math/matrix',
     function () {
         'use strict';
-        var mat = [];
         return function (m, n, initial) {
-            var a,
+            var mat = [],
+                a,
                 row,
                 col;
 
@@ -22402,15 +22391,18 @@ glue.module.create(
     'glue/math/rectangle',
     function () {
         'use strict';
-        var rectangle;
         return function (x1, y1, x2, y2) {
-            rectangle = {
+            var rectangle = {
                 x1: x1,
                 y1: y1,
                 x2: x2,
                 y2: y2
             };
             return {
+                x1: rectangle.x1,
+                y1: rectangle.y1,
+                x2: rectangle.x2,
+                y2: rectangle.y2,
                 get: function () {
                     return rectangle;
                 }
@@ -22427,25 +22419,48 @@ glue.module.create(
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
-glue.module.create(
-    'glue/math/vector',
-    function () {
-        'use strict';
-        var coordinates;
-        return function (x, y, z) {
-            coordinates = {
-                x: x,
-                y: y,
-                z: z || 0
-            };
-            return {
-                get: function () {
-                    return coordinates;
+glue.module.create('glue/math/vector', function () {
+    'use strict';
+    return function (x, y, z) {
+        return {
+            x: x,
+            y: y,
+            z: z || 0,
+            get: function () {
+                return {
+                    x: this.x,
+                    y: this.y,
+                    z: this.z
                 }
-            };
+            },
+            add: function (vector) {
+                this.x += vector.x;
+                this.y += vector.y;
+                return this;
+            },
+            substract: function (vector) {
+                this.x -= vector.x;
+                this.y -= vector.y;
+                return this;
+            },
+            angle: function (vector) {
+                return Math.atan2(
+                    (vector.y - this.y),
+                    (vector.x - this.x)
+                );
+            },
+            dotProduct: function (vector) {
+                return this.x * vector.x + this.y * vector.y;
+            },        
+            distance : function (vector) {
+                return Math.sqrt(
+                    (this.x - vector.x) * (this.x - vector.x) +
+                    (this.y - vector.y) * (this.y - vector.y)
+                );
+            }
         };
-    }
-);
+    };
+});
 
 /**
  *  @module Sugar

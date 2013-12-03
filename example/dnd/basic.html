@@ -11,20 +11,18 @@
         glue.module.get(
             [
                 'glue/game',
+                'glue/math/dimension',
                 'glue/component',
                 'glue/component/visible',
                 'glue/component/draggable'
             ],
-            function (Game, Component, Visible, Draggable) {
+            function (Game, Dimension, Component, Visible, Draggable) {
                 'use strict';
 
                 Game.setup({
                     canvas: {
                         id: 'canvas',
-                        dimension: {
-                            width: 800,
-                            height: 600
-                        }
+                        dimension: Dimension(800, 600)
                     }
                 }, function () {
                     var component = Component(Visible, Draggable).add({
