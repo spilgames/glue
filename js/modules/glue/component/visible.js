@@ -87,10 +87,7 @@ glue.module.create(
                     };
                 },
                 update: function (deltaT) {
-                    rectangle.x1 = position.x;
-                    rectangle.y1 = position.y;
-                    rectangle.x2 = position.x + dimension.width;
-                    rectangle.y2 = position.y + dimension.height;
+
                 },
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)
@@ -100,6 +97,10 @@ glue.module.create(
                 },
                 setPosition: function (value) {
                     position = value;
+                    rectangle.x1 = position.x;
+                    rectangle.y1 = position.y;
+                    rectangle.x2 = position.x + dimension.width;
+                    rectangle.y2 = position.y + dimension.height;
                 },
                 getDimension: function () {
                     return dimension;
