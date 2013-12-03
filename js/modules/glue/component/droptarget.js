@@ -16,14 +16,7 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position,
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(obj, e) && obj.onDrop) {

@@ -11,10 +11,9 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/math/rectangle',
         'glue/event/system'
     ],
-    function (Glue, Vector, Rectangle, Event) {
+    function (Glue, Vector, Event) {
         var draggables = [],
             dragStartTimeout = 30;
 
@@ -38,22 +37,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    var position = e.position,
-                        objectPosition = obj.visible.getPosition(),
-                        objectDimension = obj.visible.getDimension();
-
-                        boundingBox = Rectangle(
-                            objectPosition.x,
-                            objectPosition.y,
-                            objectPosition.x + objectDimension.width,
-                            objectPosition.y + objectDimension.height
-                        );
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.x1 && position.x <= boundingBox.x2 &&
-                        position.y >= boundingBox.y1 && position.y <= boundingBox.y2) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity

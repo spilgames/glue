@@ -16,15 +16,7 @@ glue.module.create(
             // TODO: add state constants
             var state = 'not hovered',
                 isHovered = function (e) {
-                    // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerMoveHandler = function (e) {
                     if (isHovered(e)) {

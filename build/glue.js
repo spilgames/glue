@@ -21506,15 +21506,7 @@ glue.module.create(
     function (Glue) {
         return function (obj) {
             var isClicked = function (e) {
-                    // TODO: add more methods (constants) to check on me
-                    var position = e.position,
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
                     if (isClicked(e) && obj.onClick) {
@@ -21555,10 +21547,9 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/math/rectangle',
         'glue/event/system'
     ],
-    function (Glue, Vector, Rectangle, Event) {
+    function (Glue, Vector, Event) {
         var draggables = [],
             dragStartTimeout = 30;
 
@@ -21582,24 +21573,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    var position = e.position,
-                        objectPosition = obj.visible.getPosition(),
-                        objectDimension = obj.visible.getDimension();
-
-                        boundingBox = Rectangle(
-                            objectPosition.x,
-                            objectPosition.y,
-                            objectPosition.x + objectDimension.width,
-                            objectPosition.y + objectDimension.height
-                        );
-                        console.log(boundingBox, position)
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.x1 && position.x <= boundingBox.x2 &&
-                        position.y >= boundingBox.y1 && position.y <= boundingBox.y2) {
-                        console.log('hit')
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity
@@ -21705,14 +21679,7 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position,
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(obj, e) && obj.onDrop) {
@@ -21755,15 +21722,7 @@ glue.module.create(
             // TODO: add state constants
             var state = 'not hovered',
                 isHovered = function (e) {
-                    // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerMoveHandler = function (e) {
                     if (isHovered(e)) {
@@ -21892,7 +21851,10 @@ glue.module.create(
                     };
                 },
                 update: function (deltaT) {
-
+                    rectangle.x1 = position.x;
+                    rectangle.y1 = position.y;
+                    rectangle.x2 = position.x + dimension.width;
+                    rectangle.y2 = position.y + dimension.height;
                 },
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)
@@ -22416,6 +22378,12 @@ glue.module.create(
                         x2: this.x2,
                         y2: this.y2
                     };
+                },
+                hasPosition: function (position) {
+                    if (position.x >= this.x1 && position.x <= this.x2 &&
+                        position.y >= this.y1 && position.y <= this.y2) {
+                        return true;
+                    }
                 }
             };
         };

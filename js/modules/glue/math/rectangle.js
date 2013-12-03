@@ -23,6 +23,12 @@ glue.module.create(
                         x2: this.x2,
                         y2: this.y2
                     };
+                },
+                hasPosition: function (position) {
+                    if (position.x >= this.x1 && position.x <= this.x2 &&
+                        position.y >= this.y1 && position.y <= this.y2) {
+                        return true;
+                    }
                 }
             };
         };
