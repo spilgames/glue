@@ -23,7 +23,13 @@ glue.module.create(
                 image = null,
                 frameCount = 0,
                 frame = 1,
-                rectangle;
+                rectangle,
+                updateRectangle = function () {
+                    rectangle.x1 = position.x;
+                    rectangle.y1 = position.y;
+                    rectangle.x2 = position.x + dimension.width;
+                    rectangle.y2 = position.y + dimension.height;
+                };
 
             obj = obj || {};
             obj.visible = {
@@ -97,19 +103,20 @@ glue.module.create(
                 },
                 setPosition: function (value) {
                     position = value;
-                    rectangle.x1 = position.x;
-                    rectangle.y1 = position.y;
-                    rectangle.x2 = position.x + dimension.width;
-                    rectangle.y2 = position.y + dimension.height;
+                    updateRectangle();
                 },
                 getDimension: function () {
                     return dimension;
                 },
                 setDimension: function (value) {
                     dimension = value;
+                    updateRectangle();
                 },
                 getBoundingBox: function () {
                     return rectangle;
+                },
+                setBoundingBox: function (value) {
+                    rectangle = value;
                 }
             };
             return obj;

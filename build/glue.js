@@ -21787,7 +21787,13 @@ glue.module.create(
                 image = null,
                 frameCount = 0,
                 frame = 1,
-                rectangle;
+                rectangle,
+                updateRectangle = function () {
+                    rectangle.x1 = position.x;
+                    rectangle.y1 = position.y;
+                    rectangle.x2 = position.x + dimension.width;
+                    rectangle.y2 = position.y + dimension.height;
+                };
 
             obj = obj || {};
             obj.visible = {
@@ -21861,19 +21867,20 @@ glue.module.create(
                 },
                 setPosition: function (value) {
                     position = value;
-                    rectangle.x1 = position.x;
-                    rectangle.y1 = position.y;
-                    rectangle.x2 = position.x + dimension.width;
-                    rectangle.y2 = position.y + dimension.height;
+                    updateRectangle();
                 },
                 getDimension: function () {
                     return dimension;
                 },
                 setDimension: function (value) {
                     dimension = value;
+                    updateRectangle();
                 },
                 getBoundingBox: function () {
                     return rectangle;
+                },
+                setBoundingBox: function (value) {
+                    rectangle = value;
                 }
             };
             return obj;
@@ -21963,9 +21970,9 @@ glue.module.create(
             components = [],
             addedComponents = [],
             removedComponents = [],
-            lastFrame = new Date().getTime(),
+            lastFrameTime = 0,
             canvas = null,
-            canvasId = 0,
+            canvasId,
             context2D = null,
             backBuffer = null,
             backBufferContext2D = null,
@@ -21975,6 +21982,8 @@ glue.module.create(
             win = null,
             doc = null,
             isRunning = false,
+            debug = false,
+            debugBar = null,
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -22019,7 +22028,7 @@ glue.module.create(
                 canvas.style.width = width + 'px';
                 canvas.style.height = height + 'px';
             },
-            sort = function() {
+            sort = function () {
                 components.sort(function(a, b) {
                     if (a.visible && b.visible) {
                         return a.visible.z - b.visible.z;
@@ -22053,18 +22062,18 @@ glue.module.create(
                     removedComponents = [];
                 }
             },
-            redraw = function() {
+            redraw = function () {
                 backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
                 context2D.clearRect(0, 0, canvas.width, canvas.height);
             }
-            cycle = function () {
-                var currentFrame = new Date().getTime(),
-                    deltaT = (currentFrame - lastFrame),
+            cycle = function (time) {
+                var deltaT,
+                    fps,
                     component;
 
-                requestAnimationFrame(cycle);
-                lastFrame = currentFrame;
-
+                if (isRunning) {
+                    requestAnimationFrame(cycle);
+                }
                 sort();
 
                 if (canvasSupported) {
@@ -22072,6 +22081,15 @@ glue.module.create(
                     removeComponents();
                     addComponents();
 
+                    deltaT = time - lastFrameTime;
+                    if (debug) {
+                        fps = Math.round(1000 / deltaT, 2);
+                        debugBar.innerHTML = '<strong>Glue debug bar</strong>';
+                        debugBar.innerHTML += '<br />version: 0.0.1';
+                        debugBar.innerHTML += '<br />play time: ' + parseInt(time / 1000) + ' s';
+                        debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
+                        debugBar.innerHTML += '<br />objects: ' + components.length;
+                    }
                     for (var i = 0; i < components.length; ++i) {
                         component = components[i];
                         if (component.update) {
@@ -22082,6 +22100,7 @@ glue.module.create(
                         }
                     };
                     context2D.drawImage(backBuffer, 0, 0);
+                    lastFrameTime = time;
                 }
             },
             startup = function () {
@@ -22229,12 +22248,22 @@ glue.module.create(
                 doc = win.document;
                 canvasId = config.canvas.id;
                 canvasDimension = config.canvas.dimension
+                if (config.develop && config.develop.debug) {
+                    debug = true;
+                    debugBar = document.createElement('div');
+                    debugBar.id = 'debugBar';
+                    document.body.appendChild(debugBar);
+                }
                 initCanvas();
                 setupEventListeners();
                 startup();
                 if (onReady) {
                     onReady();
                 }
+            },
+            shutdown: function () {
+                shutdown();
+                isRunning = false;
             },
             add: function (component) {
                 addedComponents.push(component);
