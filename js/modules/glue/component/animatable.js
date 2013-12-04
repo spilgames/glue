@@ -1,7 +1,7 @@
 /*
- *  @module Visible
+ *  @module Animatable
  *  @namespace component
- *  @desc Represents a visible component
+ *  @desc Represents an animatable component
  *  @copyright (C) 2013 SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
@@ -9,7 +9,7 @@
  *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
-    'glue/component/visible',
+    'glue/component/animatable',
     [
         'glue',
         'glue/math/vector',
@@ -27,10 +27,24 @@ glue.module.create(
                     rectangle.y1 = position.y;
                     rectangle.x2 = position.x + dimension.width;
                     rectangle.y2 = position.y + dimension.height;
+                },
+                currentFrame = 0,
+                frameCount = 1,
+                fps = 60,
+                timeBetweenFrames = 1 / fps,
+                timeSinceLastFrame = timeBetweenFrames,
+                frameWidth,
+                setAnimation = function (img, count, fps) {
+                    image = img;
+                    currentFrame = 0;
+                    frameCount = count;
+                    timeBetweenFrames = 1 / fps;
+                    timeSinceLastFrame = timeBetweenFrames;
+                    frameWidth = image.width / frameCount;
                 };
 
             obj = obj || {};
-            obj.visible = {
+            obj.animatable = {
                 ready: false,
                 setup: function (settings) {
                     var readyNeeded = [],
@@ -44,10 +58,11 @@ glue.module.create(
                             }
                         },
                         imageLoadHandler = function () {
-                            dimension = {
-                                width: image.naturalWidth,
-                                height: image.naturalHeight
-                            };
+                            setAnimation(image, 8, 8);
+                            dimension = Dimension(
+                                image.naturalWidth,
+                                image.naturalHeight
+                            );
                             rectangle = Rectangle(
                                 position.x,
                                 position.y,
@@ -91,10 +106,53 @@ glue.module.create(
                     };
                 },
                 update: function (deltaT) {
-
+                    timeSinceLastFrame -= deltaT;
+                    if (timeSinceLastFrame <= 0)
+                    {
+                       timeSinceLastFrame = timeBetweenFrames;
+                       ++currentFrame;
+                       currentFrame %= frameCount;
+                    }
                 },
                 draw: function (deltaT, context) {
-                    context.drawImage(image, position.x, position.y)
+                    //log('drawing player...');
+                    //  Save the current context so we can only make changes to one graphic
+                    context.save();
+
+                    //  First we translate to the current x and y, so we can scale the image relative to that
+                    context.translate(position.x, position.y);
+
+                    //  Now we scale the image according to the scale (set in update function)
+                    //context.scale(scale, scale);
+
+                    var sourceX = frameWidth * currentFrame;
+
+                    /*
+                    console.log(
+                        'image: ' + image,
+                        'sourceX: ' + sourceX,
+                        'frameWidth: ' + frameWidth,
+                        'image.height: ' + image.height,
+                        'frameWidth: ' + frameWidth,
+                        'current frame: ' + currentFrame,
+                        'frame count: ' + frameCount);
+                    */
+
+                    context.drawImage
+                    (
+                        image,
+                        sourceX,
+                        0,
+                        frameWidth,
+                        image.height,
+                        0,
+                        0,
+                        frameWidth,
+                        image.height
+                    );
+
+                    context.restore();
+                    //context.drawImage(image, position.x, position.y)
                 },
                 getPosition: function () {
                     return position;
@@ -115,6 +173,9 @@ glue.module.create(
                 },
                 setBoundingBox: function (value) {
                     rectangle = value;
+                },
+                getFrameWidth: function () {
+                    return frameWidth;
                 }
             };
             return obj;

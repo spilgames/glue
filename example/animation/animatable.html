@@ -6,16 +6,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="stylesheet" href="../css/style.css" />
-    <script src="../../build/glue.min.js"></script>
+    <script src="../../js/modules/glue/asset.js"></script>
+    <script src="../../build/glue.js"></script>
     <script>
         glue.module.get(
             [
                 'glue/game',
                 'glue/math/dimension',
                 'glue/component',
-                'glue/component/visible'
+                'glue/component/animatable'
             ],
-            function (Game, Dimension, Component, Visible) {
+            function (Game, Dimension, Component, Animatable) {
                 'use strict';
 
                 Game.setup({
@@ -32,12 +33,16 @@
                         playerPosition,
                         speed = 1,
                         direction = 'right',
-                        component = Component(Visible).add({
+                        component = Component(Animatable).add({
                             update: function (deltaT) {
-                                playerDimension = this.visible.getDimension();
-                                playerPosition = this.visible.getPosition();
+                                
+                                this.animatable.update(deltaT);
+
+                                playerDimension = this.animatable.getDimension();
+                                playerPosition = this.animatable.getPosition();
+                                //console.log(playerPosition.x, canvasDimension.width);
                                 if (playerPosition.x > canvasDimension.width -
-                                        playerDimension.width) {
+                                        this.animatable.getFrameWidth()) {
                                     direction = 'down';
                                 }
                                 if (playerPosition.y > canvasDimension.height -
@@ -67,22 +72,13 @@
                                 }
                             },
                             draw: function (deltaT, context) {
-                                this.visible.draw(deltaT, context);
-                            },
-                            pointerDown: function (e) {
-                                console.log('Pointer down: ', e.position);
-                            },
-                            pointerMove: function (e) {
-                                console.log('Pointer move: ', e.position);
-                            },
-                            pointerUp: function (e) {
-                                console.log('Pointer up: ', e.position);
+                                this.animatable.draw(deltaT, context);
                             }
                         });
 
-                    component.visible.setup({
+                    component.animatable.setup({
                         image: {
-                            src: '../image/glue-logo.png'
+                            src: '../image/player/walk-right.gif'
                         }
                     }).then(function () {
                         Game.add(component);

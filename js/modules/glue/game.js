@@ -17,7 +17,7 @@ glue.module.create(
             components = [],
             addedComponents = [],
             removedComponents = [],
-            lastFrameTime = 0,
+            lastFrameTime = new Date().getTime(),
             canvas = null,
             canvasId,
             context2D = null,
@@ -128,9 +128,9 @@ glue.module.create(
                     removeComponents();
                     addComponents();
 
-                    deltaT = time - lastFrameTime;
+                    deltaT = (time - lastFrameTime) / 1000;
                     if (debug) {
-                        fps = Math.round(1000 / deltaT, 2);
+                        fps = Math.round(1000 / (time - lastFrameTime), 2);
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
                         debugBar.innerHTML += '<br />version: 0.0.1';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
@@ -150,7 +150,7 @@ glue.module.create(
                 }
             },
             startup = function () {
-                cycle();
+                cycle(0);
             },
             pointerDown = function (e) {
                 //console.log('Pointer down: ', e.position);
