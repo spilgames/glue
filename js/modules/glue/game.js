@@ -135,7 +135,6 @@ glue.module.create(
                         debugBar.innerHTML += '<br />version: 0.0.1';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />components: ' + components.length;
-                        debugBar.innerHTML += '<br />animation time: ' + time;
                     }
                     for (var i = 0; i < components.length; ++i) {
                         component = components[i];

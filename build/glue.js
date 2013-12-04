@@ -21546,11 +21546,10 @@ glue.module.create(
     'glue/component/draggable',
     [
         'glue',
-        'glue/game',
         'glue/math/vector',
         'glue/event/system'
     ],
-    function (Glue, Game, Vector, Event) {
+    function (Glue, Vector, Event) {
         var draggables = [],
             dragStartTimeout = 30;
 
@@ -22089,7 +22088,6 @@ glue.module.create(
                         debugBar.innerHTML += '<br />version: 0.0.1';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />components: ' + components.length;
-                        debugBar.innerHTML += '<br />animation time: ' + time;
                     }
                     for (var i = 0; i < components.length; ++i) {
                         component = components[i];
