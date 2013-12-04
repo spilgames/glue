@@ -12,28 +12,21 @@ glue.module.create(
     'glue/component/animatable',
     [
         'glue',
+        'glue/component',
+        'glue/component/visible',
         'glue/math/vector',
         'glue/math/dimension',
         'glue/math/rectangle'
     ],
-    function (Glue, Vector, Dimension, Rectangle) {
+    function (Glue, Component, Visible, Vector, Dimension, Rectangle) {
         return function (obj) {
-            var position = Vector(0, 0),
-                dimension = null,
-                image = null,
-                rectangle,
-                updateRectangle = function () {
-                    rectangle.x1 = position.x;
-                    rectangle.y1 = position.y;
-                    rectangle.x2 = position.x + dimension.width;
-                    rectangle.y2 = position.y + dimension.height;
-                },
-                currentFrame = 0,
+            var currentFrame = 0,
                 frameCount = 1,
                 fps = 60,
                 timeBetweenFrames = 1 / fps,
                 timeSinceLastFrame = timeBetweenFrames,
                 frameWidth,
+                image,
                 setAnimation = function (img, count, fps) {
                     image = img;
                     currentFrame = 0;
@@ -41,63 +34,17 @@ glue.module.create(
                     timeBetweenFrames = 1 / fps;
                     timeSinceLastFrame = timeBetweenFrames;
                     frameWidth = image.width / frameCount;
-                };
+                },
+                successCallback,
+                errorCallback;
 
             obj = obj || {};
-            obj.animatable = {
-                ready: false,
+            obj.animatable = Component(Visible).add({
                 setup: function (settings) {
-                    var readyNeeded = [],
-                        readyList = [],
-                        successCallback,
-                        errorCallback,
-                        customPosition,
-                        readyCheck = function () {
-                            if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
-                                successCallback();
-                            }
-                        },
-                        imageLoadHandler = function () {
-                            setAnimation(image, 8, 8);
-                            dimension = Dimension(
-                                image.naturalWidth,
-                                image.naturalHeight
-                            );
-                            rectangle = Rectangle(
-                                position.x,
-                                position.y,
-                                position.x + dimension.width,
-                                position.y + dimension.height
-                            );
-                            readyList.push('image');
-                            readyCheck();
-                        };
-
-                    if (settings) {
-                        if (settings.position) {
-                            // using proper rounding:
-                            // http://jsperf.com/math-round-vs-hack/66
-                            customPosition = settings.position;
-                            position = Vector(
-                                Math.round(customPosition.x),
-                                Math.round(customPosition.y)
-                            );
-                        }
-                        if (settings.dimension) {
-                            dimension = settings.dimension;
-                        }
-                        if (settings.image) {
-                            readyNeeded.push('image');
-                            image = new Image();
-                            image.addEventListener('load', function () {
-                                imageLoadHandler();
-                            }, false);
-                            image.src = settings.image.src;
-                            if (image.frameWidth) {
-                                frameCount = dimension.width / image.frameWidth;
-                            }
-                        }
-                    }
+                    this.visible.setup(settings).then(function (image) {
+                        setAnimation(image, 8, 8);
+                        successCallback();
+                    });
                     return {
                         then: function (onSuccess, onError) {
                             successCallback = onSuccess;
@@ -115,7 +62,8 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
-                    //log('drawing player...');
+                    var position = this.visible.getPosition();
+
                     //  Save the current context so we can only make changes to one graphic
                     context.save();
 
@@ -155,29 +103,27 @@ glue.module.create(
                     //context.drawImage(image, position.x, position.y)
                 },
                 getPosition: function () {
-                    return position;
+                    return this.visible.getPosition();
                 },
-                setPosition: function (value) {
-                    position = value;
-                    updateRectangle();
+                setPosition: function () {
+                    return this.visible.setPosition();
                 },
                 getDimension: function () {
-                    return dimension;
+                    return this.visible.getDimension();
                 },
-                setDimension: function (value) {
-                    dimension = value;
-                    updateRectangle();
+                setDimension: function () {
+                    return this.visible.setDimension();
                 },
                 getBoundingBox: function () {
-                    return rectangle;
+                    return this.visible.getBoundingBox();
                 },
-                setBoundingBox: function (value) {
-                    rectangle = value;
+                setBoundingBox: function () {
+                    return this.visible.setBoundingBox();
                 },
                 getFrameWidth: function () {
                     return frameWidth;
                 }
-            };
+            });
             return obj;
         };
     }

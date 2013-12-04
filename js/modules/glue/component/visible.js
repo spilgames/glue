@@ -22,6 +22,40 @@ glue.module.create(
                 dimension = null,
                 image = null,
                 rectangle,
+                readyNeeded = [],
+                readyList = [],
+                successCallback,
+                errorCallback,
+                customPosition,
+                readyCheck = function () {
+                    if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
+                        readyNeeded = [];
+                        readyList = [];
+                        successCallback.call(null, image);
+                    }
+                },
+                imageLoadHandler = function () {
+                    dimension = {
+                        width: image.naturalWidth,
+                        height: image.naturalHeight
+                    };
+                    rectangle = Rectangle(
+                        position.x,
+                        position.y,
+                        position.x + dimension.width,
+                        position.y + dimension.height
+                    );
+                    readyList.push('image');
+                    readyCheck();
+                },
+                loadImage = function (imageData) {
+                    readyNeeded.push('image');
+                    image = new Image();
+                    image.addEventListener('load', function () {
+                        imageLoadHandler();
+                    }, false);
+                    image.src = imageData.src;
+                },
                 updateRectangle = function () {
                     rectangle.x1 = position.x;
                     rectangle.y1 = position.y;
@@ -31,33 +65,7 @@ glue.module.create(
 
             obj = obj || {};
             obj.visible = {
-                ready: false,
                 setup: function (settings) {
-                    var readyNeeded = [],
-                        readyList = [],
-                        successCallback,
-                        errorCallback,
-                        customPosition,
-                        readyCheck = function () {
-                            if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
-                                successCallback();
-                            }
-                        },
-                        imageLoadHandler = function () {
-                            dimension = {
-                                width: image.naturalWidth,
-                                height: image.naturalHeight
-                            };
-                            rectangle = Rectangle(
-                                position.x,
-                                position.y,
-                                position.x + dimension.width,
-                                position.y + dimension.height
-                            );
-                            readyList.push('image');
-                            readyCheck();
-                        };
-
                     if (settings) {
                         if (settings.position) {
                             // using proper rounding:
@@ -72,15 +80,7 @@ glue.module.create(
                             dimension = settings.dimension;
                         }
                         if (settings.image) {
-                            readyNeeded.push('image');
-                            image = new Image();
-                            image.addEventListener('load', function () {
-                                imageLoadHandler();
-                            }, false);
-                            image.src = settings.image.src;
-                            if (image.frameWidth) {
-                                frameCount = dimension.width / image.frameWidth;
-                            }
+                            loadImage(settings.image);
                         }
                     }
                     return {
@@ -115,6 +115,12 @@ glue.module.create(
                 },
                 setBoundingBox: function (value) {
                     rectangle = value;
+                },
+                setImage: function (imageData) {
+                    loadImage(imageData);
+                },
+                getImage: function () {
+                    return image;
                 }
             };
             return obj;
