@@ -10,9 +10,10 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/event/system'
+        'glue/event/system',
+        'glue/loader'
     ],
-    function (Glue, Vector, Event) {
+    function (Glue, Vector, Event, Loader) {
         var fps = 60,
             components = [],
             addedComponents = [],
@@ -150,6 +151,8 @@ glue.module.create(
                 }
             },
             startup = function () {
+                initCanvas();
+                setupEventListeners();
                 cycle(0);
             },
             pointerDown = function (e) {
@@ -300,11 +303,22 @@ glue.module.create(
                     debugBar.id = 'debugBar';
                     document.body.appendChild(debugBar);
                 }
-                initCanvas();
-                setupEventListeners();
-                startup();
-                if (onReady) {
-                    onReady();
+                if (config.asset && config.asset.image && config.asset.image.path &&
+                    config.asset.image.source) {
+                    Loader.setAssetPath(config.asset.image.path);
+                    Loader.setAssets(config.asset.image.source);
+                    Loader.load(function () {
+                        startup();
+                        /*
+                        if (config.canvas.color) {
+                            backBufferContext2D.fillStyle = config.canvas.color;
+                            backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        */
+                        if (onReady) {
+                            onReady();
+                        }
+                    });
                 }
             },
             shutdown: function () {

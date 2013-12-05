@@ -41,16 +41,8 @@ glue.module.create(
             obj = obj || {};
             obj.animatable = Component(Visible).add({
                 setup: function (settings) {
-                    this.visible.setup(settings).then(function (image) {
-                        setAnimation(image, 8, 8);
-                        successCallback();
-                    });
-                    return {
-                        then: function (onSuccess, onError) {
-                            successCallback = onSuccess;
-                            errorCallback = onError;
-                        }
-                    };
+                    this.visible.setup(settings);
+                    setAnimation(settings.image, settings.frameCount, settings.fps);
                 },
                 update: function (deltaT) {
                     timeSinceLastFrame -= deltaT;

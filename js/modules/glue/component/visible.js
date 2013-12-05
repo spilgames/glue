@@ -22,40 +22,6 @@ glue.module.create(
                 dimension = null,
                 image = null,
                 rectangle,
-                readyNeeded = [],
-                readyList = [],
-                successCallback,
-                errorCallback,
-                customPosition,
-                readyCheck = function () {
-                    if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
-                        readyNeeded = [];
-                        readyList = [];
-                        successCallback.call(null, image);
-                    }
-                },
-                imageLoadHandler = function () {
-                    dimension = {
-                        width: image.naturalWidth,
-                        height: image.naturalHeight
-                    };
-                    rectangle = Rectangle(
-                        position.x,
-                        position.y,
-                        position.x + dimension.width,
-                        position.y + dimension.height
-                    );
-                    readyList.push('image');
-                    readyCheck();
-                },
-                loadImage = function (imageData) {
-                    readyNeeded.push('image');
-                    image = new Image();
-                    image.addEventListener('load', function () {
-                        imageLoadHandler();
-                    }, false);
-                    image.src = imageData.src;
-                },
                 updateRectangle = function () {
                     rectangle.x1 = position.x;
                     rectangle.y1 = position.y;
@@ -66,11 +32,12 @@ glue.module.create(
             obj = obj || {};
             obj.visible = {
                 setup: function (settings) {
-                    if (settings) {
+                    if (settings && settings.image) {
+                        image = settings.image;
                         if (settings.position) {
+                            customPosition = settings.position;
                             // using proper rounding:
                             // http://jsperf.com/math-round-vs-hack/66
-                            customPosition = settings.position;
                             position = Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
@@ -78,20 +45,21 @@ glue.module.create(
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
+                        } else {
+                            dimension = {
+                                width: image.naturalWidth,
+                                height: image.naturalHeight
+                            };
                         }
-                        if (settings.image) {
-                            loadImage(settings.image);
-                        }
+                        rectangle = Rectangle(
+                            position.x,
+                            position.y,
+                            position.x + dimension.width,
+                            position.y + dimension.height
+                        );
+                    } else {
+                        throw('No image provided in settings')
                     }
-                    return {
-                        then: function (onSuccess, onError) {
-                            successCallback = onSuccess;
-                            errorCallback = onError;
-                        }
-                    };
-                },
-                update: function (deltaT) {
-
                 },
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)

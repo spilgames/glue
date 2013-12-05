@@ -21448,81 +21448,6 @@ modules.spilgames.sugar = (function (win, doc) {
         domReady: domReady
     };
 }(window, window.document));
-var AssetManager = function()
-{
-    var _oInstance = null;
-
-    return new function()
-    {
-        this.Instance = function()
-        {
-            if ( _oInstance == null )
-            {
-                _oInstance = new AssetManager();
-                _oInstance.constructor = null;
-            }
-            return _oInstance;
-        }
-    };
-
-    function AssetManager()
-    {
-        var sources = {
-            player_stand_up: 'stand-up.gif',
-            player_stand_right: 'stand-right.gif',
-            player_stand_down: 'stand-down.gif',
-            player_stand_left: 'stand-left.gif',
-            player_stand_down_left: 'stand-down-left.gif',
-            player_stand_down_right: 'stand-down-right.gif',
-            player_walk_up: 'stand-up.gif',
-            player_walk_right: 'walk-right.gif',
-            player_walk_down: 'stand-down.gif',
-            player_walk_left: 'walk-left.gif'
-        }
-        var _sBasePath = '../../example/';
-        var _sImagePath = _sBasePath + 'image/player/';
-
-        var images = [];
-
-        function _loadImage(source) {
-            var image = new Image();
-            image.src = _sImagePath + source
-            return image;
-        };
-
-        this.loadImages = function (callback) {
-            var loadedImages = 0;
-            var numImages = 0;
-            for (var src in sources) {
-                ++numImages;
-            }
-
-            for(var src in sources) {
-                images[src] = new Image();
-                images[src].onload = function() {
-                    if (++loadedImages >= numImages) {
-                        callback(images);
-                    }
-                };
-                if (src !== 'mix')
-                images[src].src = _sImagePath + sources[src];
-            }
-        }
-
-        this.get = function( sName )
-        {
-            var oAsset = images[sName];
-            if ( oAsset != null && oAsset != '' )
-            {
-                return oAsset;
-            }
-            return false;
-        };
-
-    };
-
-}();
-
 /*
  *  @module Component
  *  @desc Represents a component
@@ -21608,16 +21533,8 @@ glue.module.create(
             obj = obj || {};
             obj.animatable = Component(Visible).add({
                 setup: function (settings) {
-                    this.visible.setup(settings).then(function (image) {
-                        setAnimation(image, 8, 8);
-                        successCallback();
-                    });
-                    return {
-                        then: function (onSuccess, onError) {
-                            successCallback = onSuccess;
-                            errorCallback = onError;
-                        }
-                    };
+                    this.visible.setup(settings);
+                    setAnimation(settings.image, settings.frameCount, settings.fps);
                 },
                 update: function (deltaT) {
                     timeSinceLastFrame -= deltaT;
@@ -21992,40 +21909,6 @@ glue.module.create(
                 dimension = null,
                 image = null,
                 rectangle,
-                readyNeeded = [],
-                readyList = [],
-                successCallback,
-                errorCallback,
-                customPosition,
-                readyCheck = function () {
-                    if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
-                        readyNeeded = [];
-                        readyList = [];
-                        successCallback.call(null, image);
-                    }
-                },
-                imageLoadHandler = function () {
-                    dimension = {
-                        width: image.naturalWidth,
-                        height: image.naturalHeight
-                    };
-                    rectangle = Rectangle(
-                        position.x,
-                        position.y,
-                        position.x + dimension.width,
-                        position.y + dimension.height
-                    );
-                    readyList.push('image');
-                    readyCheck();
-                },
-                loadImage = function (imageData) {
-                    readyNeeded.push('image');
-                    image = new Image();
-                    image.addEventListener('load', function () {
-                        imageLoadHandler();
-                    }, false);
-                    image.src = imageData.src;
-                },
                 updateRectangle = function () {
                     rectangle.x1 = position.x;
                     rectangle.y1 = position.y;
@@ -22036,11 +21919,12 @@ glue.module.create(
             obj = obj || {};
             obj.visible = {
                 setup: function (settings) {
-                    if (settings) {
+                    if (settings && settings.image) {
+                        image = settings.image;
                         if (settings.position) {
+                            customPosition = settings.position;
                             // using proper rounding:
                             // http://jsperf.com/math-round-vs-hack/66
-                            customPosition = settings.position;
                             position = Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
@@ -22048,20 +21932,21 @@ glue.module.create(
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
+                        } else {
+                            dimension = {
+                                width: image.naturalWidth,
+                                height: image.naturalHeight
+                            };
                         }
-                        if (settings.image) {
-                            loadImage(settings.image);
-                        }
+                        rectangle = Rectangle(
+                            position.x,
+                            position.y,
+                            position.x + dimension.width,
+                            position.y + dimension.height
+                        );
+                    } else {
+                        throw('No image provided in settings')
                     }
-                    return {
-                        then: function (onSuccess, onError) {
-                            successCallback = onSuccess;
-                            errorCallback = onError;
-                        }
-                    };
-                },
-                update: function (deltaT) {
-
                 },
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)
@@ -22173,9 +22058,10 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/event/system'
+        'glue/event/system',
+        'glue/loader'
     ],
-    function (Glue, Vector, Event) {
+    function (Glue, Vector, Event, Loader) {
         var fps = 60,
             components = [],
             addedComponents = [],
@@ -22313,6 +22199,8 @@ glue.module.create(
                 }
             },
             startup = function () {
+                initCanvas();
+                setupEventListeners();
                 cycle(0);
             },
             pointerDown = function (e) {
@@ -22463,11 +22351,22 @@ glue.module.create(
                     debugBar.id = 'debugBar';
                     document.body.appendChild(debugBar);
                 }
-                initCanvas();
-                setupEventListeners();
-                startup();
-                if (onReady) {
-                    onReady();
+                if (config.asset && config.asset.image && config.asset.image.path &&
+                    config.asset.image.source) {
+                    Loader.setAssetPath(config.asset.image.path);
+                    Loader.setAssets(config.asset.image.source);
+                    Loader.load(function () {
+                        startup();
+                        /*
+                        if (config.canvas.color) {
+                            backBufferContext2D.fillStyle = config.canvas.color;
+                            backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        */
+                        if (onReady) {
+                            onReady();
+                        }
+                    });
                 }
             },
             shutdown: function () {
@@ -22501,6 +22400,158 @@ glue.module.create(
     }
 );
 
+/*
+ *  @module Loader
+ *  @desc Used to load assets in the beginning of the game, shows a progress bar
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/loader',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        var loaded = false,
+            assetCount = 0,
+            loadCount = 0,
+            assetPath = null,
+            assets = null,
+            loadedAssets = {},
+            completedHandler,
+            assetLoadedHandler = function (e) {
+                ++loadCount;
+                // temp console log, will be hooked to loading bar later on
+                console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
+                if (assetCount === loadCount) {
+                    loaded = true;
+                    completedHandler();
+                }
+            },
+            loadAsset = function (source) {
+                var asset = new Image();
+                asset.src = assetPath + source;
+                asset.addEventListener('load', assetLoadedHandler, false);
+                return asset;
+            },
+            obj = {
+                setAssetPath: function (value) {
+                    assetPath = value;
+                },
+                setAssets: function (value) {
+                    assets = value;
+                    for (asset in assets) {
+                        if (assets.hasOwnProperty(asset)) {
+                            ++assetCount;
+                        }
+                    }
+                },
+                load: function (onReady) {
+                    completedHandler = onReady;
+                    for (asset in assets) {
+                        if (assets.hasOwnProperty(asset)) {
+                            loadedAssets[asset] = loadAsset(assets[asset]);
+                        }
+                    }
+                },
+                isLoaded: function () {
+                    return loaded;
+                },
+                getAssets: function () {
+                    if (!loaded) {
+                        throw('Assets are not loaded yet');
+                    }
+                    return loadedAssets;
+                },
+                getAsset: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets[name];
+                }
+            };
+
+        return obj;
+    }
+);
+
+/*
+var AssetManager = function()
+{
+    var _oInstance = null;
+
+    return new function()
+    {
+        this.Instance = function()
+        {
+            if ( _oInstance == null )
+            {
+                _oInstance = new AssetManager();
+                _oInstance.constructor = null;
+            }
+            return _oInstance;
+        }
+    };
+
+    function AssetManager()
+    {
+        var sources = {
+            player_stand_up: 'stand-up.gif',
+            player_stand_right: 'stand-right.gif',
+            player_stand_down: 'stand-down.gif',
+            player_stand_left: 'stand-left.gif',
+            player_stand_down_left: 'stand-down-left.gif',
+            player_stand_down_right: 'stand-down-right.gif',
+            player_walk_up: 'stand-up.gif',
+            player_walk_right: 'walk-right.gif',
+            player_walk_down: 'stand-down.gif',
+            player_walk_left: 'walk-left.gif'
+        }
+        var _sBasePath = '../../example/';
+        var _sImagePath = _sBasePath + 'image/player/';
+
+        var images = [];
+
+        function _loadImage(source) {
+            var image = new Image();
+            image.src = _sImagePath + source;
+            return image;
+        };
+
+        this.loadImages = function (callback) {
+            var loadedImages = 0;
+            var numImages = 0;
+            for (var src in sources) {
+                ++numImages;
+            }
+
+            for(var src in sources) {
+                images[src] = new Image();
+                images[src].onload = function() {
+                    if (++loadedImages >= numImages) {
+                        callback(images);
+                    }
+                };
+                if (src !== 'mix')
+                images[src].src = _sImagePath + sources[src];
+            }
+        }
+
+        this.get = function( sName )
+        {
+            var oAsset = images[sName];
+            if ( oAsset != null && oAsset != '' )
+            {
+                return oAsset;
+            }
+            return false;
+        };
+
+    };
+
+}();
+*/
 /**
  *  @module Math
  *  @desc The math module
