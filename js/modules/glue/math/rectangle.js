@@ -10,17 +10,25 @@ glue.module.create(
     'glue/math/rectangle',
     function () {
         'use strict';
-        var rectangle;
         return function (x1, y1, x2, y2) {
-            rectangle = {
+            return {
                 x1: x1,
                 y1: y1,
                 x2: x2,
-                y2: y2
-            };
-            return {
+                y2: y2,
                 get: function () {
-                    return rectangle;
+                    return {
+                        x1: this.x1,
+                        y1: this.y1,
+                        x2: this.x2,
+                        y2: this.y2
+                    };
+                },
+                hasPosition: function (position) {
+                    if (position.x >= this.x1 && position.x <= this.x2 &&
+                        position.y >= this.y1 && position.y <= this.y2) {
+                        return true;
+                    }
                 }
             };
         };

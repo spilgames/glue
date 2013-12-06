@@ -11,19 +11,29 @@
         glue.module.get(
             [
                 'glue/game',
+                'glue/math/dimension',
                 'glue/component',
                 'glue/component/visible',
-                'glue/component/draggable'
+                'glue/component/draggable',
+                'glue/loader'
             ],
-            function (Game, Component, Visible, Draggable) {
+            function (Game, Dimension, Component, Visible, Draggable, Loader) {
                 'use strict';
 
                 Game.setup({
                     canvas: {
                         id: 'canvas',
-                        dimension: {
-                            width: 800,
-                            height: 600
+                        dimension: Dimension(800, 600)
+                    },
+                    develop: {
+                        debug: true
+                    },
+                    asset: {
+                        image: {
+                            path: '../image/',
+                            source: {
+                                glueLogo: 'glue-logo.png'
+                            }
                         }
                     }
                 }, function () {
@@ -42,15 +52,11 @@
                             }
                         });
 
+
                     component.visible.setup({
-                        image: {
-                            src: '../image/glue-logo.png'
-                        }
-                    }).then(function () {
-                        // add the component to the game
-                        // after the setup is completed
-                        Game.add(component);
+                        image: Loader.getAsset('glueLogo')
                     });
+                    Game.add(component);
                 });
             }
         );

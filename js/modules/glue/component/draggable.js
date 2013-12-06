@@ -20,11 +20,7 @@ glue.module.create(
         return function (obj) {
             var dragging = false,
                 dragId,
-                // TODO: Change to Glue Vector
-                grabOffset = {
-                    x: 0,
-                    y: 0
-                },
+                grabOffset = Vector(0, 0),
                 isHeighestDraggable = function (obj) {
                     var i = 0,
                         l = draggables.length,
@@ -41,14 +37,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    var position = e.position.get(),
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity
@@ -58,21 +47,13 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
-                    var pointerPostion,
-                        objectPosition;
-
                     if (checkOnMe(e) && dragging === false) {
                         draggables.push(obj);
                         setTimeout(function () {
                             if (isHeighestDraggable(obj)) {
-                                pointerPosition = e.position.get();
-                                objectPosition = obj.visible.getPosition();
                                 dragging = true;
                                 dragId = e.pointerId;
-                                grabOffset = {
-                                    x: pointerPosition.x - objectPosition.x,
-                                    y: pointerPosition.y - objectPosition.y
-                                };
+                                grabOffset = e.position.substract(obj.visible.getPosition());
                                 if (obj.dragStart) {
                                     obj.dragStart(e);
                                 }
@@ -89,13 +70,9 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragMove = function (e) {
-                    var pointerPosition = e.position.get();
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            obj.visible.setPosition(Vector(
-                                pointerPosition.x - grabOffset.x,
-                                pointerPosition.y - grabOffset.y
-                            ));
+                            obj.visible.setPosition(e.position.substract(grabOffset));
                             if (obj.dragMove) {
                                 obj.dragMove(e);
                             }

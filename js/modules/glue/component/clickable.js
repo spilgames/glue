@@ -14,15 +14,7 @@ glue.module.create(
     function (Glue) {
         return function (obj) {
             var isClicked = function (e) {
-                    // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
                     if (isClicked(e) && obj.onClick) {

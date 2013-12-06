@@ -21491,6 +21491,160 @@ glue.module.create(
 );
 
 /*
+ *  @module Animatable
+ *  @namespace component
+ *  @desc Represents an animatable component
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ *
+ *  Only when performance issues: Remove the need for getters and setters in visible
+ */
+glue.module.create(
+    'glue/component/animatable',
+    [
+        'glue',
+        'glue/component',
+        'glue/component/visible',
+        'glue/math/vector',
+        'glue/math/dimension',
+        'glue/math/rectangle'
+    ],
+    function (Glue, Component, Visible, Vector, Dimension, Rectangle) {
+        return function (obj) {
+            var animationSettings,
+                animations = {},
+                currentAnimation,
+                currentFrame = 0,
+                frameCount = 1,
+                fps = 60,
+                timeBetweenFrames = 1 / fps,
+                timeSinceLastFrame = timeBetweenFrames,
+                frameWidth,
+                startFrame,
+                endFrame,
+                image,
+                setAnimation = function () {
+                    if (!image) {
+                        image = currentAnimation.image;
+                        this.visible.setImage(image);
+                    }
+                    frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
+                    timeBetweenFrames = currentAnimation.fps ?
+                        1 / currentAnimation.fps :
+                        1 / animationSettings.fps;
+                    timeSinceLastFrame = timeBetweenFrames;
+                    frameWidth = currentAnimation.frameCount ?
+                        image.width / currentAnimation.frameCount :
+                        image.width / animationSettings.frameCount;
+                    startFrame = currentAnimation.startFrame;
+                    endFrame = currentAnimation.endFrame;
+                    currentFrame = startFrame;
+                },
+                successCallback,
+                errorCallback;
+
+            obj = obj || {};
+            obj.animatable = Component(Visible).add({
+                setup: function (settings) {
+                    var animation;
+                    if (settings) {
+                        if (settings.animation) {
+                            animationSettings = settings.animation;
+                            if (settings.animation.animations) {
+                                animations = settings.animation.animations;
+                            }
+                        }
+                    }
+                    this.visible.setup(settings);
+                    if (settings.image) {
+                        image = settings.image;
+                    }
+                },
+                update: function (deltaT) {
+                    timeSinceLastFrame -= deltaT;
+                    if (timeSinceLastFrame <= 0) {
+                        timeSinceLastFrame = timeBetweenFrames;
+                        ++currentFrame;
+                        if (currentFrame === endFrame) {
+                            currentFrame = startFrame;
+                        }
+                    }
+                },
+                draw: function (deltaT, context) {
+                    var position = this.visible.getPosition(),
+                        sourceX = frameWidth * currentFrame;
+
+                    //console.log(frameWidth, currentFrame);
+
+                    //  Save the current context so we can only make changes to one graphic
+                    context.save();
+                    //  First we translate to the current x and y, so we can scale the image relative to that
+                    context.translate(position.x, position.y);
+                    //  Now we scale the image according to the scale (set in update function)
+                    //context.scale(scale, scale);
+                    context.drawImage
+                    (
+                        image,
+                        sourceX,
+                        0,
+                        frameWidth,
+                        image.height,
+                        0,
+                        0,
+                        frameWidth,
+                        image.height
+                    );
+                    /*
+                    console.log(
+                        'image: ' + image,
+                        'sourceX: ' + sourceX,
+                        'frameWidth: ' + frameWidth,
+                        'image.height: ' + image.height,
+                        'frameWidth: ' + frameWidth,
+                        'current frame: ' + currentFrame,
+                        'frame count: ' + frameCount);
+                    */
+                    context.restore();
+                },
+                setAnimation: function(name) {
+                    if (animations[name]) {
+                        currentAnimation = animations[name];
+                        setAnimation();
+                    }
+                },
+                getPosition: function () {
+                    return this.visible.getPosition();
+                },
+                setPosition: function () {
+                    return this.visible.setPosition();
+                },
+                getDimension: function () {
+                    var dimension = this.visible.getDimension();
+                    dimension.width = frameWidth;
+                    return dimension;
+                },
+                setDimension: function () {
+                    return this.visible.setDimension();
+                },
+                getBoundingBox: function () {
+                    var rectangle = this.visible.getBoundingBox();
+                    rectangle.y2 = rectangle.y1 + frameWidth;
+                    return rectangle;
+                },
+                setBoundingBox: function () {
+                    return this.visible.setBoundingBox();
+                },
+                getFrameWidth: function () {
+                    return frameWidth;
+                }
+            });
+            return obj;
+        };
+    }
+);
+
+/*
  *  @module Clickable
  *  @namespace component
  *  @desc Used to make a game component perfom an action when she's clicked
@@ -21506,15 +21660,7 @@ glue.module.create(
     function (Glue) {
         return function (obj) {
             var isClicked = function (e) {
-                    // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
                     if (isClicked(e) && obj.onClick) {
@@ -21564,11 +21710,7 @@ glue.module.create(
         return function (obj) {
             var dragging = false,
                 dragId,
-                // TODO: Change to Glue Vector
-                grabOffset = {
-                    x: 0,
-                    y: 0
-                },
+                grabOffset = Vector(0, 0),
                 isHeighestDraggable = function (obj) {
                     var i = 0,
                         l = draggables.length,
@@ -21585,14 +21727,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    var position = e.position.get(),
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity
@@ -21602,21 +21737,13 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragStart = function (e) {
-                    var pointerPostion,
-                        objectPosition;
-
                     if (checkOnMe(e) && dragging === false) {
                         draggables.push(obj);
                         setTimeout(function () {
                             if (isHeighestDraggable(obj)) {
-                                pointerPosition = e.position.get();
-                                objectPosition = obj.visible.getPosition();
                                 dragging = true;
                                 dragId = e.pointerId;
-                                grabOffset = {
-                                    x: pointerPosition.x - objectPosition.x,
-                                    y: pointerPosition.y - objectPosition.y
-                                };
+                                grabOffset = e.position.substract(obj.visible.getPosition());
                                 if (obj.dragStart) {
                                     obj.dragStart(e);
                                 }
@@ -21633,13 +21760,9 @@ glue.module.create(
                  * @param {Object} e: the pointer event
                  */
                 dragMove = function (e) {
-                    var pointerPosition = e.position.get();
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            obj.visible.setPosition(Vector(
-                                pointerPosition.x - grabOffset.x,
-                                pointerPosition.y - grabOffset.y
-                            ));
+                            obj.visible.setPosition(e.position.substract(grabOffset));
                             if (obj.dragMove) {
                                 obj.dragMove(e);
                             }
@@ -21710,14 +21833,7 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(obj, e) && obj.onDrop) {
@@ -21760,15 +21876,7 @@ glue.module.create(
             // TODO: add state constants
             var state = 'not hovered',
                 isHovered = function (e) {
-                    // TODO: add more methods (constants) to check on me
-                    var position = e.position.get(),
-                        boundingBox = obj.visible.getBoundingBox();
-
-                    // TODO: abstract this to overlaps utility method
-                    if (position.x >= boundingBox.left && position.x <= boundingBox.right &&
-                        position.y >= boundingBox.top && position.y <= boundingBox.bottom) {
-                        return true;
-                    }
+                    return obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerMoveHandler = function (e) {
                     if (isHovered(e)) {
@@ -21822,73 +21930,55 @@ glue.module.create(
     'glue/component/visible',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/math/dimension',
+        'glue/math/rectangle'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Dimension, Rectangle) {
         return function (obj) {
-            var position = Vector(0, 0).get(),
+            var position = Vector(0, 0),
                 dimension = null,
                 image = null,
-                frameCount = 0,
-                frame = 1,
-                rectangle 
+                rectangle,
+                updateRectangle = function () {
+                    rectangle.x1 = position.x;
+                    rectangle.y1 = position.y;
+                    rectangle.x2 = position.x + dimension.width;
+                    rectangle.y2 = position.y + dimension.height;
+                };
 
             obj = obj || {};
             obj.visible = {
-                ready: false,
                 setup: function (settings) {
-                    var readyNeeded = [],
-                        readyList = [],
-                        successCallback,
-                        errorCallback,
-                        customPosition,
-                        readyCheck = function () {
-                            if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
-                                successCallback();
-                            }
-                        },
-                        imageLoadHandler = function () {
+                    if (settings) {
+                        if (settings.image) {
+                            image = settings.image;
+                        }
+                        image = settings.image;
+                        if (settings.position) {
+                            customPosition = settings.position;
+                            // using proper rounding:
+                            // http://jsperf.com/math-round-vs-hack/66
+                            position = Vector(
+                                Math.round(customPosition.x),
+                                Math.round(customPosition.y)
+                            );
+                        }
+                        if (settings.dimension) {
+                            dimension = settings.dimension;
+                        } else if (image) {
                             dimension = {
                                 width: image.naturalWidth,
                                 height: image.naturalHeight
                             };
-                            readyList.push('image');
-                            readyCheck();
-                        };
-
-                    if (settings) {
-                        if (settings.position) {
-                            // using proper rounding (http://jsperf.com/math-round-vs-hack/66)
-                            customPosition = settings.position.get();
-                            position = Vector(
-                                Math.round(customPosition.x),
-                                Math.round(customPosition.y)
-                            ).get();
-                        }
-                        if (settings.dimension) {
-                            dimension = settings.dimension;
-                        }
-                        if (settings.image) {
-                            readyNeeded.push('image');
-                            image = new Image();
-                            image.addEventListener('load', function () {
-                                imageLoadHandler();
-                            }, false);
-                            image.src = settings.image.src;
-                            if (image.frameWidth) {
-                                frameCount = dimension.width / image.frameWidth;
-                            }
+                            rectangle = Rectangle(
+                                position.x,
+                                position.y,
+                                position.x + dimension.width,
+                                position.y + dimension.height
+                            );
                         }
                     }
-                    return {
-                        then: function (onSuccess, onError) {
-                            successCallback = onSuccess;
-                            errorCallback = onError;
-                        }
-                    };
-                },
-                update: function (deltaT) {
-
                 },
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)
@@ -21897,21 +21987,32 @@ glue.module.create(
                     return position;
                 },
                 setPosition: function (value) {
-                    position = value.get();
+                    position = value;
+                    updateRectangle();
                 },
                 getDimension: function () {
                     return dimension;
                 },
-                setDimension: function () {
-                    return dimension;
+                setDimension: function (value) {
+                    dimension = value;
+                    updateRectangle();
                 },
                 getBoundingBox: function () {
-                    return {
-                        left: position.x,
-                        right: position.x + dimension.width,
-                        top: position.y,
-                        bottom: position.y + dimension.height
+                    return rectangle;
+                },
+                setBoundingBox: function (value) {
+                    rectangle = value;
+                },
+                setImage: function (value) {
+                    image = value;
+                    dimension = {
+                        width: image.naturalWidth,
+                        height: image.naturalHeight
                     };
+                    updateRectangle();
+                },
+                getImage: function () {
+                    return image;
                 }
             };
             return obj;
@@ -21994,16 +22095,18 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/event/system'
+        'glue/event/system',
+        'glue/loader'
     ],
-    function (Glue, Vector, Event) {
-        var fps = 60,
+    function (Glue, Vector, Event, Loader) {
+        var gameInfo,
+            fps = 60,
             components = [],
             addedComponents = [],
             removedComponents = [],
-            lastFrame = new Date().getTime(),
+            lastFrameTime = new Date().getTime(),
             canvas = null,
-            canvasId = 0,
+            canvasId,
             context2D = null,
             backBuffer = null,
             backBufferContext2D = null,
@@ -22013,6 +22116,8 @@ glue.module.create(
             win = null,
             doc = null,
             isRunning = false,
+            debug = false,
+            debugBar = null,
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -22057,7 +22162,7 @@ glue.module.create(
                 canvas.style.width = width + 'px';
                 canvas.style.height = height + 'px';
             },
-            sort = function() {
+            sort = function () {
                 components.sort(function(a, b) {
                     if (a.visible && b.visible) {
                         return a.visible.z - b.visible.z;
@@ -22091,18 +22196,18 @@ glue.module.create(
                     removedComponents = [];
                 }
             },
-            redraw = function() {
+            redraw = function () {
                 backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
                 context2D.clearRect(0, 0, canvas.width, canvas.height);
             }
-            cycle = function () {
-                var currentFrame = new Date().getTime(),
-                    deltaT = (currentFrame - lastFrame),
+            cycle = function (time) {
+                var deltaT,
+                    fps,
                     component;
 
-                requestAnimationFrame(cycle);
-                lastFrame = currentFrame;
-
+                if (isRunning) {
+                    requestAnimationFrame(cycle);
+                }
                 sort();
 
                 if (canvasSupported) {
@@ -22110,6 +22215,17 @@ glue.module.create(
                     removeComponents();
                     addComponents();
 
+                    deltaT = (time - lastFrameTime) / 1000;
+                    if (debug) {
+                        fps = Math.round(1000 / (time - lastFrameTime), 2);
+                        debugBar.innerHTML = '<strong>Glue debug bar</strong>';
+                        debugBar.innerHTML += '<br />version: 0.0.1';
+                        debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
+                        debugBar.innerHTML += '<br />components: ' + components.length;
+                        if (gameInfo && gameInfo.name) {
+                            debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
+                        }
+                    }
                     for (var i = 0; i < components.length; ++i) {
                         component = components[i];
                         if (component.update) {
@@ -22120,10 +22236,13 @@ glue.module.create(
                         }
                     };
                     context2D.drawImage(backBuffer, 0, 0);
+                    lastFrameTime = time;
                 }
             },
             startup = function () {
-                cycle();
+                initCanvas();
+                setupEventListeners();
+                cycle(0);
             },
             pointerDown = function (e) {
                 //console.log('Pointer down: ', e.position);
@@ -22164,8 +22283,8 @@ glue.module.create(
                     }
                 }
             },
-            addTouchPosition = function (e) {
-                var touch = e.changedTouches[0];
+            addTouchPosition = function (e, isTouchEnd) {
+                var touch = !isTouchEnd ? e.targetTouches[0] : e.changedTouches[0];
                 e.preventDefault();
                 e.position = Vector(
                     (touch.pageX - canvas.offsetLeft) / canvasScale.x,
@@ -22190,7 +22309,7 @@ glue.module.create(
             },
             touchEnd = function (e) {
                 e.preventDefault();
-                addTouchPosition(e);
+                addTouchPosition(e, true);
                 pointerUp(e);
             },
             mouseDown = function (e) {
@@ -22265,14 +22384,39 @@ glue.module.create(
                 isRunning = true;
                 win = window;
                 doc = win.document;
+                // config.canvas is mandatory
                 canvasId = config.canvas.id;
-                canvasDimension = config.canvas.dimension
-                initCanvas();
-                setupEventListeners();
-                startup();
-                if (onReady) {
-                    onReady();
+                canvasDimension = config.canvas.dimension;
+                if (config.game) {
+                    gameInfo = config.game;
                 }
+                if (config.develop && config.develop.debug) {
+                    debug = true;
+                    debugBar = document.createElement('div');
+                    debugBar.id = 'debugBar';
+                    document.body.appendChild(debugBar);
+                }
+                if (config.asset && config.asset.image && config.asset.image.path &&
+                    config.asset.image.source) {
+                    Loader.setAssetPath(config.asset.image.path);
+                    Loader.setAssets(config.asset.image.source);
+                    Loader.load(function () {
+                        startup();
+                        /*
+                        if (config.canvas.color) {
+                            backBufferContext2D.fillStyle = config.canvas.color;
+                            backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        */
+                        if (onReady) {
+                            onReady();
+                        }
+                    });
+                }
+            },
+            shutdown: function () {
+                shutdown();
+                isRunning = false;
             },
             add: function (component) {
                 addedComponents.push(component);
@@ -22301,6 +22445,158 @@ glue.module.create(
     }
 );
 
+/*
+ *  @module Loader
+ *  @desc Used to load assets in the beginning of the game, shows a progress bar
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/loader',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        var loaded = false,
+            assetCount = 0,
+            loadCount = 0,
+            assetPath = null,
+            assets = null,
+            loadedAssets = {},
+            completedHandler,
+            assetLoadedHandler = function (e) {
+                ++loadCount;
+                // temp console log, will be hooked to loading bar later on
+                console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
+                if (assetCount === loadCount) {
+                    loaded = true;
+                    completedHandler();
+                }
+            },
+            loadAsset = function (source) {
+                var asset = new Image();
+                asset.src = assetPath + source;
+                asset.addEventListener('load', assetLoadedHandler, false);
+                return asset;
+            },
+            obj = {
+                setAssetPath: function (value) {
+                    assetPath = value;
+                },
+                setAssets: function (value) {
+                    assets = value;
+                    for (asset in assets) {
+                        if (assets.hasOwnProperty(asset)) {
+                            ++assetCount;
+                        }
+                    }
+                },
+                load: function (onReady) {
+                    completedHandler = onReady;
+                    for (asset in assets) {
+                        if (assets.hasOwnProperty(asset)) {
+                            loadedAssets[asset] = loadAsset(assets[asset]);
+                        }
+                    }
+                },
+                isLoaded: function () {
+                    return loaded;
+                },
+                getAssets: function () {
+                    if (!loaded) {
+                        throw('Assets are not loaded yet');
+                    }
+                    return loadedAssets;
+                },
+                getAsset: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets[name];
+                }
+            };
+
+        return obj;
+    }
+);
+
+/*
+var AssetManager = function()
+{
+    var _oInstance = null;
+
+    return new function()
+    {
+        this.Instance = function()
+        {
+            if ( _oInstance == null )
+            {
+                _oInstance = new AssetManager();
+                _oInstance.constructor = null;
+            }
+            return _oInstance;
+        }
+    };
+
+    function AssetManager()
+    {
+        var sources = {
+            player_stand_up: 'stand-up.gif',
+            player_stand_right: 'stand-right.gif',
+            player_stand_down: 'stand-down.gif',
+            player_stand_left: 'stand-left.gif',
+            player_stand_down_left: 'stand-down-left.gif',
+            player_stand_down_right: 'stand-down-right.gif',
+            player_walk_up: 'stand-up.gif',
+            player_walk_right: 'walk-right.gif',
+            player_walk_down: 'stand-down.gif',
+            player_walk_left: 'walk-left.gif'
+        }
+        var _sBasePath = '../../example/';
+        var _sImagePath = _sBasePath + 'image/player/';
+
+        var images = [];
+
+        function _loadImage(source) {
+            var image = new Image();
+            image.src = _sImagePath + source;
+            return image;
+        };
+
+        this.loadImages = function (callback) {
+            var loadedImages = 0;
+            var numImages = 0;
+            for (var src in sources) {
+                ++numImages;
+            }
+
+            for(var src in sources) {
+                images[src] = new Image();
+                images[src].onload = function() {
+                    if (++loadedImages >= numImages) {
+                        callback(images);
+                    }
+                };
+                if (src !== 'mix')
+                images[src].src = _sImagePath + sources[src];
+            }
+        }
+
+        this.get = function( sName )
+        {
+            var oAsset = images[sName];
+            if ( oAsset != null && oAsset != '' )
+            {
+                return oAsset;
+            }
+            return false;
+        };
+
+    };
+
+}();
+*/
 /**
  *  @module Math
  *  @desc The math module
@@ -22339,16 +22635,18 @@ glue.module.create(
     'glue/math/dimension',
     function () {
         'use strict';
-        var dim;
         return function (width, height, depth) {
-            dim = {
+            var dimension = {
                 width: width,
                 height: height,
                 depth: depth || 0
             };
             return {
+                width: dimension.width,
+                height: dimension.height,
+                depth: dimension.depth,
                 get: function () {
-                    return dim;
+                    return dimension;
                 }
             };
         };
@@ -22367,9 +22665,9 @@ glue.module.create(
     'glue/math/matrix',
     function () {
         'use strict';
-        var mat = [];
         return function (m, n, initial) {
-            var a,
+            var mat = [],
+                a,
                 row,
                 col;
 
@@ -22402,17 +22700,25 @@ glue.module.create(
     'glue/math/rectangle',
     function () {
         'use strict';
-        var rectangle;
         return function (x1, y1, x2, y2) {
-            rectangle = {
+            return {
                 x1: x1,
                 y1: y1,
                 x2: x2,
-                y2: y2
-            };
-            return {
+                y2: y2,
                 get: function () {
-                    return rectangle;
+                    return {
+                        x1: this.x1,
+                        y1: this.y1,
+                        x2: this.x2,
+                        y2: this.y2
+                    };
+                },
+                hasPosition: function (position) {
+                    if (position.x >= this.x1 && position.x <= this.x2 &&
+                        position.y >= this.y1 && position.y <= this.y2) {
+                        return true;
+                    }
                 }
             };
         };
@@ -22427,25 +22733,48 @@ glue.module.create(
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
-glue.module.create(
-    'glue/math/vector',
-    function () {
-        'use strict';
-        var coordinates;
-        return function (x, y, z) {
-            coordinates = {
-                x: x,
-                y: y,
-                z: z || 0
-            };
-            return {
-                get: function () {
-                    return coordinates;
+glue.module.create('glue/math/vector', function () {
+    'use strict';
+    return function (x, y, z) {
+        return {
+            x: x,
+            y: y,
+            z: z || 0,
+            get: function () {
+                return {
+                    x: this.x,
+                    y: this.y,
+                    z: this.z
                 }
-            };
+            },
+            add: function (vector) {
+                this.x += vector.x;
+                this.y += vector.y;
+                return this;
+            },
+            substract: function (vector) {
+                this.x -= vector.x;
+                this.y -= vector.y;
+                return this;
+            },
+            angle: function (vector) {
+                return Math.atan2(
+                    (vector.y - this.y),
+                    (vector.x - this.x)
+                );
+            },
+            dotProduct: function (vector) {
+                return this.x * vector.x + this.y * vector.y;
+            },        
+            distance : function (vector) {
+                return Math.sqrt(
+                    (this.x - vector.x) * (this.x - vector.x) +
+                    (this.y - vector.y) * (this.y - vector.y)
+                );
+            }
         };
-    }
-);
+    };
+});
 
 /**
  *  @module Sugar

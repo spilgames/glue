@@ -5,28 +5,34 @@
     <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <style>
-        #canvas {
-            border: 1px solid #00aa00;
-        }
-    </style>
-    <script src="../../build/glue.min.js"></script>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script src="../../build/glue.js"></script>
     <script>
         glue.module.get(
             [
                 'glue/game',
+                'glue/math/dimension',
                 'glue/component',
-                'glue/component/visible'
+                'glue/component/visible',
+                'glue/loader'
             ],
-            function (Game, Component, Visible) {
+            function (Game, Dimension, Component, Visible, Loader) {
                 'use strict';
 
                 Game.setup({
                     canvas: {
                         id: 'canvas',
-                        dimension: {
-                            width: 800,
-                            height: 600
+                        dimension: Dimension(800, 600)
+                    },
+                    develop: {
+                        debug: true
+                    },
+                    asset: {
+                        image: {
+                            path: '../image/',
+                            source: {
+                                glueLogo: 'glue-logo.png'
+                            }
                         }
                     }
                 }, function () {
@@ -84,12 +90,9 @@
                         });
 
                     component.visible.setup({
-                        image: {
-                            src: '../image/glue-logo.png'
-                        }
-                    }).then(function () {
-                        Game.add(component);
+                        image: Loader.getAsset('glueLogo')
                     });
+                    Game.add(component);
                 });
             }
         );

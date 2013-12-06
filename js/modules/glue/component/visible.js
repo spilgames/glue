@@ -12,73 +12,55 @@ glue.module.create(
     'glue/component/visible',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/math/dimension',
+        'glue/math/rectangle'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Dimension, Rectangle) {
         return function (obj) {
-            var position = Vector(0, 0).get(),
+            var position = Vector(0, 0),
                 dimension = null,
                 image = null,
-                frameCount = 0,
-                frame = 1,
-                rectangle 
+                rectangle,
+                updateRectangle = function () {
+                    rectangle.x1 = position.x;
+                    rectangle.y1 = position.y;
+                    rectangle.x2 = position.x + dimension.width;
+                    rectangle.y2 = position.y + dimension.height;
+                };
 
             obj = obj || {};
             obj.visible = {
-                ready: false,
                 setup: function (settings) {
-                    var readyNeeded = [],
-                        readyList = [],
-                        successCallback,
-                        errorCallback,
-                        customPosition,
-                        readyCheck = function () {
-                            if (Glue.sugar.arrayMatch(readyNeeded, readyList)) {
-                                successCallback();
-                            }
-                        },
-                        imageLoadHandler = function () {
+                    if (settings) {
+                        if (settings.image) {
+                            image = settings.image;
+                        }
+                        image = settings.image;
+                        if (settings.position) {
+                            customPosition = settings.position;
+                            // using proper rounding:
+                            // http://jsperf.com/math-round-vs-hack/66
+                            position = Vector(
+                                Math.round(customPosition.x),
+                                Math.round(customPosition.y)
+                            );
+                        }
+                        if (settings.dimension) {
+                            dimension = settings.dimension;
+                        } else if (image) {
                             dimension = {
                                 width: image.naturalWidth,
                                 height: image.naturalHeight
                             };
-                            readyList.push('image');
-                            readyCheck();
-                        };
-
-                    if (settings) {
-                        if (settings.position) {
-                            // using proper rounding (http://jsperf.com/math-round-vs-hack/66)
-                            customPosition = settings.position.get();
-                            position = Vector(
-                                Math.round(customPosition.x),
-                                Math.round(customPosition.y)
-                            ).get();
-                        }
-                        if (settings.dimension) {
-                            dimension = settings.dimension;
-                        }
-                        if (settings.image) {
-                            readyNeeded.push('image');
-                            image = new Image();
-                            image.addEventListener('load', function () {
-                                imageLoadHandler();
-                            }, false);
-                            image.src = settings.image.src;
-                            if (image.frameWidth) {
-                                frameCount = dimension.width / image.frameWidth;
-                            }
+                            rectangle = Rectangle(
+                                position.x,
+                                position.y,
+                                position.x + dimension.width,
+                                position.y + dimension.height
+                            );
                         }
                     }
-                    return {
-                        then: function (onSuccess, onError) {
-                            successCallback = onSuccess;
-                            errorCallback = onError;
-                        }
-                    };
-                },
-                update: function (deltaT) {
-
                 },
                 draw: function (deltaT, context) {
                     context.drawImage(image, position.x, position.y)
@@ -87,21 +69,32 @@ glue.module.create(
                     return position;
                 },
                 setPosition: function (value) {
-                    position = value.get();
+                    position = value;
+                    updateRectangle();
                 },
                 getDimension: function () {
                     return dimension;
                 },
-                setDimension: function () {
-                    return dimension;
+                setDimension: function (value) {
+                    dimension = value;
+                    updateRectangle();
                 },
                 getBoundingBox: function () {
-                    return {
-                        left: position.x,
-                        right: position.x + dimension.width,
-                        top: position.y,
-                        bottom: position.y + dimension.height
+                    return rectangle;
+                },
+                setBoundingBox: function (value) {
+                    rectangle = value;
+                },
+                setImage: function (value) {
+                    image = value;
+                    dimension = {
+                        width: image.naturalWidth,
+                        height: image.naturalHeight
                     };
+                    updateRectangle();
+                },
+                getImage: function () {
+                    return image;
                 }
             };
             return obj;

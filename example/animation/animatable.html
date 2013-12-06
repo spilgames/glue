@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Simple movement</title>
+    <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <script src="../../build/glue.js"></script>
+    <script>
+        glue.module.get(
+            [
+                'glue/game',
+                'glue/math/dimension',
+                'glue/component',
+                'glue/component/animatable',
+                'glue/loader'
+            ],
+            function (Game, Dimension, Component, Animatable, Loader) {
+                'use strict';
+
+                Game.setup({
+                    canvas: {
+                        id: 'canvas',
+                        dimension: Dimension(800, 600)
+                    },
+                    develop: {
+                        debug: true
+                    },
+                    asset: {
+                        image: {
+                            path: '../game2/asset/',
+                            source: {
+                                walkRight: 'walk-right-dark.png'
+                            }
+                        }
+                    }
+                }, function () {
+                    var canvasDimension = Game.canvas.getDimension(),
+                        playerDimension,
+                        playerPosition,
+                        speed = 1,
+                        direction = 'right',
+                        component = Component(Animatable).add({
+                            update: function (deltaT) {
+                                this.animatable.update(deltaT);
+                                playerDimension = this.animatable.getDimension();
+                                playerPosition = this.animatable.getPosition();
+                                if (playerPosition.x > canvasDimension.width -
+                                        this.animatable.getFrameWidth()) {
+                                    direction = 'down';
+                                }
+                                if (playerPosition.y > canvasDimension.height -
+                                        playerDimension.height) {
+                                    direction = 'left';
+                                }
+                                if (playerPosition.x < 0) {
+                                    direction = 'up';
+                                }
+                                if (playerPosition.y < 0) {
+                                    playerPosition.y = 0;
+                                    direction = 'right';
+                                }
+                                switch (direction) {
+                                    case 'right':
+                                        playerPosition.x += speed;
+                                    break;
+                                    case 'down':
+                                        playerPosition.y += speed;
+                                    break;
+                                    case 'left':
+                                        playerPosition.x -= speed;
+                                    break;
+                                    case 'up':
+                                        playerPosition.y -= speed;
+                                    break;
+                                }
+                            },
+                            draw: function (deltaT, context) {
+                                this.animatable.draw(deltaT, context);
+                            }
+                        });
+
+                    component.animatable.setup({
+                        animation: {
+                            frameCount: 8,
+                            fps: 8,
+                            animations: {
+                                walkRight: {
+                                    startFrame: 0,
+                                    endFrame: 8
+                                }
+                            }
+                        },
+                        image: Loader.getAsset('walkRight'),
+                    });
+                    component.animatable.setAnimation('walkRight');
+                    Game.add(component);
+                });
+            }
+        );
+    </script>
+</head>
+<body>
+</body>
+</html>

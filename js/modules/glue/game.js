@@ -10,16 +10,18 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/event/system'
+        'glue/event/system',
+        'glue/loader'
     ],
-    function (Glue, Vector, Event) {
-        var fps = 60,
+    function (Glue, Vector, Event, Loader) {
+        var gameInfo,
+            fps = 60,
             components = [],
             addedComponents = [],
             removedComponents = [],
-            lastFrame = new Date().getTime(),
+            lastFrameTime = new Date().getTime(),
             canvas = null,
-            canvasId = 0,
+            canvasId,
             context2D = null,
             backBuffer = null,
             backBufferContext2D = null,
@@ -29,6 +31,8 @@ glue.module.create(
             win = null,
             doc = null,
             isRunning = false,
+            debug = false,
+            debugBar = null,
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -73,7 +77,7 @@ glue.module.create(
                 canvas.style.width = width + 'px';
                 canvas.style.height = height + 'px';
             },
-            sort = function() {
+            sort = function () {
                 components.sort(function(a, b) {
                     if (a.visible && b.visible) {
                         return a.visible.z - b.visible.z;
@@ -107,18 +111,18 @@ glue.module.create(
                     removedComponents = [];
                 }
             },
-            redraw = function() {
+            redraw = function () {
                 backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
                 context2D.clearRect(0, 0, canvas.width, canvas.height);
             }
-            cycle = function () {
-                var currentFrame = new Date().getTime(),
-                    deltaT = (currentFrame - lastFrame),
+            cycle = function (time) {
+                var deltaT,
+                    fps,
                     component;
 
-                requestAnimationFrame(cycle);
-                lastFrame = currentFrame;
-
+                if (isRunning) {
+                    requestAnimationFrame(cycle);
+                }
                 sort();
 
                 if (canvasSupported) {
@@ -126,6 +130,17 @@ glue.module.create(
                     removeComponents();
                     addComponents();
 
+                    deltaT = (time - lastFrameTime) / 1000;
+                    if (debug) {
+                        fps = Math.round(1000 / (time - lastFrameTime), 2);
+                        debugBar.innerHTML = '<strong>Glue debug bar</strong>';
+                        debugBar.innerHTML += '<br />version: 0.0.1';
+                        debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
+                        debugBar.innerHTML += '<br />components: ' + components.length;
+                        if (gameInfo && gameInfo.name) {
+                            debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
+                        }
+                    }
                     for (var i = 0; i < components.length; ++i) {
                         component = components[i];
                         if (component.update) {
@@ -136,10 +151,13 @@ glue.module.create(
                         }
                     };
                     context2D.drawImage(backBuffer, 0, 0);
+                    lastFrameTime = time;
                 }
             },
             startup = function () {
-                cycle();
+                initCanvas();
+                setupEventListeners();
+                cycle(0);
             },
             pointerDown = function (e) {
                 //console.log('Pointer down: ', e.position);
@@ -180,8 +198,8 @@ glue.module.create(
                     }
                 }
             },
-            addTouchPosition = function (e) {
-                var touch = e.changedTouches[0];
+            addTouchPosition = function (e, isTouchEnd) {
+                var touch = !isTouchEnd ? e.targetTouches[0] : e.changedTouches[0];
                 e.preventDefault();
                 e.position = Vector(
                     (touch.pageX - canvas.offsetLeft) / canvasScale.x,
@@ -206,7 +224,7 @@ glue.module.create(
             },
             touchEnd = function (e) {
                 e.preventDefault();
-                addTouchPosition(e);
+                addTouchPosition(e, true);
                 pointerUp(e);
             },
             mouseDown = function (e) {
@@ -281,14 +299,39 @@ glue.module.create(
                 isRunning = true;
                 win = window;
                 doc = win.document;
+                // config.canvas is mandatory
                 canvasId = config.canvas.id;
-                canvasDimension = config.canvas.dimension
-                initCanvas();
-                setupEventListeners();
-                startup();
-                if (onReady) {
-                    onReady();
+                canvasDimension = config.canvas.dimension;
+                if (config.game) {
+                    gameInfo = config.game;
                 }
+                if (config.develop && config.develop.debug) {
+                    debug = true;
+                    debugBar = document.createElement('div');
+                    debugBar.id = 'debugBar';
+                    document.body.appendChild(debugBar);
+                }
+                if (config.asset && config.asset.image && config.asset.image.path &&
+                    config.asset.image.source) {
+                    Loader.setAssetPath(config.asset.image.path);
+                    Loader.setAssets(config.asset.image.source);
+                    Loader.load(function () {
+                        startup();
+                        /*
+                        if (config.canvas.color) {
+                            backBufferContext2D.fillStyle = config.canvas.color;
+                            backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        */
+                        if (onReady) {
+                            onReady();
+                        }
+                    });
+                }
+            },
+            shutdown: function () {
+                shutdown();
+                isRunning = false;
             },
             add: function (component) {
                 addedComponents.push(component);
