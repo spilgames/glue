@@ -13,9 +13,10 @@
                 'glue/game',
                 'glue/math/dimension',
                 'glue/component',
-                'glue/component/animatable'
+                'glue/component/animatable',
+                'glue/loader'
             ],
-            function (Game, Dimension, Component, Animatable) {
+            function (Game, Dimension, Component, Animatable, Loader) {
                 'use strict';
 
                 Game.setup({
@@ -25,6 +26,14 @@
                     },
                     develop: {
                         debug: true
+                    },
+                    asset: {
+                        image: {
+                            path: '../game2/asset/',
+                            source: {
+                                walkRight: 'walk-right-dark.png'
+                            }
+                        }
                     }
                 }, function () {
                     var canvasDimension = Game.canvas.getDimension(),
@@ -76,12 +85,11 @@
                         });
 
                     component.animatable.setup({
-                        image: {
-                            src: '../image/player/walk-right.gif'
-                        }
-                    }).then(function () {
-                        Game.add(component);
+                        image: Loader.getAsset('walkRight'),
+                        frameCount: 8,
+                        fps: 8
                     });
+                    Game.add(component);
                 });
             }
         );

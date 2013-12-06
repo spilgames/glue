@@ -14,9 +14,10 @@
                 'glue/math/dimension',
                 'glue/component',
                 'glue/component/visible',
-                'glue/component/draggable'
+                'glue/component/draggable',
+                'glue/loader'
             ],
-            function (Game, Dimension, Component, Visible, Draggable) {
+            function (Game, Dimension, Component, Visible, Draggable, Loader) {
                 'use strict';
 
                 Game.setup({
@@ -26,6 +27,14 @@
                     },
                     develop: {
                         debug: true
+                    },
+                    asset: {
+                        image: {
+                            path: '../image/',
+                            source: {
+                                glueLogo: 'glue-logo.png'
+                            }
+                        }
                     }
                 }, function () {
                     var component = Component(Visible, Draggable).add({
@@ -43,15 +52,11 @@
                             }
                         });
 
+
                     component.visible.setup({
-                        image: {
-                            src: '../image/glue-logo.png'
-                        }
-                    }).then(function () {
-                        // add the component to the game
-                        // after the setup is completed
-                        Game.add(component);
+                        image: Loader.getAsset('glueLogo')
                     });
+                    Game.add(component);
                 });
             }
         );

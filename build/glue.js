@@ -21971,8 +21971,8 @@ glue.module.create(
                 setBoundingBox: function (value) {
                     rectangle = value;
                 },
-                setImage: function (imageData) {
-                    loadImage(imageData);
+                setImage: function (value) {
+                    image = value;
                 },
                 getImage: function () {
                     return image;

@@ -13,9 +13,10 @@
                 'glue/game',
                 'glue/math/dimension',
                 'glue/component',
-                'glue/component/visible'
+                'glue/component/visible',
+                'glue/loader'
             ],
-            function (Game, Dimension, Component, Visible) {
+            function (Game, Dimension, Component, Visible, Loader) {
                 'use strict';
 
                 Game.setup({
@@ -25,6 +26,14 @@
                     },
                     develop: {
                         debug: true
+                    },
+                    asset: {
+                        image: {
+                            path: '../image/',
+                            source: {
+                                glueLogo: 'glue-logo.png'
+                            }
+                        }
                     }
                 }, function () {
                     var canvasDimension = Game.canvas.getDimension(),
@@ -81,12 +90,9 @@
                         });
 
                     component.visible.setup({
-                        image: {
-                            src: '../image/glue-logo.png'
-                        }
-                    }).then(function () {
-                        Game.add(component);
+                        image: Loader.getAsset('glueLogo')
                     });
+                    Game.add(component);
                 });
             }
         );

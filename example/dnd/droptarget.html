@@ -18,7 +18,8 @@
                 'glue/component/draggable',
                 'glue/component/droptarget',
                 'glue/component/hoverable',
-                'glue/component/clickable'
+                'glue/component/clickable',
+                'glue/loader'
             ],
             function (
                 Game,
@@ -29,7 +30,8 @@
                 Draggable,
                 Droptarget,
                 Hoverable,
-                Clickable) {
+                Clickable,
+                Loader) {
                 'use strict';
 
                 Game.setup({
@@ -39,6 +41,15 @@
                     },
                     develop: {
                         debug: true
+                    },
+                    asset: {
+                        image: {
+                            path: '../image/',
+                            source: {
+                                glueLogo: 'glue-logo.png',
+                                spilLogo: 'spil-logo.png'
+                            }
+                        }
                     }
                 }, function () {
                     var glueComponent = Component(Visible, Draggable, Hoverable, Clickable).add({
@@ -79,13 +90,10 @@
                         }
                     });
                     glueComponent.visible.setup({
-                        image: {
-                            src: '../image/glue-logo.png'
-                        }
-                    }).then(function () {
-                        glueComponent.setName('glue');
-                        Game.add(glueComponent);
+                        image: Loader.getAsset('glueLogo')
                     });
+                    glueComponent.setName('glue');
+                    Game.add(glueComponent);
 
                     var dropText = '',
                         dropComponent = Component(Visible, Droptarget).add({
@@ -107,14 +115,11 @@
                     });
                     dropComponent.visible.setup({
                         position: Vector(250, 222),
-                        image: {
-                            src: '../image/spil-logo.png'
-                        }
-                    }).then(function () {
-                        dropComponent.setName('droptarget');
-                        dropComponent.droptarget.setup();
-                        Game.add(dropComponent);
+                        image: Loader.getAsset('spilLogo')
                     });
+                    dropComponent.setName('droptarget');
+                    dropComponent.droptarget.setup();
+                    Game.add(dropComponent);
                 });
             }
         );

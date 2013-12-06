@@ -15,9 +15,10 @@
                 'glue/math/dimension',
                 'glue/component',
                 'glue/component/visible',
-                'glue/component/draggable'
+                'glue/component/draggable',
+                'glue/loader'
             ],
-            function (Game, Vector, Dimension, Component, Visible, Draggable) {
+            function (Game, Vector, Dimension, Component, Visible, Draggable, Loader) {
                 'use strict';
 
                 var myComponent = {
@@ -54,28 +55,31 @@
                     },
                     develop: {
                         debug: true
+                    },
+                    asset: {
+                        image: {
+                            path: '../image/',
+                            source: {
+                                glueLogo: 'glue-logo.png',
+                                spilLogo: 'spil-logo.png'
+                            }
+                        }
                     }
                 }, function () {
-                    var glueObject = Component(Visible, Draggable).add(myComponent);
-                    glueObject.visible.setup({
-                        image: {
-                            src: '../image/glue-logo.png'
-                        }
-                    }).then(function () {
-                        glueObject.setName('glue');
-                        Game.add(glueObject);
+                    var glueComponent = Component(Visible, Draggable).add(myComponent);
+                    glueComponent.visible.setup({
+                        image: Loader.getAsset('glueLogo')
                     });
+                    glueComponent.setName('glue');
+                    Game.add(glueComponent);
 
                     var spilObject = Component(Visible, Draggable).add(myComponent);
                     spilObject.visible.setup({
                         position: Vector(200, 200),
-                        image: {
-                            src: '../image/spil-logo.png'
-                        }
-                    }).then(function () {
-                        spilObject.setName('spil');
-                        Game.add(spilObject);
+                        image: Loader.getAsset('spilLogo')
                     });
+                    spilObject.setName('spil');
+                    Game.add(spilObject);
                 });
             }
         );
