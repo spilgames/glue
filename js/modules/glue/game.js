@@ -134,7 +134,7 @@ glue.module.create(
                     if (debug) {
                         fps = Math.round(1000 / (time - lastFrameTime), 2);
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
-                        debugBar.innerHTML += '<br />version: 0.0.1';
+                        debugBar.innerHTML += '<br />version: 0.0.1 alpha';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />components: ' + components.length;
                         if (gameInfo && gameInfo.name) {

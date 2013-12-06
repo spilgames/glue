@@ -8,6 +8,8 @@ all rights reserved
 licensed under the BSD 3-Clause license, see the [license file](https://github.com/spilgames/5-glue-engine/blob/master/LICENSE)  
 created & maintained by [Buffer-Overflow](https://github.com/Buffer-Overflow)  
    
+### Version
+0.0.1 alpha   
 Glue is currently in alpha phase and still under construction.
 
 ### Examples
