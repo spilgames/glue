@@ -1,4 +1,4 @@
-![Logo](https://rawgithub.com/spilgames/glue/master/img/glue-logo.jpg)
+![Logo](https://raw.github.com/spilgames/glue/master/img/glue-logo.jpg)
 
 ## Glue Game Engine
 Copyright (C) 2013, SpilGames  
