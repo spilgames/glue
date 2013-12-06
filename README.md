@@ -1,4 +1,4 @@
-![ListForks](https://raw.github.com/Buffer-Overflow/images/master/glue-logo.jpg)
+![Logo](https://rawgithub.com/spilgames/glue/master/img/glue-logo.jpg)
 
 ## Glue Game Engine
 Copyright (C) 2013, SpilGames  
