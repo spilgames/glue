@@ -3,7 +3,7 @@
 ## Glue Game Engine
 Copyright (C) 2013, SpilGames  
 http://www.spilgames.com
-all rights reserved
+all rights reserved   
 licensed under the BSD 3-Clause license, see the [license file](https://github.com/spilgames/5-glue-engine/blob/master/LICENSE)  
 created & maintained by [Buffer-Overflow](https://github.com/Buffer-Overflow)  
 
