@@ -20,20 +20,34 @@ glue.module.create(
     ],
     function (Glue, Component, Visible, Vector, Dimension, Rectangle) {
         return function (obj) {
-            var currentFrame = 0,
+            var animationSettings,
+                animations = {},
+                currentAnimation,
+                currentFrame = 0,
                 frameCount = 1,
                 fps = 60,
                 timeBetweenFrames = 1 / fps,
                 timeSinceLastFrame = timeBetweenFrames,
                 frameWidth,
+                startFrame,
+                endFrame,
                 image,
-                setAnimation = function (img, count, fps) {
-                    image = img;
-                    currentFrame = 0;
-                    frameCount = count;
-                    timeBetweenFrames = 1 / fps;
+                setAnimation = function () {
+                    if (!image) {
+                        image = currentAnimation.image;
+                        this.visible.setImage(image);
+                    }
+                    frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
+                    timeBetweenFrames = currentAnimation.fps ?
+                        1 / currentAnimation.fps :
+                        1 / animationSettings.fps;
                     timeSinceLastFrame = timeBetweenFrames;
-                    frameWidth = image.width / frameCount;
+                    frameWidth = currentAnimation.frameCount ?
+                        image.width / currentAnimation.frameCount :
+                        image.width / animationSettings.frameCount;
+                    startFrame = currentAnimation.startFrame;
+                    endFrame = currentAnimation.endFrame;
+                    currentFrame = startFrame;
                 },
                 successCallback,
                 errorCallback;
@@ -41,43 +55,42 @@ glue.module.create(
             obj = obj || {};
             obj.animatable = Component(Visible).add({
                 setup: function (settings) {
+                    var animation;
+                    if (settings) {
+                        if (settings.animation) {
+                            animationSettings = settings.animation;
+                            if (settings.animation.animations) {
+                                animations = settings.animation.animations;
+                            }
+                        }
+                    }
                     this.visible.setup(settings);
-                    setAnimation(settings.image, settings.frameCount, settings.fps);
+                    if (settings.image) {
+                        image = settings.image;
+                    }
                 },
                 update: function (deltaT) {
                     timeSinceLastFrame -= deltaT;
-                    if (timeSinceLastFrame <= 0)
-                    {
-                       timeSinceLastFrame = timeBetweenFrames;
-                       ++currentFrame;
-                       currentFrame %= frameCount;
+                    if (timeSinceLastFrame <= 0) {
+                        timeSinceLastFrame = timeBetweenFrames;
+                        ++currentFrame;
+                        if (currentFrame === endFrame) {
+                            currentFrame = startFrame;
+                        }
                     }
                 },
                 draw: function (deltaT, context) {
-                    var position = this.visible.getPosition();
+                    var position = this.visible.getPosition(),
+                        sourceX = frameWidth * currentFrame;
+
+                    //console.log(frameWidth, currentFrame);
 
                     //  Save the current context so we can only make changes to one graphic
                     context.save();
-
                     //  First we translate to the current x and y, so we can scale the image relative to that
                     context.translate(position.x, position.y);
-
                     //  Now we scale the image according to the scale (set in update function)
                     //context.scale(scale, scale);
-
-                    var sourceX = frameWidth * currentFrame;
-
-                    /*
-                    console.log(
-                        'image: ' + image,
-                        'sourceX: ' + sourceX,
-                        'frameWidth: ' + frameWidth,
-                        'image.height: ' + image.height,
-                        'frameWidth: ' + frameWidth,
-                        'current frame: ' + currentFrame,
-                        'frame count: ' + frameCount);
-                    */
-
                     context.drawImage
                     (
                         image,
@@ -90,9 +103,23 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
-
+                    /*
+                    console.log(
+                        'image: ' + image,
+                        'sourceX: ' + sourceX,
+                        'frameWidth: ' + frameWidth,
+                        'image.height: ' + image.height,
+                        'frameWidth: ' + frameWidth,
+                        'current frame: ' + currentFrame,
+                        'frame count: ' + frameCount);
+                    */
                     context.restore();
-                    //context.drawImage(image, position.x, position.y)
+                },
+                setAnimation: function(name) {
+                    if (animations[name]) {
+                        currentAnimation = animations[name];
+                        setAnimation();
+                    }
                 },
                 getPosition: function () {
                     return this.visible.getPosition();
@@ -101,13 +128,17 @@ glue.module.create(
                     return this.visible.setPosition();
                 },
                 getDimension: function () {
-                    return this.visible.getDimension();
+                    var dimension = this.visible.getDimension();
+                    dimension.width = frameWidth;
+                    return dimension;
                 },
                 setDimension: function () {
                     return this.visible.setDimension();
                 },
                 getBoundingBox: function () {
-                    return this.visible.getBoundingBox();
+                    var rectangle = this.visible.getBoundingBox();
+                    rectangle.y2 = rectangle.y1 + frameWidth;
+                    return rectangle;
                 },
                 setBoundingBox: function () {
                     return this.visible.setBoundingBox();

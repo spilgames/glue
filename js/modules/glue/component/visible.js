@@ -32,7 +32,10 @@ glue.module.create(
             obj = obj || {};
             obj.visible = {
                 setup: function (settings) {
-                    if (settings && settings.image) {
+                    if (settings) {
+                        if (settings.image) {
+                            image = settings.image;
+                        }
                         image = settings.image;
                         if (settings.position) {
                             customPosition = settings.position;
@@ -45,20 +48,18 @@ glue.module.create(
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
-                        } else {
+                        } else if (image) {
                             dimension = {
                                 width: image.naturalWidth,
                                 height: image.naturalHeight
                             };
+                            rectangle = Rectangle(
+                                position.x,
+                                position.y,
+                                position.x + dimension.width,
+                                position.y + dimension.height
+                            );
                         }
-                        rectangle = Rectangle(
-                            position.x,
-                            position.y,
-                            position.x + dimension.width,
-                            position.y + dimension.height
-                        );
-                    } else {
-                        throw('No image provided in settings')
                     }
                 },
                 draw: function (deltaT, context) {
@@ -86,6 +87,11 @@ glue.module.create(
                 },
                 setImage: function (value) {
                     image = value;
+                    dimension = {
+                        width: image.naturalWidth,
+                        height: image.naturalHeight
+                    };
+                    updateRectangle();
                 },
                 getImage: function () {
                     return image;

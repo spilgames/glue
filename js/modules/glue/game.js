@@ -14,7 +14,8 @@ glue.module.create(
         'glue/loader'
     ],
     function (Glue, Vector, Event, Loader) {
-        var fps = 60,
+        var gameInfo,
+            fps = 60,
             components = [],
             addedComponents = [],
             removedComponents = [],
@@ -136,6 +137,9 @@ glue.module.create(
                         debugBar.innerHTML += '<br />version: 0.0.1';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />components: ' + components.length;
+                        if (gameInfo && gameInfo.name) {
+                            debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
+                        }
                     }
                     for (var i = 0; i < components.length; ++i) {
                         component = components[i];
@@ -295,8 +299,12 @@ glue.module.create(
                 isRunning = true;
                 win = window;
                 doc = win.document;
+                // config.canvas is mandatory
                 canvasId = config.canvas.id;
-                canvasDimension = config.canvas.dimension
+                canvasDimension = config.canvas.dimension;
+                if (config.game) {
+                    gameInfo = config.game;
+                }
                 if (config.develop && config.develop.debug) {
                     debug = true;
                     debugBar = document.createElement('div');

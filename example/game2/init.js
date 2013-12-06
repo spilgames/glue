@@ -27,6 +27,9 @@ glue.module.get(
         'use strict';
 
         Game.setup({
+            game: {
+                name: 'Inspector Dan'
+            },
             canvas: {
                 id: 'canvas',
                 dimension: Dimension(800, 600)
@@ -48,8 +51,7 @@ glue.module.get(
                         standDown: 'stand-down.gif',
                         standDownLeft: 'stand-down-left.gif',
                         standDownRight: 'stand-down-right.gif',
-                        walkLeft: 'walk-left-dark.png',
-                        walkRight: 'walk-right-dark.png'
+                        walk: 'walk.png'
                     }
                 }
             }
@@ -73,7 +75,7 @@ glue.module.get(
                     init: function () {
                         this.visible.setup({
                             position: {
-                                x: 0,
+                                x: -332,
                                 y: 30
                             },
                             image: Loader.getAsset('clouds')
@@ -83,10 +85,7 @@ glue.module.get(
                         cloudsDimension = this.visible.getDimension();
                         cloudsPosition = this.visible.getPosition();
                         if (cloudsPosition.x > canvasDimension.width - cloudsDimension.width) {
-                            cloudsPosition = {
-                                x: 0,
-                                y: 30
-                            }
+                            cloudsPosition.x = -cloudsDimension.width;
                         }
                         cloudsPosition.x += moveSpeed;
                     },
@@ -102,9 +101,18 @@ glue.module.get(
                                 y: 400
                             },
                             image: Loader.getAsset('dog'),
-                            frameCount: 8,
-                            fps: 8
+                            animation: {
+                                frameCount: 8,
+                                fps: 8,
+                                animations: {
+                                    wiggleTail: {
+                                        startFrame: 0,
+                                        endFrame: 8
+                                    }
+                                }
+                            }
                         });
+                        this.animatable.setAnimation('wiggleTail');
                     },
                     update: function (deltaT, context) {
                         this.animatable.update(deltaT);
@@ -131,7 +139,7 @@ glue.module.get(
                     init: function () {
                         this.visible.setup({
                             position: {
-                                x: 340,
+                                x: 100,
                                 y: 50
                             },
                             image: Loader.getAsset('moon')
@@ -184,7 +192,22 @@ glue.module.get(
                                 x: 0,
                                 y: 350
                             },
-                            image: Loader.getAsset('walkRight')
+                            image: Loader.getAsset('walk'),
+                            animation: {
+                                frameCount: 16,
+                                animations: {
+                                    walkLeft: {
+                                        startFrame: 0,
+                                        endFrame: 8,
+                                        fps: 6
+                                    },
+                                    walkRight: {
+                                        startFrame: 8,
+                                        endFrame: 16,
+                                        fps: 6
+                                    }
+                                }
+                            }
                         });
                     },
                     update: function (deltaT) {
@@ -193,19 +216,11 @@ glue.module.get(
                         playerPosition = this.animatable.getPosition();
                         if (playerPosition.x > canvasDimension.width -
                                 this.animatable.getFrameWidth()) {
-                            this.animatable.setup({
-                                image: Loader.getAsset('walkLeft'),
-                                frameCount: 8,
-                                fps: 8
-                            });
+                            this.animatable.setAnimation('walkLeft');
                             direction = 'left';
                         }
                         if (playerPosition.x <= 0) {
-                            this.animatable.setup({
-                                image: Loader.getAsset('walkRight'),
-                                frameCount: 8,
-                                fps: 8
-                            });
+                            this.animatable.setAnimation('walkRight');
                             direction = 'right';
                         }
                         switch (direction) {

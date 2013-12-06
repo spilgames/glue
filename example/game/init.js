@@ -27,6 +27,9 @@ glue.module.get(
         'use strict';
 
         Game.setup({
+            game: {
+                name: 'Jailbreaker'
+            },
             canvas: {
                 id: 'canvas',
                 dimension: Dimension(800, 600)
@@ -123,10 +126,31 @@ glue.module.get(
                                 x: 30,
                                 y: 200
                             },
-                            frameCount: 32,
-                            fps: 8,
+                            animation: {
+                                frameCount: 32,
+                                fps: 8,
+                                animations: {
+                                    walkUp: {
+                                        startFrame: 0,
+                                        endFrame: 7
+                                    },
+                                    walkDown: {
+                                        startFrame: 8,
+                                        endFrame: 15
+                                    },
+                                    walkLeft: {
+                                        startFrame: 16,
+                                        endFrame: 23
+                                    },
+                                    walkRight: {
+                                        startFrame: 24,
+                                        endFrame: 31
+                                    }
+                                }
+                            },
                             image: Loader.getAsset('player')
                         });
+                        this.animatable.setAnimation('walkDown');
                     },
                     update: function (deltaT) {
                         this.animatable.update(deltaT);
@@ -135,6 +159,11 @@ glue.module.get(
                         this.animatable.draw(deltaT, context);
                     }
                 }),
+                enemyPosition,
+                enemyDimension,
+                walkSpeed = 1,
+                direction = 'left',
+                canvasDimension = Game.canvas.getDimension(),
                 enemy = Component(Animatable).add({
                     init: function () {
                         this.animatable.setup({
@@ -142,19 +171,58 @@ glue.module.get(
                                 x: 650,
                                 y: 350
                             },
-                            frameCount: 33,
-                            fps: 8,
+                            animation: {
+                                frameCount: 33,
+                                fps: 8,
+                                animations: {
+                                    walkUp: {
+                                        startFrame: 0,
+                                        endFrame: 7
+                                    },
+                                    walkDown: {
+                                        startFrame: 8,
+                                        endFrame: 15
+                                    },
+                                    walkLeft: {
+                                        startFrame: 16,
+                                        endFrame: 23
+                                    },
+                                    walkRight: {
+                                        startFrame: 24,
+                                        endFrame: 31
+                                    }
+                                }
+                            },
                             image: Loader.getAsset('enemy')
                         });
+                        this.animatable.setAnimation('walkLeft');
                     },
                     update: function (deltaT) {
                         this.animatable.update(deltaT);
+                        enemyDimension = this.animatable.getDimension();
+                        enemyPosition = this.animatable.getPosition();
+                        if (enemyPosition.x > canvasDimension.width -
+                                this.animatable.getFrameWidth()) {
+                            this.animatable.setAnimation('walkLeft')
+                            direction = 'left';
+                        }
+                        if (enemyPosition.x <= 0) {
+                            this.animatable.setAnimation('walkRight');
+                            direction = 'right';
+                        }
+                        switch (direction) {
+                            case 'right':
+                                enemyPosition.x += walkSpeed;
+                            break;
+                            case 'left':
+                                enemyPosition.x -= walkSpeed;
+                            break;
+                        }
                     },
                     draw: function (deltaT, context) {
                         this.animatable.draw(deltaT, context);
                     }
                 });
-
 
             // add level components to the game
             Game.add(jailBackground);

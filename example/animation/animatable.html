@@ -43,12 +43,9 @@
                         direction = 'right',
                         component = Component(Animatable).add({
                             update: function (deltaT) {
-                                
                                 this.animatable.update(deltaT);
-
                                 playerDimension = this.animatable.getDimension();
                                 playerPosition = this.animatable.getPosition();
-                                //console.log(playerPosition.x, canvasDimension.width);
                                 if (playerPosition.x > canvasDimension.width -
                                         this.animatable.getFrameWidth()) {
                                     direction = 'down';
@@ -85,10 +82,19 @@
                         });
 
                     component.animatable.setup({
+                        animation: {
+                            frameCount: 8,
+                            fps: 8,
+                            animations: {
+                                walkRight: {
+                                    startFrame: 0,
+                                    endFrame: 8
+                                }
+                            }
+                        },
                         image: Loader.getAsset('walkRight'),
-                        frameCount: 8,
-                        fps: 8
                     });
+                    component.animatable.setAnimation('walkRight');
                     Game.add(component);
                 });
             }

@@ -21512,20 +21512,34 @@ glue.module.create(
     ],
     function (Glue, Component, Visible, Vector, Dimension, Rectangle) {
         return function (obj) {
-            var currentFrame = 0,
+            var animationSettings,
+                animations = {},
+                currentAnimation,
+                currentFrame = 0,
                 frameCount = 1,
                 fps = 60,
                 timeBetweenFrames = 1 / fps,
                 timeSinceLastFrame = timeBetweenFrames,
                 frameWidth,
+                startFrame,
+                endFrame,
                 image,
-                setAnimation = function (img, count, fps) {
-                    image = img;
-                    currentFrame = 0;
-                    frameCount = count;
-                    timeBetweenFrames = 1 / fps;
+                setAnimation = function () {
+                    if (!image) {
+                        image = currentAnimation.image;
+                        this.visible.setImage(image);
+                    }
+                    frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
+                    timeBetweenFrames = currentAnimation.fps ?
+                        1 / currentAnimation.fps :
+                        1 / animationSettings.fps;
                     timeSinceLastFrame = timeBetweenFrames;
-                    frameWidth = image.width / frameCount;
+                    frameWidth = currentAnimation.frameCount ?
+                        image.width / currentAnimation.frameCount :
+                        image.width / animationSettings.frameCount;
+                    startFrame = currentAnimation.startFrame;
+                    endFrame = currentAnimation.endFrame;
+                    currentFrame = startFrame;
                 },
                 successCallback,
                 errorCallback;
@@ -21533,43 +21547,42 @@ glue.module.create(
             obj = obj || {};
             obj.animatable = Component(Visible).add({
                 setup: function (settings) {
+                    var animation;
+                    if (settings) {
+                        if (settings.animation) {
+                            animationSettings = settings.animation;
+                            if (settings.animation.animations) {
+                                animations = settings.animation.animations;
+                            }
+                        }
+                    }
                     this.visible.setup(settings);
-                    setAnimation(settings.image, settings.frameCount, settings.fps);
+                    if (settings.image) {
+                        image = settings.image;
+                    }
                 },
                 update: function (deltaT) {
                     timeSinceLastFrame -= deltaT;
-                    if (timeSinceLastFrame <= 0)
-                    {
-                       timeSinceLastFrame = timeBetweenFrames;
-                       ++currentFrame;
-                       currentFrame %= frameCount;
+                    if (timeSinceLastFrame <= 0) {
+                        timeSinceLastFrame = timeBetweenFrames;
+                        ++currentFrame;
+                        if (currentFrame === endFrame) {
+                            currentFrame = startFrame;
+                        }
                     }
                 },
                 draw: function (deltaT, context) {
-                    var position = this.visible.getPosition();
+                    var position = this.visible.getPosition(),
+                        sourceX = frameWidth * currentFrame;
+
+                    //console.log(frameWidth, currentFrame);
 
                     //  Save the current context so we can only make changes to one graphic
                     context.save();
-
                     //  First we translate to the current x and y, so we can scale the image relative to that
                     context.translate(position.x, position.y);
-
                     //  Now we scale the image according to the scale (set in update function)
                     //context.scale(scale, scale);
-
-                    var sourceX = frameWidth * currentFrame;
-
-                    /*
-                    console.log(
-                        'image: ' + image,
-                        'sourceX: ' + sourceX,
-                        'frameWidth: ' + frameWidth,
-                        'image.height: ' + image.height,
-                        'frameWidth: ' + frameWidth,
-                        'current frame: ' + currentFrame,
-                        'frame count: ' + frameCount);
-                    */
-
                     context.drawImage
                     (
                         image,
@@ -21582,9 +21595,23 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
-
+                    /*
+                    console.log(
+                        'image: ' + image,
+                        'sourceX: ' + sourceX,
+                        'frameWidth: ' + frameWidth,
+                        'image.height: ' + image.height,
+                        'frameWidth: ' + frameWidth,
+                        'current frame: ' + currentFrame,
+                        'frame count: ' + frameCount);
+                    */
                     context.restore();
-                    //context.drawImage(image, position.x, position.y)
+                },
+                setAnimation: function(name) {
+                    if (animations[name]) {
+                        currentAnimation = animations[name];
+                        setAnimation();
+                    }
                 },
                 getPosition: function () {
                     return this.visible.getPosition();
@@ -21593,13 +21620,17 @@ glue.module.create(
                     return this.visible.setPosition();
                 },
                 getDimension: function () {
-                    return this.visible.getDimension();
+                    var dimension = this.visible.getDimension();
+                    dimension.width = frameWidth;
+                    return dimension;
                 },
                 setDimension: function () {
                     return this.visible.setDimension();
                 },
                 getBoundingBox: function () {
-                    return this.visible.getBoundingBox();
+                    var rectangle = this.visible.getBoundingBox();
+                    rectangle.y2 = rectangle.y1 + frameWidth;
+                    return rectangle;
                 },
                 setBoundingBox: function () {
                     return this.visible.setBoundingBox();
@@ -21919,7 +21950,10 @@ glue.module.create(
             obj = obj || {};
             obj.visible = {
                 setup: function (settings) {
-                    if (settings && settings.image) {
+                    if (settings) {
+                        if (settings.image) {
+                            image = settings.image;
+                        }
                         image = settings.image;
                         if (settings.position) {
                             customPosition = settings.position;
@@ -21932,20 +21966,18 @@ glue.module.create(
                         }
                         if (settings.dimension) {
                             dimension = settings.dimension;
-                        } else {
+                        } else if (image) {
                             dimension = {
                                 width: image.naturalWidth,
                                 height: image.naturalHeight
                             };
+                            rectangle = Rectangle(
+                                position.x,
+                                position.y,
+                                position.x + dimension.width,
+                                position.y + dimension.height
+                            );
                         }
-                        rectangle = Rectangle(
-                            position.x,
-                            position.y,
-                            position.x + dimension.width,
-                            position.y + dimension.height
-                        );
-                    } else {
-                        throw('No image provided in settings')
                     }
                 },
                 draw: function (deltaT, context) {
@@ -21973,6 +22005,11 @@ glue.module.create(
                 },
                 setImage: function (value) {
                     image = value;
+                    dimension = {
+                        width: image.naturalWidth,
+                        height: image.naturalHeight
+                    };
+                    updateRectangle();
                 },
                 getImage: function () {
                     return image;
@@ -22062,7 +22099,8 @@ glue.module.create(
         'glue/loader'
     ],
     function (Glue, Vector, Event, Loader) {
-        var fps = 60,
+        var gameInfo,
+            fps = 60,
             components = [],
             addedComponents = [],
             removedComponents = [],
@@ -22184,6 +22222,9 @@ glue.module.create(
                         debugBar.innerHTML += '<br />version: 0.0.1';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />components: ' + components.length;
+                        if (gameInfo && gameInfo.name) {
+                            debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
+                        }
                     }
                     for (var i = 0; i < components.length; ++i) {
                         component = components[i];
@@ -22343,8 +22384,12 @@ glue.module.create(
                 isRunning = true;
                 win = window;
                 doc = win.document;
+                // config.canvas is mandatory
                 canvasId = config.canvas.id;
-                canvasDimension = config.canvas.dimension
+                canvasDimension = config.canvas.dimension;
+                if (config.game) {
+                    gameInfo = config.game;
+                }
                 if (config.develop && config.develop.debug) {
                     debug = true;
                     debugBar = document.createElement('div');
