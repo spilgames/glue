@@ -22465,14 +22465,20 @@ glue.module.create(
             assets = null,
             loadedAssets = {},
             completedHandler,
+            loader = document.getElementById('loader'),
+            loadBar = document.getElementById('loadbar'),
+            percentageLoaded,
             assetLoadedHandler = function (e) {
-                ++loadCount;
                 //console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
-                var percentage = ((loadCount / assetCount) * 100).toFixed();
-                document.getElementById('loaded').style.width = percentage + '%';
-
+                ++loadCount;
+                percentageLoaded = ((loadCount / assetCount) * 100).toFixed();
+                if (loadBar !== null) {
+                    loadBar.style.width = percentageLoaded + '%';
+                }
                 if (assetCount === loadCount) {
-                    document.getElementById('loadbar').style.display = 'none';
+                    if (loader !== null) {
+                        loader.style.display = 'none';
+                    }
                     loaded = true;
                     completedHandler();
                 }
