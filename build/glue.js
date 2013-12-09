@@ -22466,15 +22466,17 @@ glue.module.create(
             loadedAssets = {},
             completedHandler,
             assetLoadedHandler = function (e) {
-                var meter = document.getElementById('meter');
-                meter.style.width = parseInt(meter.style.width) + 10 + 'px';
                 ++loadCount;
                 // temp console log, will be hooked to loading bar later on
                 console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
+                var percentage = ((loadCount / assetCount) * 100).toFixed();
+                document.getElementById('loaded').style.width = percentage + '%';
+
                 if (assetCount === loadCount) {
                     //document.getElementById('loadbar').style.display = 'none';
                     loaded = true;
-                    completedHandler();
+                    console.log('done')
+                    //completedHandler();
                 }
             },
             loadAsset = function (source) {
@@ -22524,6 +22526,82 @@ glue.module.create(
     }
 );
 
+/*
+var AssetManager = function()
+{
+    var _oInstance = null;
+
+    return new function()
+    {
+        this.Instance = function()
+        {
+            if ( _oInstance == null )
+            {
+                _oInstance = new AssetManager();
+                _oInstance.constructor = null;
+            }
+            return _oInstance;
+        }
+    };
+
+    function AssetManager()
+    {
+        var sources = {
+            player_stand_up: 'stand-up.gif',
+            player_stand_right: 'stand-right.gif',
+            player_stand_down: 'stand-down.gif',
+            player_stand_left: 'stand-left.gif',
+            player_stand_down_left: 'stand-down-left.gif',
+            player_stand_down_right: 'stand-down-right.gif',
+            player_walk_up: 'stand-up.gif',
+            player_walk_right: 'walk-right.gif',
+            player_walk_down: 'stand-down.gif',
+            player_walk_left: 'walk-left.gif'
+        }
+        var _sBasePath = '../../example/';
+        var _sImagePath = _sBasePath + 'image/player/';
+
+        var images = [];
+
+        function _loadImage(source) {
+            var image = new Image();
+            image.src = _sImagePath + source;
+            return image;
+        };
+
+        this.loadImages = function (callback) {
+            var loadedImages = 0;
+            var numImages = 0;
+            for (var src in sources) {
+                ++numImages;
+            }
+
+            for(var src in sources) {
+                images[src] = new Image();
+                images[src].onload = function() {
+                    if (++loadedImages >= numImages) {
+                        callback(images);
+                    }
+                };
+                if (src !== 'mix')
+                images[src].src = _sImagePath + sources[src];
+            }
+        }
+
+        this.get = function( sName )
+        {
+            var oAsset = images[sName];
+            if ( oAsset != null && oAsset != '' )
+            {
+                return oAsset;
+            }
+            return false;
+        };
+
+    };
+
+}();
+*/
 /**
  *  @module Math
  *  @desc The math module
@@ -23628,3 +23706,133 @@ modules.glue.sugar = (function (win, doc) {
         arrayMatch: arrayMatch
     };
 }(window, window.document));
+
+/**
+ * @license RequireJS domReady 2.0.1 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/requirejs/domReady for details
+ */
+/*jslint */
+/*global require: false, define: false, requirejs: false,
+  window: false, clearInterval: false, document: false,
+  self: false, setInterval: false */
+
+
+glue.module.create('glue/domready', function () {
+    'use strict';
+
+    var isTop, testDiv, scrollIntervalId,
+        isBrowser = typeof window !== "undefined" && window.document,
+        isPageLoaded = !isBrowser,
+        doc = isBrowser ? document : null,
+        readyCalls = [];
+
+    function runCallbacks(callbacks) {
+        var i;
+        for (i = 0; i < callbacks.length; i += 1) {
+            callbacks[i](doc);
+        }
+    }
+
+    function callReady() {
+        var callbacks = readyCalls;
+
+        if (isPageLoaded) {
+            //Call the DOM ready callbacks
+            if (callbacks.length) {
+                readyCalls = [];
+                runCallbacks(callbacks);
+            }
+        }
+    }
+
+    /**
+     * Sets the page as loaded.
+     */
+    function pageLoaded() {
+        if (!isPageLoaded) {
+            isPageLoaded = true;
+            if (scrollIntervalId) {
+                clearInterval(scrollIntervalId);
+            }
+
+            callReady();
+        }
+    }
+
+    if (isBrowser) {
+        if (document.addEventListener) {
+            //Standards. Hooray! Assumption here that if standards based,
+            //it knows about DOMContentLoaded.
+            document.addEventListener("DOMContentLoaded", pageLoaded, false);
+            window.addEventListener("load", pageLoaded, false);
+        } else if (window.attachEvent) {
+            window.attachEvent("onload", pageLoaded);
+
+            testDiv = document.createElement('div');
+            try {
+                isTop = window.frameElement === null;
+            } catch (e) {}
+
+            //DOMContentLoaded approximation that uses a doScroll, as found by
+            //Diego Perini: http://javascript.nwbox.com/IEContentLoaded/,
+            //but modified by other contributors, including jdalton
+            if (testDiv.doScroll && isTop && window.external) {
+                scrollIntervalId = setInterval(function () {
+                    try {
+                        testDiv.doScroll();
+                        pageLoaded();
+                    } catch (e) {}
+                }, 30);
+            }
+        }
+
+        //Check if document already complete, and if so, just trigger page load
+        //listeners. Latest webkit browsers also use "interactive", and
+        //will fire the onDOMContentLoaded before "interactive" but not after
+        //entering "interactive" or "complete". More details:
+        //http://dev.w3.org/html5/spec/the-end.html#the-end
+        //http://stackoverflow.com/questions/3665561/document-readystate-of-interactive-vs-ondomcontentloaded
+        //Hmm, this is more complicated on further use, see "firing too early"
+        //bug: https://github.com/requirejs/domReady/issues/1
+        //so removing the || document.readyState === "interactive" test.
+        //There is still a window.onload binding that should get fired if
+        //DOMContentLoaded is missed.
+        if (document.readyState === "complete") {
+            pageLoaded();
+        }
+    }
+
+    /** START OF PUBLIC API **/
+
+    /**
+     * Registers a callback for DOM ready. If DOM is already ready, the
+     * callback is called immediately.
+     * @param {Function} callback
+     */
+    function domReady(callback) {
+        if (isPageLoaded) {
+            callback(doc);
+        } else {
+            readyCalls.push(callback);
+        }
+        return domReady;
+    }
+
+    domReady.version = '2.0.1';
+
+    /**
+     * Loader Plugin API method
+     */
+    domReady.load = function (name, req, onLoad, config) {
+        if (config.isBuild) {
+            onLoad(null);
+        } else {
+            domReady(onLoad);
+        }
+    };
+
+    /** END OF PUBLIC API **/
+
+    return domReady;
+});

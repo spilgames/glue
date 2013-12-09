@@ -25,7 +25,8 @@ module.exports = function (grunt) {
                     ],
                     'build/src/modules.js': [
                         'js/modules/spilgames/**/**/*.js',
-                        'js/modules/glue/**/**/*.js'
+                        'js/modules/glue/**/**/*.js',
+                        'js/modules/vendors/**/**/*.js'
                     ],
                     'build/glue.js': [
                         'build/src/libraries.js',
