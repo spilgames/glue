@@ -26,6 +26,8 @@ glue.module.get(
         Loader) {
         'use strict';
 
+
+        var setup = function () {
         Game.setup({
             game: {
                 name: 'Jailbreaker'
@@ -331,5 +333,7 @@ glue.module.get(
             Game.add(enemy);
             Game.add(jailBars);
         });
+        }
+        window.onload = setup;
     }
 );
