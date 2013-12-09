@@ -1,3 +1,4 @@
+version 0.0.1   
 December 6, 2013 - Inception
 
 - Glue Game
