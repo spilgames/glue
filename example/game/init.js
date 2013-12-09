@@ -250,6 +250,7 @@ glue.module.get(
                             e.position.x - playerDimension.width / 2,
                             e.position.y - playerDimension.height / 2
                         );
+                        left = up = down = right = false;
                     },
                     draw: function (deltaT, context) {
                         this.animatable.draw(deltaT, context);
