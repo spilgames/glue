@@ -20,16 +20,14 @@ glue.module.create(
             completedHandler,
             assetLoadedHandler = function (e) {
                 ++loadCount;
-                // temp console log, will be hooked to loading bar later on
-                console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
+                //console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
                 var percentage = ((loadCount / assetCount) * 100).toFixed();
                 document.getElementById('loaded').style.width = percentage + '%';
 
                 if (assetCount === loadCount) {
-                    //document.getElementById('loadbar').style.display = 'none';
+                    document.getElementById('loadbar').style.display = 'none';
                     loaded = true;
-                    console.log('done')
-                    //completedHandler();
+                    completedHandler();
                 }
             },
             loadAsset = function (source) {
