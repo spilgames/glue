@@ -70,6 +70,10 @@ glue.module.get(
                 jailBars = Component(Visible).add({
                     init: function () {
                         this.visible.setup({
+                            position: {
+                                x: 0,
+                                y: 36
+                            },                            
                             image: Loader.getAsset('jailBars')
                         });
                     },
@@ -82,7 +86,7 @@ glue.module.get(
                         this.visible.setup({
                             position: {
                                 x: 772,
-                                y: 96
+                                y: 132
                             },
                             image: Loader.getAsset('jailDoor')
                         });
@@ -119,6 +123,16 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
+                playerSpeed = 80,
+                playerTarget = null,
+                playerPosition = null,
+                playerDimension = null,
+                left = false,
+                right = false,
+                up = false,
+                down = false,
+                radian,
+                rotation,
                 player = Component(Animatable).add({
                     init: function () {
                         this.animatable.setup({
@@ -130,6 +144,22 @@ glue.module.get(
                                 frameCount: 32,
                                 fps: 8,
                                 animations: {
+                                    standUp: {
+                                        startFrame: 0,
+                                        endFrame: 1
+                                    },
+                                    standDown: {
+                                        startFrame: 8,
+                                        endFrame: 9
+                                    },
+                                    standLeft: {
+                                        startFrame: 16,
+                                        endFrame: 17
+                                    },
+                                    standRight: {
+                                        startFrame: 24,
+                                        endFrame: 25
+                                    },
                                     walkUp: {
                                         startFrame: 0,
                                         endFrame: 7
@@ -150,10 +180,76 @@ glue.module.get(
                             },
                             image: Loader.getAsset('player')
                         });
-                        this.animatable.setAnimation('walkDown');
+                        this.animatable.setAnimation('standDown');
+                        playerDimension = this.animatable.getDimension();
                     },
                     update: function (deltaT) {
                         this.animatable.update(deltaT);
+                        playerPosition = this.animatable.getPosition();
+                        if (playerTarget !== null) {
+                            var deltaX = playerTarget.x - playerPosition.x,
+                                deltaY = playerTarget.y - playerPosition.y;
+
+                            // Pythagorean theorem : c = √( a2 + b2 )
+                            // We stop moving the player if the remaining distance to the endpoint
+                            // is smaller then the step iterator (playerSpeed * deltaT).
+                            if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < playerSpeed * deltaT) {
+                                if (down) {
+                                    this.animatable.setAnimation('standDown');
+                                }
+                                if (up) {
+                                    this.animatable.setAnimation('standUp');
+                                }
+                                if (left) {
+                                    this.animatable.setAnimation('standLeft');
+                                }
+                                if (right) {
+                                    this.animatable.setAnimation('standRight');
+                                }
+                                left = up = down = right = false;
+                            }
+                            else
+                            {
+                                // Update the player's x and y position, using cos for x and sin for y
+                                // and get the right speed by multiplying by the speed and delta time.
+                                radian = Math.atan2(deltaY, deltaX);
+                                playerPosition.x += Math.cos(radian) * playerSpeed * deltaT;
+                                playerPosition.y += Math.sin(radian) * playerSpeed * deltaT;
+                                rotation = radian * 180 / Math.PI;
+
+                                // Set the player's walking animation based on his current rotation
+                                if (rotation > -45 && rotation < 45) {
+                                    if (!right) {
+                                        right = true;
+                                        this.animatable.setAnimation('walkRight');
+                                    }
+                                }
+                                else if (rotation > 45 && rotation < 135) {
+                                    if (!down) {
+                                        down = true;
+                                        this.animatable.setAnimation('walkDown');
+                                    }
+                                }
+                                else if (rotation < -45 && rotation > -135) {
+                                    if (!up) {
+                                        up = true;
+                                        this.animatable.setAnimation('walkUp');
+                                    }
+                                }
+                                else {
+                                    if (!left) {
+                                        left = true;
+                                        this.animatable.setAnimation('walkLeft');
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    pointerUp: function (e) {
+                        playerTarget = Vector(
+                            e.position.x - playerDimension.width / 2,
+                            e.position.y - playerDimension.height / 2
+                        );
                     },
                     draw: function (deltaT, context) {
                         this.animatable.draw(deltaT, context);
@@ -226,12 +322,12 @@ glue.module.get(
 
             // add level components to the game
             Game.add(jailBackground);
-            Game.add(jailBars);
             Game.add(jailDoor);
             Game.add(bed);
             Game.add(chair);
             Game.add(player);
             Game.add(enemy);
+            Game.add(jailBars);
         });
     }
 );
