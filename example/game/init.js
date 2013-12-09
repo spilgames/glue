@@ -253,6 +253,7 @@ glue.module.get(
                         left = up = down = right = false;
                     },
                     draw: function (deltaT, context) {
+                        context.imageSmoothingEnabled = false;
                         this.animatable.draw(deltaT, context);
                     }
                 }),
