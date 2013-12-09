@@ -17,4 +17,4 @@ You can view the examples build using Glue directly on the [example page](https:
 You can read the Glue documentation on the [Glue wiki page](https://github.com/spilgames/glue/wiki).
 
 ### Release notes
-The Glue release notes can be found in the [Release notes document](https://github.com/spilgames/glue/blob/master/RELEASE.md).
+The Glue release notes can be found in the [release notes document](https://github.com/spilgames/glue/blob/master/RELEASE.md).
