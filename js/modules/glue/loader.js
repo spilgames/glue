@@ -20,13 +20,17 @@ glue.module.create(
             completedHandler,
             loader = document.getElementById('loader'),
             loadBar = document.getElementById('loadbar'),
+            percentageBar = document.getElementById('percentagebar'),
             percentageLoaded,
             assetLoadedHandler = function (e) {
-                //console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
                 ++loadCount;
-                percentageLoaded = ((loadCount / assetCount) * 100).toFixed();
+                //console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
+                percentageLoaded = (loadCount / assetCount) * 100;
                 if (loadBar !== null) {
                     loadBar.style.width = percentageLoaded + '%';
+                }
+                if (percentageBar !== null) {
+                    percentageBar.innerHTML = percentageLoaded + '%';
                 }
                 if (assetCount === loadCount) {
                     if (loader !== null) {
@@ -55,6 +59,9 @@ glue.module.create(
                     }
                 },
                 load: function (onReady) {
+                    if (percentageBar !== null) {
+                        percentageBar.innerHTML = '0%';
+                    }
                     completedHandler = onReady;
                     for (asset in assets) {
                         if (assets.hasOwnProperty(asset)) {

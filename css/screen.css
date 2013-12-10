@@ -3,11 +3,25 @@
     padding: 0;
 }
 
+#loadbar {
+    width: 0%;
+}
+
 .logo {
     background: url('../img/glue-logo.png') no-repeat;
     width: 150px;
     height: 142px;
     margin: 10px auto;
+}
+
+#percentagebar {
+    margin: 0 auto;
+    font-family: Arial;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    padding: 10px;
+    font-weight: bold;
 }
 
 .meter { 
