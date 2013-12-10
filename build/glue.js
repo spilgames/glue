@@ -22472,7 +22472,7 @@ glue.module.create(
             assetLoadedHandler = function (e) {
                 ++loadCount;
                 //console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
-                percentageLoaded = Math.round((loadCount / assetCount) * 100);
+                percentageLoaded = Math.floor((loadCount / assetCount) * 100);
                 if (loadBar !== null) {
                     loadBar.style.width = percentageLoaded + '%';
                 }
