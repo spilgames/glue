@@ -29,7 +29,8 @@ glue.module.get(
                         path: 'asset/',
                         source: {
                             asset1: 'asset1.jpg',
-                            asset2: 'asset2.jpg'
+                            asset2: 'asset2.jpg',
+                            asset3: 'asset3.jpg'
                         }
                     }
                 }
