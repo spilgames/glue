@@ -12,7 +12,6 @@
   "dependencies": {
     "jasmine": "https://github.com/pivotal/jasmine.git",
     "melonjs": "https://github.com/melonjs/melonJS.git",
-    "requirejs": "https://github.com/jrburke/requirejs.git",
-    "game-api": "git@github.com:spilgames/GameAPI.git"
+    "requirejs": "https://github.com/jrburke/requirejs.git"
   }
 }
