@@ -8,11 +8,7 @@ module.exports = function (grunt) {
             dist: {
                 files: {
                     'build/src/libraries.js': [
-                        'bower_components/requirejs/require.js',
-                        'bower_components/game-api/dist/gameapi.js'
-                    ],
-                    'build/src/engines.js': [
-                        'bower_components/melonjs/build/melonJS-0.9.10.js'
+                        'bower_components/requirejs/require.js'
                     ],
                     'build/src/adapters.js': [
                         'js/adapters/**/*'
@@ -30,7 +26,6 @@ module.exports = function (grunt) {
                     ],
                     'build/glue.js': [
                         'build/src/libraries.js',
-                        'build/src/engines.js',
                         'build/src/sugar.js',
                         'build/src/adapters.js',
                         'build/src/base.js',

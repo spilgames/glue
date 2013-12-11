@@ -7,11 +7,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/spilgames/5-glue-engine"
+    "url": "https://github.com/spilgames/glue"
   },
   "dependencies": {
     "jasmine": "https://github.com/pivotal/jasmine.git",
-    "melonjs": "https://github.com/melonjs/melonJS.git",
     "requirejs": "https://github.com/jrburke/requirejs.git"
   }
 }
