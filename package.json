@@ -1,15 +1,14 @@
 {
-    "name": "5-glue-engine",
-    "private": true,
-    "version": "0.1.0",
-    "homepage": "http://www.spilgames.com",
+    "name": "glue-engine",
+    "version": "0.0.1",
+    "homepage": "https://github.com/spilgames/glue",
     "repository": {
         "type": "git",
-        "url": "https://github.com/spilgames/5-glue-engine"
+        "url": "https://github.com/spilgames/glue"
     },
     "author": {
         "name": "Jeroen Reurings",
-        "email": "jeroen.reurings@spilgames.com"
+        "github-handle": "Buffer-Overflow"
     },
     "devDependencies": {
         "grunt": "~0.4.1",

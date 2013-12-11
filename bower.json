@@ -1,9 +1,9 @@
 {
-  "name": "5-glue-engine",
+  "name": "glue-engine",
   "version": "0.0.1",
   "author": {
     "name": "Jeroen Reurings",
-    "email": "jeroen.reurings@spilgames.com"
+    "github-handle": "Buffer-Overflow"
   },
   "repository": {
     "type": "git",
