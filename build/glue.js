@@ -4274,27 +4274,56 @@ glue.module.create(
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
-glue.module.create(
-    'glue/math/matrix',
-    function () {
+glue.module.create('glue/math/matrix', [
+        'glue'
+    ],
+    function (
+        Glue
+    ) {
         'use strict';
-        return function (m, n, initial) {
+        var sugar = Glue.sugar;
+        return function (x, y, initial) {
             var mat = [],
                 a,
-                row,
-                col;
+                col,
+                row;
 
-            for (row = 0; row < m; ++row) {
+            for (col = 0; col < x; ++col) {
                 a = [];
-                for (col = 0; col < n; ++col) {
-                    a[col] = initial || 0;
+                for (row = 0; row < y; ++row) {
+                    a[row] = initial || null;
                 }
-                mat[row] = a;
+                mat[col] = a;
             }
 
             return {
                 get: function () {
                     return mat;
+                },
+                getValue: function (col, row) {
+                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
+                        return mat[col][row];
+                    }
+                },
+                iterate: function (callback) {
+                    for (col = 0; col < x; ++col) {
+                        for (row = 0; row < y; ++row) {
+                            if (!sugar.isFunction(callback)) {
+                                throw('Please supply a callback function');
+                            }
+                            callback(col, row, mat[col][row]);
+                        }
+                    }
+                },
+                set: function (col, row, value) {
+                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
+                        mat[col][row] = value;
+                    }
+                },
+                unset: function (col, row) {
+                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
+                        mat[col][row] = null;
+                    }
                 }
             };
         };

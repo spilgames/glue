@@ -1,3 +1,11 @@
+version 0.0.2 
+December 17, 2013
+
+- Glue Math
+  - Updated matrix module
+
+- Fixed animationframe fallback bug for stock Android browsers
+
 version 0.0.1   
 December 6, 2013 - Inception
 
