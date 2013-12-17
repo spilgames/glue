@@ -809,6 +809,7 @@ modules.glue.sugar = (function (win, doc) {
     (function() {
         var lastTime = 0;
         var vendors = ['ms', 'moz', 'webkit', 'o'];
+        var win = window;
         for(var x = 0; x < vendors.length && !win.requestAnimationFrame;
             ++x) {
                 win.requestAnimationFrame = win[vendors[x]+
@@ -822,7 +823,7 @@ modules.glue.sugar = (function (win, doc) {
             win.requestAnimationFrame = function(callback, element) {
                 var currTime = new Date().getTime();
                 var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                var id = w.setTimeout(
+                var id = win.setTimeout(
                     function() {
                         callback(currTime + timeToCall); 
                     }, 
