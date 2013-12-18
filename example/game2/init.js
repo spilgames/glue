@@ -73,7 +73,7 @@ glue.module.get(
                     canvasDimension = Game.canvas.getDimension(),
                     cloudsPosition,
                     cloudsDimension,
-                    moveSpeed = 0.2,
+                    moveSpeed = 20,
                     clouds = Component(Visible).add({
                         init: function () {
                             this.visible.setup({
@@ -90,7 +90,7 @@ glue.module.get(
                             if (cloudsPosition.x > canvasDimension.width - cloudsDimension.width) {
                                 cloudsPosition.x = -cloudsDimension.width;
                             }
-                            cloudsPosition.x += moveSpeed;
+                            cloudsPosition.x += moveSpeed * deltaT;
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);
@@ -187,7 +187,7 @@ glue.module.get(
                     canvasDimension = Game.canvas.getDimension(),
                     playerPosition,
                     playerDimension,
-                    walkSpeed = 1,
+                    walkSpeed = 80,
                     player = Component(Visible, Animatable).add({
                         init: function () {
                             this.animatable.setup({
@@ -228,10 +228,10 @@ glue.module.get(
                             }
                             switch (direction) {
                                 case 'right':
-                                    playerPosition.x += walkSpeed;
+                                    playerPosition.x += walkSpeed * deltaT;
                                 break;
                                 case 'left':
-                                    playerPosition.x -= walkSpeed;
+                                    playerPosition.x -= walkSpeed * deltaT;
                                 break;
                             }
                         },

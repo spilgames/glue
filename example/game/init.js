@@ -262,7 +262,7 @@ glue.module.get(
                     }),
                     enemyPosition,
                     enemyDimension,
-                    walkSpeed = 1,
+                    walkSpeed = 80,
                     direction = 'left',
                     canvasDimension = Game.canvas.getDimension(),
                     enemy = Component(Visible, Animatable).add({
@@ -313,10 +313,10 @@ glue.module.get(
                             }
                             switch (direction) {
                                 case 'right':
-                                    enemyPosition.x += walkSpeed;
+                                    enemyPosition.x += walkSpeed * deltaT;
                                 break;
                                 case 'left':
-                                    enemyPosition.x -= walkSpeed;
+                                    enemyPosition.x -= walkSpeed * deltaT;
                                 break;
                             }
                         },
