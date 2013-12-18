@@ -3103,12 +3103,11 @@ glue.module.create(
     [
         'glue',
         'glue/component',
-        'glue/component/visible',
         'glue/math/vector',
         'glue/math/dimension',
         'glue/math/rectangle'
     ],
-    function (Glue, Component, Visible, Vector, Dimension, Rectangle) {
+    function (Glue, Component, Vector, Dimension, Rectangle) {
         return function (obj) {
             var animationSettings,
                 animations = {},
@@ -3125,7 +3124,7 @@ glue.module.create(
                 setAnimation = function () {
                     if (!image) {
                         image = currentAnimation.image;
-                        this.visible.setImage(image);
+                        obj.visible.setImage(image);
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
                     timeBetweenFrames = currentAnimation.fps ?
@@ -3143,7 +3142,7 @@ glue.module.create(
                 errorCallback;
 
             obj = obj || {};
-            obj.animatable = Component(Visible).add({
+            obj.animatable = {
                 setup: function (settings) {
                     var animation;
                     if (settings) {
@@ -3154,7 +3153,7 @@ glue.module.create(
                             }
                         }
                     }
-                    this.visible.setup(settings);
+                    obj.visible.setup(settings);
                     if (settings.image) {
                         image = settings.image;
                     }
@@ -3170,7 +3169,7 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
-                    var position = this.visible.getPosition(),
+                    var position = obj.visible.getPosition(),
                         sourceX = frameWidth * currentFrame;
 
                     //console.log(frameWidth, currentFrame);
@@ -3211,32 +3210,20 @@ glue.module.create(
                         setAnimation();
                     }
                 },
-                getPosition: function () {
-                    return this.visible.getPosition();
-                },
-                setPosition: function () {
-                    return this.visible.setPosition();
-                },
                 getDimension: function () {
-                    var dimension = this.visible.getDimension();
+                    var dimension = obj.visible.getDimension();
                     dimension.width = frameWidth;
                     return dimension;
                 },
-                setDimension: function () {
-                    return this.visible.setDimension();
-                },
                 getBoundingBox: function () {
-                    var rectangle = this.visible.getBoundingBox();
+                    var rectangle = obj.visible.getBoundingBox();
                     rectangle.y2 = rectangle.y1 + frameWidth;
                     return rectangle;
-                },
-                setBoundingBox: function () {
-                    return this.visible.setBoundingBox();
                 },
                 getFrameWidth: function () {
                     return frameWidth;
                 }
-            });
+            };
             return obj;
         };
     }
@@ -3264,6 +3251,11 @@ glue.module.create(
                     if (isClicked(e) && obj.onClick) {
                         obj.onClick(e);
                     }
+                },
+                pointerUpHandler = function (e) {
+                    if (isClicked(e) && obj.onClick) {
+                        obj.onClick(e);
+                    }
                 };
 
             obj = obj || {};
@@ -3279,6 +3271,9 @@ glue.module.create(
                 },
                 pointerDown: function (e) {
                     pointerDownHandler(e);
+                },
+                pointerUp: function (e) {
+                    pointerUpHandler(e);
                 }
             };
             return obj;

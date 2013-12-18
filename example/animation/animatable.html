@@ -13,10 +13,11 @@
                 'glue/game',
                 'glue/math/dimension',
                 'glue/component',
+                'glue/component/visible',
                 'glue/component/animatable',
                 'glue/loader'
             ],
-            function (Game, Dimension, Component, Animatable, Loader) {
+            function (Game, Dimension, Component, Visible, Animatable, Loader) {
                 'use strict';
 
                 Game.setup({
@@ -41,11 +42,11 @@
                         playerPosition,
                         speed = 1,
                         direction = 'right',
-                        component = Component(Animatable).add({
+                        component = Component(Visible, Animatable).add({
                             update: function (deltaT) {
                                 this.animatable.update(deltaT);
                                 playerDimension = this.animatable.getDimension();
-                                playerPosition = this.animatable.getPosition();
+                                playerPosition = this.visible.getPosition();
                                 if (playerPosition.x > canvasDimension.width -
                                         this.animatable.getFrameWidth()) {
                                     direction = 'down';

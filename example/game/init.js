@@ -136,7 +136,7 @@ glue.module.get(
                     down = false,
                     radian,
                     rotation,
-                    player = Component(Animatable).add({
+                    player = Component(Visible, Animatable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
@@ -188,7 +188,7 @@ glue.module.get(
                         },
                         update: function (deltaT) {
                             this.animatable.update(deltaT);
-                            playerPosition = this.animatable.getPosition();
+                            playerPosition = this.visible.getPosition();
                             if (playerTarget !== null) {
                                 var deltaX = playerTarget.x - playerPosition.x,
                                     deltaY = playerTarget.y - playerPosition.y;
@@ -265,7 +265,7 @@ glue.module.get(
                     walkSpeed = 1,
                     direction = 'left',
                     canvasDimension = Game.canvas.getDimension(),
-                    enemy = Component(Animatable).add({
+                    enemy = Component(Visible, Animatable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
@@ -301,7 +301,7 @@ glue.module.get(
                         update: function (deltaT) {
                             this.animatable.update(deltaT);
                             enemyDimension = this.animatable.getDimension();
-                            enemyPosition = this.animatable.getPosition();
+                            enemyPosition = this.visible.getPosition();
                             if (enemyPosition.x > canvasDimension.width -
                                     this.animatable.getFrameWidth()) {
                                 this.animatable.setAnimation('walkLeft')

@@ -20,6 +20,11 @@ glue.module.create(
                     if (isClicked(e) && obj.onClick) {
                         obj.onClick(e);
                     }
+                },
+                pointerUpHandler = function (e) {
+                    if (isClicked(e) && obj.onClick) {
+                        obj.onClick(e);
+                    }
                 };
 
             obj = obj || {};
@@ -35,6 +40,9 @@ glue.module.create(
                 },
                 pointerDown: function (e) {
                     pointerDownHandler(e);
+                },
+                pointerUp: function (e) {
+                    pointerUpHandler(e);
                 }
             };
             return obj;

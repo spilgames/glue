@@ -1,8 +1,15 @@
+version 0.0.3 
+December 18, 2013
+
+- #11: Debugbar style should come with glue stylesheet
+- #13: Made visible required for animatables
+- #18: Added pointerUp support for clickables
+
 version 0.0.2 
 December 17, 2013
 
 - Glue Math
-  - Updated matrix module
+  - #10: Add iterate method to math/matrix and refactor m x n
 
 - Fixed animationframe fallback bug for stock Android browsers
 

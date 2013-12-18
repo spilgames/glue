@@ -1,3 +1,25 @@
+#debugBar {
+    pointer-events: none;
+    font-family: Arial;
+    font-size: 0.9em;
+    color: #000;
+    position: absolute;
+    right: 7px;
+    top: 7px;
+    padding: 7px;
+    border: 1px solid #000;
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    -o-border-radius: 7px;
+    border-radius: 7px;
+    border-radius: 7px;
+    background-image: -o-linear-gradient(top, rgba(255,255,255,.4) 0%, rgba(0,0,0,.35) 100%);
+    background-image: -moz-linear-gradient(top, rgba(255,255,255,.4) 0%, rgba(0,0,0,.35) 100%);
+    background-image: -webkit-linear-gradient(top, rgba(255,255,255,.4) 0%, rgba(0,0,0,.35) 100%);
+    background-image: -ms-linear-gradient(top, rgba(255,255,255,.4) 0%, rgba(0,0,0,.35) 100%);
+    background-image: linear-gradient(top, rgba(255,255,255,.4) 0%, rgba(0,0,0,.35) 100%);
+}
+
 .loader {
     margin: 0;
     padding: 0;
