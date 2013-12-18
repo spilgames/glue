@@ -355,6 +355,9 @@ glue.module.create(
                 getDimension: function () {
                     return canvasDimension;
                 }
+            },
+            getComponentCount: function () {
+                return components.length;
             }
         };
     }
