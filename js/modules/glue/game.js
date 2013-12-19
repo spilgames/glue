@@ -136,8 +136,13 @@ glue.module.create(
 
                     deltaT = (time - lastFrameTime) / 1000;
                     if (debug) {
-
                         fps = Math.round(1000 / (time - lastFrameTime), 2);
+                        fpsAccumulator += fps;
+                        ++fpsTicks;
+                        avg = Math.round(fpsAccumulator / fpsTicks);
+                        if (fpsAccumulator > fpsMaxAverage) {
+                            fpsAccumulator = fpsTicks = 0;
+                        }
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
                         debugBar.innerHTML += '<br />version: 0.0.1 alpha';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
@@ -145,12 +150,6 @@ glue.module.create(
                         debugBar.innerHTML += '<br />components: ' + components.length;
                         if (gameInfo && gameInfo.name) {
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
-                        }
-                        fpsAccumulator += fps;
-                        ++fpsTicks;
-                        avg = Math.round(fpsAccumulator / fpsTicks);
-                        if (fpsAccumulator > fpsMaxAverage) {
-                            fpsAccumulator = fpsTicks = 0;
                         }
                     }
                     for (var i = 0; i < components.length; ++i) {
