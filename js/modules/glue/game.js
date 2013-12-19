@@ -33,6 +33,9 @@ glue.module.create(
             isRunning = false,
             debug = false,
             debugBar = null,
+            fpsAccumulator = 0,
+            fpsTicks = 0,
+            fpsMaxAverage = 500000,
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -118,7 +121,8 @@ glue.module.create(
             cycle = function (time) {
                 var deltaT,
                     fps,
-                    component;
+                    component,
+                    avg;
 
                 if (isRunning) {
                     requestAnimationFrame(cycle);
@@ -132,13 +136,21 @@ glue.module.create(
 
                     deltaT = (time - lastFrameTime) / 1000;
                     if (debug) {
+
                         fps = Math.round(1000 / (time - lastFrameTime), 2);
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
                         debugBar.innerHTML += '<br />version: 0.0.1 alpha';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
+                        debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
                         debugBar.innerHTML += '<br />components: ' + components.length;
                         if (gameInfo && gameInfo.name) {
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
+                        }
+                        fpsAccumulator += fps;
+                        ++fpsTicks;
+                        avg = Math.round(fpsAccumulator / fpsTicks);
+                        if (fpsAccumulator > fpsMaxAverage) {
+                            fpsAccumulator = fpsTicks = 0;
                         }
                     }
                     for (var i = 0; i < components.length; ++i) {
