@@ -11,6 +11,7 @@ glue.module.get(
         'glue/component/droptarget',
         'glue/component/hoverable',
         'glue/component/clickable',
+        'glue/component/movable',
         'glue/loader'
     ],
     function (
@@ -25,6 +26,7 @@ glue.module.get(
         Droptarget,
         Hoverable,
         Clickable,
+        Movable,
         Loader) {
         'use strict';
 
@@ -127,7 +129,6 @@ glue.module.get(
                         }
                     }),
                     playerSpeed = 80,
-                    playerTarget = null,
                     playerPosition = null,
                     playerDimension = null,
                     left = false,
@@ -136,7 +137,7 @@ glue.module.get(
                     down = false,
                     radian,
                     rotation,
-                    player = Component(Visible, Animatable).add({
+                    player = Component(Visible, Animatable, Movable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
@@ -184,75 +185,61 @@ glue.module.get(
                                 image: Loader.getAsset('player')
                             });
                             this.animatable.setAnimation('standDown');
+                            playerPosition = this.visible.getPosition();
                             playerDimension = this.animatable.getDimension();
                         },
                         update: function (deltaT) {
+                            var rotation;
                             this.animatable.update(deltaT);
-                            playerPosition = this.visible.getPosition();
-                            if (playerTarget !== null) {
-                                var deltaX = playerTarget.x - playerPosition.x,
-                                    deltaY = playerTarget.y - playerPosition.y;
-
-                                // Pythagorean theorem : c = √( a2 + b2 )
-                                // We stop moving the player if the remaining distance to the endpoint
-                                // is smaller then the step iterator (playerSpeed * deltaT).
-                                if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < playerSpeed * deltaT) {
-                                    if (down) {
-                                        this.animatable.setAnimation('standDown');
-                                    }
-                                    if (up) {
-                                        this.animatable.setAnimation('standUp');
-                                    }
-                                    if (left) {
-                                        this.animatable.setAnimation('standLeft');
-                                    }
-                                    if (right) {
-                                        this.animatable.setAnimation('standRight');
-                                    }
-                                    left = up = down = right = false;
+                            this.movable.update(deltaT);
+                            if (this.movable.atTarget()) {
+                                if (down) {
+                                    this.animatable.setAnimation('standDown');
                                 }
-                                else
-                                {
-                                    // Update the player's x and y position, using cos for x and sin for y
-                                    // and get the right speed by multiplying by the speed and delta time.
-                                    radian = Math.atan2(deltaY, deltaX);
-                                    playerPosition.x += Math.cos(radian) * playerSpeed * deltaT;
-                                    playerPosition.y += Math.sin(radian) * playerSpeed * deltaT;
-                                    rotation = radian * 180 / Math.PI;
-
-                                    // Set the player's walking animation based on his current rotation
-                                    if (rotation > -45 && rotation < 45) {
-                                        if (!right) {
-                                            right = true;
-                                            this.animatable.setAnimation('walkRight');
-                                        }
+                                if (up) {
+                                    this.animatable.setAnimation('standUp');
+                                }
+                                if (left) {
+                                    this.animatable.setAnimation('standLeft');
+                                }
+                                if (right) {
+                                    this.animatable.setAnimation('standRight');
+                                }
+                                left = up = down = right = false;
+                            } else {
+                                // Set the player's walking animation based on his current rotation
+                                rotation = this.movable.getRotation();
+                                if (rotation > -45 && rotation < 45) {
+                                    if (!right) {
+                                        right = true;
+                                        this.animatable.setAnimation('walkRight');
                                     }
-                                    else if (rotation > 45 && rotation < 135) {
-                                        if (!down) {
-                                            down = true;
-                                            this.animatable.setAnimation('walkDown');
-                                        }
+                                }
+                                else if (rotation > 45 && rotation < 135) {
+                                    if (!down) {
+                                        down = true;
+                                        this.animatable.setAnimation('walkDown');
                                     }
-                                    else if (rotation < -45 && rotation > -135) {
-                                        if (!up) {
-                                            up = true;
-                                            this.animatable.setAnimation('walkUp');
-                                        }
+                                }
+                                else if (rotation < -45 && rotation > -135) {
+                                    if (!up) {
+                                        up = true;
+                                        this.animatable.setAnimation('walkUp');
                                     }
-                                    else {
-                                        if (!left) {
-                                            left = true;
-                                            this.animatable.setAnimation('walkLeft');
-                                        }
+                                }
+                                else {
+                                    if (!left) {
+                                        left = true;
+                                        this.animatable.setAnimation('walkLeft');
                                     }
                                 }
                             }
                         },
                         pointerUp: function (e) {
-                            playerTarget = Vector(
+                            this.movable.setTarget(Vector(
                                 e.position.x - playerDimension.width / 2,
                                 e.position.y - playerDimension.height / 2
-                            );
+                            ));
                             left = up = down = right = false;
                         },
                         draw: function (deltaT, context) {

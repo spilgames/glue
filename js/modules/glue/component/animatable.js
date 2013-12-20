@@ -10,14 +10,7 @@
  */
 glue.module.create(
     'glue/component/animatable',
-    [
-        'glue',
-        'glue/component',
-        'glue/math/vector',
-        'glue/math/dimension',
-        'glue/math/rectangle'
-    ],
-    function (Glue, Component, Vector, Dimension, Rectangle) {
+    function () {
         return function (obj) {
             var animationSettings,
                 animations = {},
