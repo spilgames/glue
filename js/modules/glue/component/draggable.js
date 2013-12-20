@@ -29,7 +29,7 @@ glue.module.create(
 
                     for (i; i < l; ++i) {
                         draggable = draggables[i];
-                        if (draggable !== obj && draggable.visible.z > obj.visible.z) {
+                        if (draggable !== obj && draggable.z > obj.z) {
                             result = false;
                             break;
                         }
