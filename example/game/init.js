@@ -129,7 +129,6 @@ glue.module.get(
                         }
                     }),
                     playerSpeed = 80,
-                    playerPosition = null,
                     playerDimension = null,
                     left = false,
                     right = false,
@@ -185,7 +184,6 @@ glue.module.get(
                                 image: Loader.getAsset('player')
                             });
                             this.animatable.setAnimation('standDown');
-                            playerPosition = this.visible.getPosition();
                             playerDimension = this.animatable.getDimension();
                         },
                         update: function (deltaT) {
