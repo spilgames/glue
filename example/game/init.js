@@ -297,11 +297,11 @@ glue.module.get(
                                 image: Loader.getAsset('enemy')
                             });
                             this.animatable.setAnimation('walkLeft');
+                            enemyDimension = this.animatable.getDimension();
+                            enemyPosition = this.visible.getPosition();
                         },
                         update: function (deltaT) {
                             this.animatable.update(deltaT);
-                            enemyDimension = this.animatable.getDimension();
-                            enemyPosition = this.visible.getPosition();
                             if (enemyPosition.x > canvasDimension.width -
                                     this.animatable.getFrameWidth()) {
                                 this.animatable.setAnimation('walkLeft')

@@ -152,15 +152,17 @@ glue.module.create(
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
                         }
                     }
-                    for (var i = 0; i < components.length; ++i) {
-                        component = components[i];
-                        if (component.update) {
-                            component.update(deltaT);
-                        }
-                        if (component.draw) {
-                            component.draw(deltaT, backBufferContext2D);
-                        }
-                    };
+                    if (deltaT < 1) {
+                        for (var i = 0; i < components.length; ++i) {
+                            component = components[i];
+                            if (component.update) {
+                                component.update(deltaT);
+                            }
+                            if (component.draw) {
+                                component.draw(deltaT, backBufferContext2D);
+                            }
+                        };
+                    }
                     context2D.drawImage(backBuffer, 0, 0);
                     lastFrameTime = time;
                 }
