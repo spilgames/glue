@@ -798,48 +798,6 @@ modules.glue.sugar = (function (win, doc) {
             }
         };
 
-    // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-    // http://my.opera.com/emoller/blog/2011/12/20
-    //  /requestanimationframe-for-smart-er-animating
-
-    // requestAnimationFrame polyfill by Erik M&#246;ller. fixes from
-    //  Paul Irish and Tino Zijdel
-
-    // MIT license
-    (function() {
-        var lastTime = 0;
-        var vendors = ['ms', 'moz', 'webkit', 'o'];
-        var win = window;
-        for(var x = 0; x < vendors.length && !win.requestAnimationFrame;
-            ++x) {
-                win.requestAnimationFrame = win[vendors[x]+
-                    'RequestAnimationFrame'];
-                win.cancelAnimationFrame = win[vendors[x]+
-                    'CancelAnimationFrame'] ||
-                win[vendors[x]+'CancelRequestAnimationFrame'];
-        }
-
-        if (!win.requestAnimationFrame) {
-            win.requestAnimationFrame = function(callback, element) {
-                var currTime = new Date().getTime();
-                var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                var id = win.setTimeout(
-                    function() {
-                        callback(currTime + timeToCall); 
-                    }, 
-                    timeToCall
-                );
-                lastTime = currTime + timeToCall;
-                return id;
-            };
-        }
-
-        if (!win.cancelAnimationFrame) {
-            win.cancelAnimationFrame = function(id) {
-                clearTimeout(id);
-            };
-        }
-
         if (!Object.prototype.hasOwnProperty) {
             Object.prototype.hasOwnProperty = function(prop) {
                 var proto = obj.__proto__ || obj.constructor.prototype;
@@ -871,8 +829,50 @@ modules.glue.sugar = (function (win, doc) {
                 // return the mixed object
                 return self;
             };
-        }
-    }());
+        };
+
+        // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+        // http://my.opera.com/emoller/blog/2011/12/20
+        //  /requestanimationframe-for-smart-er-animating
+
+        // requestAnimationFrame polyfill by Erik M&#246;ller. fixes from
+        //  Paul Irish and Tino Zijdel
+
+        // MIT license
+        (function() {
+            var lastTime = 0;
+            var vendors = ['ms', 'moz', 'webkit', 'o'];
+            var win = window;
+            for(var x = 0; x < vendors.length && !win.requestAnimationFrame;
+                ++x) {
+                    win.requestAnimationFrame = win[vendors[x]+
+                        'RequestAnimationFrame'];
+                    win.cancelAnimationFrame = win[vendors[x]+
+                        'CancelAnimationFrame'] ||
+                    win[vendors[x]+'CancelRequestAnimationFrame'];
+            }
+
+            if (!win.requestAnimationFrame) {
+                win.requestAnimationFrame = function(callback, element) {
+                    var currTime = new Date().getTime();
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = win.setTimeout(
+                        function() {
+                            callback(currTime + timeToCall); 
+                        }, 
+                        timeToCall
+                    );
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
+            }
+
+            if (!win.cancelAnimationFrame) {
+                win.cancelAnimationFrame = function(id) {
+                    clearTimeout(id);
+                };
+            }
+        }());
 
     return {
         isString: isString,
