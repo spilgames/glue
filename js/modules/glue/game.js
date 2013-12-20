@@ -82,9 +82,7 @@ glue.module.create(
             },
             sort = function () {
                 components.sort(function(a, b) {
-                    if (a.visible && b.visible) {
-                        return a.visible.z - b.visible.z;
-                    }
+                    return a.z - b.z;
                 });
             },
             addComponents = function () {

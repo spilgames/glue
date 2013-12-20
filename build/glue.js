@@ -3305,7 +3305,7 @@ glue.module.create(
 
                     for (i; i < l; ++i) {
                         draggable = draggables[i];
-                        if (draggable !== obj && draggable.visible.z > obj.visible.z) {
+                        if (draggable !== obj && draggable.z > obj.z) {
                             result = false;
                             break;
                         }
@@ -3835,9 +3835,7 @@ glue.module.create(
             },
             sort = function () {
                 components.sort(function(a, b) {
-                    if (a.visible && b.visible) {
-                        return a.visible.z - b.visible.z;
-                    }
+                    return a.z - b.z;
                 });
             },
             addComponents = function () {

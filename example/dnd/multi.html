@@ -23,7 +23,7 @@
 
                 var myComponent = {
                         init: function () {
-                            this.visible.z = this.visible.getPosition().y;
+                            this.z = this.visible.getPosition().y;
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);
@@ -38,13 +38,13 @@
                             this.draggable.pointerUp(e);
                         },
                         dragStart: function (e) {
-                            this.visible.z = 9999;
+                            this.z = 9999;
                         },
                         dragMove: function (e) {
-                            this.visible.z = this.visible.getPosition().y;
+                            this.z = this.visible.getPosition().y;
                         },
                         dragEnd: function (e) {
-                            this.visible.z = this.visible.getPosition().y;
+                            this.z = this.visible.getPosition().y;
                         }
                     };
 
