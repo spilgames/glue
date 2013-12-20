@@ -1,3 +1,10 @@
+version 0.0.4 
+December 20, 2013
+
+- #20: Added support for position animations (Movable component)
+- #22: Created average framerate counter
+- #25: Added a maximum time to deltaT, fixes position issues
+
 version 0.0.3 
 December 18, 2013
 
