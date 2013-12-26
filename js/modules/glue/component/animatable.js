@@ -37,7 +37,7 @@ glue.module.create(
                     frameWidth = currentAnimation.frameCount ?
                         image.width / currentAnimation.frameCount :
                         image.width / animationSettings.frameCount;
-                    startFrame = currentAnimation.startFrame;
+                    startFrame = currentAnimation.startFrame - 1;
                     endFrame = currentAnimation.endFrame;
                     currentFrame = startFrame;
                 },
