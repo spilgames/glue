@@ -148,35 +148,35 @@ glue.module.get(
                                     fps: 8,
                                     animations: {
                                         standUp: {
-                                            startFrame: 0,
+                                            startFrame: 1,
                                             endFrame: 1
                                         },
                                         standDown: {
-                                            startFrame: 8,
+                                            startFrame: 9,
                                             endFrame: 9
                                         },
                                         standLeft: {
-                                            startFrame: 16,
+                                            startFrame: 17,
                                             endFrame: 17
                                         },
                                         standRight: {
-                                            startFrame: 24,
+                                            startFrame: 25,
                                             endFrame: 25
                                         },
                                         walkUp: {
-                                            startFrame: 0,
+                                            startFrame: 1,
                                             endFrame: 7
                                         },
                                         walkDown: {
-                                            startFrame: 8,
+                                            startFrame: 9,
                                             endFrame: 15
                                         },
                                         walkLeft: {
-                                            startFrame: 16,
+                                            startFrame: 17,
                                             endFrame: 23
                                         },
                                         walkRight: {
-                                            startFrame: 24,
+                                            startFrame: 25,
                                             endFrame: 31
                                         }
                                     }
@@ -262,19 +262,19 @@ glue.module.get(
                                     fps: 8,
                                     animations: {
                                         walkUp: {
-                                            startFrame: 0,
+                                            startFrame: 1,
                                             endFrame: 7
                                         },
                                         walkDown: {
-                                            startFrame: 8,
+                                            startFrame: 9,
                                             endFrame: 15
                                         },
                                         walkLeft: {
-                                            startFrame: 16,
+                                            startFrame: 17,
                                             endFrame: 23
                                         },
                                         walkRight: {
-                                            startFrame: 24,
+                                            startFrame: 25,
                                             endFrame: 31
                                         }
                                     }

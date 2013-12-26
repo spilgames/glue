@@ -109,7 +109,7 @@ glue.module.get(
                                     fps: 8,
                                     animations: {
                                         wiggleTail: {
-                                            startFrame: 0,
+                                            startFrame: 1,
                                             endFrame: 8
                                         }
                                     }
@@ -200,12 +200,12 @@ glue.module.get(
                                     frameCount: 16,
                                     animations: {
                                         walkLeft: {
-                                            startFrame: 0,
+                                            startFrame: 1,
                                             endFrame: 8,
                                             fps: 6
                                         },
                                         walkRight: {
-                                            startFrame: 8,
+                                            startFrame: 9,
                                             endFrame: 16,
                                             fps: 6
                                         }
