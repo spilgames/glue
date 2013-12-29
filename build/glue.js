@@ -3767,7 +3767,8 @@ glue.module.create(
         'glue/loader'
     ],
     function (Glue, Vector, Event, Loader) {
-        var gameInfo,
+        var Sugar = Glue.sugar,
+            gameInfo,
             fps = 60,
             components = [],
             addedComponents = [],
@@ -3860,7 +3861,7 @@ glue.module.create(
                         if (component.destroy) {
                             component.destroy();
                         }
-                        components.removeObject(component);
+                        Sugar.removeObject(components, component);
                     };
                     removedComponents = [];
                 }
@@ -4118,6 +4119,12 @@ glue.module.create(
             canvas: {
                 getDimension: function () {
                     return canvasDimension;
+                },
+                getScale: function () {
+                    return canvasScale;
+                },
+                getContext: function () {
+                    return backBufferContext2D;
                 }
             },
             getComponentCount: function () {
