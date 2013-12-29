@@ -1,3 +1,10 @@
+version 0.0.5 
+December 29, 2013
+
+- #23: Fix for zindex of visibles so they are sorted correctly in all cases
+- #36: Fixed start frame for animatables so it starts at one (more intuitive)
+- #38: Using Sugar removeObject for removing objects from game loop
+
 version 0.0.4 
 December 20, 2013
 
