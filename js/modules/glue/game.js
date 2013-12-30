@@ -339,6 +339,10 @@ glue.module.create(
                             onReady();
                         }
                     });
+                } else {
+                    if (onReady) {
+                        onReady();
+                    }
                 }
             },
             shutdown: function () {
