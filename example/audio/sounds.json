@@ -1,0 +1,14 @@
+{
+  "resources": [
+    "sounds.mp3",
+    "sounds.ogg",
+    "sounds.ac3"
+  ],
+  "spritemap": {
+    "thunder": {
+      "start": 0,
+      "end": 9.536145124716553,
+      "loop": false
+    }
+  }
+}
