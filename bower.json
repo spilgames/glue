@@ -10,7 +10,7 @@
     "url": "https://github.com/spilgames/glue"
   },
   "dependencies": {
-    "jasmine": "https://github.com/pivotal/jasmine.git",
-    "requirejs": "https://github.com/jrburke/requirejs.git"
+    "jasmine": "https://github.com/pivotal/jasmine.git#1.3.1",
+    "requirejs": "https://github.com/jrburke/requirejs.git#2.1.9"
   }
 }
