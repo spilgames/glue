@@ -14,11 +14,13 @@ glue.module.create(
         'glue',
         'glue/math/vector',
         'glue/math/dimension',
-        'glue/math/rectangle'
+        'glue/math/rectangle',
+        'glue/component/rotatable'
     ],
     function (Glue, Vector, Dimension, Rectangle) {
         return function (obj) {
-            var position = Vector(0, 0),
+            var Sugar = Glue.sugar,
+                position = Vector(0, 0),
                 dimension = null,
                 image = null,
                 rectangle,
@@ -63,7 +65,12 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
+                    context.save();
+                    if (Sugar.isDefined(obj.rotatable)) {
+                        obj.rotatable.draw(deltaT, context);
+                    }
                     context.drawImage(image, position.x, position.y)
+                    context.restore();
                 },
                 getPosition: function () {
                     return position;

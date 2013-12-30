@@ -4768,11 +4768,13 @@ glue.module.create(
 glue.module.create(
     'glue/component/animatable',
     [
+        'glue',
         'glue/component/visible'
     ],
-    function (Visible) {
+    function (Glue, Visible) {
         return function (obj) {
-            var animationSettings,
+            var Sugar = Glue.sugar,
+                animationSettings,
                 animations = {},
                 currentAnimation,
                 currentFrame = 0,
@@ -4844,6 +4846,9 @@ glue.module.create(
                     context.translate(position.x, position.y);
                     //  Now we scale the image according to the scale (set in update function)
                     //context.scale(scale, scale);
+                    if (Sugar.isDefined(obj.rotatable)) {
+                        obj.rotatable.draw(deltaT, context);
+                    }
                     context.drawImage
                     (
                         image,
@@ -5256,6 +5261,60 @@ glue.module.create(
 );
 
 /*
+ *  @module Rotatable
+ *  @namespace component
+ *  @desc Represents a rotatable component
+ *  @copyright (C) 2013 SpilGames
+ *  @author Felipe Alfonso
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ *
+ *  Only when performance issues: Remove the need for getters and setters in visible
+ */
+glue.module.create(
+    'glue/component/rotatable',
+    [
+        'glue',
+        'glue/math/vector'
+    ],
+    function (Glue, Vector) {
+        return function (obj) {
+            var Sugar = Glue.sugar,
+                angle = 0,
+                origin = Vector(0, 0);
+            obj = obj || {};
+            obj.rotatable = {
+                draw: function (deltaT, context) {
+                    context.translate(origin.x, origin.y);
+                    context.rotate(angle);
+                    context.translate(-origin.x, -origin.y);
+                },
+                setAngleDegree: function (value) {
+                    angle = Sugar.isNumber(value) ? value : angle;
+                    angle *= Math.PI / 180;
+                },
+                setAngleRadian: function (value) {
+                    angle = Sugar.isNumber(value) ? value : angle;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getAngleDegree: function () {
+                    return angle * 180 / Math.PI;
+                },
+                getAngleRadian: function () {
+                    return angle;
+                },
+                getOrigin: function () {
+                    return origin;
+                }
+            };
+            return obj;
+        };
+    }
+);
+
+/*
  *  @module Visible
  *  @namespace component
  *  @desc Represents a visible component
@@ -5271,11 +5330,13 @@ glue.module.create(
         'glue',
         'glue/math/vector',
         'glue/math/dimension',
-        'glue/math/rectangle'
+        'glue/math/rectangle',
+        'glue/component/rotatable'
     ],
     function (Glue, Vector, Dimension, Rectangle) {
         return function (obj) {
-            var position = Vector(0, 0),
+            var Sugar = Glue.sugar,
+                position = Vector(0, 0),
                 dimension = null,
                 image = null,
                 rectangle,
@@ -5320,7 +5381,12 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
+                    context.save();
+                    if (Sugar.isDefined(obj.rotatable)) {
+                        obj.rotatable.draw(deltaT, context);
+                    }
                     context.drawImage(image, position.x, position.y)
+                    context.restore();
                 },
                 getPosition: function () {
                     return position;
