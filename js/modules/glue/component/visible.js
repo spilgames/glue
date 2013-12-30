@@ -14,7 +14,8 @@ glue.module.create(
         'glue',
         'glue/math/vector',
         'glue/math/dimension',
-        'glue/math/rectangle'
+        'glue/math/rectangle',
+        'glue/component/rotatable'
     ],
     function (Glue, Vector, Dimension, Rectangle) {
         return function (obj) {
@@ -63,7 +64,12 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
+                    context.save();
+                    if (obj.rotatable && typeof obj.rotatable.draw === 'function') {
+                        obj.rotatable.draw(deltaT, context);
+                    }
                     context.drawImage(image, position.x, position.y)
+                    context.restore();
                 },
                 getPosition: function () {
                     return position;

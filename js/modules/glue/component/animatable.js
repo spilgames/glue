@@ -87,6 +87,9 @@ glue.module.create(
                     context.translate(position.x, position.y);
                     //  Now we scale the image according to the scale (set in update function)
                     //context.scale(scale, scale);
+                    if (obj.rotatable && typeof obj.rotatable.draw === 'function') {
+                        obj.rotatable.draw(deltaT, context);
+                    }
                     context.drawImage
                     (
                         image,
