@@ -3100,7 +3100,10 @@ glue.module.create(
  */
 glue.module.create(
     'glue/component/animatable',
-    function () {
+    [
+        'glue/component/visible'
+    ],
+    function (Visible) {
         return function (obj) {
             var animationSettings,
                 animations = {},
@@ -3116,8 +3119,8 @@ glue.module.create(
                 image,
                 setAnimation = function () {
                     if (!image) {
-                        image = currentAnimation.image;
-                        obj.visible.setImage(image);
+                        obj.visible.setImage(currentAnimation.image);
+                        image = obj.visible.getImage();
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
                     timeBetweenFrames = currentAnimation.fps ?
@@ -3135,6 +3138,7 @@ glue.module.create(
                 errorCallback;
 
             obj = obj || {};
+            Visible(obj);
             obj.animatable = {
                 setup: function (settings) {
                     var animation;

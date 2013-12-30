@@ -136,7 +136,7 @@ glue.module.get(
                     down = false,
                     radian,
                     rotation,
-                    player = Component(Visible, Animatable, Movable).add({
+                    player = Component(Animatable, Movable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
@@ -250,7 +250,7 @@ glue.module.get(
                     walkSpeed = 80,
                     direction = 'left',
                     canvasDimension = Game.canvas.getDimension(),
-                    enemy = Component(Visible, Animatable).add({
+                    enemy = Component(Animatable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
