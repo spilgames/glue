@@ -15,7 +15,7 @@ glue.module.get(
         Domready(function () { 
             Game.setup({
                 game: {
-                    name: 'Match 3'
+                    name: 'Rotation'
                 },
                 canvas: {
                     id: 'canvas',
@@ -65,7 +65,7 @@ glue.module.get(
                                 image: Loader.getAsset('blocks')
                             });
 
-                            this.rotatable.setHandle({
+                            this.rotatable.setOrigin({
                                 x: 35,
                                 y: 35
                             });

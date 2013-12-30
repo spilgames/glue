@@ -11,11 +11,13 @@
 glue.module.create(
     'glue/component/animatable',
     [
+        'glue',
         'glue/component/visible'
     ],
-    function (Visible) {
+    function (Glue, Visible) {
         return function (obj) {
-            var animationSettings,
+            var Sugar = Glue.sugar,
+                animationSettings,
                 animations = {},
                 currentAnimation,
                 currentFrame = 0,
@@ -87,7 +89,7 @@ glue.module.create(
                     context.translate(position.x, position.y);
                     //  Now we scale the image according to the scale (set in update function)
                     //context.scale(scale, scale);
-                    if (obj.rotatable && typeof obj.rotatable.draw === 'function') {
+                    if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
                     context.drawImage

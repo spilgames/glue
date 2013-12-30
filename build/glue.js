@@ -4768,11 +4768,13 @@ glue.module.create(
 glue.module.create(
     'glue/component/animatable',
     [
+        'glue',
         'glue/component/visible'
     ],
-    function (Visible) {
+    function (Glue, Visible) {
         return function (obj) {
-            var animationSettings,
+            var Sugar = Glue.sugar,
+                animationSettings,
                 animations = {},
                 currentAnimation,
                 currentFrame = 0,
@@ -4844,7 +4846,7 @@ glue.module.create(
                     context.translate(position.x, position.y);
                     //  Now we scale the image according to the scale (set in update function)
                     //context.scale(scale, scale);
-                    if (obj.rotatable && typeof obj.rotatable.draw === 'function') {
+                    if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
                     context.drawImage
@@ -5276,25 +5278,26 @@ glue.module.create(
     ],
     function (Glue, Vector) {
         return function (obj) {
-            var angle = 0,
-                handle = Vector(0, 0);
+            var Sugar = Glue.sugar,
+                angle = 0,
+                origin = Vector(0, 0);
             obj = obj || {};
             obj.rotatable = {
                 draw: function (deltaT, context) {
-                    context.translate(handle.x, handle.y);
+                    context.translate(origin.x, origin.y);
                     context.rotate(angle);
-                    context.translate(-handle.x, -handle.y);
+                    context.translate(-origin.x, -origin.y);
                 },
                 setAngleDegree: function (value) {
-                    angle = value && !isNaN(value) ? value : angle;
+                    angle = Sugar.isNumber(value) ? value : angle;
                     angle *= Math.PI / 180;
                 },
                 setAngleRadian: function (value) {
-                    angle = !isNaN(value) ? value : angle;
+                    angle = Sugar.isNumber(value) ? value : angle;
                 },
-                setHandle: function (vec) {
-                    handle.x = !isNaN(vec.x) ? vec.x : handle.x;
-                    handle.y = !isNaN(vec.y) ? vec.y : handle.y;
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
                 },
                 getAngleDegree: function () {
                     return angle * 180 / Math.PI;
@@ -5302,8 +5305,8 @@ glue.module.create(
                 getAngleRadian: function () {
                     return angle;
                 },
-                getHandle: function () {
-                    return handle;
+                getOrigin: function () {
+                    return origin;
                 }
             };
             return obj;
@@ -5332,7 +5335,8 @@ glue.module.create(
     ],
     function (Glue, Vector, Dimension, Rectangle) {
         return function (obj) {
-            var position = Vector(0, 0),
+            var Sugar = Glue.sugar,
+                position = Vector(0, 0),
                 dimension = null,
                 image = null,
                 rectangle,
@@ -5378,7 +5382,7 @@ glue.module.create(
                 },
                 draw: function (deltaT, context) {
                     context.save();
-                    if (obj.rotatable && typeof obj.rotatable.draw === 'function') {
+                    if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
                     context.drawImage(image, position.x, position.y)
