@@ -2053,6 +2053,665 @@ var requirejs, require, define;
     req(cfg);
 }(this));
 
+(function(globals) {
+var define, requireModule;
+
+(function() {
+  var registry = {}, seen = {};
+
+  define = function(name, deps, callback) {
+    registry[name] = { deps: deps, callback: callback };
+  };
+
+  requireModule = function(name) {
+    if (seen[name]) { return seen[name]; }
+    seen[name] = {};
+
+    var mod = registry[name];
+    if (!mod) {
+      throw new Error("Module '" + name + "' not found.");
+    }
+
+    var deps = mod.deps,
+        callback = mod.callback,
+        reified = [],
+        exports;
+
+    for (var i=0, l=deps.length; i<l; i++) {
+      if (deps[i] === 'exports') {
+        reified.push(exports = {});
+      } else {
+        reified.push(requireModule(deps[i]));
+      }
+    }
+
+    var value = callback.apply(this, reified);
+    return seen[name] = exports || value;
+  };
+})();
+
+define("rsvp/all",
+  ["rsvp/promise","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Promise = __dependency1__.Promise;
+    /* global toString */
+
+
+    function all(promises) {
+      if(toString.call(promises) !== "[object Array]") {
+        throw new TypeError('You must pass an array to all.');
+      }
+      return new Promise(function(resolve, reject) {
+        var results = [], remaining = promises.length,
+        promise;
+
+        if (remaining === 0) {
+          resolve([]);
+        }
+
+        function resolver(index) {
+          return function(value) {
+            resolveAll(index, value);
+          };
+        }
+
+        function resolveAll(index, value) {
+          results[index] = value;
+          if (--remaining === 0) {
+            resolve(results);
+          }
+        }
+
+        for (var i = 0; i < promises.length; i++) {
+          promise = promises[i];
+
+          if (promise && typeof promise.then === 'function') {
+            promise.then(resolver(i), reject);
+          } else {
+            resolveAll(i, promise);
+          }
+        }
+      });
+    }
+
+
+    __exports__.all = all;
+  });
+define("rsvp/async",
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var browserGlobal = (typeof window !== 'undefined') ? window : {};
+    var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
+    var async;
+
+    // old node
+    function useNextTick() {
+      return function(callback, arg) {
+        process.nextTick(function() {
+          callback(arg);
+        });
+      };
+    }
+
+    // node >= 0.10.x
+    function useSetImmediate() {
+      return function(callback, arg) {
+        /* global  setImmediate */
+        setImmediate(function(){
+          callback(arg);
+        });
+      };
+    }
+
+    function useMutationObserver() {
+      var queue = [];
+
+      var observer = new BrowserMutationObserver(function() {
+        var toProcess = queue.slice();
+        queue = [];
+
+        toProcess.forEach(function(tuple) {
+          var callback = tuple[0], arg= tuple[1];
+          callback(arg);
+        });
+      });
+
+      var element = document.createElement('div');
+      observer.observe(element, { attributes: true });
+
+      // Chrome Memory Leak: https://bugs.webkit.org/show_bug.cgi?id=93661
+      window.addEventListener('unload', function(){
+        observer.disconnect();
+        observer = null;
+      }, false);
+
+      return function(callback, arg) {
+        queue.push([callback, arg]);
+        element.setAttribute('drainQueue', 'drainQueue');
+      };
+    }
+
+    function useSetTimeout() {
+      return function(callback, arg) {
+        setTimeout(function() {
+          callback(arg);
+        }, 1);
+      };
+    }
+
+    if (typeof setImmediate === 'function') {
+      async = useSetImmediate();
+    } else if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+      async = useNextTick();
+    } else if (BrowserMutationObserver) {
+      async = useMutationObserver();
+    } else {
+      async = useSetTimeout();
+    }
+
+
+    __exports__.async = async;
+  });
+define("rsvp/config",
+  ["rsvp/async","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var async = __dependency1__.async;
+
+    var config = {};
+    config.async = async;
+
+
+    __exports__.config = config;
+  });
+define("rsvp/defer",
+  ["rsvp/promise","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Promise = __dependency1__.Promise;
+
+    function defer() {
+      var deferred = {
+        // pre-allocate shape
+        resolve: undefined,
+        reject:  undefined,
+        promise: undefined
+      };
+
+      deferred.promise = new Promise(function(resolve, reject) {
+        deferred.resolve = resolve;
+        deferred.reject = reject;
+      });
+
+      return deferred;
+    }
+
+
+    __exports__.defer = defer;
+  });
+define("rsvp/events",
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var Event = function(type, options) {
+      this.type = type;
+
+      for (var option in options) {
+        if (!options.hasOwnProperty(option)) { continue; }
+
+        this[option] = options[option];
+      }
+    };
+
+    var indexOf = function(callbacks, callback) {
+      for (var i=0, l=callbacks.length; i<l; i++) {
+        if (callbacks[i][0] === callback) { return i; }
+      }
+
+      return -1;
+    };
+
+    var callbacksFor = function(object) {
+      var callbacks = object._promiseCallbacks;
+
+      if (!callbacks) {
+        callbacks = object._promiseCallbacks = {};
+      }
+
+      return callbacks;
+    };
+
+    var EventTarget = {
+      mixin: function(object) {
+        object.on = this.on;
+        object.off = this.off;
+        object.trigger = this.trigger;
+        return object;
+      },
+
+      on: function(eventNames, callback, binding) {
+        var allCallbacks = callbacksFor(this), callbacks, eventName;
+        eventNames = eventNames.split(/\s+/);
+        binding = binding || this;
+
+        while (eventName = eventNames.shift()) {
+          callbacks = allCallbacks[eventName];
+
+          if (!callbacks) {
+            callbacks = allCallbacks[eventName] = [];
+          }
+
+          if (indexOf(callbacks, callback) === -1) {
+            callbacks.push([callback, binding]);
+          }
+        }
+      },
+
+      off: function(eventNames, callback) {
+        var allCallbacks = callbacksFor(this), callbacks, eventName, index;
+        eventNames = eventNames.split(/\s+/);
+
+        while (eventName = eventNames.shift()) {
+          if (!callback) {
+            allCallbacks[eventName] = [];
+            continue;
+          }
+
+          callbacks = allCallbacks[eventName];
+
+          index = indexOf(callbacks, callback);
+
+          if (index !== -1) { callbacks.splice(index, 1); }
+        }
+      },
+
+      trigger: function(eventName, options) {
+        var allCallbacks = callbacksFor(this),
+            callbacks, callbackTuple, callback, binding, event;
+
+        if (callbacks = allCallbacks[eventName]) {
+          // Don't cache the callbacks.length since it may grow
+          for (var i=0; i<callbacks.length; i++) {
+            callbackTuple = callbacks[i];
+            callback = callbackTuple[0];
+            binding = callbackTuple[1];
+
+            if (typeof options !== 'object') {
+              options = { detail: options };
+            }
+
+            event = new Event(eventName, options);
+            callback.call(binding, event);
+          }
+        }
+      }
+    };
+
+
+    __exports__.EventTarget = EventTarget;
+  });
+define("rsvp/hash",
+  ["rsvp/defer","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var defer = __dependency1__.defer;
+
+    function size(object) {
+      var s = 0;
+
+      for (var prop in object) {
+        s++;
+      }
+
+      return s;
+    }
+
+    function hash(promises) {
+      var results = {}, deferred = defer(), remaining = size(promises);
+
+      if (remaining === 0) {
+        deferred.resolve({});
+      }
+
+      var resolver = function(prop) {
+        return function(value) {
+          resolveAll(prop, value);
+        };
+      };
+
+      var resolveAll = function(prop, value) {
+        results[prop] = value;
+        if (--remaining === 0) {
+          deferred.resolve(results);
+        }
+      };
+
+      var rejectAll = function(error) {
+        deferred.reject(error);
+      };
+
+      for (var prop in promises) {
+        if (promises[prop] && typeof promises[prop].then === 'function') {
+          promises[prop].then(resolver(prop), rejectAll);
+        } else {
+          resolveAll(prop, promises[prop]);
+        }
+      }
+
+      return deferred.promise;
+    }
+
+
+    __exports__.hash = hash;
+  });
+define("rsvp/node",
+  ["rsvp/promise","rsvp/all","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var Promise = __dependency1__.Promise;
+    var all = __dependency2__.all;
+
+    function makeNodeCallbackFor(resolve, reject) {
+      return function (error, value) {
+        if (error) {
+          reject(error);
+        } else if (arguments.length > 2) {
+          resolve(Array.prototype.slice.call(arguments, 1));
+        } else {
+          resolve(value);
+        }
+      };
+    }
+
+    function denodeify(nodeFunc) {
+      return function()  {
+        var nodeArgs = Array.prototype.slice.call(arguments), resolve, reject;
+        var thisArg = this;
+
+        var promise = new Promise(function(nodeResolve, nodeReject) {
+          resolve = nodeResolve;
+          reject = nodeReject;
+        });
+
+        all(nodeArgs).then(function(nodeArgs) {
+          nodeArgs.push(makeNodeCallbackFor(resolve, reject));
+
+          try {
+            nodeFunc.apply(thisArg, nodeArgs);
+          } catch(e) {
+            reject(e);
+          }
+        });
+
+        return promise;
+      };
+    }
+
+
+    __exports__.denodeify = denodeify;
+  });
+define("rsvp/promise",
+  ["rsvp/config","rsvp/events","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var config = __dependency1__.config;
+    var EventTarget = __dependency2__.EventTarget;
+
+    function objectOrFunction(x) {
+      return isFunction(x) || (typeof x === "object" && x !== null);
+    }
+
+    function isFunction(x){
+      return typeof x === "function";
+    }
+
+    var Promise = function(resolver) {
+      var promise = this,
+      resolved = false;
+
+      if (typeof resolver !== 'function') {
+        throw new TypeError('You must pass a resolver function as the sole argument to the promise constructor');
+      }
+
+      if (!(promise instanceof Promise)) {
+        return new Promise(resolver);
+      }
+
+      var resolvePromise = function(value) {
+        if (resolved) { return; }
+        resolved = true;
+        resolve(promise, value);
+      };
+
+      var rejectPromise = function(value) {
+        if (resolved) { return; }
+        resolved = true;
+        reject(promise, value);
+      };
+
+      this.on('promise:resolved', function(event) {
+        this.trigger('success', { detail: event.detail });
+      }, this);
+
+      this.on('promise:failed', function(event) {
+        this.trigger('error', { detail: event.detail });
+      }, this);
+
+      this.on('error', onerror);
+
+      try {
+        resolver(resolvePromise, rejectPromise);
+      } catch(e) {
+        rejectPromise(e);
+      }
+    };
+
+    function onerror(event) {
+      if (config.onerror) {
+        config.onerror(event.detail);
+      }
+    }
+
+    var invokeCallback = function(type, promise, callback, event) {
+      var hasCallback = isFunction(callback),
+          value, error, succeeded, failed;
+
+      if (hasCallback) {
+        try {
+          value = callback(event.detail);
+          succeeded = true;
+        } catch(e) {
+          failed = true;
+          error = e;
+        }
+      } else {
+        value = event.detail;
+        succeeded = true;
+      }
+
+      if (handleThenable(promise, value)) {
+        return;
+      } else if (hasCallback && succeeded) {
+        resolve(promise, value);
+      } else if (failed) {
+        reject(promise, error);
+      } else if (type === 'resolve') {
+        resolve(promise, value);
+      } else if (type === 'reject') {
+        reject(promise, value);
+      }
+    };
+
+    Promise.prototype = {
+      constructor: Promise,
+
+      isRejected: undefined,
+      isFulfilled: undefined,
+      rejectedReason: undefined,
+      fulfillmentValue: undefined,
+
+      then: function(done, fail) {
+        this.off('error', onerror);
+
+        var thenPromise = new this.constructor(function() {});
+
+        if (this.isFulfilled) {
+          config.async(function(promise) {
+            invokeCallback('resolve', thenPromise, done, { detail: promise.fulfillmentValue });
+          }, this);
+        }
+
+        if (this.isRejected) {
+          config.async(function(promise) {
+            invokeCallback('reject', thenPromise, fail, { detail: promise.rejectedReason });
+          }, this);
+        }
+
+        this.on('promise:resolved', function(event) {
+          invokeCallback('resolve', thenPromise, done, event);
+        });
+
+        this.on('promise:failed', function(event) {
+          invokeCallback('reject', thenPromise, fail, event);
+        });
+
+        return thenPromise;
+      }
+    };
+
+    EventTarget.mixin(Promise.prototype);
+
+    function resolve(promise, value) {
+      if (promise === value) {
+        fulfill(promise, value);
+      } else if (!handleThenable(promise, value)) {
+        fulfill(promise, value);
+      }
+    }
+
+    function handleThenable(promise, value) {
+      var then = null,
+      resolved;
+
+      try {
+        if (promise === value) {
+          throw new TypeError("A promises callback cannot return that same promise.");
+        }
+
+        if (objectOrFunction(value)) {
+          then = value.then;
+
+          if (isFunction(then)) {
+            then.call(value, function(val) {
+              if (resolved) { return true; }
+              resolved = true;
+
+              if (value !== val) {
+                resolve(promise, val);
+              } else {
+                fulfill(promise, val);
+              }
+            }, function(val) {
+              if (resolved) { return true; }
+              resolved = true;
+
+              reject(promise, val);
+            });
+
+            return true;
+          }
+        }
+      } catch (error) {
+        reject(promise, error);
+        return true;
+      }
+
+      return false;
+    }
+
+    function fulfill(promise, value) {
+      config.async(function() {
+        promise.trigger('promise:resolved', { detail: value });
+        promise.isFulfilled = true;
+        promise.fulfillmentValue = value;
+      });
+    }
+
+    function reject(promise, value) {
+      config.async(function() {
+        promise.trigger('promise:failed', { detail: value });
+        promise.isRejected = true;
+        promise.rejectedReason = value;
+      });
+    }
+
+
+    __exports__.Promise = Promise;
+  });
+define("rsvp/reject",
+  ["rsvp/promise","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Promise = __dependency1__.Promise;
+
+    function reject(reason) {
+      return new Promise(function (resolve, reject) {
+        reject(reason);
+      });
+    }
+
+
+    __exports__.reject = reject;
+  });
+define("rsvp/resolve",
+  ["rsvp/promise","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Promise = __dependency1__.Promise;
+
+    function resolve(thenable) {
+      return new Promise(function(resolve, reject) {
+        resolve(thenable);
+      });
+    }
+
+
+    __exports__.resolve = resolve;
+  });
+define("rsvp",
+  ["rsvp/events","rsvp/promise","rsvp/node","rsvp/all","rsvp/hash","rsvp/defer","rsvp/config","rsvp/resolve","rsvp/reject","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __dependency8__, __dependency9__, __exports__) {
+    "use strict";
+    var EventTarget = __dependency1__.EventTarget;
+    var Promise = __dependency2__.Promise;
+    var denodeify = __dependency3__.denodeify;
+    var all = __dependency4__.all;
+    var hash = __dependency5__.hash;
+    var defer = __dependency6__.defer;
+    var config = __dependency7__.config;
+    var resolve = __dependency8__.resolve;
+    var reject = __dependency9__.reject;
+
+    function configure(name, value) {
+      config[name] = value;
+    }
+
+
+    __exports__.Promise = Promise;
+    __exports__.EventTarget = EventTarget;
+    __exports__.all = all;
+    __exports__.hash = hash;
+    __exports__.defer = defer;
+    __exports__.denodeify = denodeify;
+    __exports__.configure = configure;
+    __exports__.resolve = resolve;
+    __exports__.reject = reject;
+  });
+window.RSVP = requireModule("rsvp");
+})(window);
+
 /**
  *  @module Sugar
  *  @namespace modules.glue
@@ -3041,10 +3700,1018 @@ adapters.glue = (function (win, Glue) {
         module: glue.module
     };
     window.game = {};
-    glue.module.create('glue', function () {
+    glue.module.create('glue', ['audio51'], function (Audio) {
+        glue.audio = Audio;
         return glue;
     });
 }());
+
+/*global define, RSVP*/
+/*
+ *  @module Audio51
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+define( 
+    'audio51',
+    ["webaudio/context",
+     "audiotag/context",
+     "audiotag/restricted",
+     "unrestrict"],
+    function(wac, atc, ratc, unrestrict) {
+    'use strict';
+    
+    var fileTypes = {
+            //Safe format, but relatively large
+            'mp3': 'audio/mpeg',
+            //Chrome on Android can't seek in ogg (or so it appeared 2013-04-25)
+            //Bad support, small size though
+            'ogg': 'audio/ogg',
+            //Not always supported, but medium size
+            'ac3': 'audio/ac3'
+        },
+        getContext = ( function() {
+            var ctx = null;
+
+            //Determine override type, if provided.
+            return function( override ) {
+                if ( override ) {
+
+                    switch (override) {
+                    case 3:
+                        ctx = ratc;
+                        break;
+
+                    case 2:
+                        ctx = atc;
+                        break;
+
+                    default:
+                        ctx = wac;
+                        break;
+                    }
+
+                } else if (ctx === null) {
+
+                    //If WebAudio API is available it should be used
+                    if ( wac.canIUse() ) {
+                        //WebAudio API has internal 'arming' so mobile and desktop are the same
+                        ctx = wac;
+                    } else {
+
+                        //Check for touch, touch probably means mobile,
+                        //acceptable margin of error
+                        if ( unrestrict.isTouch() ) {
+                            ctx = ratc;
+                        } else {
+                            ctx = atc;
+                        }
+
+                    }
+                }
+
+                //Return cached context
+                return ctx;
+            };
+        }()),
+        soundSet = {}
+    ;
+
+    return {
+        RESTRICTED: 3,
+        AUDIOTAG: 2,
+        WEBAUDIO: 1,
+        /**
+         * Get an `AudioContext` audio51 style. This method will figure out which scenario fits
+         * the current environment best. In case you find a use-case where you need to overrule
+         * this automation, you can provide an override.
+         * Internal caching will ensure that you can always quickly call this method to retreive
+         * an `AudioContext`, override will always break the cache, but on subsequent calls will
+         * be cached if the override parameter is omitted.
+         * 
+         * @param {int} override Force this method to return a context of your own chosing.
+         */
+        getContext: function( override ) {
+            return getContext( override );
+        },
+
+        /**
+         * Expecting a generated audio-sprite using `audiosprite`.
+         * The best command-line configuration would be as follows:
+         * `audiosprite -e mp3,ogg,ac3 -p mp3,ogg,ac3 -c 2 -o [output-url] [input-urls]`
+         * 
+         * This will generate the best covering set of sound-files, it will also make sure
+         * the sound output remains in stereo. The order of the different encodings is also
+         * important, as these are in order of best to worst support. Finally it will also 
+         * generate the raw parts in the same 'safe' formats for use with the webaudio API.
+         * 
+         * @param {String} uri the location of the sprite's JSON configuration file
+         * @resolves {Promise}
+         */
+        loadSoundSet: function( uri ) {
+            var client = new XMLHttpRequest( ),
+                self = this;
+
+            return new RSVP.Promise( function( resolve, reject ) {
+                
+                client.open( "GET", uri, true );
+                client.onload = function( ) {
+                    resolve( self.parseSoundSet( JSON.parse(client.response) ) );
+                };
+                client.send();
+
+            } );
+        },
+
+        /**
+         * 
+         * @returns {Promise}
+         */
+        parseSoundSet: function( newSet ) {
+            var tag = document.createElement('audio'),
+                i, ext, type, baseUrl, url, exts = [];
+
+            soundSet = newSet;
+            
+            for ( i = 0; i < newSet.resources.length; ++i ) {
+                url = newSet.resources[i];
+                baseUrl = url.substr( 0, url.lastIndexOf(".") );
+                ext = url.substr( baseUrl.length + 1 );
+                type = fileTypes[ext];
+                if (type && tag.canPlayType && tag.canPlayType(type)) {
+                    break;
+                }
+            }
+
+            return getContext().parse( newSet, baseUrl, ext );
+        },
+        
+        play: function( id ) {
+
+            return getContext().play( id );
+
+        }
+
+    };
+
+});
+
+/*global define, RSVP*/
+/*
+ *  @module Context
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+define('audiotag/context', ["audiotag/sound"],function( Sound ) {
+    'use strict';
+
+    var sounds = {},
+        loadSound = function( url ) {
+            var promise = new RSVP.Promise( function( resolve, reject ) {
+    
+                var tag = new Audio();
+                tag.addEventListener( "canplay", function() {
+                    resolve( Sound( tag ) );
+                } );
+                tag.src = url;
+    
+            } );
+            return promise;
+        },
+        addSound = function( id, url ) {
+            return loadSound( url ).then( function( sound ) {
+                sounds[id] = sound;
+                return sound;
+            } );
+        }
+    ;
+
+    return {
+
+        /**
+         * Load a sound-tag and create a `Sound` object.
+         */
+        loadSound: function( url ) {
+            return loadSound( url );
+        },
+        
+        parse: function( soundSet, baseUrl, ext ) {
+            var i = 0,
+            all = [],
+            spriteName, url;
+
+            for (spriteName in soundSet.spritemap) {
+                url = baseUrl + "_00" + (++i) + "." + ext;
+                all.push( addSound( spriteName, url ) );
+            }
+    
+            return RSVP.all( all );
+        },
+        
+        play: function( id ) {
+            var sound = null;
+            if (sounds[id]) {
+                sound = sounds[id]
+                sounds[id] = Sound( sound.tag.cloneNode() );
+                sound.play();
+            }
+            return sound;
+        }
+
+    };
+
+});
+/*global define, RSVP, requestAnimationFrame, cancelAnimationFrame*/
+/*
+ *  @module Restricted
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+define('audiotag/restricted', ["audiotag/context", "audiotag/sprite"],function( Context, Sprite ) {
+    'use strict';
+
+    var sprites = {},
+        spriteMap = null,
+        sound = null,
+        /**
+         * A cheap wrapper around requestAnimationFrame to keep the scope
+         * of the animation chain preserved without generating new function
+         * on every itteration.
+         * The 'callback' function should return true if the animation chain
+         * must continue, false if it is finished.
+         */
+        animationScope = function (scope, callback) {
+            var rafID = null,
+                requestAnimationFrame = window.requestAnimationFrame||webkitRequestAnimationFrame,
+                cancelAnimationFrame = window.cancelAnimationFrame||webkitCancelRequestAnimationFrame;
+    
+            function animationFrame () {
+                if (callback(scope)) {
+                    rafID = requestAnimationFrame(animationFrame);
+                }
+            }
+    
+            return {
+                /**
+                 * Start the animation chain.
+                 * @returns
+                 */
+                start: function () {
+                    rafID = requestAnimationFrame(animationFrame);
+                },
+                /**
+                 * On supported browsers stop the animation chain.
+                 * @returns
+                 */
+                stop: function () {
+                    if (typeof cancelAnimationFrame !== 'undefined') {
+                        cancelAnimationFrame(rafID);
+                    }
+                }
+            };
+        },
+        addSprite = function( id, context ) {
+            var sprite = new Sprite( id, context );
+            sprites[id] = sprite;
+            return sprite;
+        },
+        seekSprite = function (sprite) {
+            sound.tag.currentTime = sprite.start;
+        }
+    ;
+
+    return {
+        loadSound: function() {
+            throw "Cannot load separate sounds in this context!";
+        },
+        parse: function( soundSet, baseUrl, ext ) {
+            var i = 0,
+            all = [],
+            spriteName, url;
+            
+            spriteMap = soundSet.spritemap;
+
+            for (spriteName in soundSet.spritemap) {
+                all.push(addSprite( spriteName, this ));
+            }
+
+            return Context.loadSound(baseUrl + "." + ext).then( function( oSound ) {
+                sound = oSound;
+                return all;
+            });
+        },
+        play: function( id ) {
+            //console.log("%c Looking for a sound!", "background: #bada55; color: yellow;", id);
+            var sprite = null;
+            if (sprites[id]) {
+                sprite = sprites[id];
+                sprite.play();
+            }
+            return sprite;
+        },
+        stop: function() {
+            sound.stop();
+        },
+        playSprite: function( id ) {
+            var sprite = spriteMap[id];
+
+            //console.log("%c Starting sprite play", "background: #bada55; color: yellow;", id);
+            //Fix start/end times for really short sprites
+            var t =  sprite.end - sprite.start;
+            if ( t < 0.5 ) {
+                sprite.start = sprite.start - 0.1;
+                sprite.end = Math.floor(sprite.end) + 0.5;
+            }
+            
+            seekSprite(sprite);
+
+            if (this.animationScope) {
+                this.animationScope.stop();
+                this.animationScope = null;
+            }
+            
+            var self = this;
+
+            this.animationScope = animationScope(
+                {
+                    context: self,
+                    sound: sound,
+                    sprite: sprite
+                },
+                function (scope) {
+                    var context = scope.context,
+                        sound = scope.sound,
+                        sprite = scope.sprite
+                    ;
+                    
+                    if (sound.tag.currentTime > sprite.end) {
+                        context.stop();
+                        return false;
+                    }
+                    return true;
+                }
+            );
+
+            this.animationScope.start();
+            sound.play();
+
+        }
+
+    };
+    
+});
+/*global define, RSVP*/
+/*
+ *  @module Sound
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+define('audiotag/sound', ["unrestrict"],function(unrestrict) {
+    'use strict';
+    
+    var /**
+         * Create an audio-tag based sound, for use with an environment that does
+         * not limit the number of tags playing at the same time.
+         * 
+         * @author martin.reurings
+         * @constructor
+         */
+        Sound = function( tag, untangled ) {
+            var setup = function() {
+                    untangle( tag );
+                }
+            ;
+            if (!untangled) {
+                unrestrict.on( "userInteraction", setup );
+                unrestrict.arm();
+            }
+            
+            return{
+                play: function() {
+                    play( tag );
+                },
+                stop: function() {
+                    stop( tag );
+                },
+                getLength: function() {
+                    return getLength( tag );
+                },
+                loop: function( value ) {
+                    loop( tag, value );
+                },
+                tag: tag //a little evil, but allows re-use by restricted context.
+            };
+
+        },
+        untangle = function( tag ) {
+            tag.play();
+            tag.pause();
+        },
+        play = function( tag ) {
+            tag.play();
+        },
+        stop = function( tag ) {
+            tag.pause();
+            tag.currentTime = 0;
+        },
+        getLength = function( tag ) {
+            return tag.duration;
+        },
+        loop = function( tag, value ) {
+            tag.loop = value;
+        }
+    ;
+
+    return Sound;
+
+});
+
+/*global define, RSVP*/
+/*
+ *  @module Sprite
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+define('audiotag/sprite', [],function( ) {
+    'use strict';
+
+    var Sprite = function( id, context ) {
+            this.id = id;
+            this.context = context;
+        }
+    ;
+
+    Sprite.prototype = {
+        play: function() {
+            this.context.playSprite(this.id);
+        },
+        stop: function() {
+            this.context.stop();
+        },
+        getLength: function() {
+            throw "Not Yet Implemented";
+        },
+        loop: function() {
+            throw "Not Yet Implemented";
+        }
+    };
+
+    return Sprite;
+
+} );
+/*global define, RSVP*/
+/*
+ *  @module Manager
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+define(
+    'manager',
+    function() {
+    'use strict';
+
+    function getConfig( uri ) {
+        return new RSVP.Promise( function( resolve, reject ) {
+
+            var client = new XMLHttpRequest( );
+            client.open( "GET", uri, true );
+            client.onload = function( ) {
+                resolve( JSON.parse(client.responseText) );
+            };
+            client.send();
+
+        } );
+    }
+});
+
+/*global console */
+/*jshint -W020*/ //ignore 'Read only' warning for overwriting Audio
+/*jshint -W083*/ //ignore 'Don't create functions in loops'
+/*
+ *  @module Testframework
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+/**
+ * Test framework for testing audio-based code. This is no more, or less, than
+ * a mock class for the AudioContext of the WebAudio API. Well, a little more,
+ * as it's default destination is an analyzer node, which allows for calculation
+ * on values like average volume, frequency buckets, etc...
+ * Will also include a method to retrieve an Audio Element slaved to this mock so
+ * that it's output can be unit-tested.
+ * 
+ */
+var AudioTestFramework = ( function() {
+    "use strict";
+
+    var getContext = ( function( AC ){
+            var ctx = null,
+                get = function() {
+                    if ( ctx === null ) {
+                        ctx = new AC();
+                    }
+                    return ctx;
+                };
+            
+            get.reset = function() {
+                ctx = null;
+            };
+            
+            return get;
+        }(
+            window.AudioContext || 
+            window.webkitAudioContext || 
+            window.mozAudioContext || 
+            window.oAudioContext || 
+            window.msAudioContext
+        )),
+        getAnalyzer = ( function() {
+            
+            var analyzer = null,
+                get = function() {
+                    if ( analyzer === null ) {
+                        analyzer = getContext().createAnalyser();
+                        analyzer.smoothingTimeConstant = 0; //No delays, realtime
+                        analyzer.fftSize = 1024;
+                    }
+                    
+                    return analyzer;
+                }
+            ;
+            
+            get.reset = function() {
+                analyzer = null;
+            };
+            
+            return get;
+            
+        }()),
+        connectAudio = function( at, context ) {
+
+            var an = getContext().createMediaElementSource( at );
+    
+            //console.log("connecting audio to context");
+            an.connect( context.destination );
+            at.pause();
+            at.audionode = an;
+            at.tc = context;
+            at.isConnected = true;
+            at.context = context;
+            at.orgClone = at.cloneNode;
+            at.cloneNode = function() {
+                var newTag = at.orgClone();
+                connectAudio( newTag, context );
+                return newTag;
+            }
+
+        },
+        orgContext = window.AudioContext,
+        OrgAudio = Audio,
+        lastContext = null,
+        m
+    ;
+
+    /**
+     * Constructor for test-framework.
+     * This constructor will create an analyzer node to be supplied as a
+     * destination instead of the built-in destination. It will still be
+     * connected to the original destination, otherwise audio won't play.
+     * Constructor will also overwrite the Audio constructor.
+     * 
+     * @constructor
+     */
+    function AudioContextWrapper() {
+        //console.warn("Creating AudioContextWrapper!");
+        this.ctx = getContext();
+        this.destination = getAnalyzer();
+        this.destination.connect(getContext().destination);
+        lastContext = this;
+
+        var self = this;
+
+        /**
+         * Audio constructor overwrite. This overwrite will tie the Audio-element
+         * to the active analyzer node, allowing output inspection and thus being
+         * able to unit-test fades, cross-overs, etc...
+         * Currently fails in Safari because Safari does not support the `canplay`
+         * event.
+         */
+        Audio = function( url ) {
+            var at = new OrgAudio(  );
+            at.autoplay = true;
+
+            // Cannot attach audio tag to context before it is ready to play
+            // or it won't actually attach to the context. This is a work-around
+            // for a known bug.
+            // More info: crbug.com/112368
+            at.addEventListener("canplay", function() {
+                connectAudio( at, self );
+            }, 0 );
+
+            if ( url ) {
+                at.src = url;
+            }
+
+            lastContext = at;
+            return at;
+        };
+
+    }
+
+    AudioContextWrapper.prototype = {
+        getContext: function() {
+            return this.ctx;
+        },
+        /**
+         * isPlaying will return true if any source in the context is
+         * attempting to produce sound. Nomatter if it is or is not
+         * connected to the speakers.
+         */
+        isPlaying: function() {
+            return this.ctx.activeSourceCount > 0;
+        }
+    };
+    
+    /**
+     * Attempts to get average output volume of all frequencies as
+     * reported by a RealtimeAnalyzerNode. Information gained lags
+     * a little, take this into account in unit-testing.
+     */
+    AudioContextWrapper.getVolumeAverage = function( override ) {
+        var values = 0,
+            array =  new Uint8Array(getAnalyzer().frequencyBinCount),
+            length, average, i;
+
+        getAnalyzer().getByteFrequencyData(array);
+        length = array.length;
+
+        // get all the frequency amplitudes
+        for (i = 0; i < length; ++i) {
+            values += array[i];
+        }
+ 
+        average = values / length;
+        return average;
+    };
+    
+    AudioContextWrapper.reset = function() {
+        getAnalyzer.reset();
+        lastContext.destination = getAnalyzer();
+    };
+
+    /**
+     * Create pass-through methods for all methods on the real
+     * WebAudioContext.
+     */
+    for ( m in getContext() ) {
+        if (!Object.hasOwnProperty(m)) {
+            (function( method ) { 
+                //console.log('Mapping context method: ', method);
+                AudioContextWrapper.prototype[method] = function() {
+                    var ctx = getContext();
+                    //console.log(method, arguments);
+                    return ctx[method].apply( ctx, arguments );
+                };
+            }(m));
+        }
+    }
+
+    /**
+     * Restore original Objects.
+     */
+    AudioContextWrapper.undo = function() {
+        window.AudioContext = orgContext;
+        Audio = OrgAudio;
+    };
+    /**
+     * Hijack AudioContext
+     */
+    window.AudioContext = AudioContextWrapper;
+
+    /**
+     * Return constructor
+     */
+    return AudioContextWrapper;
+    
+}());
+
+/*global define, RSVP*/
+/*
+ *  @module Unrestrict
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+/**
+ * This class contains what is needed to work with and detect mobile devices. As
+ * such it contains code to 'arm' the audio.
+ * 
+ * It will also contain all utility methods required for working with mobile
+ * devices, such as `isTouch()`.
+ * 
+ */
+define(
+    'unrestrict',
+    function() {
+    'use strict';
+    
+    //Always doing this because it won't hurt devices that don't need it...
+    var eventtypes = ["touchstart","touchmove","touchenter","touchcancel","click","scroll"],
+        eventhandlers = [],
+        b = document.body,
+        i, eventtype, l = eventtypes.length,
+
+        listener = function() {
+            unrestrict.trigger("userInteraction");
+            cleanup();
+        },
+        cleanup = function() {
+            for (i = 0; i < l; ++i) {
+                eventtype = eventtypes[i];
+                b.removeEventListener(eventtype, listener);
+            }
+            eventhandlers = [];
+            unrestrict.off("userInteraction");
+        },
+        unrestrict = {
+            /**
+             * This 'arms' the event-listeners that are legal for triggering
+             * audio. This is used internally to 'unlock' audio on mobile
+             * devices. It is exposed so that any developer can 'arm' the
+             * listeners when a new audio-file is loading.
+             * 
+             * If you want to react to the event that is triggered on legal
+             * user-interaction you should register a listener for
+             * 'userInteraction' on the unrestrict instance. You should also be
+             * aware that all these listeners are cleared upon the first
+             * successful invocation. (Which is a cheap way to prevent
+             * accidental double-fires)
+             */
+            arm: function() {
+                if (eventhandlers.length > 0) {
+                    return; //Already armed
+                }
+                for (i = 0; i < l; ++i) {
+                    eventtype = eventtypes[i];
+                    b.addEventListener(eventtype, listener);
+                }
+            },
+            /**
+             * Returns true if both software and hardware is touch-capable. At the time of
+             * implementation this method was considered reliable. Hopefully by the time it no
+             * longer is, the need has also dissipated.
+             */
+            isTouch: ( function() {
+                //from http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-
+                //a-touch-screen-device-using-javascript
+                var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
+
+                return function() {
+                    return isTouch;
+                };
+            }())
+        }
+    ;
+    
+    unrestrict.arm();
+    RSVP.EventTarget.mixin(unrestrict);
+    return unrestrict;
+
+});
+
+/*global define, RSVP*/
+/*
+ *  @module Context
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+define('webaudio/context', ["webaudio/sound", "unrestrict"],function( Sound, Unrestrict ) {
+    'use strict';
+
+    var getAudioContext = ( function( AC ){
+            var ctx = null;
+            
+            return function() {
+                if ( ctx === null && AC ) {
+                    ctx = new AC();
+                }
+                return ctx;
+            };
+        }(
+            window.AudioContext || 
+            window.webkitAudioContext || 
+            window.mozAudioContext || 
+            window.oAudioContext || 
+            window.msAudioContext
+        )),
+        arrayBuffers = {},
+        audioBuffers = {},
+        sounds = {},
+        /**
+         * Wrap the process of getting the sound as an array-buffer
+         * into a `Promise`.
+         * 
+         * @returns Promise
+         * @resolves ArrayBuffer.
+         */
+        getArrayBuffer = function( uri ) {
+            return new RSVP.Promise( function( resolve, reject ) {
+                
+                if ( arrayBuffers[uri] ) {
+                    resolve( arrayBuffers[uri] );
+                } else {
+                    var client = new XMLHttpRequest( );
+                    client.open( "GET", uri, true );
+                    client.onload = function( ) {
+                        arrayBuffers[uri] = client.response;
+                        resolve( client.response );
+                    };
+                    client.responseType = "arraybuffer";
+                    client.send();
+                }
+            } );
+        },
+        /**
+         * Wrap the audio decoding into a `Promise`.
+         * 
+         * @returns Promise 
+         * @resolves AudioBuffer
+         */
+        createAudioBuffer = function( binaryData ) {
+            return new RSVP.Promise( function( resolve, reject ) {
+
+                getAudioContext().decodeAudioData( binaryData, function( buffer ) {
+                    resolve( buffer );
+                }, function( arg ) {
+                    reject( arg );
+                } );
+
+            } );
+        },
+        /**
+         * Grab audio source and decode it, using `Promise`s.
+         * Basically a convenience method around `getArrayBuffer` and
+         * `createAudioBuffer`.
+         * 
+         * @returns Promise
+         * @resolves AudioBuffer
+         */
+        getAudioBuffer = function( uri ) {
+            return getArrayBuffer( uri ).then( function( binaryData ) {
+                return createAudioBuffer( binaryData );
+            } );
+        },
+        /**
+         * Create a tiny fraction of silence and play it, by calling this
+         * method on any user-interaction, the webaudio context will become
+         * unmuted on mobile iOS.
+         */
+        mobileUnMuteHack = function() {
+            var ctx = getAudioContext(),
+                //Smallest possible buffer, 1 sample, thus silence...
+                buffer = ctx.createBuffer(1,1,22050), 
+                bufferSource = ctx.createBufferSource();
+            
+            //console.log("unhacking the audiocontext");
+            bufferSource.buffer = buffer;
+            bufferSource.connect(ctx.destination);
+            if (bufferSource.start) {
+                bufferSource.start( 0 );
+            } else {
+                bufferSource.noteOn( 0 );
+            }
+            //todo: add it to the garbage-bin, to potentially protect the collection cycle.
+        },
+        loadSound = function( url ) {
+            return getAudioBuffer( url ).then(
+                function( buffer ) {
+                    var ctx = getAudioContext();
+                    audioBuffers[encodeURIComponent(url)] = buffer;
+                    return Sound( buffer, ctx );
+                }
+            );
+        },
+        addSound = function( id, url ) {
+            return loadSound( url ).then( function( sound ) {
+                sounds[id] = encodeURIComponent(url);
+                return sound;
+            }, function() {
+                console.warn( arguments );
+            } );
+        }
+    ;
+
+    Unrestrict.on("userInteraction", mobileUnMuteHack);
+
+    return {
+
+        /**
+         * Load a sound-buffer and create a `Sound` object.
+         */
+        loadSound: function( url ) {
+            return loadSound( url );
+        },
+        
+        parse: function( soundSet, baseUrl, ext ) {
+            var i = 0,
+                all = [],
+                spriteName, url;
+
+            for (spriteName in soundSet.spritemap) {
+                url = baseUrl + "_00" + (++i) + "." + ext;
+                all.push( addSound( spriteName, url ) );
+            }
+
+            return RSVP.all( all );
+        },
+        
+        canIUse: function() {
+            return getAudioContext() !== null;
+        },
+        
+        play: function( id ) {
+            var sound = null;
+            if (sounds[id]) {
+                sound = Sound( audioBuffers[sounds[id]], getAudioContext() );
+                sound.play();
+            }
+            return sound;
+        }
+
+    };
+
+});
+/*global define, RSVP*/
+/*
+ *  @module Sound
+ *  @copyright (C) 2013 SpilGames
+ *  @author Martin Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+define('webaudio/sound', function() {
+    'use strict';
+    
+    var Sound = function( buffer, ctx ) {
+            var n = createBufferSource( buffer, ctx );
+            return {
+                play: function() {
+                    play( n );
+                },
+                stop: function() {
+                    n = stop( n, buffer, ctx );
+                },
+                getLength: function() {
+                    return getLength( n );
+                },
+                loop: function( value ) {
+                    loop( n, value );
+                }
+            }
+        },
+        createBufferSource = function( buffer, context ) {
+            var node = context.createBufferSource();
+            node.buffer = buffer;
+            node.connect(context.destination);
+            return node;
+        },
+        play = function( node ) {
+            //Connect to speakers
+            if ( node.start ) {
+                node.start( 0 );
+            } else {
+                node.noteOn( 0 );
+            }
+        },
+        stop = function( node, buffer, ctx ) {
+            if ( node.stop ) {
+                node.stop( 0 );
+            } else {
+                node.noteOff( 0 );
+            }
+            //Disconnect from speakers, allow garbage collection
+            node.disconnect();
+            //Create new buffersource so we can fire this sound again
+            return createBufferSource( buffer, ctx );
+        },
+        getLength = function( node ) {
+            return node.buffer.length / node.buffer.sampleRate;
+        },
+        loop = function( node, value ) {
+            node.loop = value;
+        }
+    ;
+
+    return Sound;
+
+});
 
 /*
  *  @module Component

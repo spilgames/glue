@@ -7,8 +7,9 @@ module.exports = function (grunt) {
         concat: {
             dist: {
                 files: {
-                    'build/src/libraries.js': [
-                        'bower_components/requirejs/require.js'
+                    'build/src/vendors.js': [
+                        'bower_components/requirejs/require.js',
+                        'js/vendors/rsvp.js'
                     ],
                     'build/src/adapters.js': [
                         'js/adapters/**/*'
@@ -25,7 +26,7 @@ module.exports = function (grunt) {
                         'js/modules/vendors/**/**/*.js'
                     ],
                     'build/glue.js': [
-                        'build/src/libraries.js',
+                        'build/src/vendors.js',
                         'build/src/sugar.js',
                         'build/src/adapters.js',
                         'build/src/base.js',
