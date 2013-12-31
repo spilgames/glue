@@ -76,22 +76,17 @@ glue.module.get(
                                 },
                                 image: Loader.getAsset('blocks')
                             });
-
                             this.animatable.setAnimation('yellow');
-
                             this.rotatable.setOrigin({
                                 x: 35,
                                 y: 35
                             });
-
-                            this.rotatable.setTargetAngleDegree(90, true);
-                            this.rotatable.setRotationSpeed(50);
-
+                            this.rotatable.setTargetDegree(90, true);
+                            this.rotatable.setSpeed(50);
                             this.movable.setTarget(Vector(
                                 0,
                                 0
                             ));
-
                         },
                         update: function (deltaT) {
                             this.movable.update(deltaT);
@@ -101,7 +96,6 @@ glue.module.get(
                             this.animatable.draw(deltaT, context);
                         }
                     });
-
                 Game.add(component);
             });
         });
