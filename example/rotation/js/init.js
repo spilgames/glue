@@ -73,7 +73,7 @@ glue.module.get(
                             });
 
                             this.rotatable.setTargetAngleDegree(90, true);
-                            this.rotatable.setRotationSpeed(200);
+                            this.rotatable.setRotationSpeed(50);
 
                             this.movable.setTarget(Vector(
                                 0,
