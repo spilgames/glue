@@ -65,13 +65,16 @@ glue.module.get(
                                 image: Loader.getAsset('blocks')
                             });
 
+                            this.animatable.setAnimation('yellow');
+
                             this.rotatable.setOrigin({
                                 x: 35,
                                 y: 35
                             });
 
-                            this.rotatable.setAngleDegree(180);
-                            this.animatable.setAnimation('yellow');
+                            this.rotatable.setTargetAngleDegree(90, true);
+                            this.rotatable.setRotationSpeed(50);
+
                             this.movable.setTarget(Vector(
                                 0,
                                 0
@@ -80,7 +83,7 @@ glue.module.get(
                         },
                         update: function (deltaT) {
                             this.movable.update(deltaT);
-                            this.rotatable.setAngleDegree(this.rotatable.getAngleDegree() + 1);
+                            this.rotatable.update(deltaT);
                         },
                         draw: function (deltaT, context) {
                             this.animatable.draw(deltaT, context);
