@@ -4768,9 +4768,10 @@ glue.module.create(
 glue.module.create(
     'glue/component/animatable',
     [
-        'glue'
+        'glue',
+        'glue/component/visible'
     ],
-    function (Glue) {
+    function (Glue, Visible) {
         return function (obj) {
             var Sugar = Glue.sugar,
                 animationSettings,
@@ -4806,6 +4807,7 @@ glue.module.create(
                 errorCallback;
 
             obj = obj || {};
+            Visible(obj);
             obj.animatable = {
                 setup: function (settings) {
                     var animation;
@@ -4817,13 +4819,7 @@ glue.module.create(
                             }
                         }
                     }
-                    if (Sugar.isDefined(obj.visible)) {
-                        obj.visible.setup(settings);
-                    } else {
-                        if (window.console) {
-                            throw 'Animatable needs a Visible component';
-                        }
-                    }
+                    obj.visible.setup(settings);
                     if (settings.image) {
                         image = settings.image;
                     }
@@ -4842,11 +4838,23 @@ glue.module.create(
                     var position = obj.visible.getPosition(),
                         sourceX = frameWidth * currentFrame;
 
+                    //console.log(frameWidth, currentFrame);
+
+                    //  Save the current context so we can only make changes to one graphic
                     context.save();
+                    //  First we translate to the current x and y, so we can scale the image relative to that
                     context.translate(position.x, position.y);
+                    //  Now we scale the image according to the scale (set in update function)
+                    //context.scale(scale, scale);
+
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
+                    
+                    if (Sugar.isDefined(obj.scalable)) {
+                        obj.scalable.draw(deltaT, context);
+                    }
+
                     context.drawImage
                     (
                         image,
@@ -4859,6 +4867,16 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
+                    /*
+                    console.log(
+                        'image: ' + image,
+                        'sourceX: ' + sourceX,
+                        'frameWidth: ' + frameWidth,
+                        'image.height: ' + image.height,
+                        'frameWidth: ' + frameWidth,
+                        'current frame: ' + currentFrame,
+                        'frame count: ' + frameCount);
+                    */
                     context.restore();
                 },
                 setAnimation: function(name) {
@@ -5365,6 +5383,7 @@ glue.module.create(
                 rotationDirection = 1,
                 origin = Vector(0, 0),
                 toDegree = 180 / Math.PI,
+                atTarget = true,
                 toRadian = Math.PI / 180;
             obj = obj || {};
             obj.rotatable = {
@@ -5382,13 +5401,14 @@ glue.module.create(
 
                     if (angle !== targetAngle) {
                         
-                        tarDeg = this.getTargetAngleDegree(),
+                        tarDeg = this.getTargetDegree(),
                         curDeg = this.getAngleDegree(),
                         finalSpeed = rotationSpeed * rotationDirection,
                         distance = (tarDeg > curDeg) ? (tarDeg - curDeg) : (curDeg - tarDeg);
 
                         if (Math.floor(Math.abs(distance)) < Math.abs(finalSpeed * deltaT)) {
                             angle = targetAngle;
+                            atTarget = true;
                         } else {
                             curDeg += finalSpeed * deltaT;
                             this.setAngleDegree(curDeg);
@@ -5411,7 +5431,7 @@ glue.module.create(
                     origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
                     origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
                 },
-                setTargetAngleDegree: function (value, clockwise) {
+                setTargetDegree: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
                     targetAngle *= toRadian;
                     if (Sugar.isDefined(clockwise)) {
@@ -5421,8 +5441,9 @@ glue.module.create(
                             rotationDirection = -1;
                         }
                     }
+                    atTarget = false;
                 },
-                setTargetAngleRadian: function (value, clockwise) {
+                setTargetRadian: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
                     if (Sugar.isDefined(clockwise)) {
                         if (clockwise) {
@@ -5431,9 +5452,11 @@ glue.module.create(
                             rotationDirection = -1;
                         }
                     }
+                    atTarget = false;
                 },
-                setRotationSpeed: function (value) {
+                setSpeed: function (value) {
                     rotationSpeed = Sugar.isNumber(value) ? value : rotationSpeed;
+                    rotationSpeed = Math.floor(rotationSpeed);
                 },
                 getAngleDegree: function () {
                     return angle * toDegree;
@@ -5444,14 +5467,112 @@ glue.module.create(
                 getOrigin: function () {
                     return origin;
                 },
-                getTargetAngleDegree: function () {
+                getTargetDegree: function () {
                     return targetAngle * toDegree;
                 },
-                getTargetAngleRadian: function () {
+                getTargetRadian: function () {
                     return targetAngle;
+                },
+                atTarget: function () {
+                    return atTarget;
                 }
             };
             return obj;
+        };
+    }
+);
+
+/*
+ *  @module Scalable
+ *  @namespace component
+ *  @desc Represents a scalable component
+ *  @copyright (C) 2013 SpilGames
+ *  @author Felipe Alfonso
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ *
+ *  Only when performance issues: Remove the need for getters and setters in visible
+ */
+glue.module.create(
+    'glue/component/scalable',
+    [
+        'glue',
+        'glue/math/vector'
+    ],
+    function (Glue, Vector) {
+        return function (component) {
+            var Sugar = Glue.sugar,
+                origin = Vector(0, 0),
+                currentScale = Vector(1, 1),
+                targetScale = Vector(1, 1),
+                scaleSpeed = 1,
+                atTarget = true;
+
+            component = component || {};
+            component.scalable = {
+                update: function (deltaT) {
+                    if (!atTarget) {
+                        var radian,
+                            deltaX,
+                            deltaY;
+
+                        deltaX = targetScale.x - currentScale.x,
+                        deltaY = targetScale.y - currentScale.y;
+
+                        // Pythagorean theorem : c = √( a2 + b2 )
+                        // We stop scaling if the remaining distance to the endpoint
+                        // is smaller then the step iterator (scaleSpeed * deltaT).
+                        if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
+                            atTarget = true;
+                        } else {
+                            // Update the x and y scale, using cos for x and sin for y
+                            // and get the right speed by multiplying by the speed and delta time.
+                            radian = Math.atan2(deltaY, deltaX);
+                            currentScale.x += Math.cos(radian) * scaleSpeed * deltaT;
+                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;                  
+                        }
+                    } else {
+                        currentScale = targetScale;
+                    }
+                },
+                draw: function (deltaT, context) {
+                    context.translate(origin.x, origin.y);
+                    context.scale(currentScale.x, currentScale.y);
+                    context.translate(-origin.x, -origin.y);
+                },
+                setScale: function (vec) {
+                    currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;
+                    currentScale.y = Sugar.isNumber(vec.y) ? vec.y : currentScale.y;
+                },
+                setTarget: function (vec) {
+                    targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
+                    targetScale.y = Sugar.isNumber(vec.y) ? vec.y : targetScale.y;
+                    atTarget = false;
+                },
+                setSpeed: function (value) {
+                    scaleSpeed = Sugar.isNumber(value) ? value : scaleSpeed;
+                    scaleSpeed = Math.floor(scaleSpeed / 100);
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getScale: function () {
+                    return currentScale;
+                },
+                getTarget: function () {
+                    return targetScale;
+                },
+                getSpeed: function () {
+                    return Math.floor(scaleSpeed * 100);
+                },
+                getOrigin: function () {
+                    return origin;
+                },
+                atTarget: function () {
+                    return atTarget;
+                }
+            };
+            return component;
         };
     }
 );
@@ -5524,8 +5645,13 @@ glue.module.create(
                 },
                 draw: function (deltaT, context) {
                     context.save();
+                    
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
+                    }
+
+                    if (Sugar.isDefined(obj.scalable)) {
+                        obj.scalable.draw(deltaT, context);
                     }
                     context.drawImage(image, position.x, position.y)
                     context.restore();
@@ -6299,56 +6425,6 @@ glue.module.create('glue/math/matrix', [
                     if (mat[col] !== undefined && mat[col][row] !== undefined) {
                         mat[col][row] = null;
                     }
-                }
-            };
-        };
-    }
-);
-
-/**
- *  @module Polygon
- *  @namespace math
- *  @desc Represents a polygon
- *  @copyright (C) 2013 SpilGames
- *  @author Jeroen Reurings
- *  @license BSD 3-Clause License (see LICENSE file in project root)
- */
-glue.module.create(
-    'glue/math/polygon',
-    function () {
-        'use strict';
-        return function (points) {
-            return {
-                get: function () {
-                    return points;
-                },
-                hasPosition: function (p) {
-                    var has = false,
-                        minX = points[0].x, maxX = points[0].x,
-                        minY = points[0].y, maxY = points[0].y,
-                        n = 1,
-                        q,
-                        i = 0,
-                        j = points.length - 1;
-
-                    for (n = 1; n < points.length; ++n) {
-                        q = points[n];
-                        minX = Math.min(q.x, minX);
-                        maxX = Math.max(q.x, maxX);
-                        minY = Math.min(q.y, minY);
-                        maxY = Math.max(q.y, maxY);
-                    }
-                    if (p.x < minX || p.x > maxX || p.y < minY || p.y > maxY) {
-                        return false;
-                    }
-                    for (i, j; i < points.length; j = i++) {
-                        if ((points[i].y > p.y) != (points[j].y > p.y) &&
-                                p.x < (points[j].x - points[i].x) * (p.y - points[i].y) /
-                                    (points[j].y - points[i].y) + points[i].x) {
-                            has = !has;
-                        }
-                    }
-                    return has;
                 }
             };
         };
