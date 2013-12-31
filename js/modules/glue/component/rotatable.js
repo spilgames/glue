@@ -23,6 +23,7 @@ glue.module.create(
                 rotationDirection = 1,
                 origin = Vector(0, 0),
                 toDegree = 180 / Math.PI,
+                atTarget = true,
                 toRadian = Math.PI / 180;
             obj = obj || {};
             obj.rotatable = {
@@ -40,13 +41,14 @@ glue.module.create(
 
                     if (angle !== targetAngle) {
                         
-                        tarDeg = this.getTargetAngleDegree(),
+                        tarDeg = this.getTargetDegree(),
                         curDeg = this.getAngleDegree(),
                         finalSpeed = rotationSpeed * rotationDirection,
                         distance = (tarDeg > curDeg) ? (tarDeg - curDeg) : (curDeg - tarDeg);
 
                         if (Math.floor(Math.abs(distance)) < Math.abs(finalSpeed * deltaT)) {
                             angle = targetAngle;
+                            atTarget = true;
                         } else {
                             curDeg += finalSpeed * deltaT;
                             this.setAngleDegree(curDeg);
@@ -69,7 +71,7 @@ glue.module.create(
                     origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
                     origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
                 },
-                setTargetAngleDegree: function (value, clockwise) {
+                setTargetDegree: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
                     targetAngle *= toRadian;
                     if (Sugar.isDefined(clockwise)) {
@@ -79,8 +81,9 @@ glue.module.create(
                             rotationDirection = -1;
                         }
                     }
+                    atTarget = false;
                 },
-                setTargetAngleRadian: function (value, clockwise) {
+                setTargetRadian: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
                     if (Sugar.isDefined(clockwise)) {
                         if (clockwise) {
@@ -89,9 +92,11 @@ glue.module.create(
                             rotationDirection = -1;
                         }
                     }
+                    atTarget = false;
                 },
-                setRotationSpeed: function (value) {
+                setSpeed: function (value) {
                     rotationSpeed = Sugar.isNumber(value) ? value : rotationSpeed;
+                    rotationSpeed = Math.floor(rotationSpeed);
                 },
                 getAngleDegree: function () {
                     return angle * toDegree;
@@ -102,11 +107,14 @@ glue.module.create(
                 getOrigin: function () {
                     return origin;
                 },
-                getTargetAngleDegree: function () {
+                getTargetDegree: function () {
                     return targetAngle * toDegree;
                 },
-                getTargetAngleRadian: function () {
+                getTargetRadian: function () {
                     return targetAngle;
+                },
+                atTarget: function () {
+                    return atTarget;
                 }
             };
             return obj;

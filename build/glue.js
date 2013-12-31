@@ -5383,6 +5383,7 @@ glue.module.create(
                 rotationDirection = 1,
                 origin = Vector(0, 0),
                 toDegree = 180 / Math.PI,
+                atTarget = true,
                 toRadian = Math.PI / 180;
             obj = obj || {};
             obj.rotatable = {
@@ -5400,13 +5401,14 @@ glue.module.create(
 
                     if (angle !== targetAngle) {
                         
-                        tarDeg = this.getTargetAngleDegree(),
+                        tarDeg = this.getTargetDegree(),
                         curDeg = this.getAngleDegree(),
                         finalSpeed = rotationSpeed * rotationDirection,
                         distance = (tarDeg > curDeg) ? (tarDeg - curDeg) : (curDeg - tarDeg);
 
                         if (Math.floor(Math.abs(distance)) < Math.abs(finalSpeed * deltaT)) {
                             angle = targetAngle;
+                            atTarget = true;
                         } else {
                             curDeg += finalSpeed * deltaT;
                             this.setAngleDegree(curDeg);
@@ -5429,7 +5431,7 @@ glue.module.create(
                     origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
                     origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
                 },
-                setTargetAngleDegree: function (value, clockwise) {
+                setTargetDegree: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
                     targetAngle *= toRadian;
                     if (Sugar.isDefined(clockwise)) {
@@ -5439,8 +5441,9 @@ glue.module.create(
                             rotationDirection = -1;
                         }
                     }
+                    atTarget = false;
                 },
-                setTargetAngleRadian: function (value, clockwise) {
+                setTargetRadian: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
                     if (Sugar.isDefined(clockwise)) {
                         if (clockwise) {
@@ -5449,9 +5452,11 @@ glue.module.create(
                             rotationDirection = -1;
                         }
                     }
+                    atTarget = false;
                 },
-                setRotationSpeed: function (value) {
+                setSpeed: function (value) {
                     rotationSpeed = Sugar.isNumber(value) ? value : rotationSpeed;
+                    rotationSpeed = Math.floor(rotationSpeed);
                 },
                 getAngleDegree: function () {
                     return angle * toDegree;
@@ -5462,11 +5467,14 @@ glue.module.create(
                 getOrigin: function () {
                     return origin;
                 },
-                getTargetAngleDegree: function () {
+                getTargetDegree: function () {
                     return targetAngle * toDegree;
                 },
-                getTargetAngleRadian: function () {
+                getTargetRadian: function () {
                     return targetAngle;
+                },
+                atTarget: function () {
+                    return atTarget;
                 }
             };
             return obj;
@@ -5496,16 +5504,34 @@ glue.module.create(
                 origin = Vector(0, 0),
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
-                scaleSpeed = 100,
-                equals = function (vec1, vec2) {
-                    return vec1.x === vec2.x && vec1.y === vec2.y;
-                };
+                scaleSpeed = 1,
+                atTarget = true;
 
             component = component || {};
             component.scalable = {
                 update: function (deltaT) {
-                    if (!equals(currentScale, targetScale)) {
+                    if (!atTarget) {
+                        var radian,
+                            deltaX,
+                            deltaY;
 
+                        deltaX = targetScale.x - currentScale.x,
+                        deltaY = targetScale.y - currentScale.y;
+
+                        // Pythagorean theorem : c = √( a2 + b2 )
+                        // We stop scaling if the remaining distance to the endpoint
+                        // is smaller then the step iterator (scaleSpeed * deltaT).
+                        if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
+                            atTarget = true;
+                        } else {
+                            // Update the x and y scale, using cos for x and sin for y
+                            // and get the right speed by multiplying by the speed and delta time.
+                            radian = Math.atan2(deltaY, deltaX);
+                            currentScale.x += Math.cos(radian) * scaleSpeed * deltaT;
+                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;                  
+                        }
+                    } else {
+                        currentScale = targetScale;
                     }
                 },
                 draw: function (deltaT, context) {
@@ -5517,12 +5543,14 @@ glue.module.create(
                     currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;
                     currentScale.y = Sugar.isNumber(vec.y) ? vec.y : currentScale.y;
                 },
-                setScaleTarget: function (vec) {
+                setTarget: function (vec) {
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
                     targetScale.y = Sugar.isNumber(vec.y) ? vec.y : targetScale.y;
+                    atTarget = false;
                 },
-                setScaleSpeed: function (value) {
+                setSpeed: function (value) {
                     scaleSpeed = Sugar.isNumber(value) ? value : scaleSpeed;
+                    scaleSpeed = Math.floor(scaleSpeed / 100);
                 },
                 setOrigin: function (vec) {
                     origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
@@ -5531,14 +5559,17 @@ glue.module.create(
                 getScale: function () {
                     return currentScale;
                 },
-                getScaleTarget: function () {
+                getTarget: function () {
                     return targetScale;
                 },
-                getScaleSpeed: function () {
-                    return scaleSpeed;
+                getSpeed: function () {
+                    return Math.floor(scaleSpeed * 100);
                 },
                 getOrigin: function () {
                     return origin;
+                },
+                atTarget: function () {
+                    return atTarget;
                 }
             };
             return component;

@@ -20,16 +20,34 @@ glue.module.create(
                 origin = Vector(0, 0),
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
-                scaleSpeed = 100,
-                equals = function (vec1, vec2) {
-                    return vec1.x === vec2.x && vec1.y === vec2.y;
-                };
+                scaleSpeed = 1,
+                atTarget = true;
 
             component = component || {};
             component.scalable = {
                 update: function (deltaT) {
-                    if (!equals(currentScale, targetScale)) {
+                    if (!atTarget) {
+                        var radian,
+                            deltaX,
+                            deltaY;
 
+                        deltaX = targetScale.x - currentScale.x,
+                        deltaY = targetScale.y - currentScale.y;
+
+                        // Pythagorean theorem : c = √( a2 + b2 )
+                        // We stop scaling if the remaining distance to the endpoint
+                        // is smaller then the step iterator (scaleSpeed * deltaT).
+                        if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
+                            atTarget = true;
+                        } else {
+                            // Update the x and y scale, using cos for x and sin for y
+                            // and get the right speed by multiplying by the speed and delta time.
+                            radian = Math.atan2(deltaY, deltaX);
+                            currentScale.x += Math.cos(radian) * scaleSpeed * deltaT;
+                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;                  
+                        }
+                    } else {
+                        currentScale = targetScale;
                     }
                 },
                 draw: function (deltaT, context) {
@@ -41,12 +59,14 @@ glue.module.create(
                     currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;
                     currentScale.y = Sugar.isNumber(vec.y) ? vec.y : currentScale.y;
                 },
-                setScaleTarget: function (vec) {
+                setTarget: function (vec) {
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
                     targetScale.y = Sugar.isNumber(vec.y) ? vec.y : targetScale.y;
+                    atTarget = false;
                 },
-                setScaleSpeed: function (value) {
+                setSpeed: function (value) {
                     scaleSpeed = Sugar.isNumber(value) ? value : scaleSpeed;
+                    scaleSpeed = Math.floor(scaleSpeed / 100);
                 },
                 setOrigin: function (vec) {
                     origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
@@ -55,14 +75,17 @@ glue.module.create(
                 getScale: function () {
                     return currentScale;
                 },
-                getScaleTarget: function () {
+                getTarget: function () {
                     return targetScale;
                 },
-                getScaleSpeed: function () {
-                    return scaleSpeed;
+                getSpeed: function () {
+                    return Math.floor(scaleSpeed * 100);
                 },
                 getOrigin: function () {
                     return origin;
+                },
+                atTarget: function () {
+                    return atTarget;
                 }
             };
             return component;

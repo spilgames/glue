@@ -34,7 +34,7 @@ glue.module.get(
                     }
                 }
             }, function () {
-                var component = Component(Animatable, Movable, Scalable, Rotatable).add({
+                var component = Component(Animatable, Scalable, Movable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
@@ -65,41 +65,45 @@ glue.module.get(
                                 },
                                 image: Loader.getAsset('blocks')
                             });
-
                             this.animatable.setAnimation('yellow');
-
                             this.scalable.setOrigin({
                                 x: 35,
                                 y: 35
                             });
-
                             this.scalable.setScale({
-                                x: 2,
+                                x: 8,
+                                y: 8
+                            });
+                            this.scalable.setTarget({
+                                x: 5,
                                 y: 2
                             });
-
-                            this.rotatable.setTargetAngleDegree(360);
-                            this.rotatable.setOrigin({
-                                x: 35,
-                                y: 35
+                            this.scalable.setSpeed(200);
+                            this.movable.setTarget({
+                                x: 0,
+                                y: 0
                             });
-
-                            this.movable.setTarget(Vector(
-                                0,
-                                0
-                            ));
-
                         },
                         update: function (deltaT) {
                             this.movable.update(deltaT);
                             this.scalable.update(deltaT);
-                            this.rotatable.update(deltaT);
+                            if (this.scalable.atTarget()) {
+                                component.scalable.setTarget({
+                                    x: 2,
+                                    y: 8
+                                });
+                            }
+                            if (this.movable.atTarget()) {
+                                    this.movable.setTarget({
+                                    x: 300,
+                                    y: 300
+                                });
+                            }
                         },
                         draw: function (deltaT, context) {
                             this.animatable.draw(deltaT, context);
                         }
                     });
-
                 Game.add(component);
             });
         });
