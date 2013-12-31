@@ -42,7 +42,7 @@
                         playerPosition,
                         speed = 1,
                         direction = 'right',
-                        component = Component(Animatable).add({
+                        component = Component(Visible, Animatable).add({
                             update: function (deltaT) {
                                 this.animatable.update(deltaT);
                                 playerDimension = this.animatable.getDimension();
