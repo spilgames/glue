@@ -9,9 +9,10 @@ glue.module.get(
         'glue/component/animatable',
         'glue/component/movable',
         'glue/component/scalable',
-        'glue/component/rotatable'
+        'glue/component/rotatable',
+        'glue/component/visible'
     ],
-    function (Domready, Game, Loader, Dimension, Vector, Component, Animatable, Movable, Scalable, Rotatable) {
+    function (Domready, Game, Loader, Dimension, Vector, Component, Animatable, Movable, Scalable, Rotatable, Visible) {
         'use strict';
         Domready(function () { 
             Game.setup({
@@ -34,7 +35,7 @@ glue.module.get(
                     }
                 }
             }, function () {
-                var component = Component(Animatable, Scalable, Movable).add({
+                var component = Component(Animatable, Visible, Scalable, Movable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
