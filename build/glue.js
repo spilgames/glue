@@ -4768,10 +4768,9 @@ glue.module.create(
 glue.module.create(
     'glue/component/animatable',
     [
-        'glue',
-        'glue/component/visible'
+        'glue'
     ],
-    function (Glue, Visible) {
+    function (Glue) {
         return function (obj) {
             var Sugar = Glue.sugar,
                 animationSettings,
@@ -4807,7 +4806,6 @@ glue.module.create(
                 errorCallback;
 
             obj = obj || {};
-            Visible(obj);
             obj.animatable = {
                 setup: function (settings) {
                     var animation;
@@ -4819,7 +4817,13 @@ glue.module.create(
                             }
                         }
                     }
-                    obj.visible.setup(settings);
+                    if (Sugar.isDefined(obj.visible)) {
+                        obj.visible.setup(settings);
+                    } else {
+                        if (window.console) {
+                            throw 'Animatable needs a Visible component';
+                        }
+                    }
                     if (settings.image) {
                         image = settings.image;
                     }
@@ -4838,14 +4842,8 @@ glue.module.create(
                     var position = obj.visible.getPosition(),
                         sourceX = frameWidth * currentFrame;
 
-                    //console.log(frameWidth, currentFrame);
-
-                    //  Save the current context so we can only make changes to one graphic
                     context.save();
-                    //  First we translate to the current x and y, so we can scale the image relative to that
                     context.translate(position.x, position.y);
-                    //  Now we scale the image according to the scale (set in update function)
-                    //context.scale(scale, scale);
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
@@ -4861,16 +4859,6 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
-                    /*
-                    console.log(
-                        'image: ' + image,
-                        'sourceX: ' + sourceX,
-                        'frameWidth: ' + frameWidth,
-                        'image.height: ' + image.height,
-                        'frameWidth: ' + frameWidth,
-                        'current frame: ' + currentFrame,
-                        'frame count: ' + frameCount);
-                    */
                     context.restore();
                 },
                 setAnimation: function(name) {
