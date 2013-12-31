@@ -1,3 +1,15 @@
+version 0.0.6 
+December 31, 2013
+
+- Support added for alpha fading.
+- Moved the Visible dependency of the Animatable to the module itself instead of implementation side
+- Added sound module.
+- Added rotatable component.
+- Added scalable component.
+- Fixed unit test enviroment.
+- Added a math module for defining Polygons.
+- Added fadable component.
+
 version 0.0.5 
 December 29, 2013
 
