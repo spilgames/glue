@@ -4768,10 +4768,9 @@ glue.module.create(
 glue.module.create(
     'glue/component/animatable',
     [
-        'glue',
-        'glue/component/visible'
+        'glue'
     ],
-    function (Glue, Visible) {
+    function (Glue) {
         return function (obj) {
             var Sugar = Glue.sugar,
                 animationSettings,
@@ -4807,7 +4806,6 @@ glue.module.create(
                 errorCallback;
 
             obj = obj || {};
-            Visible(obj);
             obj.animatable = {
                 setup: function (settings) {
                     var animation;
@@ -4819,7 +4817,13 @@ glue.module.create(
                             }
                         }
                     }
-                    obj.visible.setup(settings);
+                    if (Sugar.isDefined(obj.visible)) {
+                        obj.visible.setup(settings);
+                    } else {
+                        if (window.console) {
+                            throw 'Animatable needs a Visible component';
+                        }
+                    }
                     if (settings.image) {
                         image = settings.image;
                     }
@@ -4838,23 +4842,11 @@ glue.module.create(
                     var position = obj.visible.getPosition(),
                         sourceX = frameWidth * currentFrame;
 
-                    //console.log(frameWidth, currentFrame);
-
-                    //  Save the current context so we can only make changes to one graphic
                     context.save();
-                    //  First we translate to the current x and y, so we can scale the image relative to that
                     context.translate(position.x, position.y);
-                    //  Now we scale the image according to the scale (set in update function)
-                    //context.scale(scale, scale);
-
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
-                    
-                    if (Sugar.isDefined(obj.scalable)) {
-                        obj.scalable.draw(deltaT, context);
-                    }
-
                     context.drawImage
                     (
                         image,
@@ -4867,16 +4859,6 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
-                    /*
-                    console.log(
-                        'image: ' + image,
-                        'sourceX: ' + sourceX,
-                        'frameWidth: ' + frameWidth,
-                        'image.height: ' + image.height,
-                        'frameWidth: ' + frameWidth,
-                        'current frame: ' + currentFrame,
-                        'frame count: ' + frameCount);
-                    */
                     context.restore();
                 },
                 setAnimation: function(name) {
@@ -6425,6 +6407,56 @@ glue.module.create('glue/math/matrix', [
                     if (mat[col] !== undefined && mat[col][row] !== undefined) {
                         mat[col][row] = null;
                     }
+                }
+            };
+        };
+    }
+);
+
+/**
+ *  @module Polygon
+ *  @namespace math
+ *  @desc Represents a polygon
+ *  @copyright (C) 2013 SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/math/polygon',
+    function () {
+        'use strict';
+        return function (points) {
+            return {
+                get: function () {
+                    return points;
+                },
+                hasPosition: function (p) {
+                    var has = false,
+                        minX = points[0].x, maxX = points[0].x,
+                        minY = points[0].y, maxY = points[0].y,
+                        n = 1,
+                        q,
+                        i = 0,
+                        j = points.length - 1;
+
+                    for (n = 1; n < points.length; ++n) {
+                        q = points[n];
+                        minX = Math.min(q.x, minX);
+                        maxX = Math.max(q.x, maxX);
+                        minY = Math.min(q.y, minY);
+                        maxY = Math.max(q.y, maxY);
+                    }
+                    if (p.x < minX || p.x > maxX || p.y < minY || p.y > maxY) {
+                        return false;
+                    }
+                    for (i, j; i < points.length; j = i++) {
+                        if ((points[i].y > p.y) != (points[j].y > p.y) &&
+                                p.x < (points[j].x - points[i].x) * (p.y - points[i].y) /
+                                    (points[j].y - points[i].y) + points[i].x) {
+                            has = !has;
+                        }
+                    }
+                    return has;
                 }
             };
         };
