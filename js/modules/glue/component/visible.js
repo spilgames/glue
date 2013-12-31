@@ -66,8 +66,13 @@ glue.module.create(
                 },
                 draw: function (deltaT, context) {
                     context.save();
+                    
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
+                    }
+
+                    if (Sugar.isDefined(obj.scalable)) {
+                        obj.scalable.draw(deltaT, context);
                     }
                     context.drawImage(image, position.x, position.y)
                     context.restore();

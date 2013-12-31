@@ -89,9 +89,15 @@ glue.module.create(
                     context.translate(position.x, position.y);
                     //  Now we scale the image according to the scale (set in update function)
                     //context.scale(scale, scale);
+
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
+                    
+                    if (Sugar.isDefined(obj.scalable)) {
+                        obj.scalable.draw(deltaT, context);
+                    }
+
                     context.drawImage
                     (
                         image,
