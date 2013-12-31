@@ -96,7 +96,7 @@ glue.module.get(
                             this.visible.draw(deltaT, context);
                         }
                     }),
-                    dog = Component(Animatable).add({
+                    dog = Component(Visible, Animatable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
@@ -188,7 +188,7 @@ glue.module.get(
                     playerPosition,
                     playerDimension,
                     walkSpeed = 80,
-                    player = Component(Animatable).add({
+                    player = Component(Visible, Animatable).add({
                         init: function () {
                             this.animatable.setup({
                                 position: {
