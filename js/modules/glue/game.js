@@ -15,6 +15,8 @@ glue.module.create(
     ],
     function (Glue, Vector, Event, Loader) {
         var Sugar = Glue.sugar,
+            win = null,
+            doc = null,
             gameInfo,
             fps = 60,
             components = [],
@@ -29,8 +31,7 @@ glue.module.create(
             canvasSupported = false,
             canvasDimension = null,
             canvasScale = {},
-            win = null,
-            doc = null,
+            scroll = Vector(0, 0),
             isRunning = false,
             debug = false,
             debugBar = null,
@@ -155,10 +156,10 @@ glue.module.create(
                         for (var i = 0; i < components.length; ++i) {
                             component = components[i];
                             if (component.update) {
-                                component.update(deltaT);
+                                component.update(deltaT, scroll);
                             }
                             if (component.draw) {
-                                component.draw(deltaT, backBufferContext2D);
+                                component.draw(deltaT, backBufferContext2D, scroll);
                             }
                         };
                     }
@@ -358,11 +359,13 @@ glue.module.create(
             get: function (componentName) {
                 var i,
                     l,
-                    component;
+                    component,
+                    name;
 
                 for (i = 0, l = components.length; i < l; ++i) {
                     component = components[i];
-                    if (component.name === componentName) {
+                    name = component.getName();
+                    if (!Sugar.isEmpty(name) && name === componentName) {
                         return component;
                     }
                 }
@@ -380,6 +383,9 @@ glue.module.create(
             },
             getComponentCount: function () {
                 return components.length;
+            },
+            getScroll: function () {
+                return scroll;
             }
         };
     }

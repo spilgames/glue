@@ -64,7 +64,7 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
+                draw: function (deltaT, context, scroll) {
                     context.save();
                     
                     if (Sugar.isDefined(obj.rotatable)) {
@@ -74,7 +74,7 @@ glue.module.create(
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
                     }
-                    context.drawImage(image, position.x, position.y)
+                    context.drawImage(image, position.x - scroll.x, position.y - scroll.y)
                     context.restore();
                 },
                 getPosition: function () {
