@@ -4768,9 +4768,10 @@ glue.module.create(
 glue.module.create(
     'glue/component/animatable',
     [
-        'glue'
+        'glue',
+        'glue/math/vector'
     ],
-    function (Glue) {
+    function (Glue, Vector) {
         return function (obj) {
             var Sugar = Glue.sugar,
                 animationSettings,
@@ -4838,12 +4839,16 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
+                draw: function (deltaT, context, scroll) {
                     var position = obj.visible.getPosition(),
                         sourceX = frameWidth * currentFrame;
 
+                    scroll = scroll || Vector(0, 0);
                     context.save();
-                    context.translate(position.x, position.y);
+                    context.translate(
+                        position.x - scroll.x,
+                        position.y - scroll.y
+                    );
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
@@ -5648,16 +5653,19 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context, scroll) {
+                    scroll = scroll || Vector(0, 0);
                     context.save();
-                    
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
-
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
                     }
-                    context.drawImage(image, position.x - scroll.x, position.y - scroll.y)
+                    context.drawImage(
+                        image,
+                        position.x - scroll.x,
+                        position.y - scroll.y
+                    );
                     context.restore();
                 },
                 getPosition: function () {

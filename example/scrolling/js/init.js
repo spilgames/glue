@@ -6,7 +6,8 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/component',
-        'glue/component/visible'
+        'glue/component/visible',
+        'glue/component/animatable'
     ],
     function (
         Domready,
@@ -15,7 +16,8 @@ glue.module.get(
         Dimension,
         Vector,
         Component,
-        Visible
+        Visible,
+        Animatable
     ) {
         'use strict';
         Domready(function () { 
@@ -25,40 +27,81 @@ glue.module.get(
                 },
                 canvas: {
                     id: 'canvas',
-                    dimension: Dimension(600, 600)
+                    dimension: Dimension(800, 600)
                 },
                 develop: {
                     debug: true
                 },
                 asset: {
                     image: {
-                        path: 'asset/',
+                        path: '../image/',
                         source: {
-                            blocks: 'block-sheet.png'
+                            glue: 'glue-logo.png',
+                            spil: 'spil-logo.png',
+                            dog: 'dog-sit.png'
                         }
                     }
                 }
             }, function () {
-                var scrollSpeed = 50,
-                    scroll = Game.getScroll(),
+                var scroll = Game.getScroll(),
                     component = Component(Visible).add({
-                    init: function () {
-                        this.visible.setup({
-                            position: Vector(320, 300),
-                            image: Loader.getAsset('blocks')
-                        });
-                    },
-                    update: function (deltaT, scroll) {
-                        if (scroll.x < this.visible.getDimension().width) {
-                            scroll.x += deltaT * scrollSpeed;
+                        init: function () {
+                            this.visible.setup({
+                                position: Vector(600, 400),
+                                image: Loader.getAsset('glue')
+                            });
+                        },
+                        draw: function (deltaT, context, scroll) {
+                            this.visible.draw(deltaT, context, scroll);
+                        },
+                        pointerMove: function (e) {
+                            scroll.x = e.position.x;
+                            scroll.y = e.position.y;
                         }
-                    },
-                    draw: function (deltaT, context, scroll) {
-                        this.visible.draw(deltaT, context, scroll);
-                    }
-                });
+                    }),
+                    component2 = Component(Visible).add({
+                        init: function () {
+                            this.visible.setup({
+                                position: Vector(800, 400),
+                                image: Loader.getAsset('spil')
+                            });
+                        },
+                        draw: function (deltaT, context, scroll) {
+                            this.visible.draw(deltaT, context, scroll);
+                        }
+                    }),
+                    dog = Component(Visible, Animatable).add({
+                        init: function () {
+                            this.animatable.setup({
+                                position: {
+                                    x: 350,
+                                    y: 400
+                                },
+                                image: Loader.getAsset('dog'),
+                                animation: {
+                                    frameCount: 8,
+                                    fps: 8,
+                                    animations: {
+                                        wiggleTail: {
+                                            startFrame: 1,
+                                            endFrame: 8
+                                        }
+                                    }
+                                }
+                            });
+                            this.animatable.setAnimation('wiggleTail');
+                        },
+                        update: function (deltaT, context) {
+                            this.animatable.update(deltaT);
+                        },
+                        draw: function (deltaT, context, scroll) {
+                            this.animatable.draw(deltaT, context, scroll);
+                        }
+                    });
 
                 Game.add(component);
+                Game.add(component2);
+                Game.add(dog);
             });
         });
     }
