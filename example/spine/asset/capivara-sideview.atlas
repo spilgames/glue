@@ -1,0 +1,131 @@
+
+capivara-sideview.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+capivara-head
+  rotate: false
+  xy: 1, 81
+  size: 195, 174
+  orig: 195, 174
+  offset: 0, 0
+  index: -1
+capivara-body
+  rotate: false
+  xy: 198, 119
+  size: 210, 136
+  orig: 210, 136
+  offset: 0, 0
+  index: -1
+cast-shadow
+  rotate: false
+  xy: 410, 204
+  size: 263, 51
+  orig: 263, 51
+  offset: 0, 0
+  index: -1
+capivara-right-front-lowerleg
+  rotate: false
+  xy: 1, 1
+  size: 71, 78
+  orig: 71, 78
+  offset: 0, 0
+  index: -1
+capivara-right-front-foot
+  rotate: false
+  xy: 410, 119
+  size: 65, 83
+  orig: 65, 83
+  offset: 0, 0
+  index: -1
+capivara-right-hind-lowerleg
+  rotate: false
+  xy: 74, 7
+  size: 76, 72
+  orig: 76, 72
+  offset: 0, 0
+  index: -1
+capivara-right-hind-upperleg
+  rotate: false
+  xy: 477, 120
+  size: 62, 82
+  orig: 62, 82
+  offset: 0, 0
+  index: -1
+capivara-left-front-lowerleg
+  rotate: false
+  xy: 541, 132
+  size: 64, 70
+  orig: 64, 70
+  offset: 0, 0
+  index: -1
+capivara-left-hind-lowerleg
+  rotate: false
+  xy: 607, 138
+  size: 67, 64
+  orig: 67, 64
+  offset: 0, 0
+  index: -1
+capivara-left-front-foot
+  rotate: false
+  xy: 152, 5
+  size: 58, 74
+  orig: 58, 74
+  offset: 0, 0
+  index: -1
+capivara-left-hind-upperleg
+  rotate: false
+  xy: 212, 44
+  size: 55, 73
+  orig: 55, 73
+  offset: 0, 0
+  index: -1
+capivara-right-hind-foot
+  rotate: false
+  xy: 269, 57
+  size: 48, 60
+  orig: 48, 60
+  offset: 0, 0
+  index: -1
+capivara-left-hind-foot
+  rotate: false
+  xy: 319, 64
+  size: 43, 53
+  orig: 43, 53
+  offset: 0, 0
+  index: -1
+capivara-right-front-toes
+  rotate: false
+  xy: 675, 224
+  size: 51, 31
+  orig: 51, 31
+  offset: 0, 0
+  index: -1
+capivara-right-hind-toes
+  rotate: false
+  xy: 212, 11
+  size: 51, 31
+  orig: 51, 31
+  offset: 0, 0
+  index: -1
+capivara-left-front-toes
+  rotate: false
+  xy: 364, 89
+  size: 44, 28
+  orig: 44, 28
+  offset: 0, 0
+  index: -1
+capivara-left-hind-toes
+  rotate: false
+  xy: 728, 227
+  size: 44, 28
+  orig: 44, 28
+  offset: 0, 0
+  index: -1
+capivara-tail
+  rotate: false
+  xy: 410, 91
+  size: 26, 26
+  orig: 26, 26
+  offset: 0, 0
+  index: -1
