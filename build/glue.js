@@ -5167,7 +5167,6 @@ glue.module.create(
                 },
                 draw: function (context, deltaT) {
                     context.globalAlpha = alpha;
-                    return context;
                 },
                 fade: function (callback, startAlpha, endAlpha) {
                     alpha = startAlpha;
