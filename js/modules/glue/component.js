@@ -12,7 +12,7 @@ glue.module.create(
     ],
     function (Glue) {
         return function () {
-            var name = 'undefined',
+            var name = '',
                 obj = {
                     add: function (value) {
                         this.mix(value);

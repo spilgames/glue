@@ -11,9 +11,10 @@
 glue.module.create(
     'glue/component/animatable',
     [
-        'glue'
+        'glue',
+        'glue/math/vector'
     ],
-    function (Glue) {
+    function (Glue, Vector) {
         return function (obj) {
             var Sugar = Glue.sugar,
                 animationSettings,
@@ -81,12 +82,16 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
+                draw: function (deltaT, context, scroll) {
                     var position = obj.visible.getPosition(),
                         sourceX = frameWidth * currentFrame;
 
+                    scroll = scroll || Vector(0, 0);
                     context.save();
-                    context.translate(position.x, position.y);
+                    context.translate(
+                        position.x - scroll.x,
+                        position.y - scroll.y
+                    );
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }

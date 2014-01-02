@@ -67,7 +67,7 @@ glue.module.get(
                         }
                     },
                     draw: function (deltaT, context) {
-                        context = this.fadable.draw(context);
+                        this.fadable.draw(context);
                         this.visible.draw(deltaT, context);
                     }
                 });

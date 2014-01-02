@@ -18,7 +18,8 @@ glue.module.create(
                 targetAlpha,
                 fadingIn = false,
                 fadingOut = false,
-                fadeSpeed = 0.5;
+                fadeSpeed = 0.5,
+                atTargetCallback = null;
 
             component = component || {};
             component.fadable = {
@@ -29,6 +30,9 @@ glue.module.create(
                         } else {
                             alpha = targetAlpha;
                             fadingIn = false;
+                            if (atTargetCallback !== null) {
+                                atTargetCallback();
+                            }
                         }
                     }
                     else if (fadingOut === true) {
@@ -37,28 +41,39 @@ glue.module.create(
                         } else {
                             alpha = targetAlpha;
                             fadingOut = false;
+                            if (atTargetCallback !== null) {
+                                atTargetCallback();
+                            }
                         }
                     }
                 },
                 draw: function (context, deltaT) {
                     context.globalAlpha = alpha;
-                    return context;
                 },
-                fade: function (startAlpha, endAlpha) {
+                fade: function (callback, startAlpha, endAlpha) {
                     alpha = startAlpha;
                     targetAlpha = endAlpha;
                     fadingIn = startAlpha < endAlpha ? true : false;
                     fadingOut = startAlpha > endAlpha ? true : false;
+                    if (Sugar.isDefined(callback)) {
+                        atTargetCallback = callback;
+                    }
                 },
-                fadeIn: function (endAlpha) {
+                fadeIn: function (callback, endAlpha) {
                     alpha = 0;
                     targetAlpha = endAlpha || 1;
                     fadingIn = true;
+                    if (Sugar.isDefined(callback)) {
+                        atTargetCallback = callback;
+                    }
                 },
-                fadeOut: function (endAlpha) {
+                fadeOut: function (callback, endAlpha) {
                     alpha = 1;
                     targetAlpha = endAlpha || 0;
                     fadingOut = true;
+                    if (Sugar.isDefined(callback)) {
+                        atTargetCallback = callback;
+                    }
                 },
                 setAlpha: function (value) {
                     if (Sugar.isNumber(value)) {
@@ -83,6 +98,9 @@ glue.module.create(
                 },
                 getFadeSpeed: function () {
                     return fadeSpeed;
+                },
+                atTarget: function () {
+                    return !fadingIn && !fadingOut;
                 }
             };
             return component;

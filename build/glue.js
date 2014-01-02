@@ -4727,7 +4727,7 @@ glue.module.create(
     ],
     function (Glue) {
         return function () {
-            var name = 'undefined',
+            var name = '',
                 obj = {
                     add: function (value) {
                         this.mix(value);
@@ -4768,9 +4768,10 @@ glue.module.create(
 glue.module.create(
     'glue/component/animatable',
     [
-        'glue'
+        'glue',
+        'glue/math/vector'
     ],
-    function (Glue) {
+    function (Glue, Vector) {
         return function (obj) {
             var Sugar = Glue.sugar,
                 animationSettings,
@@ -4838,12 +4839,16 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
+                draw: function (deltaT, context, scroll) {
                     var position = obj.visible.getPosition(),
                         sourceX = frameWidth * currentFrame;
 
+                    scroll = scroll || Vector(0, 0);
                     context.save();
-                    context.translate(position.x, position.y);
+                    context.translate(
+                        position.x - scroll.x,
+                        position.y - scroll.y
+                    );
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
@@ -5131,7 +5136,8 @@ glue.module.create(
                 targetAlpha,
                 fadingIn = false,
                 fadingOut = false,
-                fadeSpeed = 0.5;
+                fadeSpeed = 0.5,
+                atTargetCallback = null;
 
             component = component || {};
             component.fadable = {
@@ -5142,6 +5148,9 @@ glue.module.create(
                         } else {
                             alpha = targetAlpha;
                             fadingIn = false;
+                            if (atTargetCallback !== null) {
+                                atTargetCallback();
+                            }
                         }
                     }
                     else if (fadingOut === true) {
@@ -5150,28 +5159,39 @@ glue.module.create(
                         } else {
                             alpha = targetAlpha;
                             fadingOut = false;
+                            if (atTargetCallback !== null) {
+                                atTargetCallback();
+                            }
                         }
                     }
                 },
                 draw: function (context, deltaT) {
                     context.globalAlpha = alpha;
-                    return context;
                 },
-                fade: function (startAlpha, endAlpha) {
+                fade: function (callback, startAlpha, endAlpha) {
                     alpha = startAlpha;
                     targetAlpha = endAlpha;
                     fadingIn = startAlpha < endAlpha ? true : false;
                     fadingOut = startAlpha > endAlpha ? true : false;
+                    if (Sugar.isDefined(callback)) {
+                        atTargetCallback = callback;
+                    }
                 },
-                fadeIn: function (endAlpha) {
+                fadeIn: function (callback, endAlpha) {
                     alpha = 0;
                     targetAlpha = endAlpha || 1;
                     fadingIn = true;
+                    if (Sugar.isDefined(callback)) {
+                        atTargetCallback = callback;
+                    }
                 },
-                fadeOut: function (endAlpha) {
+                fadeOut: function (callback, endAlpha) {
                     alpha = 1;
                     targetAlpha = endAlpha || 0;
                     fadingOut = true;
+                    if (Sugar.isDefined(callback)) {
+                        atTargetCallback = callback;
+                    }
                 },
                 setAlpha: function (value) {
                     if (Sugar.isNumber(value)) {
@@ -5196,6 +5216,9 @@ glue.module.create(
                 },
                 getFadeSpeed: function () {
                     return fadeSpeed;
+                },
+                atTarget: function () {
+                    return !fadingIn && !fadingOut;
                 }
             };
             return component;
@@ -5628,17 +5651,20 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
+                draw: function (deltaT, context, scroll) {
+                    scroll = scroll || Vector(0, 0);
                     context.save();
-                    
                     if (Sugar.isDefined(obj.rotatable)) {
                         obj.rotatable.draw(deltaT, context);
                     }
-
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
                     }
-                    context.drawImage(image, position.x, position.y)
+                    context.drawImage(
+                        image,
+                        position.x - scroll.x,
+                        position.y - scroll.y
+                    );
                     context.restore();
                 },
                 getPosition: function () {
@@ -5758,6 +5784,8 @@ glue.module.create(
     ],
     function (Glue, Vector, Event, Loader) {
         var Sugar = Glue.sugar,
+            win = null,
+            doc = null,
             gameInfo,
             fps = 60,
             components = [],
@@ -5772,8 +5800,7 @@ glue.module.create(
             canvasSupported = false,
             canvasDimension = null,
             canvasScale = {},
-            win = null,
-            doc = null,
+            scroll = Vector(0, 0),
             isRunning = false,
             debug = false,
             debugBar = null,
@@ -5898,10 +5925,10 @@ glue.module.create(
                         for (var i = 0; i < components.length; ++i) {
                             component = components[i];
                             if (component.update) {
-                                component.update(deltaT);
+                                component.update(deltaT, scroll);
                             }
                             if (component.draw) {
-                                component.draw(deltaT, backBufferContext2D);
+                                component.draw(deltaT, backBufferContext2D, scroll);
                             }
                         };
                     }
@@ -6101,11 +6128,13 @@ glue.module.create(
             get: function (componentName) {
                 var i,
                     l,
-                    component;
+                    component,
+                    name;
 
                 for (i = 0, l = components.length; i < l; ++i) {
                     component = components[i];
-                    if (component.name === componentName) {
+                    name = component.getName();
+                    if (!Sugar.isEmpty(name) && name === componentName) {
                         return component;
                     }
                 }
@@ -6123,6 +6152,9 @@ glue.module.create(
             },
             getComponentCount: function () {
                 return components.length;
+            },
+            getScroll: function () {
+                return scroll;
             }
         };
     }
