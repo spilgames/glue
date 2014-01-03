@@ -21,9 +21,10 @@ glue.module.create(
         return function (obj) {
             var Sugar = Glue.sugar,
                 position = Vector(0, 0),
-                dimension = null,
+                origin = Vector(0, 0),
+                dimension = Dimension(0, 0),
                 image = null,
-                rectangle,
+                rectangle = Rectangle(0, 0, 0, 0),
                 updateRectangle = function () {
                     rectangle.x1 = position.x;
                     rectangle.y1 = position.y;
@@ -72,7 +73,8 @@ glue.module.create(
                     }
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
-                    }
+                    }    
+                    context.translate(-origin.x, -origin.y);
                     context.drawImage(
                         image,
                         position.x - scroll.x,
@@ -110,6 +112,13 @@ glue.module.create(
                 },
                 getImage: function () {
                     return image;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
             return obj;

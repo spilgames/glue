@@ -17,9 +17,9 @@ glue.module.create(
     function (Glue, Vector) {
         return function (component) {
             var Sugar = Glue.sugar,
-                origin = Vector(0, 0),
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
+                origin = Vector(0, 0),
                 scaleSpeed = 1,
                 atTarget = true;
 
@@ -51,13 +51,14 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
-                    context.translate(origin.x, origin.y);
                     context.scale(currentScale.x, currentScale.y);
                     context.translate(-origin.x, -origin.y);
                 },
                 setScale: function (vec) {
                     currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;
                     currentScale.y = Sugar.isNumber(vec.y) ? vec.y : currentScale.y;
+                    targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
+                    targetScale.y = Sugar.isNumber(vec.y) ? vec.y : targetScale.y;
                 },
                 setTarget: function (vec) {
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
@@ -68,10 +69,6 @@ glue.module.create(
                     scaleSpeed = Sugar.isNumber(value) ? value : scaleSpeed;
                     scaleSpeed = Math.floor(scaleSpeed / 100);
                 },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
-                },
                 getScale: function () {
                     return currentScale;
                 },
@@ -81,11 +78,15 @@ glue.module.create(
                 getSpeed: function () {
                     return Math.floor(scaleSpeed * 100);
                 },
-                getOrigin: function () {
-                    return origin;
-                },
                 atTarget: function () {
                     return atTarget;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
             return component;

@@ -45,11 +45,11 @@ glue.module.get(
                 }
             }
         }, function () {
-            var component = Component(Animatable, Visible, Scalable, Movable).add({
+            var component = Component(Animatable, Visible, Scalable, Movable, Rotatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
-                                x: 300,
+                                x: 310,
                                 y: 300
                             },
                             animation: {
@@ -77,39 +77,23 @@ glue.module.get(
                             image: Loader.getAsset('blocks')
                         });
                         this.animatable.setAnimation('yellow');
-                        this.scalable.setOrigin({
+                        
+                        this.visible.setOrigin({
                             x: 35,
                             y: 35
                         });
-                        this.scalable.setScale({
-                            x: 8,
-                            y: 8
-                        });
+
                         this.scalable.setTarget({
-                            x: 5,
+                            x: 2,
                             y: 2
                         });
-                        this.scalable.setSpeed(200);
-                        this.movable.setTarget({
-                            x: 0,
-                            y: 0
-                        });
+
+                        this.rotatable.setTargetDegree(180);
                     },
                     update: function (deltaT) {
                         this.movable.update(deltaT);
                         this.scalable.update(deltaT);
-                        if (this.scalable.atTarget()) {
-                            component.scalable.setTarget({
-                                x: 2,
-                                y: 8
-                            });
-                        }
-                        if (this.movable.atTarget()) {
-                                this.movable.setTarget({
-                                x: 300,
-                                y: 300
-                            });
-                        }
+                        this.rotatable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
                         this.animatable.draw(deltaT, context);
