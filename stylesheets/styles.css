@@ -20,6 +20,10 @@ h1, h2, h3 {
   line-height:1.1;
 }
 
+h3.mainTitle {
+  
+}
+
 h1 {
   font-size:28px;
 }
@@ -36,6 +40,12 @@ a {
   color:#39c;
   font-weight:400;
   text-decoration:none;
+}
+
+.menu a {
+  color: #000;
+  font-weight:600;
+  text-decoration:underline;
 }
 
 a small {
@@ -158,7 +168,7 @@ header ul a strong {
 }
 
 section {
-  
+
 }
 
 small {
@@ -175,6 +185,7 @@ hr {
 footer {
   width:270px;
   float:left;
+  margin-top: 60px;
 }
 
 @media print, screen and (max-width: 960px) {

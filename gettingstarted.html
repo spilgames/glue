@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Glue Engine Documentation - Getting started</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+    <div class="wrapper">
+        <h2 class="mainTitle">Glue Engine Documentation</h3>
+            <h3>Inclusion</h3>
+
+            <p>To include Glue in your project you can add Glue as a bower dependency. You can do so by adding Glue as a dependency in your bower.json file, as you can see in the example below. You need to replace 0.0.5 by the latest version of Glue, and run "bower update" from your terminal. More information about setting up Bower dependencies can be found on the <a href="http://bower.io" target="_blank">Bower website</a>.</p>
+
+<pre>
+"dependencies": {
+    "glue-engine": "~0.0.5"
+}
+</pre>
+
+            <p>
+                After you did that, Glue will be in the "bower_components" directory and you can include Glue in the head of your HTML5 document, like you can see in the example code below. You need to replace <strong>[PATH]</strong> with the actual path which holds your bower_components folder.
+            </p>
+
+            <h3>Create a game</h3>
+
+            <p>
+                To create a new Glue Game you can use the Game module ('glue/game'). You you only need to startup your game once. After that, the running game instance will be available through the Game module.
+            </p>
+            <p>
+                To start a game you can use the 'setup' method The setup method requires a configuration object. The canvas property is mandatory, because Glue needs it to get information about the canvas you want to use to render you game in. The canvas property needs tho contain the sub-properties "id" and "dimension". If there is a canvas present with the configured id, Glue will use this canvas, if not, Glue will automatically create the canvas for you. The dimension property needs to contain an object with the width and height of the canvas. To define the dimension you need to use the Dimension module ('glue/math/dimension'). You can see an example of this below.
+            </p>
+
+<pre>
+glue.module.get(['glue/game', 'glue/math/dimension'], function (Game, Dimension) {
+    Game.setup({
+        game: {
+            name: 'My Glue Game'
+        },
+        canvas: {
+            id: 'canvas',
+            dimension: Dimension(800, 600)
+        }
+    });
+});
+</pre>          
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;head&gt;</span>
+<span class="nt">    &lt;script </span><span class="na">src=</span><span class="s">"[PATH]/bower_components/glue.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+</pre></div>
+
+        </section>
+        <footer>
+            <p>This project is maintained by <a href="https://github.com/spilgames">spilgames</a></p>
+            <p><small>Hosted on GitHub Pages &mdash; Origninal theme by <a href="https://github.com/orderedlist">orderedlist</a> &mdash; Modified theme by <a href="https://github.com/buffer-overflow">Buffer-Overflow</a></small></p>
+        </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+</body>
+</html>
