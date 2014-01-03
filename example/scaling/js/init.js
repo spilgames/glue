@@ -112,7 +112,12 @@ glue.module.get(
                         }
                     },
                     draw: function (deltaT, context) {
+                        var pos = this.visible.getPosition(),
+                            dimension = this.scalable.getDimension();
                         this.animatable.draw(deltaT, context);
+                        context.strokeStyle = '#ff0000';
+                        //context.strokeRect(pos.x, pos.y, dimension.width, dimension.height);
+                        console.log(pos.x, pos.y, dimension.width, dimension.height);
                     }
                 });
             Game.add(component);
