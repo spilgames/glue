@@ -2717,7 +2717,7 @@ window.RSVP = requireModule("rsvp");
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3643,7 +3643,7 @@ modules.glue.sugar = (function (win, doc) {
  *  @module Glue
  *  @namespace adapters
  *  @desc Provides adapters to interface with native Glue functionality
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3681,7 +3681,7 @@ adapters.glue = (function (win, Glue) {
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3711,7 +3711,7 @@ adapters.glue = (function (win, Glue) {
 /*global define, RSVP*/
 /*
  *  @module Audio51
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3862,7 +3862,7 @@ define(
 /*global define, RSVP*/
 /*
  *  @module Context
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3928,7 +3928,7 @@ define('audiotag/context', ["audiotag/sound"],function( Sound ) {
 /*global define, RSVP, requestAnimationFrame, cancelAnimationFrame*/
 /*
  *  @module Restricted
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4068,7 +4068,7 @@ define('audiotag/restricted', ["audiotag/context", "audiotag/sprite"],function( 
 /*global define, RSVP*/
 /*
  *  @module Sound
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4135,7 +4135,7 @@ define('audiotag/sound', ["unrestrict"],function(unrestrict) {
 /*global define, RSVP*/
 /*
  *  @module Sprite
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4169,7 +4169,7 @@ define('audiotag/sprite', [],function( ) {
 /*global define, RSVP*/
 /*
  *  @module Manager
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4197,7 +4197,7 @@ define(
 /*jshint -W083*/ //ignore 'Don't create functions in loops'
 /*
  *  @module Testframework
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4407,7 +4407,7 @@ var AudioTestFramework = ( function() {
 /*global define, RSVP*/
 /*
  *  @module Unrestrict
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4491,7 +4491,7 @@ define(
 /*global define, RSVP*/
 /*
  *  @module Context
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4654,7 +4654,7 @@ define('webaudio/context', ["webaudio/sound", "unrestrict"],function( Sound, Unr
 /*global define, RSVP*/
 /*
  *  @module Sound
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4718,7 +4718,7 @@ define('webaudio/sound', function() {
 /*
  *  @module Component
  *  @desc Represents a component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4761,7 +4761,7 @@ glue.module.create(
  *  @module Animatable
  *  @namespace component
  *  @desc Represents an animatable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -4900,7 +4900,7 @@ glue.module.create(
  *  @module Clickable
  *  @namespace component
  *  @desc Used to make a game component perfom an action when she's clicked
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4952,7 +4952,7 @@ glue.module.create(
  *  @module Draggable
  *  @namespace component
  *  @desc Used to make a game entity draggable
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5079,7 +5079,7 @@ glue.module.create(
  *  @module Droptarget
  *  @namespace component
  *  @desc Used to make a game entity behave as a droptarget
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5122,7 +5122,7 @@ glue.module.create(
  *  @module Fadable
  *  @namespace component
  *  @desc Represents an fadable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5232,7 +5232,7 @@ glue.module.create(
  *  @module Hoverable
  *  @namespace component
  *  @desc Used to make a game component perfom an action when she's hovered over
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5290,7 +5290,7 @@ glue.module.create(
  *  @module Movable
  *  @namespace component
  *  @desc Represents an movable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5372,7 +5372,7 @@ glue.module.create(
  *  @module Rotatable
  *  @namespace component
  *  @desc Represents a rotatable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -5496,7 +5496,7 @@ glue.module.create(
  *  @module Scalable
  *  @namespace component
  *  @desc Represents a scalable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -5591,7 +5591,7 @@ glue.module.create(
  *  @module Visible
  *  @namespace component
  *  @desc Represents a visible component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -5710,7 +5710,7 @@ glue.module.create(
  *  @module System
  *  @namespace event
  *  @desc This module offers a very basic pub/sub system event system
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5772,7 +5772,7 @@ glue.module.create(
 /*
  *  @module Game
  *  @desc Represents a Glue game
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6168,7 +6168,7 @@ glue.module.create(
 /*
  *  @module Loader
  *  @desc Used to load assets in the beginning of the game, shows a progress bar
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6260,7 +6260,7 @@ glue.module.create(
 /**
  *  @module Math
  *  @desc The math module
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6287,7 +6287,7 @@ glue.module.create(
  *  @module Dimension
  *  @namespace math
  *  @desc Represents a dimension
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6317,7 +6317,7 @@ glue.module.create(
  *  @module Matrix
  *  @namespace math
  *  @desc Represents a matrix
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6381,7 +6381,7 @@ glue.module.create('glue/math/matrix', [
  *  @module Polygon
  *  @namespace math
  *  @desc Represents a polygon
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6431,7 +6431,7 @@ glue.module.create(
  *  @module Rectangle
  *  @namespace math
  *  @desc Represents a rectangle
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6468,7 +6468,7 @@ glue.module.create(
  *  @module Vector
  *  @namespace math
  *  @desc Represents a vector
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6520,7 +6520,7 @@ glue.module.create('glue/math/vector', function () {
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */

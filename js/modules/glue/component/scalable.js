@@ -2,7 +2,7 @@
  *  @module Scalable
  *  @namespace component
  *  @desc Represents a scalable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
