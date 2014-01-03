@@ -143,6 +143,9 @@ glue.module.create(
                     currentSkeleton = spineSettings.skeleton;
                     addAtlas(spineSettings);
                     addSkeletonData(spineSettings);
+                    if (spineSettings.position && obj.visible) {
+                        obj.visible.setPosition(spineSettings.position);
+                    }
                 },
                 /**
                  * Loads the atlas data
@@ -222,10 +225,10 @@ glue.module.create(
                             continue;
                         }
                         attachment.computeVertices(skeleton.x, skeleton.y, slot.bone, vertices);
-                        boneRectangle.setWidth(attachment.width);
-                        boneRectangle.setHeight(attachment.height);
                         boneRectangle.x1 = vertices[2];
                         boneRectangle.y1 = vertices[3];
+                        boneRectangle.setWidth(attachment.width);
+                        boneRectangle.setHeight(attachment.height);
                         skeletonRectangle.union(boneRectangle);
                     }
                     skeletonRectangles[currentSkeleton] = skeletonRectangle;
@@ -251,31 +254,10 @@ glue.module.create(
                             scale = obj.scalable.getScale();
                         }
                         // update visible dimension
-                        width = skeletonRectangle.getWidth() * scale.x;
-                        height = skeletonRectangle.getHeight() * scale.y;
+                        width = skeletonRectangle.getWidth() * Math.abs(scale.x);
+                        height = skeletonRectangle.getHeight() * Math.abs(scale.y);
                         obj.visible.setDimension(Dimension(width, height));
                     }
-                },
-                /**
-                 * Updates the skeleton's position to set it to the object's position
-                 * @name updateAnimatable
-                 * @memberOf Spineable
-                 * @function
-                 */
-                updatePosition = function () {
-                    var skeleton = skeletons[currentSkeleton],
-                        position = Vector(0, 0),
-                        scale = Vector(1, 1);
-                    if (obj.visible) {
-                        position = obj.visible.getPosition();
-                    }
-                    if (obj.scalable) {
-                        scale = obj.scalable.getScale();
-                    }
-                    // divide by scale here because the position is
-                    // superposed inside computeVertices in the draw function
-                    skeleton.getRootBone().x = position.x / scale.x;
-                    skeleton.getRootBone().y = position.y / scale.y;
                 };
 
             // - external interface -
@@ -290,22 +272,26 @@ glue.module.create(
                 draw: function (deltaT, context, scroll) {
                     var slot = {},
                         attachment = {},
-                        fx, fy, x, y, w, h,
+                        skeleton = skeletons[currentSkeleton],
+                        i = 0,
+                        l = skeleton.drawOrder.length,
+                        x, y, w, h,
                         px, py,
                         scaleX, scaleY,
                         boneScaleX, boneScaleY,
                         angle,
-                        skeleton = skeletons[currentSkeleton],
-                        i = 0,
-                        l = skeleton.drawOrder.length,
                         corner = cornerPoints[currentSkeleton],
                         origin = origins[currentSkeleton],
-                        vOrigin = Vector(0, 0);
-                    if (obj.visible) {
-                        // vOrigin = obj.scalable.getOrigin();
-                    }
-
+                        vOrigin = Vector(0, 0),
+                        position = Vector(0, 0),
+                        offset;
                     context.save();
+                    if (obj.visible) {
+                        vOrigin = obj.visible.getOrigin();
+                        position = obj.visible.getPosition();
+                        context.translate(~~position.x, ~~position.y);
+                    }
+                    offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));
                     if (obj.scalable) {
                         obj.scalable.draw(deltaT, context);
                     }
@@ -319,19 +305,17 @@ glue.module.create(
                             continue;
                         }
                         attachment.computeVertices(skeleton.x, skeleton.y, slot.bone, vertices);
-                        fx = skeleton.flipX ? -1 : 1;
-                        fy = skeleton.flipY ? -1 : 1;
-                        x = (vertices[2] - (corner.x + origin.x + vOrigin.x) * fx);
-                        y = (vertices[3] - (corner.y + origin.y + vOrigin.y) * fy);
+                        x = (vertices[2] - offset.x);
+                        y = (vertices[3] - offset.y);
                         w = attachment.rendererObject.width;
                         h = attachment.rendererObject.height;
                         px = attachment.rendererObject.x;
                         py = attachment.rendererObject.y;
-                        scaleX = attachment.scaleX * fx * fy;
-                        scaleY = attachment.scaleY * fx * fy;
+                        scaleX = attachment.scaleX;
+                        scaleY = attachment.scaleY;
                         boneScaleX = slot.bone.scaleX;
                         boneScaleY = slot.bone.scaleY;
-                        angle = -(slot.bone.worldRotation + attachment.rotation) * Math.PI / 180 * fx * fy;
+                        angle = -(slot.bone.worldRotation + attachment.rotation) * Math.PI / 180;
 
                         context.save();
                         context.translate(~~x, ~~y);
@@ -343,6 +327,10 @@ glue.module.create(
                         context.restore();
                     }
                     context.restore();
+
+                    // draw boundingbox
+                    // var b=obj.visible.getBoundingBox();
+                    // context.strokeRect(b.x1,b.y1,b.getWidth(),b.getHeight());
                 },
                 /**
                  * Update the animation
@@ -355,7 +343,6 @@ glue.module.create(
                     state[currentSkeleton].update(deltaT);
                     state[currentSkeleton].apply(skeleton);
                     skeleton.updateWorldTransform();
-                    updatePosition();
                     return true;
                 },
                 /**
@@ -424,24 +411,6 @@ glue.module.create(
                     return skeletonJson[currentSkeleton].scale;
                 },
                 /**
-                 * Mirrors the sprite in the x direction around the anchor point
-                 * @name flipX
-                 * @memberOf Spineable
-                 * @function
-                 */
-                flipX: function (bool) {
-                    skeletons[currentSkeleton].flipX = bool;
-                },
-                /**
-                 * Mirrors the sprite in the y direction around the anchor point
-                 * @name flipY
-                 * @memberOf Spineable
-                 * @function
-                 */
-                flipY: function (bool) {
-                    skeletons[currentSkeleton].flipY = bool;
-                },
-                /**
                  * Adds another skeleton json to the spineable
                  * @name addSkeleton
                  * @memberOf Spineable
@@ -506,9 +475,6 @@ glue.module.create(
                         y: -cornerPoints[currentSkeleton].y
                     };
                     updateVisible();
-                },
-                getBoundingBox: function () {
-                    return rectangle;
                 }
             };
             return obj;

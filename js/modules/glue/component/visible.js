@@ -26,10 +26,14 @@ glue.module.create(
                 image = null,
                 rectangle = Rectangle(0, 0, 0, 0),
                 updateRectangle = function () {
-                    rectangle.x1 = position.x;
-                    rectangle.y1 = position.y;
-                    rectangle.x2 = position.x + dimension.width;
-                    rectangle.y2 = position.y + dimension.height;
+                    var scale = Vector(1, 1);
+                    if (obj.scalable) {
+                        scale = obj.scalable.getScale();
+                    }
+                    rectangle.x1 = position.x - origin.x * Math.abs(scale.x);
+                    rectangle.y1 = position.y - origin.y * Math.abs(scale.y);
+                    rectangle.x2 = position.x - origin.x * Math.abs(scale.x) + dimension.width;
+                    rectangle.y2 = position.y - origin.y * Math.abs(scale.y) + dimension.height;
                 };
 
             obj = obj || {};

@@ -49,12 +49,12 @@ glue.module.get(
                 }
             }, function () {
                 var scroll = Game.getScroll(),
-                    spine = Component(Visible, Spineable, Scalable, Rotatable, Draggable).add({
+                    capivara = Component(Visible, Spineable, Scalable, Rotatable, Draggable).add({
                         init: function () {
                             this.spineable.setup({
                                 position: {
-                                    x: 100,
-                                    y: 200
+                                    x: 300,
+                                    y: 300
                                 },
                                 atlasImage: 'capivara_sideview',
                                 atlas: 'capivara_sideview_atlas',
@@ -71,13 +71,28 @@ glue.module.get(
                         draw: function (deltaT, context, scroll) {
                             this.spineable.draw(deltaT, context, scroll);
                         },
+                        // pointerMove: function (e) {
+                        //     this.visible.setPosition(e.position);
+                        // },
+                        pointerDown: function (e) {
+                            this.draggable.pointerDown(e);
+                        },
                         pointerMove: function (e) {
-                            this.visible.setPosition(e.position);
+                            this.draggable.pointerMove(e);
+                        },
+                        pointerUp: function (e) {
+                            this.draggable.pointerUp(e);
                         }
                     });
-                spine.scalable.setScale(Vector(0.5, 1));
-                // spine.rotatable.setAngleDegree(45);
-                Game.add(spine);
+                Game.add(capivara);
+                // set origin
+                capivara.visible.setOrigin(Vector(150, 150));
+                // set an angle
+                // capivara.rotatable.setAngleDegree(45);
+                // scale
+                // capivara.scalable.setScale(Vector(2, 2));
+                // flip
+                // capivara.scalable.setScale(Vector(-1, 1));
             });
         });
     }

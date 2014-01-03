@@ -43,10 +43,10 @@ glue.module.create(
                     this.y2 = this.y1 + height;
                 },
                 union: function (rectangle) {
-                    this.x1 = Math.min(this.x1, rectangle.get().x1);
-                    this.y1 = Math.min(this.y1, rectangle.get().y1);
-                    this.x2 = Math.max(this.x2, rectangle.get().x2);
-                    this.y2 = Math.max(this.y2, rectangle.get().y2);
+                    this.x1 = Math.min(this.x1, rectangle.x1);
+                    this.y1 = Math.min(this.y1, rectangle.y1);
+                    this.x2 = Math.max(this.x2, rectangle.x2);
+                    this.y2 = Math.max(this.y2, rectangle.y2);
                 }
             };
         };
