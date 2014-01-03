@@ -4843,8 +4843,8 @@ glue.module.create(
                 },
                 draw: function (deltaT, context, scroll) {
                     var position = obj.visible.getPosition(),
-                        sourceX = frameWidth * currentFrame;
-
+                        sourceX = frameWidth * currentFrame,
+                        origin = obj.visible.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -4856,7 +4856,8 @@ glue.module.create(
                     }
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
-                    }
+                    }    
+                    context.translate(-origin.x, -origin.y);
                     context.drawImage
                     (
                         image,
@@ -5385,18 +5386,18 @@ glue.module.create(
         'glue/math/vector'
     ],
     function (Glue, Vector) {
-        return function (obj) {
+        return function (component) {
             var Sugar = Glue.sugar,
                 angle = 0,
                 rotationSpeed = 100,
                 targetAngle = 0,
                 rotationDirection = 1,
-                origin = Vector(0, 0),
                 toDegree = 180 / Math.PI,
                 atTarget = true,
                 toRadian = Math.PI / 180;
-            obj = obj || {};
-            obj.rotatable = {
+                origin = Vector(0, 0),
+            component = component || {};
+            component.rotatable = {
                 update: function (deltaT) {
                     var tarDeg,
                         curDeg,
@@ -5426,7 +5427,6 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
-                    context.translate(origin.x, origin.y);
                     context.rotate(angle);
                     context.translate(-origin.x, -origin.y);
                 },
@@ -5436,10 +5436,6 @@ glue.module.create(
                 },
                 setAngleRadian: function (value) {
                     angle = Sugar.isNumber(value) ? value : angle;
-                },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
                 },
                 setTargetDegree: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
@@ -5474,9 +5470,6 @@ glue.module.create(
                 getAngleRadian: function () {
                     return angle;
                 },
-                getOrigin: function () {
-                    return origin;
-                },
                 getTargetDegree: function () {
                     return targetAngle * toDegree;
                 },
@@ -5485,9 +5478,16 @@ glue.module.create(
                 },
                 atTarget: function () {
                     return atTarget;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
-            return obj;
+            return component;
         };
     }
 );
@@ -5511,9 +5511,9 @@ glue.module.create(
     function (Glue, Vector) {
         return function (component) {
             var Sugar = Glue.sugar,
-                origin = Vector(0, 0),
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
+                origin = Vector(0, 0),
                 scaleSpeed = 1,
                 atTarget = true;
 
@@ -5545,13 +5545,14 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
-                    context.translate(origin.x, origin.y);
                     context.scale(currentScale.x, currentScale.y);
                     context.translate(-origin.x, -origin.y);
                 },
                 setScale: function (vec) {
                     currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;
                     currentScale.y = Sugar.isNumber(vec.y) ? vec.y : currentScale.y;
+                    targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
+                    targetScale.y = Sugar.isNumber(vec.y) ? vec.y : targetScale.y;
                 },
                 setTarget: function (vec) {
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
@@ -5562,10 +5563,6 @@ glue.module.create(
                     scaleSpeed = Sugar.isNumber(value) ? value : scaleSpeed;
                     scaleSpeed = Math.floor(scaleSpeed / 100);
                 },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
-                },
                 getScale: function () {
                     return currentScale;
                 },
@@ -5575,11 +5572,15 @@ glue.module.create(
                 getSpeed: function () {
                     return Math.floor(scaleSpeed * 100);
                 },
-                getOrigin: function () {
-                    return origin;
-                },
                 atTarget: function () {
                     return atTarget;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
             return component;
@@ -5610,9 +5611,10 @@ glue.module.create(
         return function (obj) {
             var Sugar = Glue.sugar,
                 position = Vector(0, 0),
-                dimension = null,
+                origin = Vector(0, 0),
+                dimension = Dimension(0, 0),
                 image = null,
-                rectangle,
+                rectangle = Rectangle(0, 0, 0, 0),
                 updateRectangle = function () {
                     rectangle.x1 = position.x;
                     rectangle.y1 = position.y;
@@ -5661,7 +5663,8 @@ glue.module.create(
                     }
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
-                    }
+                    }    
+                    context.translate(-origin.x, -origin.y);
                     context.drawImage(
                         image,
                         position.x - scroll.x,
@@ -5699,6 +5702,13 @@ glue.module.create(
                 },
                 getImage: function () {
                     return image;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
             return obj;
