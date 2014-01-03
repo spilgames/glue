@@ -3700,10 +3700,12 @@ adapters.glue = (function (win, Glue) {
         module: glue.module
     };
     window.game = {};
-    glue.module.create('glue', ['audio51'], function (Audio) {
-        glue.audio = Audio;
-        return glue;
-    });
+    glue.module.create('glue', ['audio51'],
+        function (Audio) {
+            glue.audio = Audio;
+            return glue;
+        }
+    );
 }());
 
 /*global define, RSVP*/
@@ -5778,11 +5780,12 @@ glue.module.create(
     'glue/game',
     [
         'glue',
+        'glue/domready',
         'glue/math/vector',
         'glue/event/system',
         'glue/loader'
     ],
-    function (Glue, Vector, Event, Loader) {
+    function (Glue, DomReady, Vector, Event, Loader) {
         var Sugar = Glue.sugar,
             win = null,
             doc = null,
@@ -6075,45 +6078,47 @@ glue.module.create(
 
         return {
             setup: function (config, onReady) {
-                if (isRunning) {
-                    throw('Glue: The main game is already running');
-                }
-                isRunning = true;
-                win = window;
-                doc = win.document;
-                // config.canvas is mandatory
-                canvasId = config.canvas.id;
-                canvasDimension = config.canvas.dimension;
-                if (config.game) {
-                    gameInfo = config.game;
-                }
-                if (config.develop && config.develop.debug) {
-                    debug = true;
-                    debugBar = document.createElement('div');
-                    debugBar.id = 'debugBar';
-                    document.body.appendChild(debugBar);
-                }
-                if (config.asset && config.asset.image && config.asset.image.path &&
-                    config.asset.image.source) {
-                    Loader.setAssetPath(config.asset.image.path);
-                    Loader.setAssets(config.asset.image.source);
-                    Loader.load(function () {
-                        startup();
-                        /*
-                        if (config.canvas.color) {
-                            backBufferContext2D.fillStyle = config.canvas.color;
-                            backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
-                        }
-                        */
+                DomReady(function () {
+                    if (isRunning) {
+                        throw('Glue: The main game is already running');
+                    }
+                    isRunning = true;
+                    win = window;
+                    doc = win.document;
+                    // config.canvas is mandatory
+                    canvasId = config.canvas.id;
+                    canvasDimension = config.canvas.dimension;
+                    if (config.game) {
+                        gameInfo = config.game;
+                    }
+                    if (config.develop && config.develop.debug) {
+                        debug = true;
+                        debugBar = document.createElement('div');
+                        debugBar.id = 'debugBar';
+                        document.body.appendChild(debugBar);
+                    }
+                    if (config.asset && config.asset.image && config.asset.image.path &&
+                        config.asset.image.source) {
+                        Loader.setAssetPath(config.asset.image.path);
+                        Loader.setAssets(config.asset.image.source);
+                        Loader.load(function () {
+                            startup();
+                            /*
+                            if (config.canvas.color) {
+                                backBufferContext2D.fillStyle = config.canvas.color;
+                                backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
+                            }
+                            */
+                            if (onReady) {
+                                onReady();
+                            }
+                        });
+                    } else {
                         if (onReady) {
                             onReady();
                         }
-                    });
-                } else {
-                    if (onReady) {
-                        onReady();
                     }
-                }
+                });
             },
             shutdown: function () {
                 shutdown();
@@ -6252,82 +6257,6 @@ glue.module.create(
     }
 );
 
-/*
-var AssetManager = function()
-{
-    var _oInstance = null;
-
-    return new function()
-    {
-        this.Instance = function()
-        {
-            if ( _oInstance == null )
-            {
-                _oInstance = new AssetManager();
-                _oInstance.constructor = null;
-            }
-            return _oInstance;
-        }
-    };
-
-    function AssetManager()
-    {
-        var sources = {
-            player_stand_up: 'stand-up.gif',
-            player_stand_right: 'stand-right.gif',
-            player_stand_down: 'stand-down.gif',
-            player_stand_left: 'stand-left.gif',
-            player_stand_down_left: 'stand-down-left.gif',
-            player_stand_down_right: 'stand-down-right.gif',
-            player_walk_up: 'stand-up.gif',
-            player_walk_right: 'walk-right.gif',
-            player_walk_down: 'stand-down.gif',
-            player_walk_left: 'walk-left.gif'
-        }
-        var _sBasePath = '../../example/';
-        var _sImagePath = _sBasePath + 'image/player/';
-
-        var images = [];
-
-        function _loadImage(source) {
-            var image = new Image();
-            image.src = _sImagePath + source;
-            return image;
-        };
-
-        this.loadImages = function (callback) {
-            var loadedImages = 0;
-            var numImages = 0;
-            for (var src in sources) {
-                ++numImages;
-            }
-
-            for(var src in sources) {
-                images[src] = new Image();
-                images[src].onload = function() {
-                    if (++loadedImages >= numImages) {
-                        callback(images);
-                    }
-                };
-                if (src !== 'mix')
-                images[src].src = _sImagePath + sources[src];
-            }
-        }
-
-        this.get = function( sName )
-        {
-            var oAsset = images[sName];
-            if ( oAsset != null && oAsset != '' )
-            {
-                return oAsset;
-            }
-            return false;
-        };
-
-    };
-
-}();
-*/
 /**
  *  @module Math
  *  @desc The math module
