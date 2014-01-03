@@ -3,21 +3,21 @@ glue.module.create([
         'glue',
         'glue/game',
         'glue/component',
-        'vendors/spine/spinable'
+        'vendors/spine/spineable'
     ],
-    function (Glue, Game, Component, Spinable) {
+    function (Glue, Game, Component, Spineable) {
         'use strict';
         var createSpine = function (x, y, settings) {
-            var entity = Component(Spinable).add({
+            var entity = Component(Spineable).add({
                 init: function () {
                     console.log('init');
-                    this.spinable.setup(settings);
+                    this.spineable.setup(settings);
                 },
                 update: function (deltaT, context) {
-                    this.spinable.update(deltaT);
+                    this.spineable.update(deltaT);
                 },
                 draw: function (deltaT, context, scroll) {
-                    this.spinable.draw(deltaT, context, scroll);
+                    this.spineable.draw(deltaT, context, scroll);
                 }
             });
             return entity;
@@ -43,43 +43,43 @@ glue.module.create([
                     console.log(spine);
                     spine.init();
                     Game.add(spine);
-                    spine.spinable.setAnimationByName(0, "animation", true);
-                    expect(spine.spinable.drawAnimatable).toBeDefined();
+                    spine.spineable.setAnimationByName(0, "animation", true);
+                    expect(spine.spineable.drawAnimatable).toBeDefined();
                     Game.remove(spine);
                 });
 
                 it('Should be able to move', function () {
                     var spine = createSpine(0, 0, settings);
                     Game.add(spine, 3);
-                    spine.spinable.pos.x = 1000;
+                    spine.spineable.pos.x = 1000;
                     // you dont need to update position manually,
                     // but it's useful for the test because we don't want to
                     // wait for the update cycle
-                    spine.spinable.updatePosition();
-                    expect(spine.spinable.getAnimatablePosition().x).toEqual(1000);
+                    spine.spineable.updatePosition();
+                    expect(spine.spineable.getAnimatablePosition().x).toEqual(1000);
                     Game.remove(spine);
                 });
 
                 it('Should be able to rescale the skeleton', function () {
                     settings.resolution = 0.5;
                     var spine = createSpine(0, 0, settings);
-                    spine.spinable.pos.x = 512;
-                    spine.spinable.pos.y = 384;
-                    spine.spinable.setAnimationByName(0, "animation", true);
+                    spine.spineable.pos.x = 512;
+                    spine.spineable.pos.y = 384;
+                    spine.spineable.setAnimationByName(0, "animation", true);
                     Game.add(spine, 3);
-                    expect(spine.spinable.getResolution()).toEqual(0.5);
+                    expect(spine.spineable.getResolution()).toEqual(0.5);
                     Game.remove(spine);
                 });
 
                 it('Should be able to set the anchorPoint', function () {
                     var spine = createSpine(0, 0, settings);
-                    spine.spinable.setAnimationByName(0, "animation", true);
+                    spine.spineable.setAnimationByName(0, "animation", true);
                     Game.add(spine, 3);
-                    spine.spinable.setAnchorPoint({
+                    spine.spineable.setAnchorPoint({
                         x: 100,
                         y: 0
                     });
-                    expect(spine.spinable.getAnchorPoint().x).toEqual(100);
+                    expect(spine.spineable.getAnchorPoint().x).toEqual(100);
                     Game.remove(spine);
                 });
 
@@ -87,14 +87,14 @@ glue.module.create([
                     settings.resolution = 1.0;
                     settings.scale = 0.5;
                     var spine = createSpine(0, 0, settings);
-                    spine.spinable.pos.x = 0;
-                    spine.spinable.pos.y = 0;
-                    spine.spinable.updatePosition();
-                    //spine.spinable.flipX(true);
-                    spine.spinable.setAnimation("animation");
+                    spine.spineable.pos.x = 0;
+                    spine.spineable.pos.y = 0;
+                    spine.spineable.updatePosition();
+                    //spine.spineable.flipX(true);
+                    spine.spineable.setAnimation("animation");
 
                     Game.add(spine, 3);
-                    expect(spine.spinable.getScale()).toEqual(0.5);
+                    expect(spine.spineable.getScale()).toEqual(0.5);
 
                     Game.remove(spine);
                 });
@@ -103,38 +103,38 @@ glue.module.create([
                     settings.resolution = 1.0;
                     settings.scale = 0.5;
                     var spine = createSpine(0, 0, settings);
-                    spine.spinable.setAnimationByName(0, "animation", true);
+                    spine.spineable.setAnimationByName(0, "animation", true);
                     Game.add(spine, 3);
 
-                    spine.spinable.addSkeleton({
+                    spine.spineable.addSkeleton({
                         atlas: "capivara_atlas",
                         atlasImage: "capivara",
                         skeleton: "capivara_skeleton",
                         scale: 1,
                         resolution: 1
                     });
-                    spine.spinable.setAnimationByName(0, "idle", true);
-                    expect(spine.spinable.getSkeleton()).toEqual("capivara_skeleton");
+                    spine.spineable.setAnimationByName(0, "idle", true);
+                    expect(spine.spineable.getSkeleton()).toEqual("capivara_skeleton");
                     Game.remove(spine);
                 });
                 it('Should be able to set animation', function (done) {
                     settings.resolution = 1.0;
                     settings.scale = 0.5;
                     var spine = createSpine(0, 0, settings);
-                    spine.spinable.setAnimationByName(0, "animation", true);
+                    spine.spineable.setAnimationByName(0, "animation", true);
                     Game.add(spine, 3);
-                    spine.spinable.addSkeleton({
+                    spine.spineable.addSkeleton({
                         atlas: "capivara_atlas",
                         atlasImage: "capivara",
                         skeleton: "capivara_skeleton",
                         scale: 1,
                         resolution: 1
                     });
-                    spine.spinable.setAnimation("idle");
+                    spine.spineable.setAnimation("idle");
 
                     setTimeout(function () {
-                        spine.spinable.setAnimationByName(0, "sad", true);
-                        expect(spine.spinable.getAnimation()).toEqual("sad");
+                        spine.spineable.setAnimationByName(0, "sad", true);
+                        expect(spine.spineable.getAnimation()).toEqual("sad");
                         done();
                     }, 100);
                     Game.remove(spine);
@@ -146,19 +146,19 @@ glue.module.create([
                 settings.atlasImage = 'elephant_atlas';
                 settings.skeleton = 'elephant_skeleton';
                 var spine = createSpine(0, 0, settings);
-                spine.spinable.setAnimation("idle");
-                spine.spinable.setAnchorPoint({x: spine.spinable.getInitialRect().width/2, y: spine.spinable.getInitialRect().height});
-                spine.spinable.pos.x = 512;
-                spine.spinable.pos.y = 384;
-                spine.spinable.updatePosition();
+                spine.spineable.setAnimation("idle");
+                spine.spineable.setAnchorPoint({x: spine.spineable.getInitialRect().width/2, y: spine.spineable.getInitialRect().height});
+                spine.spineable.pos.x = 512;
+                spine.spineable.pos.y = 384;
+                spine.spineable.updatePosition();
                 Draggable(spine);
                 Game.add(spine,3);
                 setTimeout(function() {
-                    spine.spinable.addSkeleton("elephant-sideview_atlas", "elephant-sideview_atlas", "elephant-sideview_skeleton", 1, 1);
-                    spine.spinable.setAnimation("walk");
-                    spine.spinable.setAnchorPoint({x: spine.spinable.getInitialRect().width/2-50, y: spine.spinable.getInitialRect().height});
+                    spine.spineable.addSkeleton("elephant-sideview_atlas", "elephant-sideview_atlas", "elephant-sideview_skeleton", 1, 1);
+                    spine.spineable.setAnimation("walk");
+                    spine.spineable.setAnchorPoint({x: spine.spineable.getInitialRect().width/2-50, y: spine.spineable.getInitialRect().height});
                     setTimeout(function() {
-                        spine.spinable.flipX(true);
+                        spine.spineable.flipX(true);
                     },2000);
                 }, 2000);
             });*/

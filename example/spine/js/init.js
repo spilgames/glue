@@ -7,7 +7,9 @@ glue.module.get(
         'glue/math/vector',
         'glue/component',
         'glue/component/visible',
-        'vendors/spine/spinable'
+        'glue/component/draggable',
+        'glue/component/scalable',
+        'vendors/spine/spineable'
     ],
     function (
         Domready,
@@ -17,7 +19,9 @@ glue.module.get(
         Vector,
         Component,
         Visible,
-        Spinable
+        Draggable,
+        Scalable,
+        Spineable
     ) {
         'use strict';
         Domready(function () {
@@ -43,25 +47,27 @@ glue.module.get(
                 }
             }, function () {
                 var scroll = Game.getScroll(),
-                    spine = Component(Spinable).add({
+                    spine = Component(Visible, Spineable, Scalable, Draggable).add({
                         init: function () {
-                            this.spinable.setup({
+                            this.spineable.setup({
                                 position: {
                                     x: 100,
                                     y: 200
                                 },
                                 atlasImage: 'capivara_sideview',
                                 atlas: 'capivara_sideview_atlas',
-                                skeleton: 'capivara_sideview_skeleton'
+                                skeleton: 'capivara_sideview_skeleton',
+                                // optional setting: you can rescale the bones
+                                // useful for using differently sized assets
+                                skeletonResolution: 1
                             });
-
-                            this.spinable.setAnimation('walk');
+                            this.spineable.setAnimation('walk');
                         },
                         update: function (deltaT, context) {
-                            this.spinable.update(deltaT);
+                            this.spineable.update(deltaT);
                         },
                         draw: function (deltaT, context, scroll) {
-                            this.spinable.draw(deltaT, context, scroll);
+                            this.spineable.draw(deltaT, context, scroll);
                         }
                     });
                 Game.add(spine);

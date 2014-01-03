@@ -9465,7 +9465,7 @@ glue.module.create('glue/domready', function () {
 });
 
 glue.module.create(
-    'vendors/spine/spinable', [
+    'vendors/spine/spineable', [
         'glue',
         'glue/math/rectangle',
         'glue/math/vector',
@@ -9564,7 +9564,7 @@ glue.module.create(
         /**
          * Constructor
          * @name
-         * @memberOf Spinable
+         * @memberOf Spineable
          * @function
          * @param {Object} obj: the entity object
          * @param {Object} spineSettings: contains json and atlas
@@ -9579,34 +9579,31 @@ glue.module.create(
                 stateData = {},
                 state = {},
                 currentSkeleton = '',
-                currentAnimation = '',
+                currentAnimationStr = '',
                 time = new Date().getTime(),
                 vertices = Array(8),
                 settings,
-                rectangle,
-                position = Vector(0, 0),
-                scale = 1,  
                 skeletonRectangles = {},
-                cornerPoints = {}, 
+                cornerPoints = {},
                 origins = {},
                 /**
                  * Initalizes the animation
                  * @name initSpine
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 initSpine = function (spineSettings) {
                     if (!sugar.isDefined(spineSettings)) {
-                        throw 'Specify settings object to Spine';                        
+                        throw 'Specify settings object to Spine';
                     }
                     if (!sugar.isDefined(spineSettings.atlas)) {
-                        throw 'Specify an atlas to settings object ';                        
+                        throw 'Specify an atlas to settings object ';
                     }
                     if (!sugar.isDefined(spineSettings.atlasImage)) {
-                        throw 'Specify an atlasImage to settings object ';                        
+                        throw 'Specify an atlasImage to settings object ';
                     }
                     if (!sugar.isDefined(spineSettings.skeleton)) {
-                        throw 'Specify a skeleton JSON to settings object ';                        
+                        throw 'Specify a skeleton JSON to settings object ';
                     }
                     currentSkeleton = spineSettings.skeleton;
                     addAtlas(spineSettings);
@@ -9615,7 +9612,7 @@ glue.module.create(
                 /**
                  * Loads the atlas data
                  * @name loadAtlas
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 addAtlas = function (spineSettings) {
@@ -9636,27 +9633,27 @@ glue.module.create(
                 /**
                  * Adds the skeleton data to arrays
                  * @name addSkeletonData
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 addSkeletonData = function (spineSettings) {
-                    var skeleton;
                     skeletonJson[currentSkeleton] = new spine.SkeletonJson(
                         new spine.AtlasAttachmentLoader(atlas[currentSkeleton])
                     );
-                    if (spineSettings.resolution) {
-                        skeletonJson[currentSkeleton].scale = spineSettings.resolution;
+                    if (spineSettings.skeletonResolution) {
+                        skeletonJson[currentSkeleton].scale = spineSettings.skeletonResolution;
                     }
 
                     skeletonData[currentSkeleton] = skeletonJson[currentSkeleton].readSkeletonData(
                         Loader.getJSON(spineSettings.skeleton)
                     );
                     skeletons[currentSkeleton] = new spine.Skeleton(skeletonData[currentSkeleton]);
-                    skeleton = skeletons[currentSkeleton];
                     spine.Bone.yDown = true;
-                    skeleton.getRootBone().x = position.x;
-                    skeleton.getRootBone().y = position.y;
-                    skeleton.updateWorldTransform();
+                    if (obj.visible) {
+                        skeletons[currentSkeleton].getRootBone().x = obj.visible.getPosition().x;
+                        skeletons[currentSkeleton].getRootBone().y = obj.visible.getPosition().y;
+                    }
+                    skeletons[currentSkeleton].updateWorldTransform();
 
                     stateData[currentSkeleton] = new spine.AnimationStateData(skeletonData[currentSkeleton]);
                     state[currentSkeleton] = new spine.AnimationState(stateData[currentSkeleton]);
@@ -9666,18 +9663,23 @@ glue.module.create(
                 /**
                  * Calculate rectangle by setting up the skeleton once
                  * @name calculateRectangle
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 calculateRectangle = function () {
-                    var skeleton = skeletons[currentSkeleton]
+                    var skeleton = skeletons[currentSkeleton],
                         i = 0,
                         l = skeleton.slots.length,
                         slot = {},
                         attachment = {},
-                        boneRectangle = Rectangle(0, 0, 0, 0);
+                        boneRectangle = Rectangle(0, 0, 0, 0),
+                        rootBone = skeleton.getRootBone(),
+                        skeletonRectangle = Rectangle(0, 0, 0, 0);
+                    if (obj.visible) {
+                        skeletonRectangle.x1 = obj.visible.getPosition().x;
+                        skeletonRectangle.y1 = obj.visible.getPosition().y;
+                    }
                     // set up the skeleton to get width/height of the sprite
-                    skeletonRectangles[currentSkeleton] = Rectangle(position.x, position.y, 0, 0);
                     for (i; i < l; ++i) {
                         slot = skeleton.slots[i];
                         attachment = slot.attachment;
@@ -9690,39 +9692,73 @@ glue.module.create(
                         boneRectangle.setHeight(attachment.height);
                         boneRectangle.get().x1 = vertices[2];
                         boneRectangle.get().y1 = vertices[3];
-                        skeletonRectangles[currentSkeleton].union(boneRectangle);
+                        skeletonRectangle.union(boneRectangle);
                     }
-                    cornerPoints[currentSkeleton] = {
-                        x: 0,
-                        y: 0
-                    };
-                    cornerPoints[currentSkeleton].x = skeletonRectangles[currentSkeleton].get().x1 - skeleton.getRootBone()
-                        .x;
-                    cornerPoints[currentSkeleton].y = skeletonRectangles[currentSkeleton].get().y1 - skeleton.getRootBone()
-                        .y;
-                    origins[currentSkeleton] = {
-                        x: 0,
-                        y: 0
-                    };
-                    updateBoundingBox();
+                    skeletonRectangles[currentSkeleton] = skeletonRectangle;
+                    cornerPoints[currentSkeleton] = Vector(0, 0);
+                    cornerPoints[currentSkeleton].x = skeletonRectangle.get().x1 - rootBone.x;
+                    cornerPoints[currentSkeleton].y = skeletonRectangle.get().y1 - rootBone.y;
+                    origins[currentSkeleton] = Vector(0, 0);
+                    updateVisible();
                 },
                 /**
-                 * Update rectangle to correct skeleton
+                 * Update visible component's rectangle and dimension to correct skeleton
                  * @name updateBoundingbox
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
-                updateBoundingBox = function () {
-                    rectangle = skeletonRectangles[currentSkeleton];
+                updateVisible = function () {
+                    var skeletonRectangle,
+                        position,
+                        rectangle = Rectangle(0, 0, 0, 0),
+                        dimension = Vector(0, 0),
+                        offset = Vector(0, 0);
+                    if (obj.visible) {
+                        skeletonRectangle = skeletonRectangles[currentSkeleton];
+                        position = obj.visible.getPosition();
+                        //rectangle = obj.visible.getBoundingBox();
+                        //dimension = obj.visible.getDimension();
+                        offset.x = cornerPoints[currentSkeleton].x + origins[currentSkeleton].x;
+                        offset.y = cornerPoints[currentSkeleton].y + origins[currentSkeleton].y;
+
+                        rectangle.x1 = skeletonRectangle.x1 + position.x - offset.x;
+                        rectangle.y1 = skeletonRectangle.y1 + position.y - offset.y;
+                        rectangle.x2 = rectangle.x1 + skeletonRectangle.getWidth();
+                        rectangle.y2 = rectangle.y1 + skeletonRectangle.getHeight();
+
+                        dimension.x = rectangle.getWidth();
+                        dimension.y = rectangle.getHeight();
+                    }
+                },
+                /**
+                 * Updates the skeleton's position to set it to the object's position
+                 * @name updateAnimatable
+                 * @memberOf Spineable
+                 * @function
+                 */
+                updatePosition = function () {
+                    var skeleton = skeletons[currentSkeleton],
+                        position = Vector(0, 0),
+                        scale = Vector(1, 1);
+                    if (obj.visible) {
+                        position = obj.visible.getPosition();
+                    }
+                    if (obj.scalable) {
+                        scale = obj.scalable.getScale();
+                    }
+                    // divide by scale here because the position is
+                    // superposed inside computeVertices in the draw function
+                    skeleton.getRootBone().x = position.x / scale.x;
+                    skeleton.getRootBone().y = position.y / scale.y;
                 };
 
             // - external interface -
             obj = obj || {};
-            obj.spinable = {
+            obj.spineable = {
                 /**
-                 * Draw the animatable component
-                 * @name drawAnimatable
-                 * @memberOf Spinable
+                 * Draw the spine component
+                 * @name draw
+                 * @memberOf Spineable
                  * @function
                  */
                 draw: function (deltaT, context, scroll) {
@@ -9731,44 +9767,41 @@ glue.module.create(
                         fx, fy, x, y, w, h,
                         px, py,
                         scaleX, scaleY,
+                        scale = Vector(1, 1),
                         boneScaleX, boneScaleY,
                         angle,
                         skeleton = skeletons[currentSkeleton],
                         i = 0,
                         l = skeleton.drawOrder.length;
+                    if (obj.scalable) {
+                        scale = obj.scalable.getScale();
+                    }
                     for (i; i < l; ++i) {
                         slot = skeleton.drawOrder[i];
                         attachment = slot.attachment;
                         if (!(attachment instanceof spine.RegionAttachment)) {
                             continue;
                         }
-                        attachment.computeVertices(skeleton.x, skeleton.y, slot.bone,vertices);
+                        attachment.computeVertices(skeleton.x, skeleton.y, slot.bone, vertices);
                         fx = skeleton.flipX ? -1 : 1;
                         fy = skeleton.flipY ? -1 : 1;
-                        x = (vertices[2] - (cornerPoints[currentSkeleton].x + origins[currentSkeleton].x) * fx) * scale;
-                        y = (vertices[3] - (cornerPoints[currentSkeleton].y + origins[currentSkeleton].y) * fy) * scale;
+                        x = (vertices[2] - (cornerPoints[currentSkeleton].x + origins[currentSkeleton].x) * fx) * scale.x;
+                        y = (vertices[3] - (cornerPoints[currentSkeleton].y + origins[currentSkeleton].y) * fy) * scale.y;
                         w = attachment.rendererObject.width;
                         h = attachment.rendererObject.height;
                         px = attachment.rendererObject.x;
                         py = attachment.rendererObject.y;
-                        scaleX = attachment.scaleX;
-                        scaleY = attachment.scaleY;
+                        scaleX = attachment.scaleX * fx * fy;
+                        scaleY = attachment.scaleY * fx * fy;
                         boneScaleX = slot.bone.scaleX;
                         boneScaleY = slot.bone.scaleY;
-                        angle = -(slot.bone.worldRotation + attachment.rotation) * Math.PI / 180;
-                        if (skeleton.flipX) {
-                            scaleX *= -1;
-                            angle *= -1;
-                        }
-                        if (skeleton.flipY) {
-                            scaleY *= -1;
-                            angle *= -1;
-                        }
+                        angle = -(slot.bone.worldRotation + attachment.rotation) * Math.PI / 180 * fx * fy;
+
                         context.save();
                         context.translate(~~x, ~~y);
                         context.rotate(angle);
                         context.globalAlpha = slot.a;
-                        context.scale(boneScaleX * scaleX * scale, boneScaleY * scaleY * scale);
+                        context.scale(boneScaleX * scaleX * scale.x, boneScaleY * scaleY * scale.y);
 
                         context.drawImage(attachment.rendererObject.page.image, px, py, w, h, 0, 0, w, h);
                         context.restore();
@@ -9777,95 +9810,68 @@ glue.module.create(
                 /**
                  * Update the animation
                  * @name update
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 update: function (deltaT) {
-                    var skeleton=skeletons[currentSkeleton];
+                    var skeleton = skeletons[currentSkeleton];
                     state[currentSkeleton].update(deltaT);
                     state[currentSkeleton].apply(skeleton);
                     skeleton.updateWorldTransform();
-                    obj.spinable.updatePosition();
+                    updatePosition();
                     return true;
                 },
                 /**
-                 * Setup the spinable
-                 * @name updateAnimatable
-                 * @memberOf Spinable
+                 * Setup the spineable
+                 * @name setup
+                 * @memberOf Spineable
                  * @function
                  */
                 setup: function (s) {
                     settings = s;
-                    position = settings.position;
                     initSpine(settings);
                 },
                 /**
                  * Set a new animation
-                 * @name drawAnimatable
-                 * @memberOf Spinable
+                 * @name setAnimationByName
+                 * @memberOf Spineable
                  * @function
                  * @param {Number} trackIndex: Track number
                  * @param {String} animationName: Name of the animation
                  * @param {Bool} loop: Wether the animation loops
                  */
                 setAnimationByName: function (trackIndex, animationName, loop) {
-                    currentAnimation = animationName;
+                    currentAnimationStr = animationName;
                     state[currentSkeleton].setAnimationByName(trackIndex, animationName, loop);
                     skeletons[currentSkeleton].setSlotsToSetupPose();
                 },
                 /**
                  * Set a new animation if it's not playing yet, returns true if successful
-                 * @name drawAnimatable
-                 * @memberOf Spinable
+                 * @name setAnimation
+                 * @memberOf Spineable
                  * @function
                  * @param {String} animationName: Name of the animation
                  */
                 setAnimation: function (animationName) {
-                    if (currentAnimation === animationName) {
+                    if (currentAnimationStr === animationName) {
                         return false;
                     }
-                    obj.spinable.setAnimationByName(0, animationName, true);
+                    obj.spineable.setAnimationByName(0, animationName, true);
                     return true;
                 },
                 /**
-                 * Get current animation
-                 * @name drawAnimatable
-                 * @memberOf Spinable
+                 * Get current animation being played
+                 * @name getAnimation
+                 * @memberOf Spineable
                  * @function
                  */
                 getAnimation: function () {
-                    return currentAnimation;
+                    return currentAnimationStr;
                 },
                 /**
-                 * Updates the animations's position to set it to the object's position
-                 * @name updateAnimatable
-                 * @memberOf Spinable
-                 * @function
-                 */
-                updatePosition: function () {
-                    // divide by scale here because the position is
-                    // superposed inside computeVertices in the draw function
-                    var skeleton = skeletons[currentSkeleton];
-                    skeleton.getRootBone().x = position.x / scale;
-                    skeleton.getRootBone().y = position.y / scale;
-                },
-                /**
-                 * Retrieves world position of the animatable
-                 * @name getAnimatablePosition
-                 * @memberOf Spinable
-                 * @function
-                 */
-                getAnimatablePosition: function () {
-                    var skeleton = skeletons[currentSkeleton];
-                    return {
-                        x: (skeleton.getRootBone().x) * scale,
-                        y: (skeleton.getRootBone().y) * scale
-                    };
-                },
-                /**
-                 * Retrieves the root bone object
+                 * Retrieves the root bone object of the current skeleton
                  * @name getRootBone
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 getRootBone: function () {
@@ -9874,36 +9880,16 @@ glue.module.create(
                 /**
                  * Gets the current skeleton scale
                  * @name getResolution
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
-                getResolution: function () {
+                getSkeletonResolution: function () {
                     return skeletonJson[currentSkeleton].scale;
-                },
-                /**
-                 * Gets the current sprite scale
-                 * @name getScale
-                 * @memberOf Spinable
-                 * @function
-                 */
-                getScale: function () {
-                    return scale;
-                },
-                /**
-                 * Sets the current sprite scale
-                 * @name setScale
-                 * @memberOf Spinable
-                 * @function
-                 * @param {Number} s: the scale of the sprite to set
-                 */
-                setScale: function (s) {
-                    scale = s;
-                    updateBoundingBox();
                 },
                 /**
                  * Mirrors the sprite in the x direction around the anchor point
                  * @name flipX
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 flipX: function (bool) {
@@ -9912,16 +9898,16 @@ glue.module.create(
                 /**
                  * Mirrors the sprite in the y direction around the anchor point
                  * @name flipY
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 flipY: function (bool) {
                     skeletons[currentSkeleton].flipY = bool;
                 },
                 /**
-                 * Adds another skeleton json to the animatable
+                 * Adds another skeleton json to the spineable
                  * @name addSkeleton
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  * @param {Object} spineSettings: object with atlasImage, atlas, skeleton and optionally scale and resolution
                  */
@@ -9931,7 +9917,7 @@ glue.module.create(
                 /**
                  * Sets the current skeleton json
                  * @name setSkeleton
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  * @param {String} strSkeleton: skeleton json name (as specified in resources)
                  */
@@ -9940,58 +9926,49 @@ glue.module.create(
                         return;
                     }
                     currentSkeleton = strSkeleton;
-                    obj.spinable.update();
+                    obj.spineable.update();
                 },
                 /**
                  * Returns the name of the current skeleton json
                  * @name getSkeleton
-                 * @memberOf Spinable
+                 * @memberOf Spineable
                  * @function
                  */
                 getSkeleton: function () {
                     return currentSkeleton;
                 },
                 /**
-                 * Sets the anchor point
-                 * @name setAnchorPoint
-                 * @memberOf Spinable
+                 * Sets the origin of the current skeleton
+                 * @name setOrigin
+                 * @memberOf Spineable
                  * @function
-                 * @param {Number} s: the scale of the sprite to set
+                 * @param {Object} pos: x and y position relative to the upper left corner point
                  */
-                setAnchorPoint: function (pos) {
+                setOrigin: function (pos) {
                     origins[currentSkeleton] = pos;
-                    updateBoundingBox();
+                    updateVisible();
                 },
                 /**
-                 * Gets the anchor point
-                 * @name getAnchorPoint
-                 * @memberOf Spinable
+                 * Gets the origin of the current skeleton
+                 * @name getOrigin
+                 * @memberOf Spineable
                  * @function
                  */
-                getAnchorPoint: function () {
+                getOrigin: function () {
                     return origins[currentSkeleton];
                 },
                 /**
-                 * Resets the anchor point to the root bone position
-                 * @name resetAnchorPoint
-                 * @memberOf Spinable
+                 * Resets the origin of the current skeleton to the root bone position
+                 * @name resetOrigin
+                 * @memberOf Spineable
                  * @function
                  */
-                resetAnchorPoint: function () {
+                resetOrigin: function () {
                     origins[currentSkeleton] = {
                         x: -cornerPoints[currentSkeleton].x,
                         y: -cornerPoints[currentSkeleton].y
                     };
-                    updateBoundingBox();
-                },
-                /**
-                 * Get initial rectangle defined by the sprite
-                 * @name getskeletonRectangle
-                 * @memberOf Spinable
-                 * @function
-                 */
-                getskeletonRectangle: function () {
-                    return skeletonRectangles[currentSkeleton];
+                    updateVisible();
                 }
             };
             return obj;
