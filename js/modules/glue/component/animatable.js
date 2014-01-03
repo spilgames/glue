@@ -87,7 +87,7 @@ glue.module.create(
                         sourceX = frameWidth * currentFrame,
                         origin = obj.visible.getOrigin();
                     scroll = scroll || Vector(0, 0);
-                    context.save();     
+                    context.save();
                     context.translate(
                         position.x - scroll.x,
                         position.y - scroll.y
