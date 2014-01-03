@@ -9,6 +9,7 @@ glue.module.get(
         'glue/component/visible',
         'glue/component/draggable',
         'glue/component/scalable',
+        'glue/component/rotatable',
         'vendors/spine/spineable'
     ],
     function (
@@ -21,6 +22,7 @@ glue.module.get(
         Visible,
         Draggable,
         Scalable,
+        Rotatable,
         Spineable
     ) {
         'use strict';
@@ -47,7 +49,7 @@ glue.module.get(
                 }
             }, function () {
                 var scroll = Game.getScroll(),
-                    spine = Component(Visible, Spineable, Scalable, Draggable).add({
+                    spine = Component(Visible, Spineable, Scalable, Rotatable, Draggable).add({
                         init: function () {
                             this.spineable.setup({
                                 position: {
@@ -68,8 +70,13 @@ glue.module.get(
                         },
                         draw: function (deltaT, context, scroll) {
                             this.spineable.draw(deltaT, context, scroll);
+                        },
+                        pointerMove: function (e) {
+                            this.visible.setPosition(e.position);
                         }
                     });
+                spine.scalable.setScale(Vector(0.5, 1));
+                // spine.rotatable.setAngleDegree(45);
                 Game.add(spine);
             });
         });

@@ -3,11 +3,11 @@ glue.module.create(
         'glue',
         'glue/math/rectangle',
         'glue/math/vector',
+        'glue/math/dimension',
         'glue/loader'
     ],
-    function (Glue, Rectangle, Vector, Loader) {
+    function (Glue, Rectangle, Vector, Dimension, Loader) {
         // - cross instance private members -
-
 
         // temporary
         var assets = {},
@@ -117,6 +117,7 @@ glue.module.create(
                 time = new Date().getTime(),
                 vertices = Array(8),
                 settings,
+                rectangle = Rectangle(0, 0, 0, 0),
                 skeletonRectangles = {},
                 cornerPoints = {},
                 origins = {},
@@ -220,48 +221,39 @@ glue.module.create(
                         if (!(attachment instanceof spine.RegionAttachment)) {
                             continue;
                         }
-                        attachment.computeVertices(skeleton.x, skeleton.y, slot.bone,
-                            vertices);
+                        attachment.computeVertices(skeleton.x, skeleton.y, slot.bone, vertices);
                         boneRectangle.setWidth(attachment.width);
                         boneRectangle.setHeight(attachment.height);
-                        boneRectangle.get().x1 = vertices[2];
-                        boneRectangle.get().y1 = vertices[3];
+                        boneRectangle.x1 = vertices[2];
+                        boneRectangle.y1 = vertices[3];
                         skeletonRectangle.union(boneRectangle);
                     }
                     skeletonRectangles[currentSkeleton] = skeletonRectangle;
                     cornerPoints[currentSkeleton] = Vector(0, 0);
-                    cornerPoints[currentSkeleton].x = skeletonRectangle.get().x1 - rootBone.x;
-                    cornerPoints[currentSkeleton].y = skeletonRectangle.get().y1 - rootBone.y;
+                    cornerPoints[currentSkeleton].x = skeletonRectangle.x1 - rootBone.x;
+                    cornerPoints[currentSkeleton].y = skeletonRectangle.y1 - rootBone.y;
                     origins[currentSkeleton] = Vector(0, 0);
                     updateVisible();
                 },
                 /**
-                 * Update visible component's rectangle and dimension to correct skeleton
+                 * Update visible component's dimension to correct skeleton
                  * @name updateBoundingbox
                  * @memberOf Spineable
                  * @function
                  */
                 updateVisible = function () {
-                    var skeletonRectangle,
-                        position,
-                        rectangle = Rectangle(0, 0, 0, 0),
-                        dimension = Vector(0, 0),
-                        offset = Vector(0, 0);
+                    var scale = Vector(1, 1),
+                        skeletonRectangle = skeletonRectangles[currentSkeleton],
+                        width,
+                        height;
                     if (obj.visible) {
-                        skeletonRectangle = skeletonRectangles[currentSkeleton];
-                        position = obj.visible.getPosition();
-                        //rectangle = obj.visible.getBoundingBox();
-                        //dimension = obj.visible.getDimension();
-                        offset.x = cornerPoints[currentSkeleton].x + origins[currentSkeleton].x;
-                        offset.y = cornerPoints[currentSkeleton].y + origins[currentSkeleton].y;
-
-                        rectangle.x1 = skeletonRectangle.x1 + position.x - offset.x;
-                        rectangle.y1 = skeletonRectangle.y1 + position.y - offset.y;
-                        rectangle.x2 = rectangle.x1 + skeletonRectangle.getWidth();
-                        rectangle.y2 = rectangle.y1 + skeletonRectangle.getHeight();
-
-                        dimension.x = rectangle.getWidth();
-                        dimension.y = rectangle.getHeight();
+                        if (obj.scalable) {
+                            scale = obj.scalable.getScale();
+                        }
+                        // update visible dimension
+                        width = skeletonRectangle.getWidth() * scale.x;
+                        height = skeletonRectangle.getHeight() * scale.y;
+                        obj.visible.setDimension(Dimension(width, height));
                     }
                 },
                 /**
@@ -301,14 +293,24 @@ glue.module.create(
                         fx, fy, x, y, w, h,
                         px, py,
                         scaleX, scaleY,
-                        scale = Vector(1, 1),
                         boneScaleX, boneScaleY,
                         angle,
                         skeleton = skeletons[currentSkeleton],
                         i = 0,
-                        l = skeleton.drawOrder.length;
+                        l = skeleton.drawOrder.length,
+                        corner = cornerPoints[currentSkeleton],
+                        origin = origins[currentSkeleton],
+                        vOrigin = Vector(0, 0);
+                    if (obj.visible) {
+                        // vOrigin = obj.scalable.getOrigin();
+                    }
+
+                    context.save();
                     if (obj.scalable) {
-                        scale = obj.scalable.getScale();
+                        obj.scalable.draw(deltaT, context);
+                    }
+                    if (obj.rotatable) {
+                        obj.rotatable.draw(deltaT, context);
                     }
                     for (i; i < l; ++i) {
                         slot = skeleton.drawOrder[i];
@@ -319,8 +321,8 @@ glue.module.create(
                         attachment.computeVertices(skeleton.x, skeleton.y, slot.bone, vertices);
                         fx = skeleton.flipX ? -1 : 1;
                         fy = skeleton.flipY ? -1 : 1;
-                        x = (vertices[2] - (cornerPoints[currentSkeleton].x + origins[currentSkeleton].x) * fx) * scale.x;
-                        y = (vertices[3] - (cornerPoints[currentSkeleton].y + origins[currentSkeleton].y) * fy) * scale.y;
+                        x = (vertices[2] - (corner.x + origin.x + vOrigin.x) * fx);
+                        y = (vertices[3] - (corner.y + origin.y + vOrigin.y) * fy);
                         w = attachment.rendererObject.width;
                         h = attachment.rendererObject.height;
                         px = attachment.rendererObject.x;
@@ -335,11 +337,12 @@ glue.module.create(
                         context.translate(~~x, ~~y);
                         context.rotate(angle);
                         context.globalAlpha = slot.a;
-                        context.scale(boneScaleX * scaleX * scale.x, boneScaleY * scaleY * scale.y);
+                        context.scale(boneScaleX * scaleX, boneScaleY * scaleY);
 
                         context.drawImage(attachment.rendererObject.page.image, px, py, w, h, 0, 0, w, h);
                         context.restore();
                     }
+                    context.restore();
                 },
                 /**
                  * Update the animation
@@ -472,7 +475,7 @@ glue.module.create(
                     return currentSkeleton;
                 },
                 /**
-                 * Sets the origin of the current skeleton
+                 * Sets the origin of the current skeleton (it's summed with visible's origin)
                  * @name setOrigin
                  * @memberOf Spineable
                  * @function
@@ -503,6 +506,9 @@ glue.module.create(
                         y: -cornerPoints[currentSkeleton].y
                     };
                     updateVisible();
+                },
+                getBoundingBox: function () {
+                    return rectangle;
                 }
             };
             return obj;
