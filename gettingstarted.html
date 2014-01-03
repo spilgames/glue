@@ -13,7 +13,7 @@
 </head>
 <body>
     <div class="wrapper">
-        <h2 class="mainTitle">Glue Engine Documentation</h3>
+        <h2 class="mainTitle">Getting started</h3>
             <h3>Inclusion</h3>
 
             <p>To include Glue in your project you can add Glue as a bower dependency. You can do so by adding Glue as a dependency in your bower.json file, as you can see in the example below. You need to replace 0.0.5 by the latest version of Glue, and run "bower update" from your terminal. More information about setting up Bower dependencies can be found on the <a href="http://bower.io" target="_blank">Bower website</a>.</p>
@@ -27,6 +27,11 @@
             <p>
                 After you did that, Glue will be in the "bower_components" directory and you can include Glue in the head of your HTML5 document, like you can see in the example code below. You need to replace <strong>[PATH]</strong> with the actual path which holds your bower_components folder.
             </p>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;head&gt;</span>
+<span class="nt">    &lt;script </span><span class="na">src=</span><span class="s">"[PATH]/bower_components/glue.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+</pre></div>
 
             <h3>Create a game</h3>
 
@@ -49,12 +54,25 @@ glue.module.get(['glue/game', 'glue/math/dimension'], function (Game, Dimension)
         }
     });
 });
-</pre>          
+</pre>
 
-<div class="highlight highlight-html"><pre><span class="nt">&lt;head&gt;</span>
-<span class="nt">    &lt;script </span><span class="na">src=</span><span class="s">"[PATH]/bower_components/glue.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;/head&gt;</span>
-</pre></div>
+            <h3>Adding game components</h3>
+
+            <p>
+                Once you've created a running game, like explained in the previous chapter, you can add game components to your game. The most simple game component is a JavaScript object literal, containing an update and a draw method. To add this component to the game you can use the "add" method which is also within the Game module. Once the component is added to the game, it's update and draw methods will be called from the main game loop. The update function will receive the "deltaT" parameter which is the delta time since the previous call to the update method. The draw method also receives the "deltaT" parameter, and also receives the canvas context as a second parameter, which the component can use to draw on the game canvas. You can see an example of adding the most simple Glue component, a JavaScript object literal, to the already running Glue game below:
+            </p>
+<pre>
+glue.module.create(['glue/game'], function (Game) {
+    Game.add({
+        update: function (deltaT) {
+            console.log('update', deltaT);
+        },
+        draw: function (deltaT, context) {
+            console.log('draw', deltaT, context);
+        }
+    });
+});
+</pre>
 
         </section>
         <footer>
