@@ -5532,7 +5532,7 @@ glue.module.create(
                         // Pythagorean theorem : c = √( a2 + b2 )
                         // We stop scaling if the remaining distance to the endpoint
                         // is smaller then the step iterator (scaleSpeed * deltaT).
-                        if (!atTarget && Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
+                        if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
                             atTarget = true;
                             this.setScale(targetScale);
                         } else {
@@ -5540,7 +5540,7 @@ glue.module.create(
                             // and get the right speed by multiplying by the speed and delta time.
                             radian = Math.atan2(deltaY, deltaX);
                             currentScale.x += Math.cos(radian) * scaleSpeed * deltaT;
-                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;         
+                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;
                         }
                     }
                 },
