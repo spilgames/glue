@@ -97,8 +97,6 @@ img {
 
 header {
   width:270px;
-  float:left;
-  position:fixed;
 }
 
 header ul {
@@ -160,9 +158,7 @@ header ul a strong {
 }
 
 section {
-  width:500px;
-  float:right;
-  padding-bottom:50px;
+  
 }
 
 small {
@@ -179,8 +175,6 @@ hr {
 footer {
   width:270px;
   float:left;
-  position:fixed;
-  bottom:50px;
 }
 
 @media print, screen and (max-width: 960px) {
