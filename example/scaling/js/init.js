@@ -94,14 +94,15 @@ glue.module.get(
                         this.movable.update(deltaT);
                         this.scalable.update(deltaT);
                         this.rotatable.update(deltaT);
+                        if (this.scalable.atTarget()) {
+                            this.scalable.setTarget({
+                                x: 8,
+                                y: 1
+                            });
+                        }
                     },
                     draw: function (deltaT, context) {
-                        var pos = this.visible.getPosition(),
-                            dimension = this.scalable.getDimension();
-                        this.animatable.draw(deltaT, context);
-                        context.strokeStyle = '#ff0000';
-                        //context.strokeRect(pos.x, pos.y, dimension.width, dimension.height);
-                        console.log(pos.x, pos.y, dimension.width, dimension.height);
+                        this.animatable.draw(deltaT, context);                        
                     }
                 });
             Game.add(component);
