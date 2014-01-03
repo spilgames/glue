@@ -2,7 +2,7 @@
  *  @module Matrix
  *  @namespace math
  *  @desc Represents a matrix
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */

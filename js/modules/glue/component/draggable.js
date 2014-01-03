@@ -2,7 +2,7 @@
  *  @module Draggable
  *  @namespace component
  *  @desc Used to make a game entity draggable
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
