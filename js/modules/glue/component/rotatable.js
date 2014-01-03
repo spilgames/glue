@@ -2,7 +2,7 @@
  *  @module Rotatable
  *  @namespace component
  *  @desc Represents a rotatable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -15,18 +15,18 @@ glue.module.create(
         'glue/math/vector'
     ],
     function (Glue, Vector) {
-        return function (obj) {
+        return function (component) {
             var Sugar = Glue.sugar,
                 angle = 0,
                 rotationSpeed = 100,
                 targetAngle = 0,
                 rotationDirection = 1,
-                origin = Vector(0, 0),
                 toDegree = 180 / Math.PI,
                 atTarget = true,
                 toRadian = Math.PI / 180;
-            obj = obj || {};
-            obj.rotatable = {
+                origin = Vector(0, 0),
+            component = component || {};
+            component.rotatable = {
                 update: function (deltaT) {
                     var tarDeg,
                         curDeg,
@@ -56,7 +56,6 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
-                    context.translate(origin.x, origin.y);
                     context.rotate(angle);
                     context.translate(-origin.x, -origin.y);
                 },
@@ -66,10 +65,6 @@ glue.module.create(
                 },
                 setAngleRadian: function (value) {
                     angle = Sugar.isNumber(value) ? value : angle;
-                },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
                 },
                 setTargetDegree: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
@@ -104,9 +99,6 @@ glue.module.create(
                 getAngleRadian: function () {
                     return angle;
                 },
-                getOrigin: function () {
-                    return origin;
-                },
                 getTargetDegree: function () {
                     return targetAngle * toDegree;
                 },
@@ -115,9 +107,16 @@ glue.module.create(
                 },
                 atTarget: function () {
                     return atTarget;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
-            return obj;
+            return component;
         };
     }
 );

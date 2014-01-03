@@ -3,7 +3,7 @@
 /*jshint -W083*/ //ignore 'Don't create functions in loops'
 /*
  *  @module Testframework
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */

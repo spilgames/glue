@@ -2,7 +2,7 @@
  *  @module Animatable
  *  @namespace component
  *  @desc Represents an animatable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -84,8 +84,8 @@ glue.module.create(
                 },
                 draw: function (deltaT, context, scroll) {
                     var position = obj.visible.getPosition(),
-                        sourceX = frameWidth * currentFrame;
-
+                        sourceX = frameWidth * currentFrame,
+                        origin = obj.visible.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -97,7 +97,8 @@ glue.module.create(
                     }
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
-                    }
+                    }    
+                    context.translate(-origin.x, -origin.y);
                     context.drawImage
                     (
                         image,

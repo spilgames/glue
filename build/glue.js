@@ -2717,7 +2717,7 @@ window.RSVP = requireModule("rsvp");
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3643,7 +3643,7 @@ modules.glue.sugar = (function (win, doc) {
  *  @module Glue
  *  @namespace adapters
  *  @desc Provides adapters to interface with native Glue functionality
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3681,7 +3681,7 @@ adapters.glue = (function (win, Glue) {
 /**
  *  @module Glue main
  *  @desc Provides an abstraction layer
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3711,7 +3711,7 @@ adapters.glue = (function (win, Glue) {
 /*global define, RSVP*/
 /*
  *  @module Audio51
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3862,7 +3862,7 @@ define(
 /*global define, RSVP*/
 /*
  *  @module Context
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -3928,7 +3928,7 @@ define('audiotag/context', ["audiotag/sound"],function( Sound ) {
 /*global define, RSVP, requestAnimationFrame, cancelAnimationFrame*/
 /*
  *  @module Restricted
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4068,7 +4068,7 @@ define('audiotag/restricted', ["audiotag/context", "audiotag/sprite"],function( 
 /*global define, RSVP*/
 /*
  *  @module Sound
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4135,7 +4135,7 @@ define('audiotag/sound', ["unrestrict"],function(unrestrict) {
 /*global define, RSVP*/
 /*
  *  @module Sprite
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4169,7 +4169,7 @@ define('audiotag/sprite', [],function( ) {
 /*global define, RSVP*/
 /*
  *  @module Manager
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4197,7 +4197,7 @@ define(
 /*jshint -W083*/ //ignore 'Don't create functions in loops'
 /*
  *  @module Testframework
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4407,7 +4407,7 @@ var AudioTestFramework = ( function() {
 /*global define, RSVP*/
 /*
  *  @module Unrestrict
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4491,7 +4491,7 @@ define(
 /*global define, RSVP*/
 /*
  *  @module Context
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4654,7 +4654,7 @@ define('webaudio/context', ["webaudio/sound", "unrestrict"],function( Sound, Unr
 /*global define, RSVP*/
 /*
  *  @module Sound
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Martin Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4718,7 +4718,7 @@ define('webaudio/sound', function() {
 /*
  *  @module Component
  *  @desc Represents a component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4761,7 +4761,7 @@ glue.module.create(
  *  @module Animatable
  *  @namespace component
  *  @desc Represents an animatable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -4843,8 +4843,8 @@ glue.module.create(
                 },
                 draw: function (deltaT, context, scroll) {
                     var position = obj.visible.getPosition(),
-                        sourceX = frameWidth * currentFrame;
-
+                        sourceX = frameWidth * currentFrame,
+                        origin = obj.visible.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -4856,7 +4856,8 @@ glue.module.create(
                     }
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
-                    }
+                    }    
+                    context.translate(-origin.x, -origin.y);
                     context.drawImage
                     (
                         image,
@@ -4900,7 +4901,7 @@ glue.module.create(
  *  @module Clickable
  *  @namespace component
  *  @desc Used to make a game component perfom an action when she's clicked
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -4952,7 +4953,7 @@ glue.module.create(
  *  @module Draggable
  *  @namespace component
  *  @desc Used to make a game entity draggable
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5079,7 +5080,7 @@ glue.module.create(
  *  @module Droptarget
  *  @namespace component
  *  @desc Used to make a game entity behave as a droptarget
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5122,7 +5123,7 @@ glue.module.create(
  *  @module Fadable
  *  @namespace component
  *  @desc Represents an fadable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5232,7 +5233,7 @@ glue.module.create(
  *  @module Hoverable
  *  @namespace component
  *  @desc Used to make a game component perfom an action when she's hovered over
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5290,7 +5291,7 @@ glue.module.create(
  *  @module Movable
  *  @namespace component
  *  @desc Represents an movable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5372,7 +5373,7 @@ glue.module.create(
  *  @module Rotatable
  *  @namespace component
  *  @desc Represents a rotatable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -5385,18 +5386,18 @@ glue.module.create(
         'glue/math/vector'
     ],
     function (Glue, Vector) {
-        return function (obj) {
+        return function (component) {
             var Sugar = Glue.sugar,
                 angle = 0,
                 rotationSpeed = 100,
                 targetAngle = 0,
                 rotationDirection = 1,
-                origin = Vector(0, 0),
                 toDegree = 180 / Math.PI,
                 atTarget = true,
                 toRadian = Math.PI / 180;
-            obj = obj || {};
-            obj.rotatable = {
+                origin = Vector(0, 0),
+            component = component || {};
+            component.rotatable = {
                 update: function (deltaT) {
                     var tarDeg,
                         curDeg,
@@ -5426,7 +5427,6 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context) {
-                    context.translate(origin.x, origin.y);
                     context.rotate(angle);
                     context.translate(-origin.x, -origin.y);
                 },
@@ -5436,10 +5436,6 @@ glue.module.create(
                 },
                 setAngleRadian: function (value) {
                     angle = Sugar.isNumber(value) ? value : angle;
-                },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
                 },
                 setTargetDegree: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
@@ -5474,9 +5470,6 @@ glue.module.create(
                 getAngleRadian: function () {
                     return angle;
                 },
-                getOrigin: function () {
-                    return origin;
-                },
                 getTargetDegree: function () {
                     return targetAngle * toDegree;
                 },
@@ -5485,9 +5478,16 @@ glue.module.create(
                 },
                 atTarget: function () {
                     return atTarget;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
-            return obj;
+            return component;
         };
     }
 );
@@ -5496,7 +5496,7 @@ glue.module.create(
  *  @module Scalable
  *  @namespace component
  *  @desc Represents a scalable component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -5511,19 +5511,16 @@ glue.module.create(
     function (Glue, Vector) {
         return function (component) {
             var Sugar = Glue.sugar,
-                origin = Vector(0, 0),
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
+                origin = Vector(0, 0),
                 scaleSpeed = 1,
-                atTarget = true,
-                equals = function (v1, v2) {
-                    return v1.x === v2.x && v1.y === v2.y;
-                };
+                atTarget = true;
 
             component = component || {};
             component.scalable = {
                 update: function (deltaT) {
-                    if (!equals(currentScale, targetScale)) {
+                    if (!atTarget) {
                         var radian,
                             deltaX,
                             deltaY;
@@ -5534,26 +5531,28 @@ glue.module.create(
                         // Pythagorean theorem : c = √( a2 + b2 )
                         // We stop scaling if the remaining distance to the endpoint
                         // is smaller then the step iterator (scaleSpeed * deltaT).
-                        if (!atTarget && Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
+                        if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
                             atTarget = true;
-                            this.setScale(targetScale);
                         } else {
                             // Update the x and y scale, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
                             radian = Math.atan2(deltaY, deltaX);
                             currentScale.x += Math.cos(radian) * scaleSpeed * deltaT;
-                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;         
+                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;                  
                         }
+                    } else {
+                        currentScale = targetScale;
                     }
                 },
                 draw: function (deltaT, context) {
-                    context.translate(origin.x, origin.y);
                     context.scale(currentScale.x, currentScale.y);
                     context.translate(-origin.x, -origin.y);
                 },
                 setScale: function (vec) {
                     currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;
                     currentScale.y = Sugar.isNumber(vec.y) ? vec.y : currentScale.y;
+                    targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
+                    targetScale.y = Sugar.isNumber(vec.y) ? vec.y : targetScale.y;
                 },
                 setTarget: function (vec) {
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
@@ -5561,11 +5560,8 @@ glue.module.create(
                     atTarget = false;
                 },
                 setSpeed: function (value) {
-                    scaleSpeed = Sugar.isNumber(value) ? (value / 100) : scaleSpeed;
-                },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                    scaleSpeed = Sugar.isNumber(value) ? value : scaleSpeed;
+                    scaleSpeed = Math.floor(scaleSpeed / 100);
                 },
                 getScale: function () {
                     return currentScale;
@@ -5576,26 +5572,15 @@ glue.module.create(
                 getSpeed: function () {
                     return Math.floor(scaleSpeed * 100);
                 },
-                getOrigin: function () {
-                    return origin;
-                },
                 atTarget: function () {
                     return atTarget;
                 },
-                getDimension: function () {
-                    var dimension;
-                    if (Sugar.isDefined(component.animatable)) {
-                        dimension = component.animatable.getDimension();
-                    } else if (Sugar.isDefined(component.visible)) {
-                        dimension = component.visible.getDimension();
-                    } else {
-                        dimension = Dimension(1, 1);
-                    }
-
-                    return Dimension(
-                            dimension.width * currentScale.x,
-                            dimension.height * currentScale.y
-                        ); 
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
             return component;
@@ -5607,7 +5592,7 @@ glue.module.create(
  *  @module Visible
  *  @namespace component
  *  @desc Represents a visible component
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  *
@@ -5626,9 +5611,10 @@ glue.module.create(
         return function (obj) {
             var Sugar = Glue.sugar,
                 position = Vector(0, 0),
-                dimension = null,
+                origin = Vector(0, 0),
+                dimension = Dimension(0, 0),
                 image = null,
-                rectangle,
+                rectangle = Rectangle(0, 0, 0, 0),
                 updateRectangle = function () {
                     rectangle.x1 = position.x;
                     rectangle.y1 = position.y;
@@ -5677,7 +5663,8 @@ glue.module.create(
                     }
                     if (Sugar.isDefined(obj.scalable)) {
                         obj.scalable.draw(deltaT, context);
-                    }
+                    }    
+                    context.translate(-origin.x, -origin.y);
                     context.drawImage(
                         image,
                         position.x - scroll.x,
@@ -5715,6 +5702,13 @@ glue.module.create(
                 },
                 getImage: function () {
                     return image;
+                },
+                setOrigin: function (vec) {
+                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
+                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             };
             return obj;
@@ -5726,7 +5720,7 @@ glue.module.create(
  *  @module System
  *  @namespace event
  *  @desc This module offers a very basic pub/sub system event system
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -5788,7 +5782,7 @@ glue.module.create(
 /*
  *  @module Game
  *  @desc Represents a Glue game
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6184,7 +6178,7 @@ glue.module.create(
 /*
  *  @module Loader
  *  @desc Used to load assets in the beginning of the game, shows a progress bar
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6276,7 +6270,7 @@ glue.module.create(
 /**
  *  @module Math
  *  @desc The math module
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6303,7 +6297,7 @@ glue.module.create(
  *  @module Dimension
  *  @namespace math
  *  @desc Represents a dimension
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6333,7 +6327,7 @@ glue.module.create(
  *  @module Matrix
  *  @namespace math
  *  @desc Represents a matrix
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6397,7 +6391,7 @@ glue.module.create('glue/math/matrix', [
  *  @module Polygon
  *  @namespace math
  *  @desc Represents a polygon
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6447,7 +6441,7 @@ glue.module.create(
  *  @module Rectangle
  *  @namespace math
  *  @desc Represents a rectangle
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6484,7 +6478,7 @@ glue.module.create(
  *  @module Vector
  *  @namespace math
  *  @desc Represents a vector
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -6536,7 +6530,7 @@ glue.module.create('glue/math/vector', function () {
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
  *  @author Jeroen Reurings
- *  @copyright (C) 2013 SpilGames
+ *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
