@@ -55,8 +55,12 @@ glue.module.get(
                             this.visible.draw(deltaT, context, scroll);
                         },
                         pointerMove: function (e) {
-                            scroll.x = e.position.x;
-                            scroll.y = e.position.y;
+                            var position = Vector(
+                                Math.round(e.position.x),
+                                Math.round(e.position.y)
+                            );
+                            scroll.x = position.x;
+                            scroll.y = position.y;
                         }
                     }),
                     component2 = Component(Visible).add({
