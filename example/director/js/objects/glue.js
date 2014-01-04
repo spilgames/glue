@@ -27,7 +27,7 @@ glue.module.create(
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
                     }
-                };
+                });
             return component;
         };
     }

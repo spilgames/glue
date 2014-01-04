@@ -22,7 +22,7 @@ glue.module.create(
             var component = Component(Visible, Animatable, Movable).add({
                     init: function () {
                         this.animatable.setup({
-                            position: Vector(350, 400),
+                            position: Vector(50, 400),
                             image: Loader.getAsset('dog'),
                             animation: {
                                 frameCount: 8,

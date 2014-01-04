@@ -14,9 +14,9 @@ glue.module.create(
     ) {
         return function () {
             var screen = Screen('Screen1');
-            screen.add(Dog);
-            screen.add(Glue);
-            screen.add(Spil);
+            screen.addObject(Dog());
+            screen.addObject(Glue());
+            screen.addObject(Spil());
             return screen;
         };
     }
