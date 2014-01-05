@@ -5774,6 +5774,12 @@ glue.module.create(
 
                 if (Sugar.isString(name)) {
                     screen = getScreen(name);
+                    if (action === 'show') {
+                        Game.add(screen);
+                    }
+                    if (action === 'hide') {
+                        Game.remove(screen);
+                    }
                     objects = screen.getObjects();
                     l = objects.length;
                     for (i; i < l; ++i) {

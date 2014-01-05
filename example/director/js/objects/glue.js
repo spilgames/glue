@@ -20,9 +20,10 @@ glue.module.create(
         Droptarget,
         Director
     ) {
-        var init = false;
         return function () {
-            var component = Component(Visible, Movable, Droptarget).add({
+            var init = false,
+                dropped = false,
+                component = Component(Visible, Movable, Droptarget).add({
                     init: function () {
                         if (!init) {
                             init = true;
@@ -30,8 +31,16 @@ glue.module.create(
                                 position: Vector(600, 400),
                                 image: Loader.getAsset('glue')
                             });
+                            this.movable.setMoveSpeed(200);
                         }
                         this.droptarget.setup();
+                    },
+                    update: function (deltaT) {
+                        this.movable.update(deltaT);
+                        if (dropped && this.movable.atTarget()) {
+                            Director.showScreen('Screen2');
+                            dropped = false;
+                        }
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
@@ -39,19 +48,17 @@ glue.module.create(
                     onDrop: function (obj, e) {
                         var position = this.visible.getPosition();
                         if (position.x === 200) {
-                            this.visible.setPosition(Vector(
+                            this.movable.setTarget(Vector(
                                 600,
                                 400
                             ));
                         } else {
-                            this.visible.setPosition(Vector(
+                            this.movable.setTarget(Vector(
                                 position.x - 100,
                                 position.y - 100
                             ));
                         }
-                        if (obj.getName && obj.getName() === 'dog') {
-                            Director.showScreen('Screen2');
-                        }
+                        dropped = true;
                     },
                     destroy: function () {
                         this.droptarget.destroy();

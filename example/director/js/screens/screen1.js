@@ -14,6 +14,11 @@ glue.module.create(
             var screen = Screen('Screen1');
             screen.addObject(GlueObject());
             screen.addObject(DogObject());
+            screen.draw = function (deltaT, context) {
+                context.fillStyle = 'blue';
+                context.font = 'bold 16px Arial';
+                context.fillText('Drop the dog on the Glue logo to go to screen 2', 210, 580);
+            };
             return screen;
         };
     }
