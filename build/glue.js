@@ -6634,8 +6634,7 @@ glue.module.create(
         var Sugar = Glue.sugar;
 
         return function (name) {
-            var useCache = true,
-                objects = [],
+            var objects = [],
                 module = {
                     addObject: function (object) {
                         if (Sugar.isObject(object)) {
@@ -6647,14 +6646,6 @@ glue.module.create(
                     },
                     getName: function () {
                         return name;
-                    },
-                    useCache: function () {
-                        return useCache;
-                    },
-                    setUseCache: function (value) {
-                        if (Sugar.isBoolean(value)) {
-                            useCache = value;
-                        }
                     }
                 };
             return module;
