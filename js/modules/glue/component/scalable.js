@@ -5,8 +5,6 @@
  *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/scalable',
@@ -16,7 +14,7 @@ glue.module.create(
         'glue/math/dimension'
     ],
     function (Glue, Vector, Dimension) {
-        return function (component) {
+        return function (object) {
             var Sugar = Glue.sugar,
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
@@ -24,8 +22,8 @@ glue.module.create(
                 scaleSpeed = 1,
                 atTarget = true;
 
-            component = component || {};
-            component.scalable = {
+            object = object || {};
+            object.scalable = {
                 update: function (deltaT) {
                     if (!atTarget) {
                         var radian,
@@ -90,10 +88,10 @@ glue.module.create(
                 },
                 getDimension: function () {
                     var dimension;
-                    if (Sugar.isDefined(component.animatable)) {
-                        dimension = component.animatable.getDimension();
-                    } else if (Sugar.isDefined(component.visible)) {
-                        dimension = component.visible.getDimension();
+                    if (Sugar.isDefined(object.animatable)) {
+                        dimension = object.animatable.getDimension();
+                    } else if (Sugar.isDefined(object.visible)) {
+                        dimension = object.visible.getDimension();
                     } else {
                         dimension = Dimension(1, 1);
                     }
@@ -103,7 +101,8 @@ glue.module.create(
                         ); 
                 }
             };
-            return component;
+
+            return object;
         };
     }
 );

@@ -29,6 +29,7 @@ glue.module.create(
                         return name;
                     }
                 };
+
             return module;
         };
     }

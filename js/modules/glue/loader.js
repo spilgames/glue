@@ -46,7 +46,7 @@ glue.module.create(
                 asset.addEventListener('load', assetLoadedHandler, false);
                 return asset;
             },
-            obj = {
+            module = {
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
@@ -86,6 +86,6 @@ glue.module.create(
                 }
             };
 
-        return obj;
+        return module;
     }
 );

@@ -12,23 +12,23 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        return function (obj) {
+        return function (object) {
             var isClicked = function (e) {
-                    return obj.visible.getBoundingBox().hasPosition(e.position);
+                    return object.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
-                    if (isClicked(e) && obj.onClick) {
-                        obj.onClick(e);
+                    if (isClicked(e) && object.onClick) {
+                        object.onClick(e);
                     }
                 },
                 pointerUpHandler = function (e) {
-                    if (isClicked(e) && obj.onClick) {
-                        obj.onClick(e);
+                    if (isClicked(e) && object.onClick) {
+                        object.onClick(e);
                     }
                 };
 
-            obj = obj || {};
-            obj.clickable = {
+            object = object || {};
+            object.clickable = {
                 setup: function (settings) {
 
                 },
@@ -45,7 +45,8 @@ glue.module.create(
                     pointerUpHandler(e);
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );

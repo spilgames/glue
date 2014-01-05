@@ -13,21 +13,21 @@ glue.module.create(
         'glue/event/system'
     ],
     function (Glue, Event) {
-        return function (obj) {
+        return function (object) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    return obj.animatable ?
-                        obj.animatable.getBoundingBox().hasPosition(e.position) :
-                        obj.visible.getBoundingBox().hasPosition(e.position);
+                    return object.animatable ?
+                        object.animatable.getBoundingBox().hasPosition(e.position) :
+                        object.visible.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
-                    if (droppedOnMe(obj, e) && obj.onDrop) {
-                        obj.onDrop(draggable, e);
+                    if (droppedOnMe(object, e) && object.onDrop) {
+                        object.onDrop(draggable, e);
                     }
                 };
 
-            obj = obj || {};
-            obj.droptarget = {
+            object = object || {};
+            object.droptarget = {
                 setup: function (settings) {
                     Event.on('draggable.drop', draggableDropHandler);
                 },
@@ -38,7 +38,8 @@ glue.module.create(
 
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );

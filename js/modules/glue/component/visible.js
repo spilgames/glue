@@ -18,7 +18,7 @@ glue.module.create(
         'glue/component/rotatable'
     ],
     function (Glue, Vector, Dimension, Rectangle) {
-        return function (obj) {
+        return function (object) {
             var Sugar = Glue.sugar,
                 position = Vector(0, 0),
                 origin = Vector(0, 0),
@@ -32,8 +32,8 @@ glue.module.create(
                     rectangle.y2 = position.y + dimension.height;
                 };
 
-            obj = obj || {};
-            obj.visible = {
+            object = object || {};
+            object.visible = {
                 setup: function (settings) {
                     if (settings) {
                         if (settings.image) {
@@ -68,11 +68,11 @@ glue.module.create(
                 draw: function (deltaT, context, scroll) {
                     scroll = scroll || Vector(0, 0);
                     context.save();
-                    if (Sugar.isDefined(obj.rotatable)) {
-                        obj.rotatable.draw(deltaT, context);
+                    if (Sugar.isDefined(object.rotatable)) {
+                        object.rotatable.draw(deltaT, context);
                     }
-                    if (Sugar.isDefined(obj.scalable)) {
-                        obj.scalable.draw(deltaT, context);
+                    if (Sugar.isDefined(object.scalable)) {
+                        object.scalable.draw(deltaT, context);
                     }    
                     context.translate(-origin.x, -origin.y);
                     context.drawImage(
@@ -121,7 +121,8 @@ glue.module.create(
                     return origin;
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );

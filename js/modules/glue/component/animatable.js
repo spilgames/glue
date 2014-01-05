@@ -13,7 +13,7 @@ glue.module.create(
         'glue/math/vector'
     ],
     function (Glue, Vector) {
-        return function (obj) {
+        return function (object) {
             var Sugar = Glue.sugar,
                 animationSettings,
                 animations = {},
@@ -29,8 +29,8 @@ glue.module.create(
                 image,
                 setAnimation = function () {
                     if (!image) {
-                        obj.visible.setImage(currentAnimation.image);
-                        image = obj.visible.getImage();
+                        object.visible.setImage(currentAnimation.image);
+                        image = object.visible.getImage();
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
                     timeBetweenFrames = currentAnimation.fps ?
@@ -47,8 +47,8 @@ glue.module.create(
                 successCallback,
                 errorCallback;
 
-            obj = obj || {};
-            obj.animatable = {
+            object = object || {};
+            object.animatable = {
                 setup: function (settings) {
                     var animation;
                     if (settings) {
@@ -59,8 +59,8 @@ glue.module.create(
                             }
                         }
                     }
-                    if (Sugar.isDefined(obj.visible)) {
-                        obj.visible.setup(settings);
+                    if (Sugar.isDefined(object.visible)) {
+                        object.visible.setup(settings);
                     } else {
                         if (window.console) {
                             throw 'Animatable needs a Visible component';
@@ -81,20 +81,20 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    var position = obj.visible.getPosition(),
+                    var position = object.visible.getPosition(),
                         sourceX = frameWidth * currentFrame,
-                        origin = obj.visible.getOrigin();
+                        origin = object.visible.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
                         position.x - scroll.x,
                         position.y - scroll.y
                     );
-                    if (Sugar.isDefined(obj.rotatable)) {
-                        obj.rotatable.draw(deltaT, context);
+                    if (Sugar.isDefined(object.rotatable)) {
+                        object.rotatable.draw(deltaT, context);
                     }
-                    if (Sugar.isDefined(obj.scalable)) {
-                        obj.scalable.draw(deltaT, context);
+                    if (Sugar.isDefined(object.scalable)) {
+                        object.scalable.draw(deltaT, context);
                     }    
                     context.translate(-origin.x, -origin.y);
                     context.drawImage
@@ -118,12 +118,12 @@ glue.module.create(
                     }
                 },
                 getDimension: function () {
-                    var dimension = obj.visible.getDimension();
+                    var dimension = object.visible.getDimension();
                     dimension.width = frameWidth;
                     return dimension;
                 },
                 getBoundingBox: function () {
-                    var rectangle = obj.visible.getBoundingBox();
+                    var rectangle = object.visible.getBoundingBox();
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
@@ -131,7 +131,8 @@ glue.module.create(
                     return frameWidth;
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );

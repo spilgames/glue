@@ -4730,7 +4730,7 @@ glue.module.create(
     function (Glue) {
         return function () {
             var name = '',
-                obj = {
+                module = {
                     add: function (value) {
                         this.mix(value);
                         return this;
@@ -4743,9 +4743,9 @@ glue.module.create(
 
             for (i; i < l; ++i) {
                 mixin = mixins[i];
-                mixin(obj);
+                mixin(module);
             }
-            return obj.mix({
+            return module.mix({
                 setName: function (value) {
                     name = value;
                 },
@@ -4772,7 +4772,7 @@ glue.module.create(
         'glue/math/vector'
     ],
     function (Glue, Vector) {
-        return function (obj) {
+        return function (object) {
             var Sugar = Glue.sugar,
                 animationSettings,
                 animations = {},
@@ -4788,8 +4788,8 @@ glue.module.create(
                 image,
                 setAnimation = function () {
                     if (!image) {
-                        obj.visible.setImage(currentAnimation.image);
-                        image = obj.visible.getImage();
+                        object.visible.setImage(currentAnimation.image);
+                        image = object.visible.getImage();
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
                     timeBetweenFrames = currentAnimation.fps ?
@@ -4806,8 +4806,8 @@ glue.module.create(
                 successCallback,
                 errorCallback;
 
-            obj = obj || {};
-            obj.animatable = {
+            object = object || {};
+            object.animatable = {
                 setup: function (settings) {
                     var animation;
                     if (settings) {
@@ -4818,8 +4818,8 @@ glue.module.create(
                             }
                         }
                     }
-                    if (Sugar.isDefined(obj.visible)) {
-                        obj.visible.setup(settings);
+                    if (Sugar.isDefined(object.visible)) {
+                        object.visible.setup(settings);
                     } else {
                         if (window.console) {
                             throw 'Animatable needs a Visible component';
@@ -4840,20 +4840,20 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    var position = obj.visible.getPosition(),
+                    var position = object.visible.getPosition(),
                         sourceX = frameWidth * currentFrame,
-                        origin = obj.visible.getOrigin();
+                        origin = object.visible.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
                         position.x - scroll.x,
                         position.y - scroll.y
                     );
-                    if (Sugar.isDefined(obj.rotatable)) {
-                        obj.rotatable.draw(deltaT, context);
+                    if (Sugar.isDefined(object.rotatable)) {
+                        object.rotatable.draw(deltaT, context);
                     }
-                    if (Sugar.isDefined(obj.scalable)) {
-                        obj.scalable.draw(deltaT, context);
+                    if (Sugar.isDefined(object.scalable)) {
+                        object.scalable.draw(deltaT, context);
                     }    
                     context.translate(-origin.x, -origin.y);
                     context.drawImage
@@ -4877,12 +4877,12 @@ glue.module.create(
                     }
                 },
                 getDimension: function () {
-                    var dimension = obj.visible.getDimension();
+                    var dimension = object.visible.getDimension();
                     dimension.width = frameWidth;
                     return dimension;
                 },
                 getBoundingBox: function () {
-                    var rectangle = obj.visible.getBoundingBox();
+                    var rectangle = object.visible.getBoundingBox();
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
@@ -4890,7 +4890,8 @@ glue.module.create(
                     return frameWidth;
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );
@@ -4909,23 +4910,23 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        return function (obj) {
+        return function (object) {
             var isClicked = function (e) {
-                    return obj.visible.getBoundingBox().hasPosition(e.position);
+                    return object.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
-                    if (isClicked(e) && obj.onClick) {
-                        obj.onClick(e);
+                    if (isClicked(e) && object.onClick) {
+                        object.onClick(e);
                     }
                 },
                 pointerUpHandler = function (e) {
-                    if (isClicked(e) && obj.onClick) {
-                        obj.onClick(e);
+                    if (isClicked(e) && object.onClick) {
+                        object.onClick(e);
                     }
                 };
 
-            obj = obj || {};
-            obj.clickable = {
+            object = object || {};
+            object.clickable = {
                 setup: function (settings) {
 
                 },
@@ -4942,7 +4943,8 @@ glue.module.create(
                     pointerUpHandler(e);
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );
@@ -4966,11 +4968,11 @@ glue.module.create(
         var draggables = [],
             dragStartTimeout = 30;
 
-        return function (obj) {
+        return function (object) {
             var dragging = false,
                 dragId,
                 grabOffset = Vector(0, 0),
-                isHeighestDraggable = function (obj) {
+                isHeighestDraggable = function (object) {
                     var i = 0,
                         l = draggables.length,
                         draggable,
@@ -4978,7 +4980,7 @@ glue.module.create(
 
                     for (i; i < l; ++i) {
                         draggable = draggables[i];
-                        if (draggable !== obj && draggable.z > obj.z) {
+                        if (draggable !== object && draggable.z > object.z) {
                             result = false;
                             break;
                         }
@@ -4986,9 +4988,9 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    return obj.animatable ?
-                        obj.animatable.getBoundingBox().hasPosition(e.position) :
-                        obj.visible.getBoundingBox().hasPosition(e.position);
+                    return object.animatable ?
+                        object.animatable.getBoundingBox().hasPosition(e.position) :
+                        object.visible.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity
@@ -4999,14 +5001,14 @@ glue.module.create(
                  */
                 dragStart = function (e) {
                     if (checkOnMe(e) && dragging === false) {
-                        draggables.push(obj);
+                        draggables.push(object);
                         setTimeout(function () {
-                            if (isHeighestDraggable(obj)) {
+                            if (isHeighestDraggable(object)) {
                                 dragging = true;
                                 dragId = e.pointerId;
-                                grabOffset = e.position.substract(obj.visible.getPosition());
-                                if (obj.dragStart) {
-                                    obj.dragStart(e);
+                                grabOffset = e.position.substract(object.visible.getPosition());
+                                if (object.dragStart) {
+                                    object.dragStart(e);
                                 }
                                 return false;
                             }
@@ -5023,9 +5025,9 @@ glue.module.create(
                 dragMove = function (e) {
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            obj.visible.setPosition(e.position.substract(grabOffset));
-                            if (obj.dragMove) {
-                                obj.dragMove(e);
+                            object.visible.setPosition(e.position.substract(grabOffset));
+                            if (object.dragMove) {
+                                object.dragMove(e);
                             }
                         }
                     }
@@ -5039,19 +5041,19 @@ glue.module.create(
                  */
                 dragEnd = function (e) {
                     if (dragging === true) {
-                        Event.fire('draggable.drop', obj, e);
+                        Event.fire('draggable.drop', object, e);
                         draggables = [];
                         dragId = undefined;
                         dragging = false;
-                        if (obj.dragEnd) {
-                            obj.dragEnd(e, function () {});
+                        if (object.dragEnd) {
+                            object.dragEnd(e, function () {});
                         }
                         return false;
                     }
                 };
 
-            obj = obj || {};
-            obj.draggable = {
+            object = object || {};
+            object.draggable = {
                 setup: function (settings) {
 
                 },
@@ -5071,7 +5073,8 @@ glue.module.create(
                     dragStartTimeout = value;
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );
@@ -5091,21 +5094,21 @@ glue.module.create(
         'glue/event/system'
     ],
     function (Glue, Event) {
-        return function (obj) {
+        return function (object) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    return obj.animatable ?
-                        obj.animatable.getBoundingBox().hasPosition(e.position) :
-                        obj.visible.getBoundingBox().hasPosition(e.position);
+                    return object.animatable ?
+                        object.animatable.getBoundingBox().hasPosition(e.position) :
+                        object.visible.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
-                    if (droppedOnMe(obj, e) && obj.onDrop) {
-                        obj.onDrop(draggable, e);
+                    if (droppedOnMe(object, e) && object.onDrop) {
+                        object.onDrop(draggable, e);
                     }
                 };
 
-            obj = obj || {};
-            obj.droptarget = {
+            object = object || {};
+            object.droptarget = {
                 setup: function (settings) {
                     Event.on('draggable.drop', draggableDropHandler);
                 },
@@ -5116,7 +5119,8 @@ glue.module.create(
 
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );
@@ -5136,7 +5140,7 @@ glue.module.create(
     ],
     function (Glue) {
         var Sugar = Glue.sugar;
-        return function (component) {
+        return function (object) {
             var alpha,
                 targetAlpha,
                 fadingIn = false,
@@ -5144,8 +5148,8 @@ glue.module.create(
                 fadeSpeed = 0.5,
                 atTargetCallback = null;
 
-            component = component || {};
-            component.fadable = {
+            object = object || {};
+            object.fadable = {
                 update: function (deltaT) {
                     if (fadingIn === true) {
                         if (alpha < targetAlpha + (deltaT * fadeSpeed)) {
@@ -5226,7 +5230,8 @@ glue.module.create(
                     return !fadingIn && !fadingOut;
                 }
             };
-            return component;
+
+            return object;
         };
     }
 );
@@ -5245,32 +5250,32 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        return function (obj) {
+        return function (object) {
             // TODO: add state constants
             var state = 'not hovered',
                 isHovered = function (e) {
-                    return obj.visible.getBoundingBox().hasPosition(e.position);
+                    return object.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerMoveHandler = function (e) {
                     if (isHovered(e)) {
                         if (state === 'not hovered') {
-                            if (obj.hoverOver) {
-                                obj.hoverOver(e);
+                            if (object.hoverOver) {
+                                object.hoverOver(e);
                             }
                             state = 'hovered';
                         }
                     } else {
                         if (state === 'hovered') {
-                            if (obj.hoverOut) {
-                                obj.hoverOut(e);
+                            if (object.hoverOut) {
+                                object.hoverOut(e);
                             }
                             state = 'not hovered';
                         }
                     }
                 };
 
-            obj = obj || {};
-            obj.hoverable = {
+            object = object || {};
+            object.hoverable = {
                 setup: function (settings) {
 
                 },
@@ -5284,7 +5289,7 @@ glue.module.create(
                     pointerMoveHandler(e);
                 }
             };
-            return obj;
+            return object;
         };
     }
 );
@@ -5305,22 +5310,22 @@ glue.module.create(
     ],
     function (Glue, Vector) {
         var Sugar = Glue.sugar;
-        return function (component) {
+        return function (object) {
             var position,
                 targetPosition = null,
                 moveSpeed = 100,
                 atTarget = true,
                 rotation = 0;
 
-            component = component || {};
-            component.movable = {
+            object = object || {};
+            object.movable = {
                 update: function (deltaT) {
                     if (targetPosition !== null) {
                         var radian,
                             deltaX,
                             deltaY;
 
-                        position = component.visible.getPosition();
+                        position = object.visible.getPosition();
                         deltaX = targetPosition.x - position.x,
                         deltaY = targetPosition.y - position.y;
 
@@ -5330,7 +5335,7 @@ glue.module.create(
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < moveSpeed * deltaT) {
                             atTarget = true;
                             position = targetPosition;
-                            component.visible.setPosition(position);
+                            object.visible.setPosition(position);
                         } else {
                             // Update the x and y position, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
@@ -5338,7 +5343,7 @@ glue.module.create(
                             position.x += Math.cos(radian) * moveSpeed * deltaT;
                             position.y += Math.sin(radian) * moveSpeed * deltaT;
                             rotation = radian * 180 / Math.PI;
-                            component.visible.setPosition(position);                      
+                            object.visible.setPosition(position);                      
                         }
                     }
                 },
@@ -5366,7 +5371,7 @@ glue.module.create(
                     moveSpeed = speed;
                 }
             };
-            return component;
+            return object;
         };
     }
 );
@@ -5388,7 +5393,7 @@ glue.module.create(
         'glue/math/vector'
     ],
     function (Glue, Vector) {
-        return function (component) {
+        return function (object) {
             var Sugar = Glue.sugar,
                 angle = 0,
                 rotationSpeed = 100,
@@ -5397,9 +5402,10 @@ glue.module.create(
                 toDegree = 180 / Math.PI,
                 atTarget = true,
                 toRadian = Math.PI / 180;
-                origin = Vector(0, 0),
-            component = component || {};
-            component.rotatable = {
+                origin = Vector(0, 0);
+
+            object = object || {};
+            object.rotatable = {
                 update: function (deltaT) {
                     var tarDeg,
                         curDeg,
@@ -5489,7 +5495,8 @@ glue.module.create(
                     return origin;
                 }
             };
-            return component;
+
+            return object;
         };
     }
 );
@@ -5501,8 +5508,6 @@ glue.module.create(
  *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/scalable',
@@ -5512,7 +5517,7 @@ glue.module.create(
         'glue/math/dimension'
     ],
     function (Glue, Vector, Dimension) {
-        return function (component) {
+        return function (object) {
             var Sugar = Glue.sugar,
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
@@ -5520,8 +5525,8 @@ glue.module.create(
                 scaleSpeed = 1,
                 atTarget = true;
 
-            component = component || {};
-            component.scalable = {
+            object = object || {};
+            object.scalable = {
                 update: function (deltaT) {
                     if (!atTarget) {
                         var radian,
@@ -5586,10 +5591,10 @@ glue.module.create(
                 },
                 getDimension: function () {
                     var dimension;
-                    if (Sugar.isDefined(component.animatable)) {
-                        dimension = component.animatable.getDimension();
-                    } else if (Sugar.isDefined(component.visible)) {
-                        dimension = component.visible.getDimension();
+                    if (Sugar.isDefined(object.animatable)) {
+                        dimension = object.animatable.getDimension();
+                    } else if (Sugar.isDefined(object.visible)) {
+                        dimension = object.visible.getDimension();
                     } else {
                         dimension = Dimension(1, 1);
                     }
@@ -5599,7 +5604,8 @@ glue.module.create(
                         ); 
                 }
             };
-            return component;
+
+            return object;
         };
     }
 );
@@ -5624,7 +5630,7 @@ glue.module.create(
         'glue/component/rotatable'
     ],
     function (Glue, Vector, Dimension, Rectangle) {
-        return function (obj) {
+        return function (object) {
             var Sugar = Glue.sugar,
                 position = Vector(0, 0),
                 origin = Vector(0, 0),
@@ -5638,8 +5644,8 @@ glue.module.create(
                     rectangle.y2 = position.y + dimension.height;
                 };
 
-            obj = obj || {};
-            obj.visible = {
+            object = object || {};
+            object.visible = {
                 setup: function (settings) {
                     if (settings) {
                         if (settings.image) {
@@ -5674,11 +5680,11 @@ glue.module.create(
                 draw: function (deltaT, context, scroll) {
                     scroll = scroll || Vector(0, 0);
                     context.save();
-                    if (Sugar.isDefined(obj.rotatable)) {
-                        obj.rotatable.draw(deltaT, context);
+                    if (Sugar.isDefined(object.rotatable)) {
+                        object.rotatable.draw(deltaT, context);
                     }
-                    if (Sugar.isDefined(obj.scalable)) {
-                        obj.scalable.draw(deltaT, context);
+                    if (Sugar.isDefined(object.scalable)) {
+                        object.scalable.draw(deltaT, context);
                     }    
                     context.translate(-origin.x, -origin.y);
                     context.drawImage(
@@ -5727,7 +5733,8 @@ glue.module.create(
                     return origin;
                 }
             };
-            return obj;
+
+            return object;
         };
     }
 );
@@ -5781,7 +5788,7 @@ glue.module.create(
                     }
                 }
             },
-            object = {
+            module = {
                 addScreen: function (screen) {
                     if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
                         screens[screen.getName()] = screen;
@@ -5804,7 +5811,8 @@ glue.module.create(
                     toggleScreen(name, 'hide');
                 }
             };
-        return object;
+
+        return module;
     }
 );
 
@@ -6315,7 +6323,7 @@ glue.module.create(
                 asset.addEventListener('load', assetLoadedHandler, false);
                 return asset;
             },
-            obj = {
+            module = {
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
@@ -6355,7 +6363,7 @@ glue.module.create(
                 }
             };
 
-        return obj;
+        return module;
     }
 );
 
@@ -6648,6 +6656,7 @@ glue.module.create(
                         return name;
                     }
                 };
+
             return module;
         };
     }

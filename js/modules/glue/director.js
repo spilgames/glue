@@ -47,7 +47,7 @@ glue.module.create(
                     }
                 }
             },
-            object = {
+            module = {
                 addScreen: function (screen) {
                     if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
                         screens[screen.getName()] = screen;
@@ -70,6 +70,7 @@ glue.module.create(
                     toggleScreen(name, 'hide');
                 }
             };
-        return object;
+
+        return module;
     }
 );

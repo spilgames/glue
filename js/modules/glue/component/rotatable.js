@@ -15,7 +15,7 @@ glue.module.create(
         'glue/math/vector'
     ],
     function (Glue, Vector) {
-        return function (component) {
+        return function (object) {
             var Sugar = Glue.sugar,
                 angle = 0,
                 rotationSpeed = 100,
@@ -24,9 +24,10 @@ glue.module.create(
                 toDegree = 180 / Math.PI,
                 atTarget = true,
                 toRadian = Math.PI / 180;
-                origin = Vector(0, 0),
-            component = component || {};
-            component.rotatable = {
+                origin = Vector(0, 0);
+
+            object = object || {};
+            object.rotatable = {
                 update: function (deltaT) {
                     var tarDeg,
                         curDeg,
@@ -116,7 +117,8 @@ glue.module.create(
                     return origin;
                 }
             };
-            return component;
+
+            return object;
         };
     }
 );
