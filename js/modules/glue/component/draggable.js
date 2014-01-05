@@ -37,7 +37,9 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    return obj.visible.getBoundingBox().hasPosition(e.position);
+                    return obj.animatable ?
+                        obj.animatable.getBoundingBox().hasPosition(e.position) :
+                        obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity

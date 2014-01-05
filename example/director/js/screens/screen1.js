@@ -2,21 +2,18 @@ glue.module.create(
     'js/screens/screen1',
     [
         'glue/screen',
-        'js/objects/dog',
         'js/objects/glue',
-        'js/objects/spil'
+        'js/objects/dog'
     ],
     function (
         Screen,
-        Dog,
-        Glue,
-        Spil
+        GlueObject,
+        DogObject
     ) {
         return function () {
             var screen = Screen('Screen1');
-            screen.addObject(Dog());
-            screen.addObject(Glue());
-            screen.addObject(Spil());
+            screen.addObject(GlueObject());
+            screen.addObject(DogObject());
             return screen;
         };
     }

@@ -15,7 +15,7 @@ glue.module.create(
         var Sugar = Glue.sugar;
 
         return function (name) {
-            var isCached = true,
+            var useCache = true,
                 objects = [],
                 module = {
                     addObject: function (object) {
@@ -23,14 +23,19 @@ glue.module.create(
                             objects.push(object);
                         }
                     },
-                    getComponents: function () {
+                    getObjects: function () {
                         return objects;
                     },
                     getName: function () {
                         return name;
                     },
-                    cached: function () {
-                        return isCached;
+                    useCache: function () {
+                        return useCache;
+                    },
+                    setUseCache: function (value) {
+                        if (Sugar.isBoolean(value)) {
+                            useCache = value;
+                        }
                     }
                 };
             return module;

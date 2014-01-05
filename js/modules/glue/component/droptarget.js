@@ -16,7 +16,9 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    return obj.visible.getBoundingBox().hasPosition(e.position);
+                    return obj.animatable ?
+                        obj.animatable.getBoundingBox().hasPosition(e.position) :
+                        obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(obj, e) && obj.onDrop) {

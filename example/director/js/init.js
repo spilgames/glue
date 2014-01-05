@@ -40,12 +40,11 @@ glue.module.get(
             }
         }, function () {
             var screen1 = Screen1(),
-                screen2 = Screen2(),
-                director = Director;
+                screen2 = Screen2();
 
-            director.addScreen(screen1);
-            director.addScreen(screen2);
-            director.displayScreen('Screen1');
+            Director.addScreen(screen1);
+            Director.addScreen(screen2);
+            Director.showScreen('Screen1');
         });
     }
 );

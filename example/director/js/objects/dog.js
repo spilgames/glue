@@ -7,7 +7,7 @@ glue.module.create(
         'glue/component',
         'glue/component/visible',
         'glue/component/animatable',
-        'glue/component/movable'
+        'glue/component/draggable'
     ],
     function (
         Game,
@@ -16,11 +16,12 @@ glue.module.create(
         Component,
         Visible,
         Animatable,
-        Movable
+        Draggable
     ) {
         return function () {
-            var component = Component(Visible, Animatable, Movable).add({
+            var component = Component(Visible, Animatable, Draggable).add({
                     init: function () {
+                        this.setName('dog');
                         this.animatable.setup({
                             position: Vector(50, 400),
                             image: Loader.getAsset('dog'),
@@ -39,9 +40,19 @@ glue.module.create(
                     },
                     update: function (deltaT, context) {
                         this.animatable.update(deltaT);
+                        this.draggable.update(deltaT);
                     },
                     draw: function (deltaT, context, scroll) {
                         this.animatable.draw(deltaT, context, scroll);
+                    },
+                    pointerDown: function (e) {
+                        this.draggable.pointerDown(e);
+                    },
+                    pointerMove: function (e) {
+                        this.draggable.pointerMove(e);
+                    },
+                    pointerUp: function (e) {
+                        this.draggable.pointerUp(e);
                     }
                 });
             return component;

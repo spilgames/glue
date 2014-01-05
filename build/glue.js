@@ -4764,8 +4764,6 @@ glue.module.create(
  *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/animatable',
@@ -4885,7 +4883,7 @@ glue.module.create(
                 },
                 getBoundingBox: function () {
                     var rectangle = obj.visible.getBoundingBox();
-                    rectangle.y2 = rectangle.y1 + frameWidth;
+                    rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
                 getFrameWidth: function () {
@@ -4988,7 +4986,9 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    return obj.visible.getBoundingBox().hasPosition(e.position);
+                    return obj.animatable ?
+                        obj.animatable.getBoundingBox().hasPosition(e.position) :
+                        obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity
@@ -5094,7 +5094,9 @@ glue.module.create(
         return function (obj) {
             var droppedOnMe = function (draggable, e) {
                     // TODO: add more methods (constants) to check on me
-                    return obj.visible.getBoundingBox().hasPosition(e.position);
+                    return obj.animatable ?
+                        obj.animatable.getBoundingBox().hasPosition(e.position) :
+                        obj.visible.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(obj, e) && obj.onDrop) {
@@ -5748,69 +5750,58 @@ glue.module.create(
     function (Glue, Game, Screen) {
         'use strict';
         var Sugar = Glue.sugar,
-            screens = [],
-            cache = {},
+            screens = {},
+            activeScreen = null,
             getScreen = function (name) {
-                var i = 0,
-                    l = screens.length,
-                    foundScreen;
-
-                for (i; i < l; ++i) {
-                    console.log(name, screens[i].getName())
-                    console.log(screens)
-                    if (screens[i].getName && screens[i].getName() === name) {
-                        foundScreen = screens[i];
-                        console.log('found...')
-                        break;
+                if (Sugar.isString(name)) {
+                    if (Sugar.isObject(screens[name])) {
+                        return screens[name]
                     }
                 }
-                return foundScreen;
+            },
+            toggleScreen = function (name, action) {
+                var screen,
+                    objects,
+                    i = 0,
+                    l;
+
+                if (Sugar.isString(name)) {
+                    screen = getScreen(name);
+                    objects = screen.getObjects();
+                    l = objects.length;
+                    for (i; i < l; ++i) {
+                        if (action === 'show') {
+                            Game.add(objects[i]);
+                        } else if (action === 'hide') {
+                            Game.remove(objects[i]);
+                        }
+                    }
+                    if (action === 'show') {
+                        activeScreen = screen;
+                    }
+                }
             },
             object = {
                 addScreen: function (screen) {
-                    if (Sugar.isObject(screen)) {
-                        screens.push(screen);
+                    if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
+                        screens[screen.getName()] = screen;
                     }                    
                 },
                 getScreens: function () {
                     return screens;
                 },
-                displayScreen: function (name) {
-                    var screen,
-                        components,
-                        i = 0,
-                        l;
-
+                showScreen: function (name) {
+                    var activeScreenName;
                     if (Sugar.isString(name)) {
-                        if (cache[name]) {
-                            screen = cache[name]
-                        } else {
-                            screen = getScreen(name);
+                        if (activeScreen !== null) {
+                            activeScreenName = activeScreen.getName();
+                            toggleScreen(activeScreenName, 'hide');    
                         }
-                        components = screen.getComponents();
-                        l = components.length;
-                        for (i; i < l; ++i) {
-                            Game.add(components[i]);
-                        }
+                        toggleScreen(name, 'show');
                     }
                 },
                 hideScreen: function (name) {
-                    var screen,
-                        components,
-                        i = 0,
-                        l;
-
-                    if (Sugar.isString(name)) {
-                        screen = getScreen(name);
-                        if (screen.cached()) {
-                            cache[name] = screen;
-                        }
-                        components = screen.getComponents();
-                        l = components.length;
-                        for (i; i < l; ++i) {
-                            Game.remove(components[i]);
-                        }
-                    }
+                    toggleScreen(name, 'hide');
                 }
             };
         return object;
@@ -5902,9 +5893,9 @@ glue.module.create(
             doc = null,
             gameInfo,
             fps = 60,
-            components = [],
-            addedComponents = [],
-            removedComponents = [],
+            objects = [],
+            addedObjects = [],
+            removedObjects = [],
             lastFrameTime = new Date().getTime(),
             canvas = null,
             canvasId,
@@ -5966,35 +5957,35 @@ glue.module.create(
                 canvas.style.height = height + 'px';
             },
             sort = function () {
-                components.sort(function(a, b) {
+                objects.sort(function(a, b) {
                     return a.z - b.z;
                 });
             },
-            addComponents = function () {
+            addObjects = function () {
                 var component;
-                if (addedComponents.length) {
-                    for (var i = 0; i < addedComponents.length; ++i) {
-                        component = addedComponents[i];
+                if (addedObjects.length) {
+                    for (var i = 0; i < addedObjects.length; ++i) {
+                        component = addedObjects[i];
                         if (component.init) {
                             component.init();
                         }
-                        components.push(addedComponents[i]);
+                        objects.push(addedObjects[i]);
                     };
-                    addedComponents = [];
+                    addedObjects = [];
                     sort();
                 }
             },
-            removeComponents = function () {
+            removeObjects = function () {
                 var component;
-                if (removedComponents.length) {
-                    for (var i = 0; i < removedComponents.length; ++i) {
-                        component = removedComponents[i];
+                if (removedObjects.length) {
+                    for (var i = 0; i < removedObjects.length; ++i) {
+                        component = removedObjects[i];
                         if (component.destroy) {
                             component.destroy();
                         }
-                        Sugar.removeObject(components, component);
+                        Sugar.removeObject(objects, component);
                     };
-                    removedComponents = [];
+                    removedObjects = [];
                 }
             },
             redraw = function () {
@@ -6014,8 +6005,8 @@ glue.module.create(
 
                 if (canvasSupported) {
                     redraw();
-                    removeComponents();
-                    addComponents();
+                    removeObjects();
+                    addObjects();
 
                     deltaT = (time - lastFrameTime) / 1000;
                     if (debug) {
@@ -6030,14 +6021,14 @@ glue.module.create(
                         debugBar.innerHTML += '<br />version: 0.0.1 alpha';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
-                        debugBar.innerHTML += '<br />components: ' + components.length;
+                        debugBar.innerHTML += '<br />objects: ' + objects.length;
                         if (gameInfo && gameInfo.name) {
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
                         }
                     }
                     if (deltaT < 1) {
-                        for (var i = 0; i < components.length; ++i) {
-                            component = components[i];
+                        for (var i = 0; i < objects.length; ++i) {
+                            component = objects[i];
                             if (component.update) {
                                 component.update(deltaT, scroll);
                             }
@@ -6061,8 +6052,8 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = components.length; i < l; ++i) {
-                    component = components[i];
+                for (i = 0, l = objects.length; i < l; ++i) {
+                    component = objects[i];
                     if (component.pointerDown) {
                         component.pointerDown(e);
                     }
@@ -6074,8 +6065,8 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = components.length; i < l; ++i) {
-                    component = components[i];
+                for (i = 0, l = objects.length; i < l; ++i) {
+                    component = objects[i];
                     if (component.pointerMove) {
                         component.pointerMove(e);
                     }
@@ -6087,8 +6078,8 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = components.length; i < l; ++i) {
-                    component = components[i];
+                for (i = 0, l = objects.length; i < l; ++i) {
+                    component = objects[i];
                     if (component.pointerUp) {
                         component.pointerUp(e);
                     }
@@ -6236,10 +6227,10 @@ glue.module.create(
                 isRunning = false;
             },
             add: function (component) {
-                addedComponents.push(component);
+                addedObjects.push(component);
             },
             remove: function (component) {
-                removedComponents.push(component);
+                removedObjects.push(component);
             },
             get: function (componentName) {
                 var i,
@@ -6247,8 +6238,8 @@ glue.module.create(
                     component,
                     name;
 
-                for (i = 0, l = components.length; i < l; ++i) {
-                    component = components[i];
+                for (i = 0, l = objects.length; i < l; ++i) {
+                    component = objects[i];
                     name = component.getName();
                     if (!Sugar.isEmpty(name) && name === componentName) {
                         return component;
@@ -6266,8 +6257,8 @@ glue.module.create(
                     return backBufferContext2D;
                 }
             },
-            getComponentCount: function () {
-                return components.length;
+            getObjectCount: function () {
+                return objects.length;
             },
             getScroll: function () {
                 return scroll;
@@ -6643,7 +6634,7 @@ glue.module.create(
         var Sugar = Glue.sugar;
 
         return function (name) {
-            var isCached = true,
+            var useCache = true,
                 objects = [],
                 module = {
                     addObject: function (object) {
@@ -6651,14 +6642,19 @@ glue.module.create(
                             objects.push(object);
                         }
                     },
-                    getComponents: function () {
+                    getObjects: function () {
                         return objects;
                     },
                     getName: function () {
                         return name;
                     },
-                    cached: function () {
-                        return isCached;
+                    useCache: function () {
+                        return useCache;
+                    },
+                    setUseCache: function (value) {
+                        if (Sugar.isBoolean(value)) {
+                            useCache = value;
+                        }
                     }
                 };
             return module;

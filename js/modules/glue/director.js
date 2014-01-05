@@ -16,69 +16,58 @@ glue.module.create(
     function (Glue, Game, Screen) {
         'use strict';
         var Sugar = Glue.sugar,
-            screens = [],
-            cache = {},
+            screens = {},
+            activeScreen = null,
             getScreen = function (name) {
-                var i = 0,
-                    l = screens.length,
-                    foundScreen;
-
-                for (i; i < l; ++i) {
-                    console.log(name, screens[i].getName())
-                    console.log(screens)
-                    if (screens[i].getName && screens[i].getName() === name) {
-                        foundScreen = screens[i];
-                        console.log('found...')
-                        break;
+                if (Sugar.isString(name)) {
+                    if (Sugar.isObject(screens[name])) {
+                        return screens[name]
                     }
                 }
-                return foundScreen;
+            },
+            toggleScreen = function (name, action) {
+                var screen,
+                    objects,
+                    i = 0,
+                    l;
+
+                if (Sugar.isString(name)) {
+                    screen = getScreen(name);
+                    objects = screen.getObjects();
+                    l = objects.length;
+                    for (i; i < l; ++i) {
+                        if (action === 'show') {
+                            Game.add(objects[i]);
+                        } else if (action === 'hide') {
+                            Game.remove(objects[i]);
+                        }
+                    }
+                    if (action === 'show') {
+                        activeScreen = screen;
+                    }
+                }
             },
             object = {
                 addScreen: function (screen) {
-                    if (Sugar.isObject(screen)) {
-                        screens.push(screen);
+                    if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
+                        screens[screen.getName()] = screen;
                     }                    
                 },
                 getScreens: function () {
                     return screens;
                 },
-                displayScreen: function (name) {
-                    var screen,
-                        components,
-                        i = 0,
-                        l;
-
+                showScreen: function (name) {
+                    var activeScreenName;
                     if (Sugar.isString(name)) {
-                        if (cache[name]) {
-                            screen = cache[name]
-                        } else {
-                            screen = getScreen(name);
+                        if (activeScreen !== null) {
+                            activeScreenName = activeScreen.getName();
+                            toggleScreen(activeScreenName, 'hide');    
                         }
-                        components = screen.getComponents();
-                        l = components.length;
-                        for (i; i < l; ++i) {
-                            Game.add(components[i]);
-                        }
+                        toggleScreen(name, 'show');
                     }
                 },
                 hideScreen: function (name) {
-                    var screen,
-                        components,
-                        i = 0,
-                        l;
-
-                    if (Sugar.isString(name)) {
-                        screen = getScreen(name);
-                        if (screen.cached()) {
-                            cache[name] = screen;
-                        }
-                        components = screen.getComponents();
-                        l = components.length;
-                        for (i; i < l; ++i) {
-                            Game.remove(components[i]);
-                        }
-                    }
+                    toggleScreen(name, 'hide');
                 }
             };
         return object;

@@ -5,8 +5,6 @@
  *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/animatable',
@@ -126,7 +124,7 @@ glue.module.create(
                 },
                 getBoundingBox: function () {
                     var rectangle = obj.visible.getBoundingBox();
-                    rectangle.y2 = rectangle.y1 + frameWidth;
+                    rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
                 getFrameWidth: function () {

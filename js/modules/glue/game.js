@@ -20,9 +20,9 @@ glue.module.create(
             doc = null,
             gameInfo,
             fps = 60,
-            components = [],
-            addedComponents = [],
-            removedComponents = [],
+            objects = [],
+            addedObjects = [],
+            removedObjects = [],
             lastFrameTime = new Date().getTime(),
             canvas = null,
             canvasId,
@@ -84,35 +84,35 @@ glue.module.create(
                 canvas.style.height = height + 'px';
             },
             sort = function () {
-                components.sort(function(a, b) {
+                objects.sort(function(a, b) {
                     return a.z - b.z;
                 });
             },
-            addComponents = function () {
+            addObjects = function () {
                 var component;
-                if (addedComponents.length) {
-                    for (var i = 0; i < addedComponents.length; ++i) {
-                        component = addedComponents[i];
+                if (addedObjects.length) {
+                    for (var i = 0; i < addedObjects.length; ++i) {
+                        component = addedObjects[i];
                         if (component.init) {
                             component.init();
                         }
-                        components.push(addedComponents[i]);
+                        objects.push(addedObjects[i]);
                     };
-                    addedComponents = [];
+                    addedObjects = [];
                     sort();
                 }
             },
-            removeComponents = function () {
+            removeObjects = function () {
                 var component;
-                if (removedComponents.length) {
-                    for (var i = 0; i < removedComponents.length; ++i) {
-                        component = removedComponents[i];
+                if (removedObjects.length) {
+                    for (var i = 0; i < removedObjects.length; ++i) {
+                        component = removedObjects[i];
                         if (component.destroy) {
                             component.destroy();
                         }
-                        Sugar.removeObject(components, component);
+                        Sugar.removeObject(objects, component);
                     };
-                    removedComponents = [];
+                    removedObjects = [];
                 }
             },
             redraw = function () {
@@ -132,8 +132,8 @@ glue.module.create(
 
                 if (canvasSupported) {
                     redraw();
-                    removeComponents();
-                    addComponents();
+                    removeObjects();
+                    addObjects();
 
                     deltaT = (time - lastFrameTime) / 1000;
                     if (debug) {
@@ -148,14 +148,14 @@ glue.module.create(
                         debugBar.innerHTML += '<br />version: 0.0.1 alpha';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
-                        debugBar.innerHTML += '<br />components: ' + components.length;
+                        debugBar.innerHTML += '<br />objects: ' + objects.length;
                         if (gameInfo && gameInfo.name) {
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
                         }
                     }
                     if (deltaT < 1) {
-                        for (var i = 0; i < components.length; ++i) {
-                            component = components[i];
+                        for (var i = 0; i < objects.length; ++i) {
+                            component = objects[i];
                             if (component.update) {
                                 component.update(deltaT, scroll);
                             }
@@ -179,8 +179,8 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = components.length; i < l; ++i) {
-                    component = components[i];
+                for (i = 0, l = objects.length; i < l; ++i) {
+                    component = objects[i];
                     if (component.pointerDown) {
                         component.pointerDown(e);
                     }
@@ -192,8 +192,8 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = components.length; i < l; ++i) {
-                    component = components[i];
+                for (i = 0, l = objects.length; i < l; ++i) {
+                    component = objects[i];
                     if (component.pointerMove) {
                         component.pointerMove(e);
                     }
@@ -205,8 +205,8 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = components.length; i < l; ++i) {
-                    component = components[i];
+                for (i = 0, l = objects.length; i < l; ++i) {
+                    component = objects[i];
                     if (component.pointerUp) {
                         component.pointerUp(e);
                     }
@@ -354,10 +354,10 @@ glue.module.create(
                 isRunning = false;
             },
             add: function (component) {
-                addedComponents.push(component);
+                addedObjects.push(component);
             },
             remove: function (component) {
-                removedComponents.push(component);
+                removedObjects.push(component);
             },
             get: function (componentName) {
                 var i,
@@ -365,8 +365,8 @@ glue.module.create(
                     component,
                     name;
 
-                for (i = 0, l = components.length; i < l; ++i) {
-                    component = components[i];
+                for (i = 0, l = objects.length; i < l; ++i) {
+                    component = objects[i];
                     name = component.getName();
                     if (!Sugar.isEmpty(name) && name === componentName) {
                         return component;
@@ -384,8 +384,8 @@ glue.module.create(
                     return backBufferContext2D;
                 }
             },
-            getComponentCount: function () {
-                return components.length;
+            getObjectCount: function () {
+                return objects.length;
             },
             getScroll: function () {
                 return scroll;
