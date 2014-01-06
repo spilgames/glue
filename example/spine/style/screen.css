@@ -12,6 +12,14 @@ body {
     overflow: hidden;
 }
 
+#copyright {
+    font-family: Arial;
+    font-size: 1em;
+    color: #000;
+    width: 480px;
+    margin: 0 auto;
+}
+
 #debugBar {
     pointer-events: none;
     font-family: Arial;
