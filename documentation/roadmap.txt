@@ -1,9 +1,0 @@
-5) Components (component constructor chaining, obj & config in constructor private setup function also privileged access)
-10) Dynamic viewport scaling and test on devices
-12) Pointer events (most up-to-date industry standard)
-14) System events (html5game event module with constants)
-20) Camera, buttons, behaviours test by building clickthrough game base
-22) Spritesheet animation
-24) Audio
-30) Spine importer and interpreter
-40) Tiled map importer and interpreter
