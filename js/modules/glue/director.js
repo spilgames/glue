@@ -59,6 +59,16 @@ glue.module.create(
                         screens[screen.getName()] = screen;
                     }                    
                 },
+                removeScreen: function (screen) {
+                    var screenName;
+                    if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
+                        screenName = screen.getName();
+                        toggleScreen(screenName, 'hide');
+                    }
+                    if (Sugar.isObject(screens[screenName])) {
+                        delete screens[screenName];
+                    }
+                },
                 getScreens: function () {
                     return screens;
                 },
@@ -73,7 +83,9 @@ glue.module.create(
                     }
                 },
                 hideScreen: function (name) {
-                    toggleScreen(name, 'hide');
+                    if (Sugar.isString(name)) {
+                        toggleScreen(name, 'hide');
+                    }
                 }
             };
 
