@@ -94,9 +94,15 @@ glue.module.get(
                         this.movable.update(deltaT);
                         this.scalable.update(deltaT);
                         this.rotatable.update(deltaT);
+                        if (this.scalable.atTarget()) {
+                            this.scalable.setTarget({
+                                x: 8,
+                                y: 1
+                            });
+                        }
                     },
                     draw: function (deltaT, context) {
-                        this.animatable.draw(deltaT, context);
+                        this.animatable.draw(deltaT, context);                        
                     }
                 });
             Game.add(component);

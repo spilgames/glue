@@ -7307,9 +7307,10 @@ glue.module.create(
     'glue/component/scalable',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/math/dimension'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Dimension) {
         return function (component) {
             var Sugar = Glue.sugar,
                 currentScale = Vector(1, 1),
@@ -7334,15 +7335,14 @@ glue.module.create(
                         // is smaller then the step iterator (scaleSpeed * deltaT).
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
                             atTarget = true;
+                            this.setScale(targetScale);
                         } else {
                             // Update the x and y scale, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
                             radian = Math.atan2(deltaY, deltaX);
                             currentScale.x += Math.cos(radian) * scaleSpeed * deltaT;
-                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;                  
+                            currentScale.y += Math.sin(radian) * scaleSpeed * deltaT;
                         }
-                    } else {
-                        currentScale = targetScale;
                     }
                 },
                 draw: function (deltaT, context) {
@@ -7382,6 +7382,20 @@ glue.module.create(
                 },
                 getOrigin: function () {
                     return origin;
+                },
+                getDimension: function () {
+                    var dimension;
+                    if (Sugar.isDefined(component.animatable)) {
+                        dimension = component.animatable.getDimension();
+                    } else if (Sugar.isDefined(component.visible)) {
+                        dimension = component.visible.getDimension();
+                    } else {
+                        dimension = Dimension(1, 1);
+                    }
+                    return Dimension(
+                            dimension.width * currentScale.x,
+                            dimension.height * currentScale.y
+                        ); 
                 }
             };
             return component;
