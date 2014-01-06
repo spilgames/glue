@@ -12,12 +12,12 @@
             [
                 'glue/game',
                 'glue/math/dimension',
-                'glue/component',
+                'glue/baseobject',
                 'glue/component/visible',
                 'glue/component/draggable',
                 'glue/loader'
             ],
-            function (Game, Dimension, Component, Visible, Draggable, Loader) {
+            function (Game, Dimension, BaseObject, Visible, Draggable, Loader) {
                 'use strict';
 
                 Game.setup({
@@ -37,7 +37,7 @@
                         }
                     }
                 }, function () {
-                    var component = Component(Visible, Draggable).add({
+                    var object = BaseObject(Visible, Draggable).add({
                             draw: function (deltaT, context) {
                                 this.visible.draw(deltaT, context);
                             },
@@ -53,10 +53,10 @@
                         });
 
 
-                    component.visible.setup({
+                    object.visible.setup({
                         image: Loader.getAsset('glueLogo')
                     });
-                    Game.add(component);
+                    Game.add(object);
                 });
             }
         );

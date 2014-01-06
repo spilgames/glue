@@ -4,7 +4,7 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/math/vector',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/animatable',
         'glue/component/movable',
         'glue/component/scalable',
@@ -16,7 +16,7 @@ glue.module.get(
         Loader,
         Dimension,
         Vector,
-        Component,
+        BaseObject,
         Animatable,
         Movable,
         Scalable,
@@ -45,7 +45,7 @@ glue.module.get(
                 }
             }
         }, function () {
-            var component = Component(Animatable, Visible, Scalable, Movable, Rotatable).add({
+            var object = BaseObject(Animatable, Visible, Scalable, Movable, Rotatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -105,7 +105,7 @@ glue.module.get(
                         this.animatable.draw(deltaT, context);                        
                     }
                 });
-            Game.add(component);
+            Game.add(object);
         });
     }
 );

@@ -4,7 +4,7 @@ glue.module.create(
         'glue/game',
         'glue/loader',
         'glue/math/vector',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/visible',
         'glue/component/animatable',
         'glue/component/draggable'
@@ -13,13 +13,13 @@ glue.module.create(
         Game,
         Loader,
         Vector,
-        Component,
+        BaseObject,
         Visible,
         Animatable,
         Draggable
     ) {
         return function () {
-            var component = Component(Visible, Animatable, Draggable).add({
+            var object = BaseObject(Visible, Animatable, Draggable).add({
                     init: function () {
                         this.setName('dog');
                         this.animatable.setup({
@@ -55,7 +55,7 @@ glue.module.create(
                         this.draggable.pointerUp(e);
                     }
                 });
-            return component;
+            return object;
         };
     }
 );

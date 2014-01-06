@@ -1,12 +1,12 @@
 /*
- *  @module Component
- *  @desc Represents a component
+ *  @module BaseObject
+ *  @desc Represents a base object
  *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
-    'glue/component',
+    'glue/baseobject',
     [
         'glue'
     ],

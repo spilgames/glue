@@ -13,7 +13,7 @@
                 'glue/game',
                 'glue/math/vector',
                 'glue/math/dimension',
-                'glue/component',
+                'glue/baseobject',
                 'glue/component/visible',
                 'glue/component/draggable',
                 'glue/component/droptarget',
@@ -25,7 +25,7 @@
                 Game,
                 Vector,
                 Dimension,
-                Component,
+                BaseObject,
                 Visible,
                 Draggable,
                 Droptarget,
@@ -52,7 +52,7 @@
                         }
                     }
                 }, function () {
-                    var glueComponent = Component(Visible, Draggable, Hoverable, Clickable).add({
+                    var glueObject = BaseObject(Visible, Draggable, Hoverable, Clickable).add({
                         init: function () {
                             this.z = this.visible.getPosition().y;
                         },
@@ -89,14 +89,14 @@
                             console.log('glue is clicked...');
                         }
                     });
-                    glueComponent.visible.setup({
+                    glueObject.visible.setup({
                         image: Loader.getAsset('glueLogo')
                     });
-                    glueComponent.setName('glue');
-                    Game.add(glueComponent);
+                    glueObject.setName('glue');
+                    Game.add(glueObject);
 
                     var dropText = '',
-                        dropComponent = Component(Visible, Droptarget).add({
+                        dropObject = BaseObject(Visible, Droptarget).add({
                         init: function () {
                             this.z = this.visible.getPosition().y;
                         },
@@ -106,20 +106,20 @@
                             context.font = 'bold 16px Arial';
                             context.fillText(dropText, 255, 180);
                         },
-                        onDrop: function (obj, e) {
-                            dropText = obj.getName() + ' dropped';
+                        onDrop: function (object, e) {
+                            dropText = object.getName() + ' dropped';
                             setTimeout(function () {
                                 dropText = '';
                             }, 2000);
                         }
                     });
-                    dropComponent.visible.setup({
+                    dropObject.visible.setup({
                         position: Vector(250, 222),
                         image: Loader.getAsset('spilLogo')
                     });
-                    dropComponent.setName('droptarget');
-                    dropComponent.droptarget.setup();
-                    Game.add(dropComponent);
+                    dropObject.setName('droptarget');
+                    dropObject.droptarget.setup();
+                    Game.add(dropObject);
                 });
             }
         );

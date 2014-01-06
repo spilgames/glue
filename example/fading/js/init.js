@@ -4,7 +4,7 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/math/vector',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/visible',
         'glue/component/movable',
         'glue/component/fadable'
@@ -14,7 +14,7 @@ glue.module.get(
         Loader,
         Dimension,
         Vector,
-        Component,
+        BaseObject,
         Visible,
         Movable,
         Fadable
@@ -41,7 +41,7 @@ glue.module.get(
             }
         }, function () {
             var wasAtTarget = false,
-                component = Component(Visible, Movable, Fadable).add({
+                object = BaseObject(Visible, Movable, Fadable).add({
                 init: function () {
                     this.visible.setup({
                         position: {
@@ -69,7 +69,7 @@ glue.module.get(
                 }
             });
 
-            Game.add(component);
+            Game.add(object);
         });
     }
 );

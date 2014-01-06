@@ -3,7 +3,7 @@ glue.module.get(
         'glue/game',
         'glue/math/vector',
         'glue/math/dimension',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/visible',
         'glue/component/animatable',
         'glue/component/draggable',
@@ -17,7 +17,7 @@ glue.module.get(
         Game,
         Vector,
         Dimension,
-        Component,
+        BaseObject,
         Visible,
         Animatable,
         Draggable,
@@ -59,7 +59,7 @@ glue.module.get(
             }
         }, function () {
             // define level components
-            var jailBackground = Component(Visible).add({
+            var jailBackground = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             image: Loader.getAsset('jailBackground')
@@ -69,7 +69,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                jailBars = Component(Visible).add({
+                jailBars = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -83,7 +83,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                jailDoor = Component(Visible).add({
+                jailDoor = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -97,7 +97,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                bed = Component(Visible).add({
+                bed = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -111,7 +111,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                chair = Component(Visible).add({
+                chair = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -133,7 +133,7 @@ glue.module.get(
                 down = false,
                 radian,
                 rotation,
-                player = Component(Visible, Animatable, Movable).add({
+                player = BaseObject(Visible, Animatable, Movable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -247,7 +247,7 @@ glue.module.get(
                 walkSpeed = 80,
                 direction = 'left',
                 canvasDimension = Game.canvas.getDimension(),
-                enemy = Component(Visible, Animatable).add({
+                enemy = BaseObject(Visible, Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {

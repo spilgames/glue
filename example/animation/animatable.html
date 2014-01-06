@@ -12,12 +12,12 @@
             [
                 'glue/game',
                 'glue/math/dimension',
-                'glue/component',
+                'glue/baseobject',
                 'glue/component/visible',
                 'glue/component/animatable',
                 'glue/loader'
             ],
-            function (Game, Dimension, Component, Visible, Animatable, Loader) {
+            function (Game, Dimension, BaseObject, Visible, Animatable, Loader) {
                 'use strict';
 
                 Game.setup({
@@ -42,7 +42,7 @@
                         playerPosition,
                         speed = 1,
                         direction = 'right',
-                        component = Component(Visible, Animatable).add({
+                        object = BaseObject(Visible, Animatable).add({
                             update: function (deltaT) {
                                 this.animatable.update(deltaT);
                                 playerDimension = this.animatable.getDimension();
@@ -82,7 +82,7 @@
                             }
                         });
 
-                    component.animatable.setup({
+                    object.animatable.setup({
                         animation: {
                             frameCount: 8,
                             fps: 8,
@@ -95,8 +95,8 @@
                         },
                         image: Loader.getAsset('walkRight'),
                     });
-                    component.animatable.setAnimation('walkRight');
-                    Game.add(component);
+                    object.animatable.setAnimation('walkRight');
+                    Game.add(object);
                 });
             }
         );

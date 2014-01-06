@@ -5,7 +5,7 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/math/vector',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/visible',
         'glue/component/draggable',
         'glue/component/scalable',
@@ -18,7 +18,7 @@ glue.module.get(
         Loader,
         Dimension,
         Vector,
-        Component,
+        BaseObject,
         Visible,
         Draggable,
         Scalable,
@@ -51,7 +51,7 @@ glue.module.get(
                 }
             }, function () {
                 var scroll = Game.getScroll(),
-                    capivara = Component(Visible, Spineable, Scalable, Rotatable, Draggable).add({
+                    capivara = BaseObject(Visible, Spineable, Scalable, Rotatable, Draggable).add({
                         init: function () {
                             this.spineable.setup({
                                 position: {
@@ -86,6 +86,7 @@ glue.module.get(
                             this.draggable.pointerUp(e);
                         }
                     });
+
                 Game.add(capivara);
                 // set origin
                 capivara.visible.setOrigin(Vector(150, 150));

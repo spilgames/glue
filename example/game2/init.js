@@ -3,7 +3,7 @@ glue.module.get(
         'glue/game',
         'glue/math/vector',
         'glue/math/dimension',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/visible',
         'glue/component/animatable',
         'glue/component/draggable',
@@ -16,7 +16,7 @@ glue.module.get(
         Game,
         Vector,
         Dimension,
-        Component,
+        BaseObject,
         Visible,
         Animatable,
         Draggable,
@@ -57,7 +57,7 @@ glue.module.get(
             }
         }, function () {
             // define level components
-            var background = Component(Visible).add({
+            var background = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             image: Loader.getAsset('background')
@@ -71,7 +71,7 @@ glue.module.get(
                 cloudsPosition,
                 cloudsDimension,
                 moveSpeed = 20,
-                clouds = Component(Visible).add({
+                clouds = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -93,7 +93,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                dog = Component(Visible, Animatable).add({
+                dog = BaseObject(Visible, Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -121,7 +121,7 @@ glue.module.get(
                         this.animatable.draw(deltaT, context);
                     }
                 }),
-                hills = Component(Visible).add({
+                hills = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -135,7 +135,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                moon = Component(Visible).add({
+                moon = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -149,7 +149,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                stones = Component(Visible).add({
+                stones = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -163,7 +163,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                tree = Component(Visible).add({
+                tree = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -185,7 +185,7 @@ glue.module.get(
                 playerPosition,
                 playerDimension,
                 walkSpeed = 80,
-                player = Component(Visible, Animatable).add({
+                player = BaseObject(Visible, Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
