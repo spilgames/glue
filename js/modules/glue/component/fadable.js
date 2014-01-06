@@ -13,7 +13,7 @@ glue.module.create(
     ],
     function (Glue) {
         var Sugar = Glue.sugar;
-        return function (component) {
+        return function (object) {
             var alpha,
                 targetAlpha,
                 fadingIn = false,
@@ -21,8 +21,8 @@ glue.module.create(
                 fadeSpeed = 0.5,
                 atTargetCallback = null;
 
-            component = component || {};
-            component.fadable = {
+            object = object || {};
+            object.fadable = {
                 update: function (deltaT) {
                     if (fadingIn === true) {
                         if (alpha < targetAlpha + (deltaT * fadeSpeed)) {
@@ -103,7 +103,8 @@ glue.module.create(
                     return !fadingIn && !fadingOut;
                 }
             };
-            return component;
+
+            return object;
         };
     }
 );

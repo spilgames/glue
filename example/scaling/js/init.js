@@ -96,8 +96,8 @@ glue.module.get(
                         this.rotatable.update(deltaT);
                         if (this.scalable.atTarget()) {
                             this.scalable.setTarget({
-                                x: 8,
-                                y: 1
+                                x: 6,
+                                y: 6
                             });
                         }
                     },

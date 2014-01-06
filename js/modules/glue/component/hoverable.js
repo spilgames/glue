@@ -12,32 +12,32 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        return function (obj) {
+        return function (object) {
             // TODO: add state constants
             var state = 'not hovered',
                 isHovered = function (e) {
-                    return obj.visible.getBoundingBox().hasPosition(e.position);
+                    return object.visible.getBoundingBox().hasPosition(e.position);
                 },
                 pointerMoveHandler = function (e) {
                     if (isHovered(e)) {
                         if (state === 'not hovered') {
-                            if (obj.hoverOver) {
-                                obj.hoverOver(e);
+                            if (object.hoverOver) {
+                                object.hoverOver(e);
                             }
                             state = 'hovered';
                         }
                     } else {
                         if (state === 'hovered') {
-                            if (obj.hoverOut) {
-                                obj.hoverOut(e);
+                            if (object.hoverOut) {
+                                object.hoverOut(e);
                             }
                             state = 'not hovered';
                         }
                     }
                 };
 
-            obj = obj || {};
-            obj.hoverable = {
+            object = object || {};
+            object.hoverable = {
                 setup: function (settings) {
 
                 },
@@ -51,7 +51,7 @@ glue.module.create(
                     pointerMoveHandler(e);
                 }
             };
-            return obj;
+            return object;
         };
     }
 );

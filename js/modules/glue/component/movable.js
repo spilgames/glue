@@ -14,22 +14,22 @@ glue.module.create(
     ],
     function (Glue, Vector) {
         var Sugar = Glue.sugar;
-        return function (component) {
+        return function (object) {
             var position,
                 targetPosition = null,
                 moveSpeed = 100,
                 atTarget = true,
                 rotation = 0;
 
-            component = component || {};
-            component.movable = {
+            object = object || {};
+            object.movable = {
                 update: function (deltaT) {
                     if (targetPosition !== null) {
                         var radian,
                             deltaX,
                             deltaY;
 
-                        position = component.visible.getPosition();
+                        position = object.visible.getPosition();
                         deltaX = targetPosition.x - position.x,
                         deltaY = targetPosition.y - position.y;
 
@@ -39,7 +39,7 @@ glue.module.create(
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < moveSpeed * deltaT) {
                             atTarget = true;
                             position = targetPosition;
-                            component.visible.setPosition(position);
+                            object.visible.setPosition(position);
                         } else {
                             // Update the x and y position, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
@@ -47,7 +47,7 @@ glue.module.create(
                             position.x += Math.cos(radian) * moveSpeed * deltaT;
                             position.y += Math.sin(radian) * moveSpeed * deltaT;
                             rotation = radian * 180 / Math.PI;
-                            component.visible.setPosition(position);                      
+                            object.visible.setPosition(position);                      
                         }
                     }
                 },
@@ -75,7 +75,7 @@ glue.module.create(
                     moveSpeed = speed;
                 }
             };
-            return component;
+            return object;
         };
     }
 );

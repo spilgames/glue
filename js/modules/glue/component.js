@@ -13,7 +13,7 @@ glue.module.create(
     function (Glue) {
         return function () {
             var name = '',
-                obj = {
+                module = {
                     add: function (value) {
                         this.mix(value);
                         return this;
@@ -26,9 +26,9 @@ glue.module.create(
 
             for (i; i < l; ++i) {
                 mixin = mixins[i];
-                mixin(obj);
+                mixin(module);
             }
-            return obj.mix({
+            return module.mix({
                 setName: function (value) {
                     name = value;
                 },

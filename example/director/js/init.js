@@ -3,25 +3,23 @@ glue.module.get(
         'glue/game',
         'glue/loader',
         'glue/math/dimension',
-        'glue/math/vector',
-        'glue/component',
-        'glue/component/visible',
-        'glue/component/animatable'
+        'glue/director',
+        'js/screens/screen1',
+        'js/screens/screen2'
     ],
     function (
         Game,
         Loader,
         Dimension,
-        Vector,
-        Component,
-        Visible,
-        Animatable
+        Director,
+        Screen1,
+        Screen2
     ) {
         'use strict';
 
         Game.setup({
             game: {
-                name: 'Scrolling'
+                name: 'Director'
             },
             canvas: {
                 id: 'canvas',
@@ -41,69 +39,12 @@ glue.module.get(
                 }
             }
         }, function () {
-            var scroll = Game.getScroll(),
-                component = Component(Visible).add({
-                    init: function () {
-                        this.visible.setup({
-                            position: Vector(600, 400),
-                            image: Loader.getAsset('glue')
-                        });
-                    },
-                    draw: function (deltaT, context, scroll) {
-                        this.visible.draw(deltaT, context, scroll);
-                    },
-                    pointerMove: function (e) {
-                        var position = Vector(
-                            Math.round(e.position.x),
-                            Math.round(e.position.y)
-                        );
-                        scroll.x = position.x;
-                        scroll.y = position.y;
-                    }
-                }),
-                component2 = Component(Visible).add({
-                    init: function () {
-                        this.visible.setup({
-                            position: Vector(800, 400),
-                            image: Loader.getAsset('spil')
-                        });
-                    },
-                    draw: function (deltaT, context, scroll) {
-                        this.visible.draw(deltaT, context, scroll);
-                    }
-                }),
-                dog = Component(Visible, Animatable).add({
-                    init: function () {
-                        this.animatable.setup({
-                            position: {
-                                x: 350,
-                                y: 400
-                            },
-                            image: Loader.getAsset('dog'),
-                            animation: {
-                                frameCount: 8,
-                                fps: 8,
-                                animations: {
-                                    wiggleTail: {
-                                        startFrame: 1,
-                                        endFrame: 8
-                                    }
-                                }
-                            }
-                        });
-                        this.animatable.setAnimation('wiggleTail');
-                    },
-                    update: function (deltaT, context) {
-                        this.animatable.update(deltaT);
-                    },
-                    draw: function (deltaT, context, scroll) {
-                        this.animatable.draw(deltaT, context, scroll);
-                    }
-                });
+            var screen1 = Screen1(),
+                screen2 = Screen2();
 
-            Game.add(component);
-            Game.add(component2);
-            Game.add(dog);
+            Director.addScreen(screen1);
+            Director.addScreen(screen2);
+            Director.showScreen('Screen1');
         });
     }
 );

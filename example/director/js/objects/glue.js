@@ -6,7 +6,9 @@ glue.module.create(
         'glue/math/vector',
         'glue/component',
         'glue/component/visible',
-        'glue/component/movable'
+        'glue/component/movable',
+        'glue/component/droptarget',
+        'glue/director'
     ],
     function (
         Game,
@@ -14,20 +16,54 @@ glue.module.create(
         Vector,
         Component,
         Visible,
-        Movable
+        Movable,
+        Droptarget,
+        Director
     ) {
         return function () {
-            var component = Component(Visible, Movable).add({
+            var init = false,
+                dropped = false,
+                component = Component(Visible, Movable, Droptarget).add({
                     init: function () {
-                        this.visible.setup({
-                            position: Vector(600, 400),
-                            image: Loader.getAsset('glue')
-                        });
+                        if (!init) {
+                            init = true;
+                            this.visible.setup({
+                                position: Vector(600, 400),
+                                image: Loader.getAsset('glue')
+                            });
+                            this.movable.setMoveSpeed(200);
+                        }
+                        this.droptarget.setup();
+                    },
+                    update: function (deltaT) {
+                        this.movable.update(deltaT);
+                        if (dropped && this.movable.atTarget()) {
+                            Director.showScreen('Screen2');
+                            dropped = false;
+                        }
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
+                    },
+                    onDrop: function (obj, e) {
+                        var position = this.visible.getPosition();
+                        if (position.x === 200) {
+                            this.movable.setTarget(Vector(
+                                600,
+                                400
+                            ));
+                        } else {
+                            this.movable.setTarget(Vector(
+                                position.x - 100,
+                                position.y - 100
+                            ));
+                        }
+                        dropped = true;
+                    },
+                    destroy: function () {
+                        this.droptarget.destroy();
                     }
-                };
+                });
             return component;
         };
     }
