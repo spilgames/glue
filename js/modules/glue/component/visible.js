@@ -72,6 +72,10 @@ glue.module.create(
                 draw: function (deltaT, context, scroll) {
                     scroll = scroll || Vector(0, 0);
                     context.save();
+                    context.translate(
+                        position.x - scroll.x,
+                        position.y - scroll.y
+                    );
                     if (Sugar.isDefined(object.rotatable)) {
                         object.rotatable.draw(deltaT, context);
                     }
@@ -81,8 +85,8 @@ glue.module.create(
                     context.translate(-origin.x, -origin.y);
                     context.drawImage(
                         image,
-                        position.x - scroll.x,
-                        position.y - scroll.y
+                        0,
+                        0
                     );
                     context.restore();
                 },
