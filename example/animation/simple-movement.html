@@ -12,11 +12,11 @@
             [
                 'glue/game',
                 'glue/math/dimension',
-                'glue/component',
+                'glue/baseobject',
                 'glue/component/visible',
                 'glue/loader'
             ],
-            function (Game, Dimension, Component, Visible, Loader) {
+            function (Game, Dimension, BaseObject, Visible, Loader) {
                 'use strict';
 
                 Game.setup({
@@ -41,7 +41,7 @@
                         playerPosition,
                         speed = 1,
                         direction = 'right',
-                        component = Component(Visible).add({
+                        object = BaseObject(Visible).add({
                             update: function (deltaT) {
                                 playerDimension = this.visible.getDimension();
                                 playerPosition = this.visible.getPosition();
@@ -89,10 +89,10 @@
                             }
                         });
 
-                    component.visible.setup({
+                    object.visible.setup({
                         image: Loader.getAsset('glueLogo')
                     });
-                    Game.add(component);
+                    Game.add(object);
                 });
             }
         );

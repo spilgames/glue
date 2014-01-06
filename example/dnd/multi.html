@@ -13,12 +13,12 @@
                 'glue/game',
                 'glue/math/vector',
                 'glue/math/dimension',
-                'glue/component',
+                'glue/baseobject',
                 'glue/component/visible',
                 'glue/component/draggable',
                 'glue/loader'
             ],
-            function (Game, Vector, Dimension, Component, Visible, Draggable, Loader) {
+            function (Game, Vector, Dimension, BaseObject, Visible, Draggable, Loader) {
                 'use strict';
 
                 var myComponent = {
@@ -66,14 +66,14 @@
                         }
                     }
                 }, function () {
-                    var glueComponent = Component(Visible, Draggable).add(myComponent);
-                    glueComponent.visible.setup({
+                    var glueObject = BaseObject(Visible, Draggable).add(myComponent);
+                    glueObject.visible.setup({
                         image: Loader.getAsset('glueLogo')
                     });
-                    glueComponent.setName('glue');
-                    Game.add(glueComponent);
+                    glueObject.setName('glue');
+                    Game.add(glueObject);
 
-                    var spilObject = Component(Visible, Draggable).add(myComponent);
+                    var spilObject = BaseObject(Visible, Draggable).add(myComponent);
                     spilObject.visible.setup({
                         position: Vector(200, 200),
                         image: Loader.getAsset('spilLogo')

@@ -4,7 +4,7 @@ glue.module.create(
         'glue/game',
         'glue/loader',
         'glue/math/vector',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/visible',
         'glue/component/movable',
         'glue/component/droptarget',
@@ -14,14 +14,14 @@ glue.module.create(
         Game,
         Loader,
         Vector,
-        Component,
+        BaseObject,
         Visible,
         Movable,
         Droptarget,
         Director
     ) {
         return function () {
-            var component = Component(Visible, Movable, Droptarget).add({
+            var object = BaseObject(Visible, Movable, Droptarget).add({
                     init: function () {
                         this.visible.setup({
                             position: Vector(400, 400),
@@ -32,8 +32,8 @@ glue.module.create(
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
                     },
-                    onDrop: function (obj, e) {
-                        if (obj.getName && obj.getName() === 'dog') {
+                    onDrop: function (object, e) {
+                        if (object.getName && object.getName() === 'dog') {
                             Director.showScreen('Screen1');
                         }
                     },
@@ -41,7 +41,7 @@ glue.module.create(
                         this.droptarget.destroy();
                     }
                 });
-            return component;
+            return object;
         };
     }
 );

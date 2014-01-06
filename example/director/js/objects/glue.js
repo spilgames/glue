@@ -4,7 +4,7 @@ glue.module.create(
         'glue/game',
         'glue/loader',
         'glue/math/vector',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/visible',
         'glue/component/movable',
         'glue/component/droptarget',
@@ -14,7 +14,7 @@ glue.module.create(
         Game,
         Loader,
         Vector,
-        Component,
+        BaseObject,
         Visible,
         Movable,
         Droptarget,
@@ -23,7 +23,7 @@ glue.module.create(
         return function () {
             var init = false,
                 dropped = false,
-                component = Component(Visible, Movable, Droptarget).add({
+                object = BaseObject(Visible, Movable, Droptarget).add({
                     init: function () {
                         if (!init) {
                             init = true;
@@ -64,7 +64,7 @@ glue.module.create(
                         this.droptarget.destroy();
                     }
                 });
-            return component;
+            return object;
         };
     }
 );

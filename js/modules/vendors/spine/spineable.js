@@ -80,7 +80,7 @@ glue.module.create(
             // console.log(assets);
         });
         Loader.loadBinary('asset/capivara-sideview.atlas', 'capivara_sideview_atlas', function () {
-            console.log(assets);
+            //console.log(assets);
         });
 
         //replacer functions for spine implementation
@@ -103,7 +103,7 @@ glue.module.create(
          * @param {Object} obj: the entity object
          * @param {Object} spineSettings: contains json and atlas
          */
-        return function (obj) {
+        return function (object) {
             // - per instance private members -
             var sugar = Glue.sugar,
                 atlas = {},
@@ -143,8 +143,8 @@ glue.module.create(
                     currentSkeleton = spineSettings.skeleton;
                     addAtlas(spineSettings);
                     addSkeletonData(spineSettings);
-                    if (spineSettings.position && obj.visible) {
-                        obj.visible.setPosition(spineSettings.position);
+                    if (spineSettings.position && object.visible) {
+                        object.visible.setPosition(spineSettings.position);
                     }
                 },
                 /**
@@ -187,9 +187,9 @@ glue.module.create(
                     );
                     skeletons[currentSkeleton] = new spine.Skeleton(skeletonData[currentSkeleton]);
                     spine.Bone.yDown = true;
-                    if (obj.visible) {
-                        skeletons[currentSkeleton].getRootBone().x = obj.visible.getPosition().x;
-                        skeletons[currentSkeleton].getRootBone().y = obj.visible.getPosition().y;
+                    if (object.visible) {
+                        skeletons[currentSkeleton].getRootBone().x = object.visible.getPosition().x;
+                        skeletons[currentSkeleton].getRootBone().y = object.visible.getPosition().y;
                     }
                     skeletons[currentSkeleton].updateWorldTransform();
 
@@ -213,9 +213,9 @@ glue.module.create(
                         boneRectangle = Rectangle(0, 0, 0, 0),
                         rootBone = skeleton.getRootBone(),
                         skeletonRectangle = Rectangle(0, 0, 0, 0);
-                    if (obj.visible) {
-                        skeletonRectangle.x1 = obj.visible.getPosition().x;
-                        skeletonRectangle.y1 = obj.visible.getPosition().y;
+                    if (object.visible) {
+                        skeletonRectangle.x1 = object.visible.getPosition().x;
+                        skeletonRectangle.y1 = object.visible.getPosition().y;
                     }
                     // set up the skeleton to get width/height of the sprite
                     for (i; i < l; ++i) {
@@ -249,20 +249,20 @@ glue.module.create(
                         skeletonRectangle = skeletonRectangles[currentSkeleton],
                         width,
                         height;
-                    if (obj.visible) {
-                        if (obj.scalable) {
-                            scale = obj.scalable.getScale();
+                    if (object.visible) {
+                        if (object.scalable) {
+                            scale = object.scalable.getScale();
                         }
                         // update visible dimension
                         width = skeletonRectangle.getWidth() * Math.abs(scale.x);
                         height = skeletonRectangle.getHeight() * Math.abs(scale.y);
-                        obj.visible.setDimension(Dimension(width, height));
+                        object.visible.setDimension(Dimension(width, height));
                     }
                 };
 
             // - external interface -
-            obj = obj || {};
-            obj.spineable = {
+            object = object || {};
+            object.spineable = {
                 /**
                  * Draw the spine component
                  * @name draw
@@ -286,17 +286,17 @@ glue.module.create(
                         position = Vector(0, 0),
                         offset;
                     context.save();
-                    if (obj.visible) {
-                        vOrigin = obj.visible.getOrigin();
-                        position = obj.visible.getPosition();
+                    if (object.visible) {
+                        vOrigin = object.visible.getOrigin();
+                        position = object.visible.getPosition();
                         context.translate(~~position.x, ~~position.y);
                     }
                     offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));
-                    if (obj.scalable) {
-                        obj.scalable.draw(deltaT, context);
+                    if (object.scalable) {
+                        object.scalable.draw(deltaT, context);
                     }
-                    if (obj.rotatable) {
-                        obj.rotatable.draw(deltaT, context);
+                    if (object.rotatable) {
+                        object.rotatable.draw(deltaT, context);
                     }
                     for (i; i < l; ++i) {
                         slot = skeleton.drawOrder[i];
@@ -329,7 +329,7 @@ glue.module.create(
                     context.restore();
 
                     // draw boundingbox
-                    // var b=obj.visible.getBoundingBox();
+                    // var b=object.visible.getBoundingBox();
                     // context.strokeRect(b.x1,b.y1,b.getWidth(),b.getHeight());
                 },
                 /**
@@ -380,7 +380,7 @@ glue.module.create(
                     if (currentAnimationStr === animationName) {
                         return false;
                     }
-                    obj.spineable.setAnimationByName(0, animationName, true);
+                    object.spineable.setAnimationByName(0, animationName, true);
                     return true;
                 },
                 /**
@@ -432,7 +432,7 @@ glue.module.create(
                         return;
                     }
                     currentSkeleton = strSkeleton;
-                    obj.spineable.update();
+                    object.spineable.update();
                 },
                 /**
                  * Returns the name of the current skeleton json
@@ -477,7 +477,7 @@ glue.module.create(
                     updateVisible();
                 }
             };
-            return obj;
+            return object;
         };
     }
 );

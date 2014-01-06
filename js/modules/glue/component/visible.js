@@ -27,8 +27,8 @@ glue.module.create(
                 rectangle = Rectangle(0, 0, 0, 0),
                 updateRectangle = function () {
                     var scale = Vector(1, 1);
-                    if (obj.scalable) {
-                        scale = obj.scalable.getScale();
+                    if (object.scalable) {
+                        scale = object.scalable.getScale();
                     }
                     rectangle.x1 = position.x - origin.x * Math.abs(scale.x);
                     rectangle.y1 = position.y - origin.y * Math.abs(scale.y);

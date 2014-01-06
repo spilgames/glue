@@ -4,7 +4,7 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/math/vector',
-        'glue/component',
+        'glue/baseobject',
         'glue/component/visible',
         'glue/component/animatable'
     ],
@@ -13,7 +13,7 @@ glue.module.get(
         Loader,
         Dimension,
         Vector,
-        Component,
+        BaseObject,
         Visible,
         Animatable
     ) {
@@ -42,7 +42,7 @@ glue.module.get(
             }
         }, function () {
             var scroll = Game.getScroll(),
-                component = Component(Visible).add({
+                object = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: Vector(600, 400),
@@ -61,7 +61,7 @@ glue.module.get(
                         scroll.y = position.y;
                     }
                 }),
-                component2 = Component(Visible).add({
+                object2 = BaseObject(Visible).add({
                     init: function () {
                         this.visible.setup({
                             position: Vector(800, 400),
@@ -72,7 +72,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context, scroll);
                     }
                 }),
-                dog = Component(Visible, Animatable).add({
+                dog = BaseObject(Visible, Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -101,8 +101,8 @@ glue.module.get(
                     }
                 });
 
-            Game.add(component);
-            Game.add(component2);
+            Game.add(object);
+            Game.add(object2);
             Game.add(dog);
         });
     }
