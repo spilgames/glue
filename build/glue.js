@@ -6570,7 +6570,7 @@ glue.module.create(
     [
         'glue',
     ],
-    function (Glue, Game, Screen) {
+    function (Glue) {
         'use strict';
         var Sugar = Glue.sugar,
             collisionList = [],
@@ -6585,6 +6585,10 @@ glue.module.create(
                     var inter = obj1.collidable.getIntersectionBox(obj2),
                         box1 = obj1.collidable.getBoundingBox(),
                         box2 = obj2.collidable.getBoundingBox(),
+                        bounce1 = obj1.collidable.getBounce(),
+                        bounce2 = obj2.collidable.getBounce(),
+                        velocity1,
+                        velocity2,
                         solution = {
                             x: 0,
                             y: 0
@@ -6607,75 +6611,116 @@ glue.module.create(
                         obj2.collidable.resolve(solution);
                         if (hasPhysics(obj2)) {
                             if (solution.y !== 0) {
-                                obj2.physics.setVelocity({
-                                    y: 0
-                                });
+                                if (bounce2 === 0) {
+                                    obj2.physics.setVelocity({
+                                        y: 0
+                                    });
+                                } else {
+                                    velocity2 = obj2.physics.getVelocity().y;
+                                    obj2.physics.setVelocity({
+                                        y: velocity2 * -bounce2
+                                    });
+                                }
                             } else if (solution.x !== 0) {
-                                obj2.physics.setVelocity({
-                                    x: 0
-                                });
+                                if (bounce2 === 0) {
+                                    obj2.physics.setVelocity({
+                                        x: 0
+                                    });
+                                } else {
+                                    velocity2 = obj2.physics.getVelocity().x;
+                                    obj2.physics.setVelocity({
+                                        x: velocity2 * -bounce2
+                                    });
+                                }
                             }
                         }
-                    } else if (obj2.collidable.isFixed()) {
-                        obj1.collidable.resolve(solution);
-                        if (hasPhysics(obj1)) {
-                            if (solution.y !== 0) {
-                                obj1.physics.setVelocity({
-                                    y: 0
-                                });
-                            } else if (solution.x !== 0) {
-                                obj1.physics.setVelocity({
-                                    x: 0
-                                });
-                            }
-                        }
-                    } /*else if (!obj1.collidable.isFixed() && !obj2.collidable.isFixed()) {
+                    } else if (!obj1.collidable.isFixed() && !obj2.collidable.isFixed()) {
                         if (inter.x2 > inter.y2) {
                             if (box1.y1 > box2.y1) {
-                                solution.y -= inter.y2 / 2;
                                 obj1.collidable.resolve({
-                                    x: 0,
                                     y: solution.y * -1
                                 });
                                 obj2.collidable.resolve({
-                                    x: 0,
                                     y: solution.y
                                 });
+
                             } else {
-                                solution.y += inter.y2 / 2;
                                 obj2.collidable.resolve({
-                                    x: 0,
                                     y: solution.y * -1
                                 });
                                 obj1.collidable.resolve({
-                                    x: 0,
                                     y: solution.y
                                 });
                             }
+
+                            if (hasPhysics(obj1)) {
+                                if (bounce1 === 0) {
+                                    obj1.physics.setVelocity({
+                                        y: 0
+                                    });
+                                } else {
+                                    velocity1 = obj1.physics.getVelocity().y;
+                                    obj1.physics.setVelocity({
+                                        y: velocity1 * -bounce1
+                                    });
+                                }
+                            }
+                            if (hasPhysics(obj2)) {
+                               if (bounce2 === 0) {
+                                    obj2.physics.setVelocity({
+                                        y: 0
+                                    });
+                                } else {
+                                    velocity2 = obj2.physics.getVelocity().y;
+                                    obj2.physics.setVelocity({
+                                        y: velocity2 * -bounce2
+                                    });
+                                }
+                            }
+
                         } else {
                             if (box1.x1 > box2.x1) {
-                                solution.x -= inter.x2 / 2;
                                 obj1.collidable.resolve({
-                                    x: solution.x * -1,
-                                    y: 0
+                                    x: solution.x * -1
                                 });
                                 obj2.collidable.resolve({
-                                    x: solution.x,
-                                    y: 0
+                                    x: solution.x
                                 });
                             } else {
-                                solution.x += inter.x2 / 2;
                                 obj2.collidable.resolve({
-                                    x: solution.x * -1,
-                                    y: 0
+                                    x: solution.x * -1
                                 });
                                 obj1.collidable.resolve({
-                                    x: solution.x,
-                                    y: 0
+                                    x: solution.x
                                 });
                             }
+
+                            if (hasPhysics(obj1)) {
+                                if (bounce1 === 0) {
+                                    obj1.physics.setVelocity({
+                                        x: 0
+                                    });
+                                } else {
+                                    velocity1 = obj1.physics.getVelocity().x;
+                                    obj1.physics.setVelocity({
+                                        x: velocity1 * -bounce1
+                                    });
+                                }
+                            }
+                            if (hasPhysics(obj2)) {
+                               if (bounce2 === 0) {
+                                    obj2.physics.setVelocity({
+                                        x: 0
+                                    });
+                                } else {
+                                    velocity2 = obj2.physics.getVelocity().x;
+                                    obj2.physics.setVelocity({
+                                        x: velocity2 * -bounce2
+                                    });
+                                }
+                            }
                         }
-                    }*/
+                    }
                 }
             },
             update = function () {
@@ -6913,14 +6958,16 @@ glue.module.create(
     'glue/component/collidable',
     [
         'glue',
+        'glue/math/vector',
         'glue/math/rectangle'
     ],
-    function (Glue, Rectangle) {
+    function (Glue, Vector, Rectangle) {
         return function (object) {
             'use strict';
             var Sugar = Glue.sugar,
                 fixed = false,
                 box = Rectangle(0,0,0,0),
+                bounce = 0,
                 updateBox = function () {
                     var dimension,
                         position;
@@ -6966,6 +7013,9 @@ glue.module.create(
                 setBoundingBox: function (rectangle) {
                     box = Sugar.isDefined(rectangle) ? rectangle : box;
                 },
+                setBounce: function (value) {
+                    bounce = Sugar.isNumber(value) ? value : bounce;
+                },
                 hitTest: function (testBox) {
                     var box2 = getBox(testBox);
                     if (box2 !== null && box !== null) {
@@ -6981,13 +7031,15 @@ glue.module.create(
                     return null;
                 },
                 resolve: function (vec) {
-                    var position;
+                    var position,
+                        newPosition;
                     if (Sugar.isDefined(object.visible)) {
                         position = object.visible.getPosition();
-                        object.visible.setPosition({
-                            x: position.x + vec.x,
-                            y: position.y + vec.y
-                        });
+                        newPosition = Vector(0, 0);
+                        newPosition.x = Sugar.isNumber(vec.x) ? vec.x : newPosition.x;
+                        newPosition.y = Sugar.isNumber(vec.y) ? vec.y : newPosition.y;
+                        newPosition.add(position);
+                        object.visible.setPosition(newPosition);
                     }
                 },
                 isFixed: function () {
@@ -6995,6 +7047,9 @@ glue.module.create(
                 },
                 getBoundingBox: function () {
                     return box;
+                },
+                getBounce: function () {
+                    return bounce;
                 }
             };
 

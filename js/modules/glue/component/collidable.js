@@ -10,14 +10,16 @@ glue.module.create(
     'glue/component/collidable',
     [
         'glue',
+        'glue/math/vector',
         'glue/math/rectangle'
     ],
-    function (Glue, Rectangle) {
+    function (Glue, Vector, Rectangle) {
         return function (object) {
             'use strict';
             var Sugar = Glue.sugar,
                 fixed = false,
                 box = Rectangle(0,0,0,0),
+                bounce = 0,
                 updateBox = function () {
                     var dimension,
                         position;
@@ -63,6 +65,9 @@ glue.module.create(
                 setBoundingBox: function (rectangle) {
                     box = Sugar.isDefined(rectangle) ? rectangle : box;
                 },
+                setBounce: function (value) {
+                    bounce = Sugar.isNumber(value) ? value : bounce;
+                },
                 hitTest: function (testBox) {
                     var box2 = getBox(testBox);
                     if (box2 !== null && box !== null) {
@@ -78,13 +83,15 @@ glue.module.create(
                     return null;
                 },
                 resolve: function (vec) {
-                    var position;
+                    var position,
+                        newPosition;
                     if (Sugar.isDefined(object.visible)) {
                         position = object.visible.getPosition();
-                        object.visible.setPosition({
-                            x: position.x + vec.x,
-                            y: position.y + vec.y
-                        });
+                        newPosition = Vector(0, 0);
+                        newPosition.x = Sugar.isNumber(vec.x) ? vec.x : newPosition.x;
+                        newPosition.y = Sugar.isNumber(vec.y) ? vec.y : newPosition.y;
+                        newPosition.add(position);
+                        object.visible.setPosition(newPosition);
                     }
                 },
                 isFixed: function () {
@@ -92,6 +99,9 @@ glue.module.create(
                 },
                 getBoundingBox: function () {
                     return box;
+                },
+                getBounce: function () {
+                    return bounce;
                 }
             };
 

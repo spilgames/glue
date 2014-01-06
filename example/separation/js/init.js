@@ -60,19 +60,21 @@ glue.module.get(
                             image: Loader.getAsset('logoLD')
                         });
 
+                        this.collidable.setBounce(0.6);
+
                         this.physics.setAcceleration({
                             y: .5
                         });
                     },
                     update: function (deltaT) {
-                        this.physics.update(deltaT);
                         this.collidable.update(deltaT);
+                        this.physics.update(deltaT);
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
                     }
                 }),
-                obj2 = BaseObject(Visible, Collidable, Draggable).add({
+                obj2 = BaseObject(Visible, Collidable, Draggable, Physics).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -82,9 +84,14 @@ glue.module.get(
                             image: Loader.getAsset('logoLD')
                         });
                         this.collidable.setFixed(true);
+                        this.physics.setVelocity({
+                            y: -.5
+                        });
                     },
                     update: function (deltaT) {
                         this.collidable.update(deltaT);
+                        this.physics.update();
+                        
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
