@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Glue Engine Documentation - Using BaseObject</title>
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+</head>
+<body>
+    <div class="wrapper">
+        <h2 class="mainTitle">Using BaseObject</h2>
+        <section>
+            <h3>How does it work?</h3>
+            <p>
+              Glue is a component based game engine. She contains multiple pre-made components you can combine to create your game object behave in the way you want to. Glue lets you easily create your own components to be able to specify specific behaviour.
+
+              <p>In order to easily combine multiple behaviour components you can create a base component which will exhibit those behaviours. A base component can be created using the component module. You can pass along as many other components into the component module her constructor. Your component will incorporate all the other components (behaviours) you pass along. After that you can chain the add method and pass in an object which will represent your actual component.
+
+              The Glue game loop will keep on calling the draw and update methods on your base component as soon as you add her to the game. If some of the behaviours need to have update or draw methods called as well, you need to call these as well from your base component. You can see this call flow in the diagram below.</p>
+
+               <p><img src="img/diag.jpg" /></p>
+
+            </p>
+            <h3>My first BaseObject</h3>
+
+            <p>
+                Basically a BaseObject is a container for multiple components. Creating a BaseObject is really easy.
+                For example, here you can see how an empty BaseObject is created. 
+            </p>
+<pre>
+var object = BaseObject();
+</pre>
+            <p>
+                If we add this to our game it will not show any behaviour. To make it work we need to add components to our BaseObject. There are different types of components, you can even create your own custom components.
+                In this example you will see how to use the Visible component which displays an image in the screen.
+            </p>
+<pre>
+var object = BaseObject(Visible).add({
+        init: function () {
+            this.visible.setup({
+                position: {
+                    x: 0,
+                    y: 0
+                },
+                image: Loader.getAsset('myImage')
+            });
+        },
+        draw: function (deltaT, context) {
+            this.visible.draw(deltaT, context);
+        }
+    });
+</pre>
+            <p>
+                If we add this object to our game it will draw an image at (0, 0). For each component you mix in the BaseObject you will get a property with the same name of the component. As you can see in the previous example the property to access the Visible component is "this.visible". Through this we can use every method and property of that component.
+                On the previous example you can see how Visible is dependant of the draw method to display the image. This is also something that applies to every other component, even the custom ones you make. For example if I need to update a movable component, it should be done like this:
+            </p>
+<pre>
+var object = BaseObject(Visible, Movable).add({
+        init: function () {
+            this.visible.setup({
+                position: {
+                    x: 0,
+                    y: 0
+                },
+                image: Loader.getAsset('myImage')
+            });
+        },
+        // We add this.
+        update: function (deltaT) {
+            this.movable.update(deltaT);
+        },
+        draw: function (deltaT, context) {
+            this.visible.draw(deltaT, context);
+        }
+    });
+</pre>
+            <p>
+                As soon as we add this, the movable component will be updated.
+            </p>
+
+            <h3>Creating a custom component</h3>
+
+            <p>
+                Creating a custom component is a really simple thing to do, but first you must understand how <a href="modules.html">module pattern</a> works.
+                <p>
+                    Now that you know how AMD works lets start creating our own custom component. First we need to decide what our component will do. For this example it will just print to the console the deltaT of the update cycle and we will call it Printable.
+                </p>
+
+<pre>
+glue.module.create(
+    'my/custom/component/printable',
+    function () {
+        return function (object) {
+            object = object || {};
+            object.printable = {
+                update: function (deltaT) {
+                    console.log(deltaT);
+                }
+            };
+            return object;
+        };
+    }
+);
+</pre>
+            <p>
+                As you can see it's very simple to have a template for custom component. First we return the function that will construct our component and we add as argument the object to which we will add the different properties and methods.
+            </p>
+
+            <p>
+                After that we add the property "printable" to our object. This will be accessible from the BaseObject through "this.printable". The printable property will be a literal object that will contain all the methods and public properties.
+            </p>
+
+            <p>
+                To use our custom component we do it the same way as in the previous example with the Visible component.
+            </p>
+
+<pre>
+var object = BaseObject(Printable).add({
+        update: function (deltaT) {
+            this.printable.update(deltaT);
+        }
+    });
+
+Game.add(object);
+</pre>
+            <p>
+                With this you will have your own custom component running inside the game loop.
+            </p>
+
+            <p>
+                <a href="index.html">Back to the documentation index</a>
+            </p>
+
+        </section>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+</body>
+</html>
