@@ -5,10 +5,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/animatable',
-        'glue/component/movable',
         'glue/component/scalable',
-        'glue/component/rotatable',
         'glue/component/visible'
     ],
     function (
@@ -17,10 +14,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Animatable,
-        Movable,
         Scalable,
-        Rotatable,
         Visible
     ) {
         'use strict';
@@ -40,69 +34,42 @@ glue.module.get(
                 image: {
                     path: 'asset/',
                     source: {
-                        blocks: 'block-sheet.png'
+                        logoLD: 'glue-logo-ld.png'
                     }
                 }
             }
         }, function () {
-            var object = BaseObject(Animatable, Visible, Scalable, Movable, Rotatable).add({
+            var object = BaseObject(Visible, Scalable).add({
                     init: function () {
-                        this.animatable.setup({
+                        var dimension;
+                        this.visible.setup({
                             position: {
-                                x: 310,
+                                x: 300,
                                 y: 300
                             },
-                            animation: {
-                                frameCount: 4,
-                                fps: 0,
-                                animations: {
-                                    yellow: {
-                                        startFrame: 1,
-                                        endFrame: 1
-                                    },
-                                    blue: {
-                                        startFrame: 2,
-                                        endFrame: 2
-                                    },
-                                    green: {
-                                        startFrame: 3,
-                                        endFrame: 3
-                                    },
-                                    red: {
-                                        startFrame: 4,
-                                        endFrame: 4
-                                    }
-                                }
-                            },
-                            image: Loader.getAsset('blocks')
+                            image: Loader.getAsset('logoLD')
                         });
-                        this.animatable.setAnimation('yellow');
-                        
+                        dimension = this.visible.getDimension();
                         this.visible.setOrigin({
-                            x: 35,
-                            y: 35
+                            x: dimension.width / 2,
+                            y: dimension.height / 2
                         });
-
                         this.scalable.setTarget({
                             x: 2,
                             y: 2
                         });
-
-                        this.rotatable.setTargetDegree(180);
                     },
                     update: function (deltaT) {
-                        this.movable.update(deltaT);
                         this.scalable.update(deltaT);
-                        this.rotatable.update(deltaT);
                         if (this.scalable.atTarget()) {
                             this.scalable.setTarget({
-                                x: 6,
-                                y: 6
+                                x: 1,
+                                y: 1
                             });
                         }
                     },
                     draw: function (deltaT, context) {
-                        this.animatable.draw(deltaT, context);                        
+                        this.visible.draw(deltaT, context);              
                     }
                 });
             Game.add(object);

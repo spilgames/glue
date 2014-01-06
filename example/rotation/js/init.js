@@ -6,8 +6,6 @@ glue.module.get(
         'glue/math/vector',
         'glue/baseobject',
         'glue/component/visible',
-        'glue/component/animatable',
-        'glue/component/movable',
         'glue/component/rotatable'
     ],
     function (
@@ -17,8 +15,6 @@ glue.module.get(
         Vector,
         BaseObject,
         Visible,
-        Animatable,
-        Movable,
         Rotatable
     ) {
         'use strict';
@@ -38,60 +34,37 @@ glue.module.get(
                 image: {
                     path: 'asset/',
                     source: {
-                        blocks: 'block-sheet.png'
+                        logoLD: 'glue-logo-ld.png'
                     }
                 }
             }
         }, function () {
-            var object = BaseObject(Visible, Animatable, Movable, Rotatable).add({
+            var object = BaseObject(Visible, Rotatable).add({
                     init: function () {
-                        this.animatable.setup({
+                        var dimension;
+                        this.visible.setup({
                             position: {
                                 x: 300,
                                 y: 300
                             },
-                            animation: {
-                                frameCount: 4,
-                                fps: 0,
-                                animations: {
-                                    yellow: {
-                                        startFrame: 1,
-                                        endFrame: 1
-                                    },
-                                    blue: {
-                                        startFrame: 2,
-                                        endFrame: 2
-                                    },
-                                    green: {
-                                        startFrame: 3,
-                                        endFrame: 3
-                                    },
-                                    red: {
-                                        startFrame: 4,
-                                        endFrame: 4
-                                    }
-                                }
-                            },
-                            image: Loader.getAsset('blocks')
+                            image: Loader.getAsset('logoLD')
                         });
-                        this.animatable.setAnimation('yellow');
+                        dimension = this.visible.getDimension();
                         this.rotatable.setOrigin({
-                            x: 35,
-                            y: 35
+                            x: dimension.width / 2,
+                            y: dimension.height / 2
                         });
-                        this.rotatable.setTargetDegree(90, true);
-                        this.rotatable.setSpeed(50);
-                        this.movable.setTarget(Vector(
-                            0,
-                            0
-                        ));
+                        this.rotatable.setTargetDegree(360, true);
+                        this.rotatable.setSpeed(100);
                     },
                     update: function (deltaT) {
-                        this.movable.update(deltaT);
                         this.rotatable.update(deltaT);
+                        if (this.rotatable.atTarget()) {
+                            this.rotatable.setTargetDegree(0, false);
+                        }
                     },
                     draw: function (deltaT, context) {
-                        this.animatable.draw(deltaT, context);
+                        this.visible.draw(deltaT, context);
                     }
                 });
 
