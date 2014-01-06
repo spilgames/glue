@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "jasmine": "https://github.com/pivotal/jasmine.git#1.3.1",
-    "requirejs": "https://github.com/jrburke/requirejs.git#2.1.9"
+    "requirejs": "https://github.com/jrburke/requirejs.git#2.1.9",
+	"spine": "https://github.com/EsotericSoftware/spine-runtimes.git#1.6.13"
   }
 }

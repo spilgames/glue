@@ -5,7 +5,7 @@
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
-(function () {
+(function (win) {
     var glue = (function (adapters) {
             'use strict';
             return {
@@ -16,14 +16,12 @@
             };
         }(adapters));
 
-    window.glue = {
+    win.glue = {
         module: glue.module
     };
-    window.game = {};
-    glue.module.create('glue', ['audio51'],
-        function (Audio) {
-            glue.audio = Audio;
-            return glue;
-        }
-    );
-}());
+    win.game = {};
+    glue.module.create('glue', ['audio51'], function (Audio) {
+        glue.audio = Audio;
+        return glue;
+    });
+}(window));

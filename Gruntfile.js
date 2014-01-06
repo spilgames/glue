@@ -9,6 +9,7 @@ module.exports = function (grunt) {
                 files: {
                     'build/src/vendors.js': [
                         'bower_components/requirejs/require.js',
+                        'bower_components/spine/spine-js/spine.js',
                         'js/vendors/rsvp.js'
                     ],
                     'build/src/adapters.js': [
