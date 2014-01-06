@@ -4,7 +4,6 @@
  *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *  TODO: add scenes
  */
 glue.module.create(
     'glue/director',
