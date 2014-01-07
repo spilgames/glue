@@ -5,10 +5,9 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/rectangle',
         'glue/component/visible',
-        'glue/component/physics',
-        'glue/component/collidable',
+        'glue/component/collisionable',
         'glue/component/draggable',
-        'glue/collision',
+        'glue/sat',
         'glue/baseobject'
     ],
     function (
@@ -17,10 +16,9 @@ glue.module.get(
         Dimension,
         Rectangle,
         Visible,
-        Physics,
-        Collidable,
+        Collisionable,
         Draggable,
-        Collision,
+        SAT,
         BaseObject
     ) {
         'use strict';
@@ -45,53 +43,18 @@ glue.module.get(
                 }
             }
         }, function () {
-            var isDown = false,
-                mouse = {
-                    x: 0,
-                    y: 0
-                },
-                obj1 = BaseObject(Visible, Physics, Collidable).add({
+            var obj1 = BaseObject(Visible, Collisionable, Draggable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
-                                x: 400,
-                                y: -200
+                                x: 0,
+                                y: 0
                             },
                             image: Loader.getAsset('logoLD')
                         });
-
-                        this.collidable.setBounce(0.6);
-
-                        this.physics.setAcceleration({
-                            y: .5
-                        });
                     },
                     update: function (deltaT) {
-                        this.collidable.update(deltaT);
-                        this.physics.update(deltaT);
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
-                    }
-                }),
-                obj2 = BaseObject(Visible, Collidable, Draggable, Physics).add({
-                    init: function () {
-                        this.visible.setup({
-                            position: {
-                                x: 400,
-                                y: 500
-                            },
-                            image: Loader.getAsset('logoLD')
-                        });
-                        this.collidable.setFixed(true);
-                        this.physics.setVelocity({
-                            y: -.5
-                        });
-                    },
-                    update: function (deltaT) {
-                        this.collidable.update(deltaT);
-                        this.physics.update();
-                        
+                        this.collisionable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
@@ -105,12 +68,25 @@ glue.module.get(
                     pointerUp: function (e) {
                         this.draggable.pointerUp(e);
                     }
+                }),
+                obj2 = BaseObject(Visible, Collisionable).add({
+                    init: function () {
+                        this.visible.setup({
+                            position: {
+                                x: 400,
+                                y: 300
+                            },
+                            image: Loader.getAsset('logoLD')
+                        });
+                    },
+                    update: function (deltaT) {
+                        this.collisionable.update(deltaT);
+                        SAT.collide(obj1, obj2);
+                    },
+                    draw: function (deltaT, context) {
+                        this.visible.draw(deltaT, context);
+                    }
                 });
-            
-            Collision.add(obj1);
-            Collision.add(obj2);
-
-            Game.add(Collision);
             Game.add(obj1);
             Game.add(obj2);
         });
