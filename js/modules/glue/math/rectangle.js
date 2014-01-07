@@ -47,6 +47,27 @@ glue.module.create(
                     this.y1 = Math.min(this.y1, rectangle.y1);
                     this.x2 = Math.max(this.x2, rectangle.x2);
                     this.y2 = Math.max(this.y2, rectangle.y2);
+                },
+                intersect: function (rectangle) {
+                    return this.x1 + this.x2 > rectangle.x1 &&
+                           this.x1 < rectangle.x1 + rectangle.x2 &&
+                           this.y1 + this.y2 > rectangle.y1 &&
+                           this.y1 < rectangle.y1 + rectangle.y2;
+                },
+                intersection: function (rectangle) {
+                    var inter = {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 0
+                    };
+                    if (this.intersect(rectangle)) {
+                        inter.x1 = Math.max(this.x1, rectangle.x1);
+                        inter.y1 = Math.max(this.y1, rectangle.y1);
+                        inter.x2 = Math.min(this.x1 + this.x2, rectangle.x1 + rectangle.x2) - inter.x1;
+                        inter.y2 = Math.min(this.y1 + this.y2, rectangle.y1 + rectangle.y2) - inter.y1;
+                    }
+                    return inter;
                 }
             };
         };

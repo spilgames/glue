@@ -16,6 +16,8 @@ created & maintained by [Buffer-Overflow](https://github.com/Buffer-Overflow)
 
 * Audio: Glue contains a cross device audio module which uses the Webaudio API with a fallback to the audio tag.
 
+# Physics: Glue has a SET based Pysics system that alows you to add gravity and collisions to your games.
+
 * Event driven: Glue has built-in delegation of browser events to all game components and also contains system events to develop your games in an event driven way.
 
 * Sprite sheet animations: The built-in Animatable component contains all you need to be able to create sprite animations.
