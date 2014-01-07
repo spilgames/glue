@@ -36,18 +36,21 @@ glue.module.create(
                     };
                 correction.x = correction.y = 0;
                 horizontalOverlap = halfSize1.width + halfSize2.width - Math.abs(halfSize1.x - halfSize2.x);
+                if (horizontalOverlap <= 0) {
+                    return false;
+                }
                 horizontalDirection = sgn(halfSize1.x - halfSize2.x);
                 side.horizontal = horizontalDirection;
                 verticalOverlap = halfSize1.height + halfSize2.height - Math.abs(halfSize1.y - halfSize2.y);
+                if (verticalOverlap <= 0) {
+                    return false;
+                }
                 verticalDirection = sgn(halfSize1.y - halfSize2.y);
                 side.vertical = verticalDirection;
                 if (horizontalOverlap < verticalOverlap) {
                     correction.x += horizontalDirection * horizontalOverlap;
                 } else {
                     correction.y += verticalDirection * verticalOverlap;
-                }
-                if (horizontalOverlap <= 0 || verticalOverlap <= 0) {
-                    return false;
                 }
                 return true;
             },
