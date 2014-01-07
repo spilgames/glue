@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Glue Engine Documentation - Components</title>
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+</head>
+<body>
+    <div class="wrapper">
+        <h2 class="mainTitle">Components</h2>
+        <section>
+            <h3>Available Components</h3>
+
+            <p>
+                Glue has a lot of pre-made components which are used frequently to create games. At the moment you can choose from the following components to mix in to your base objects:
+            </p>
+
+            <ul>
+                <li>Animatable</li>
+                <li>Clickable</li>
+                <li>Draggable</li>
+                <li>Droptarget</li>
+                <li>Fadable</li>
+                <li>Hoverable</li>
+                <li>Movable</li>
+                <li>Rotatable</li>
+                <li>Scalable</li>
+                <li>Visible</li>
+                <li>Collidable</li>
+                <li>Gravitatable</li>
+            </ul>
+
+            <p>
+                If a game object in your games needs to exibit behaviour that is not available in a Glue component (yet), you can easily create you own custom component you can mix in with your base object.
+            </p>
+
+            <h3>Creating a custom component</h3>
+
+            <p>
+                Creating a custom component is a really simple thing to do, but first you must understand how the <a href="modules.html">module pattern</a> works.
+            </p>
+            <p>
+                Now that you know how modules works lets start creating our own custom component. First we need to decide what our component will do. For this example it will just print to the console the deltaT of the update cycle and we will call it Printable.
+            </p>
+
+<pre>
+glue.module.create(
+    'my/custom/component/printable',
+    function () {
+        return function (object) {
+            object = object || {};
+            object.printable = {
+                update: function (deltaT) {
+                    console.log(deltaT);
+                }
+            };
+            return object;
+        };
+    }
+);
+</pre>
+            <p>
+                As you can see it's very simple to have a template for custom component. First we return the function that will construct our component and we add as argument the object to which we will add the different properties and methods.
+            </p>
+
+            <p>
+                After that we add the property "printable" to our object. This will be accessible from the BaseObject through "this.printable". The printable property will be a literal object that will contain all the methods and public properties.
+            </p>
+
+            <p>
+                To use our custom component we first have to retrieve our custom component module using "glue.module.get". Then we can mis in the module in our base object and add our own methods to it using the add method.
+            </p>
+
+<pre>
+glue.module.get('glue/game', 'my/custom/component/printable', function (Game, Printable) {
+    // create our base object,
+    // mix in our custom component
+    // and add our update function
+    var object = BaseObject(Printable).add({
+            update: function (deltaT) {
+                this.printable.update(deltaT);
+            }
+        });
+
+    // add our base object to the game
+    Game.add(object); 
+});
+</pre>
+            <p>
+                You will now have your own custom component running inside the game loop.
+            </p>
+
+            <p>
+                <a href="index.html">Back to the documentation index</a>
+            </p>
+
+        </section>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+</body>
+</html>

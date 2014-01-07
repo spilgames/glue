@@ -2,21 +2,26 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Glue Engine Documentation - Using BaseObject</title>
+    <title>Glue Engine Documentation - Base object</title>
     <link rel="stylesheet" href="css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 </head>
 <body>
     <div class="wrapper">
-        <h2 class="mainTitle">Using BaseObject</h2>
+        <h2 class="mainTitle">Base object</h2>
         <section>
             <h3>How does it work?</h3>
             <p>
               Glue is a component based game engine. She contains multiple pre-made components you can combine to create your game object behave in the way you want to. Glue lets you easily create your own components to be able to specify specific behaviour.
+            </p>
 
-              <p>In order to easily combine multiple behaviour components you can create a base component which will exhibit those behaviours. A base component can be created using the component module. You can pass along as many other components into the component module her constructor. Your component will incorporate all the other components (behaviours) you pass along. After that you can chain the add method and pass in an object which will represent your actual component.
+            <p>
+                In order to easily combine multiple behaviour components you can create a base component which will exhibit those behaviours. A base component can be created using the component module. You can pass along as many other components into the component module her constructor. Your component will incorporate all the other components (behaviours) you pass along. After that you can chain the add method and pass in an object which will represent your actual component.
+            </p>
 
-              The Glue game loop will keep on calling the draw and update methods on your base component as soon as you add her to the game. If some of the behaviours need to have update or draw methods called as well, you need to call these as well from your base component. You can see this call flow in the diagram below.</p>
+            <p>
+                The Glue game loop will keep on calling the draw and update methods on your base component as soon as you add her to the game. If some of the behaviours need to have update or draw methods called as well, you need to call these as well from your base component. You can see this call flow in the diagram below.
+            </p>
 
                <p><img src="img/diag.jpg" /></p>
 
@@ -32,7 +37,7 @@ var object = BaseObject();
 </pre>
             <p>
                 If we add this to our game it will not show any behaviour. To make it work we need to add components to our BaseObject. There are different types of components, you can even create your own custom components.
-                In this example you will see how to use the Visible component which displays an image in the screen.
+                In this example you will see how to use the Visible component which displays an image on the game screen.
             </p>
 <pre>
 var object = BaseObject(Visible).add({
@@ -78,54 +83,7 @@ var object = BaseObject(Visible, Movable).add({
                 As soon as we add this, the movable component will be updated.
             </p>
 
-            <h3>Creating a custom component</h3>
-
-            <p>
-                Creating a custom component is a really simple thing to do, but first you must understand how <a href="modules.html">module pattern</a> works.
-                <p>
-                    Now that you know how AMD works lets start creating our own custom component. First we need to decide what our component will do. For this example it will just print to the console the deltaT of the update cycle and we will call it Printable.
-                </p>
-
-<pre>
-glue.module.create(
-    'my/custom/component/printable',
-    function () {
-        return function (object) {
-            object = object || {};
-            object.printable = {
-                update: function (deltaT) {
-                    console.log(deltaT);
-                }
-            };
-            return object;
-        };
-    }
-);
-</pre>
-            <p>
-                As you can see it's very simple to have a template for custom component. First we return the function that will construct our component and we add as argument the object to which we will add the different properties and methods.
-            </p>
-
-            <p>
-                After that we add the property "printable" to our object. This will be accessible from the BaseObject through "this.printable". The printable property will be a literal object that will contain all the methods and public properties.
-            </p>
-
-            <p>
-                To use our custom component we do it the same way as in the previous example with the Visible component.
-            </p>
-
-<pre>
-var object = BaseObject(Printable).add({
-        update: function (deltaT) {
-            this.printable.update(deltaT);
-        }
-    });
-
-Game.add(object);
-</pre>
-            <p>
-                With this you will have your own custom component running inside the game loop.
-            </p>
+            <p>You can read more about components and the creation of custom components in the <a href="components.html">components section</a>.
 
             <p>
                 <a href="index.html">Back to the documentation index</a>

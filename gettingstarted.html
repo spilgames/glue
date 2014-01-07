@@ -34,7 +34,7 @@
                 To create a new Glue Game you can use the Game module ('glue/game'). You you only need to startup your game once. After that, the running game instance will be available through the Game module.
             </p>
             <p>
-                To start a game you can use the 'setup' method The setup method requires a configuration object. The canvas property is mandatory, because Glue needs it to get information about the canvas you want to use to render you game in. The canvas property needs tho contain the sub-properties "id" and "dimension". If there is a canvas present with the configured id, Glue will use this canvas, if not, Glue will automatically create the canvas for you. The dimension property needs to contain an object with the width and height of the canvas. To define the dimension you need to use the Dimension module ('glue/math/dimension'). You can see an example of this below.
+                To start a game you can use the 'setup' method The setup method requires a configuration object. The canvas property is mandatory, because Glue needs it to get information about the canvas you want to use to render you game in. The canvas property needs tho contain the sub-properties "id" and "dimension". If there is a canvas HTML element present in the page and it has the configured id, Glue will use this canvas, if not, Glue will automatically create the canvas for you. The dimension property needs to contain an object with the width and height of the canvas. To define the dimension you need to use the Dimension module ('glue/math/dimension'). You can see an example of this below.
             </p>
 
 <pre>
