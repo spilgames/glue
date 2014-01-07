@@ -1,5 +1,5 @@
 glue.module.create(
-    'vendors/spine/spineable', [
+    'glue/component/plugin/spineable', [
         'glue',
         'glue/math/rectangle',
         'glue/math/vector',
