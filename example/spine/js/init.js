@@ -10,7 +10,7 @@ glue.module.get(
         'glue/component/draggable',
         'glue/component/scalable',
         'glue/component/rotatable',
-        'vendors/spine/spineable'
+        'glue/component/plugin/spineable'
     ],
     function (
         Domready,
