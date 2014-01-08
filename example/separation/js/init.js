@@ -4,11 +4,11 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/math/rectangle',
+        'glue/math/vector',
         'glue/component/visible',
-        'glue/component/physics',
         'glue/component/collidable',
         'glue/component/draggable',
-        'glue/collision',
+        'glue/sat',
         'glue/baseobject'
     ],
     function (
@@ -16,11 +16,11 @@ glue.module.get(
         Loader,
         Dimension,
         Rectangle,
+        Vector,
         Visible,
-        Physics,
         Collidable,
         Draggable,
-        Collision,
+        SAT,
         BaseObject
     ) {
         'use strict';
@@ -45,53 +45,19 @@ glue.module.get(
                 }
             }
         }, function () {
-            var isDown = false,
-                mouse = {
-                    x: 0,
-                    y: 0
-                },
-                obj1 = BaseObject(Visible, Physics, Collidable).add({
+            var obj1 = BaseObject(Visible, Collidable, Draggable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
-                                x: 400,
-                                y: -200
+                                x: 0,
+                                y: 0
                             },
                             image: Loader.getAsset('logoLD')
                         });
-
-                        this.collidable.setBounce(0.6);
-
-                        this.physics.setAcceleration({
-                            y: .5
-                        });
+                        this.collidable.isStatic(true);
                     },
                     update: function (deltaT) {
                         this.collidable.update(deltaT);
-                        this.physics.update(deltaT);
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
-                    }
-                }),
-                obj2 = BaseObject(Visible, Collidable, Draggable, Physics).add({
-                    init: function () {
-                        this.visible.setup({
-                            position: {
-                                x: 400,
-                                y: 500
-                            },
-                            image: Loader.getAsset('logoLD')
-                        });
-                        this.collidable.setFixed(true);
-                        this.physics.setVelocity({
-                            y: -.5
-                        });
-                    },
-                    update: function (deltaT) {
-                        this.collidable.update(deltaT);
-                        this.physics.update();
-                        
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
@@ -105,14 +71,31 @@ glue.module.get(
                     pointerUp: function (e) {
                         this.draggable.pointerUp(e);
                     }
-                });
-            
-            Collision.add(obj1);
-            Collision.add(obj2);
+                }),
+                obj2 = BaseObject(Visible, Collidable).add({
+                    init: function () {
+                        this.visible.setup({
+                            position: {
+                                x: 400,
+                                y: 300
+                            },
+                            image: Loader.getAsset('logoLD')
+                        });
+                    },
+                    update: function (deltaT) {
+                        this.collidable.update(deltaT);
+                        SAT.collide(obj1, obj2);
 
-            Game.add(Collision);
+                    },
+                    draw: function (deltaT, context) {
+                        this.visible.draw(deltaT, context);
+                    }
+                });
             Game.add(obj1);
             Game.add(obj2);
+
+            var v = Vector(0, 0);
+            v.static.add(v, v);
         });
     }
 );

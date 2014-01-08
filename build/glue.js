@@ -4532,6 +4532,14 @@ modules.glue.sugar = (function (win, doc) {
     'use strict';
     var i,
         /**
+         * Is a given value a vector?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isVector = function (value) {
+            return isNumber(value.x) && isNumber(value.y);
+        },
+        /**
          * Is a given value a string?
          * @param {Object}
          * @return {Boolean}
@@ -5393,6 +5401,7 @@ modules.glue.sugar = (function (win, doc) {
         }());
 
     return {
+        isVector: isVector,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
@@ -6558,202 +6567,6 @@ glue.module.create(
     }
 );
 
-/**
- *  @module Collision
- *  @desc Handles the collision of multiple objects.
- *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
- *  @license BSD 3-Clause License (see LICENSE file in project root)
- */
-glue.module.create(
-    'glue/collision',
-    [
-        'glue',
-    ],
-    function (Glue) {
-        'use strict';
-        var Sugar = Glue.sugar,
-            collisionList = [],
-            canCollide = function (object) {
-                return Sugar.isDefined(object.collidable);
-            },
-            hasPhysics = function (object) {
-                return Sugar.isDefined(object.physics);
-            },
-            resolveCollision = function (obj1, obj2) {
-                if (obj1.collidable.hitTest(obj2)) {
-                    var inter = obj1.collidable.getIntersectionBox(obj2),
-                        box1 = obj1.collidable.getBoundingBox(),
-                        box2 = obj2.collidable.getBoundingBox(),
-                        bounce1 = obj1.collidable.getBounce(),
-                        bounce2 = obj2.collidable.getBounce(),
-                        velocity1,
-                        velocity2,
-                        solution = {
-                            x: 0,
-                            y: 0
-                        };
-                    if (inter.x2 > inter.y2) {
-                        if (box1.y1 > box2.y1) {
-                            solution.y -= inter.y2;
-                        } else {
-                            solution.y += inter.y2;
-                        }
-                    } else {
-                        if (box1.x1 > box2.x1) {
-                            solution.x -= inter.x2;
-                        } else {
-                            solution.x += inter.x2;
-                        }
-                    }
-
-                    if (obj1.collidable.isFixed()) {
-                        obj2.collidable.resolve(solution);
-                        if (hasPhysics(obj2)) {
-                            if (solution.y !== 0) {
-                                if (bounce2 === 0) {
-                                    obj2.physics.setVelocity({
-                                        y: 0
-                                    });
-                                } else {
-                                    velocity2 = obj2.physics.getVelocity().y;
-                                    obj2.physics.setVelocity({
-                                        y: velocity2 * -bounce2
-                                    });
-                                }
-                            } else if (solution.x !== 0) {
-                                if (bounce2 === 0) {
-                                    obj2.physics.setVelocity({
-                                        x: 0
-                                    });
-                                } else {
-                                    velocity2 = obj2.physics.getVelocity().x;
-                                    obj2.physics.setVelocity({
-                                        x: velocity2 * -bounce2
-                                    });
-                                }
-                            }
-                        }
-                    } else if (!obj1.collidable.isFixed() && !obj2.collidable.isFixed()) {
-                        if (inter.x2 > inter.y2) {
-                            if (box1.y1 > box2.y1) {
-                                obj1.collidable.resolve({
-                                    y: solution.y * -1
-                                });
-                                obj2.collidable.resolve({
-                                    y: solution.y
-                                });
-
-                            } else {
-                                obj2.collidable.resolve({
-                                    y: solution.y * -1
-                                });
-                                obj1.collidable.resolve({
-                                    y: solution.y
-                                });
-                            }
-
-                            if (hasPhysics(obj1)) {
-                                if (bounce1 === 0) {
-                                    obj1.physics.setVelocity({
-                                        y: 0
-                                    });
-                                } else {
-                                    velocity1 = obj1.physics.getVelocity().y;
-                                    obj1.physics.setVelocity({
-                                        y: velocity1 * -bounce1
-                                    });
-                                }
-                            }
-                            if (hasPhysics(obj2)) {
-                               if (bounce2 === 0) {
-                                    obj2.physics.setVelocity({
-                                        y: 0
-                                    });
-                                } else {
-                                    velocity2 = obj2.physics.getVelocity().y;
-                                    obj2.physics.setVelocity({
-                                        y: velocity2 * -bounce2
-                                    });
-                                }
-                            }
-
-                        } else {
-                            if (box1.x1 > box2.x1) {
-                                obj1.collidable.resolve({
-                                    x: solution.x * -1
-                                });
-                                obj2.collidable.resolve({
-                                    x: solution.x
-                                });
-                            } else {
-                                obj2.collidable.resolve({
-                                    x: solution.x * -1
-                                });
-                                obj1.collidable.resolve({
-                                    x: solution.x
-                                });
-                            }
-
-                            if (hasPhysics(obj1)) {
-                                if (bounce1 === 0) {
-                                    obj1.physics.setVelocity({
-                                        x: 0
-                                    });
-                                } else {
-                                    velocity1 = obj1.physics.getVelocity().x;
-                                    obj1.physics.setVelocity({
-                                        x: velocity1 * -bounce1
-                                    });
-                                }
-                            }
-                            if (hasPhysics(obj2)) {
-                               if (bounce2 === 0) {
-                                    obj2.physics.setVelocity({
-                                        x: 0
-                                    });
-                                } else {
-                                    velocity2 = obj2.physics.getVelocity().x;
-                                    obj2.physics.setVelocity({
-                                        x: velocity2 * -bounce2
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            update = function () {
-                var i,
-                    len;
-                for (i = 0, len = collisionList.length; i < len; ++i) {
-                    for (var j = 0, jlen = collisionList.length; j < jlen; ++j) {
-                        if (j !== i) {
-                            resolveCollision(collisionList[i], collisionList[j]);
-                        }
-                    }
-                }
-            },
-            module = {
-                add: function (object) {
-                    if (canCollide(object)) {
-                        collisionList[collisionList.length] = object;
-                    }
-                },
-                remove: function (object) {
-                    var index = collisionList.indexOf(object);
-                    if (index >= 0) {
-                        collisionList.splice(index, 1);
-                    }
-                },
-                update: function (deltaT) {
-                    update();
-                }
-            };
-        return module;
-    }
-);
-
 /*
  *  @module Animatable
  *  @namespace component
@@ -6947,9 +6760,9 @@ glue.module.create(
 );
 
 /*
- *  @module Collisionable
+ *  @module Collidable
  *  @namespace component
- *  @desc Represents a collisionable component
+ *  @desc Represents a collidable component
  *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
@@ -6965,91 +6778,117 @@ glue.module.create(
         return function (object) {
             'use strict';
             var Sugar = Glue.sugar,
-                fixed = false,
-                box = Rectangle(0,0,0,0),
-                bounce = 0,
-                updateBox = function () {
-                    var dimension,
-                        position;
+                boundingBox = Rectangle(0, 0, null, null),
+                circle = {
+                    x: 0,
+                    y: 0,
+                    radius: null
+                },
+                isStatic = false,
+                collisionSide = Vector(0, 0),
+                updateBoundingBox = function () {
+                    var position,
+                        origin,
+                        scale,
+                        dimension,
+                        max;
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
-                        position = object.animatable.getPosition();
                     } else if (Sugar.isDefined(object.visible)) {
                         dimension = object.visible.getDimension();
-                        position = object.visible.getPosition();
                     } else {
-                        dimension = {width: 0, height: 0};
-                        position = {x: 0, y: 0};
+                        dimension = {
+                            width: 0,
+                            height: 0
+                        };
                     }
-                    box.x1 = position.x;
-                    box.y1 = position.y;
-                    box.x2 = dimension.width;
-                    box.y2 = dimension.height;
-
-                },
-                getBox = function (obj) {
-                    var dimension,
-                        position;
-                    if (Sugar.isDefined(obj.animatable)) {
-                        dimension = obj.animatable.getDimension();
-                        position = obj.animatable.getPosition();
-                    } else if (Sugar.isDefined(obj.visible)) {
-                        dimension = obj.visible.getDimension();
-                        position = obj.visible.getPosition();
-                    } else {
-                        dimension = {width: 0, height: 0};
-                        position = {x: 0, y: 0};
-                    }
-                    return Rectangle(position.x, position.y, dimension.width, dimension.height);
-                };
-            object = object || {};
-            object.collidable = {
-                update: function (deltaT) {
-                    updateBox();
-                },
-                setFixed: function (value) {
-                    fixed = Sugar.isBoolean(value) ? value : fixed;
-                },
-                setBoundingBox: function (rectangle) {
-                    box = Sugar.isDefined(rectangle) ? rectangle : box;
-                },
-                setBounce: function (value) {
-                    bounce = Sugar.isNumber(value) ? value : bounce;
-                },
-                hitTest: function (testBox) {
-                    var box2 = getBox(testBox);
-                    if (box2 !== null && box !== null) {
-                        return box.intersect(box2);
-                    }
-                    return false;
-                },
-                getIntersectionBox: function (testBox) {
-                    var box2 = getBox(testBox);
-                    if (box2 !== null && box !== null) {
-                        return box.intersection(box2);
-                    }
-                    return null;
-                },
-                resolve: function (vec) {
-                    var position,
-                        newPosition;
                     if (Sugar.isDefined(object.visible)) {
                         position = object.visible.getPosition();
-                        newPosition = Vector(0, 0);
-                        newPosition.x = Sugar.isNumber(vec.x) ? vec.x : newPosition.x;
-                        newPosition.y = Sugar.isNumber(vec.y) ? vec.y : newPosition.y;
-                        newPosition.add(position);
-                        object.visible.setPosition(newPosition);
+                        origin = object.visible.getOrigin();
+                        if (Sugar.isDefined(object.scalable)) {
+                            scale = object.scalable.getScale();
+                        } else {
+                            scale = Vector(1, 1);
+                        }
+                    } else {
+                        position = Vector(0, 0);
+                        origin = Vector(0, 0);
+                    }
+                    boundingBox.x1 = position.x - origin.x * Math.abs(scale.x);
+                    boundingBox.y1 = position.y - origin.y * Math.abs(scale.y);
+                    if (boundingBox.x2 === null || boundingBox.y2 === null) {
+                        boundingBox.x2 = dimension.width;
+                        boundingBox.y2 = dimension.height;
+                    }
+                    boundingBox.x2 *= scale.x;
+                    boundingBox.y2 *= scale.y;
+                    circle.x = boundingBox.x1 + (boundingBox.x2 / 2);
+                    circle.y = boundingBox.y1 + (boundingBox.y2 / 2);
+                    if (circle.radius === null) {
+                        max = Math.max(boundingBox.x2, boundingBox.y2);
+                        circle.radius = (Math.sqrt(
+                            (-max / 2) * (-max / 2) +
+                            (-max / 2) * (-max / 2)
+                        ));
                     }
                 },
-                isFixed: function () {
-                    return fixed;
+                resolveCollision = function (vector, side) {
+                    if (Sugar.isDefined(object.visible) && Sugar.isVector(vector)) {
+                        var position = object.visible.getPosition();
+                        object.visible.setPosition(position.substract(vector));
+                        if (Sugar.isDefined(side) && Sugar.isVector(side)) {
+                            side.scale(-1);
+                            collisionSide.copy(side);
+                        }
+                    }
+                };
+
+            object = object || {};
+            object.collidable = {
+                resolveCollision: resolveCollision,
+                update: function (deltaT) {
+                    updateBoundingBox();
+                },
+                setBoundingDimension: function (dimension) {
+                    boundingBox.x2 = dimension.width;
+                    boundingBox.y2 = dimension.height;
+                },
+                setBoundingCircleRadius: function (radius) {
+                    circle.radius = radius;
                 },
                 getBoundingBox: function () {
-                    return box;
+                    return boundingBox;
                 },
-                getBounce: function () {
-                    return bounce;
+                getBoundingCircle: function () {
+                    return circle;
+                },
+                setStatic: function (value) {
+                    if (Sugar.isBoolean(value)) {
+                        isStatic = value;
+                    } else {
+                        throw 'The argument must be a Boolean';
+                    }
+                },
+                hitTop: function () {
+                    return collisionSide.y > 0;
+                },
+                hitBottom: function () {
+                    return collisionSide.y < 0;
+                },
+                hitLeft: function () {
+                    return collisionSide.x > 0;
+                },
+                hitRight: function () {
+                    return collisionSide.x < 0;
+                },
+                hitVertical: function () {
+                    return collisionSide.y !== 0;
+                },
+                hitHorizontal: function () {
+                    return collisionSide.x !== 0;
+                },
+                isStatic: function () {
+                    return isStatic;
                 }
             };
 
@@ -7346,6 +7185,92 @@ glue.module.create(
 );
 
 /*
+ *  @module Gravitatable
+ *  @namespace component
+ *  @desc Represents a gravitatable component
+ *  @copyright (C) SpilGames
+ *  @author Felipe Alfonso
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/component/gravitatable',
+    [
+        'glue',
+        'glue/math',
+        'glue/math/vector'
+    ],
+    function (Glue, Mathematics, Vector) {
+        return function (object) {
+            'use strict';
+            var Sugar = Glue.sugar,
+                math = Mathematics(),
+                velocity = Vector(0, 0),
+                gravity = Vector(0, 0),
+                bounce = Vector(0, 0),
+                maxVelocity = Vector(0, 0);
+            object = object || {};
+            object.gravitatable = {
+                update: function (deltaT) {
+                    var position;
+                    velocity.add(gravity);
+                    if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {
+                        velocity.x = maxVelocity.x * math.sign(velocity.x);
+                    }
+                    if (maxVelocity.y !== 0 && Math.abs(velocity.y) > maxVelocity.y) {
+                        velocity.y = maxVelocity.y * math.sign(velocity.y);
+                    }
+                    if (Sugar.isDefined(object.visible)) {
+                        position = object.visible.getPosition();
+                        object.visible.setPosition(position.add(velocity));
+                    }
+                },
+                setVelocity: function (vector) {
+                    if (Sugar.isVector(vector)) {
+                        velocity = vector;
+                    } else {
+                        throw 'The argument must be a Vector';
+                    }
+                },
+                setGravity: function (vector) {
+                    if (Sugar.isVector(vector)) {
+                        gravity = vector;
+                    } else {
+                        throw 'The argument must be a Vector';
+                    }
+                },
+                setBounce: function (vector) {
+                    if (Sugar.isVector(vector)) {
+                        bounce = vector;
+                    } else {
+                        throw 'The argument must be a Vector';
+                    }
+                },
+                setMaxVelocity: function (vector) {
+                    if (Sugar.isVector(vector)) {
+                        maxVelocity = vector;
+                    } else {
+                        throw 'The argument must be a Vector';
+                    }
+                },
+                getVelocity: function () {
+                    return velocity;
+                },
+                getGravity: function () {
+                    return gravity;
+                },
+                getBounce: function () {
+                    return bounce;
+                },
+                getMaxVelocity: function () {
+                    return maxVelocity;
+                }
+            };
+            return object;
+        };
+    }
+);
+
+/*
  *  @module Hoverable
  *  @namespace component
  *  @desc Used to make a game component perfom an action when she's hovered over
@@ -7479,71 +7404,6 @@ glue.module.create(
                     }
                     moveSpeed = speed;
                 }
-            };
-            return object;
-        };
-    }
-);
-
-/*
- *  @module Physics
- *  @namespace component
- *  @desc Represents a physics component
- *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
- *  @license BSD 3-Clause License (see LICENSE file in project root)
- */
-glue.module.create(
-    'glue/component/physics',
-    [
-        'glue',
-        'glue/math/vector'
-    ],
-    function (Glue, Vector) {
-        return function (object) {
-            'use strict';
-            var Sugar = Glue.sugar,
-                velocity = Vector(0, 0),
-                acceleration = Vector(0, 0);
-
-            object = object || {};
-            object.physics = {
-                update: function (deltaT) {
-                    var position;
-                    velocity.add(acceleration);
-                    if (Sugar.isDefined(object.visible)) {
-                        position = object.visible.getPosition();
-                        position.x += velocity.x;
-                        position.y += velocity.y;
-                        object.visible.setPosition(position);
-                    }
-                },
-                setVelocity: function (vec) {
-                    velocity.x = Sugar.isNumber(vec.x) ? vec.x : velocity.x;
-                    velocity.y = Sugar.isNumber(vec.y) ? vec.y : velocity.y;
-                },
-                setAcceleration: function (vec) {
-                    acceleration.x = Sugar.isNumber(vec.x) ? vec.x : velocity.x;
-                    acceleration.y = Sugar.isNumber(vec.y) ? vec.y : velocity.y;
-                },
-                resetVelocity: function () {
-                    velocity.x = 0;
-                    velocity.y = 0;
-                },
-                resetAcceleration: function () {
-                    acceleration.x = 0;
-                    acceleration.y = 0;
-                },
-                reset: function () {
-                    this.resetVelocity();
-                    this.resetAcceleration();
-                },
-                getVelocity: function () {
-                    return velocity;
-                },
-                getAcceleration: function () {
-                    return acceleration;
-                },
             };
             return object;
         };
@@ -9059,17 +8919,46 @@ glue.module.create(
 glue.module.create(
     'glue/math',
     [
+        'glue',
+        'glue/math/rectangle',
         'glue/math/dimension',
         'glue/math/matrix',
         'glue/math/vector'
     ],
-    function (Dimension, Matrix, Vector) {
+    function (Glue, Rectangle, Dimension, Matrix, Vector) {
         'use strict';
         return function () {
+            var Sugar = Glue.sugar;
             return {
                 Dimension: Dimension,
                 Matrix: Matrix,
-                Vector: Vector
+                Vector: Vector,
+                random: function (min, max) {
+                    return ~~(Math.random() * (max - min + 1)) + min;
+                },
+                square: function (x) {
+                    return x * x;
+                },
+                sign: function (x) {
+                    if (Sugar.isNumber(x)) {
+                        if (x < 0) {
+                            return -1;
+                        } else if (x > 0) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                },
+                getHalfRectangle: function (rectangle) {
+                    var tempRect = Rectangle(
+                            rectangle.x1 + (rectangle.x2 / 2),
+                            rectangle.y1 + (rectangle.y2 / 2),
+                            rectangle.x2 / 2,
+                            rectangle.y2 / 2
+                        );
+                    return tempRect;
+                }
             };
         };
     }
@@ -9303,9 +9192,15 @@ glue.module.create(
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
-glue.module.create('glue/math/vector', function () {
+glue.module.create('glue/math/vector',
+    [
+        'glue/math'
+    ],
+    function (Mathematics) {
     'use strict';
-    return function (x, y, z) {
+    var module =function (x, y, z) {
+        var math = Mathematics();
+
         return {
             x: x,
             y: y,
@@ -9341,10 +9236,275 @@ glue.module.create('glue/math/vector', function () {
                     (this.x - vector.x) * (this.x - vector.x) +
                     (this.y - vector.y) * (this.y - vector.y)
                 );
+            },
+            multiply: function (vector) {
+                this.x *= vector.x;
+                this.y *= vector.y;
+                return this;
+            },
+            scale: function (value) {
+                this.x *= value;
+                this.y *= value;
+                return this;
+            },
+            length: function () {
+                return Math.sqrt(math.square(this.x) + math.square(this.y));
+            },
+            normalize: function (value) {
+                this.x /= value > 0 ? value : 1;
+                this.y /= value > 0 ? value : 1;
+                return this;
+            },
+            copy: function (vector) {
+                this.x = vector.x;
+                this.y = vector.y;
+                return this;
+            },
+            clone: function () {
+                return module(this.x, this.y);
+            },
+            static: {
+                add: function (vector1, vector2) {
+                    var vector = vector1.clone();
+                    vector.add(vector2);
+                    return vector;
+                },
+                substract: function (vector1, vector2) {
+                    var vector = vector1.clone();
+                    vector.substract(vector2);
+                    return vector;
+                },
+                angle: function (vector1, vector2) {
+                    return vector1.angle(vector2);
+                },
+                dotProduct: function (vector1, vector2) {
+                    return vector1.dotProduct(vector2);
+                },
+                distance: function (vector1, vector2) {
+                    return vector1.distance(vector2);
+                },
+                multiply: function (vector1, vector2) {
+                    var vector = vector1.clone();
+                    vector.multiply(vector2);
+                    return vector;
+                },
+                scale: function (vector1, value) {
+                    var vector = vector1.clone();
+                    vector.scale(value);
+                    return vector;
+                },
+                length: function (vector1) {
+                    var vector = vector1.clone();
+                    return vector.length();
+                },
+                normalize: function (vector1, value) {
+                    var vector = vector1.clone();
+                    vector.normalize(value);
+                    return vector;
+                },
+                copy: function (vector1, vector2) {
+                    var vector = vector1.clone();
+                    vector.copy(vector2);
+                    return vector;
+                },
+                clone: function (vector1) {
+                    return vector1.clone();
+                }
             }
         };
     };
+    return module;
 });
+
+/**
+ *  @module SAT (Separating Axis Theorem)
+ *  @desc Handles the collision between two rectangles.
+ *  @copyright (C) SpilGames
+ *  @author Felipe Alfonso
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/sat',
+    [
+        'glue',
+        'glue/math',
+        'glue/math/vector'
+    ],
+    function (Glue, Mathematics, Vector) {
+        'use strict';
+        var Sugar = Glue.sugar,
+            math = Mathematics(),
+            circleCollision = function (circle1, circle2, correction, unit) {
+                var distance;
+                correction.copy(circle1);
+                correction.substract(circle2);
+                distance = correction.length();
+                if (distance > circle1.radius + circle2.radius) {
+                    correction.x = correction.y = 0;
+                    return false;
+                }
+                correction.normalize(distance);
+                unit.copy(correction);
+                correction.scale((circle1.radius + circle2.radius) - distance);
+                return true;
+            },
+            rectCollision = function (rect1, rect2, correction, side) {
+                var horizontalOverlap,
+                    horizontalDirection,
+                    verticalOverlap,
+                    verticalDirection,
+                    halfSize1 = math.getHalfRectangle(rect1),
+                    halfSize2 = math.getHalfRectangle(rect2);
+                correction.x = correction.y = 0;
+                horizontalOverlap = halfSize1.x2 + halfSize2.x2 - Math.abs(halfSize1.x1 - halfSize2.x1);
+                if (horizontalOverlap <= 0) {
+                    return false;
+                }
+                horizontalDirection = math.sign(halfSize1.x1 - halfSize2.x1);
+                side.x = horizontalDirection;
+                verticalOverlap = halfSize1.y2 + halfSize2.y2 - Math.abs(halfSize1.y1 - halfSize2.y1);
+                if (verticalOverlap <= 0) {
+                    return false;
+                }
+                verticalDirection = math.sign(halfSize1.y1 - halfSize2.y1);
+                side.y = verticalDirection;
+                if (horizontalOverlap < verticalOverlap) {
+                    correction.x += horizontalDirection * horizontalOverlap;
+                } else {
+                    correction.y += verticalDirection * verticalOverlap;
+                }
+                return true;
+            },
+            reflectCircle = function (obj, unit) {
+                var velocity = obj.gravitatable.getVelocity(),
+                    bounce = obj.gravitatable.getBounce().x * obj.gravitatable.getBounce().y,
+                    unitScale = unit.scale(velocity.dotProduct(unit)),
+                    dist = velocity.static.substract(velocity, unitScale),
+                    after = dist.substract(unitScale),
+                    reflection = after.substract(velocity).scale(bounce);
+                 velocity.add(reflection);                           
+                 obj.gravitatable.setVelocity(velocity);
+            },
+            solveCircleToCircle = function (obj1, obj2) {
+                var circle1 = obj1.collidable.getBoundingCircle(),
+                    circle2 = obj2.collidable.getBoundingCircle(),
+                    correction = Vector(0, 0),
+                    unit = Vector(0, 0);
+
+                if (circleCollision(circle1, circle2, correction, unit)) {
+                    if (!obj2.collidable.isStatic()) {
+                        obj2.collidable.resolveCollision(correction);
+                        if (Sugar.isDefined(obj2.gravitatable)) {
+                            reflectCircle(obj2, unit);
+                        }
+                    }
+                    correction.scale(-1);
+                    if (!obj1.collidable.isStatic()) {
+                        obj1.collidable.resolveCollision(correction);
+                        if (Sugar.isDefined(obj1.gravitatable)) {
+                            reflectCircle(obj1, unit);
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            },
+            solveRectangeToRectangle = function (obj1, obj2) {
+                var box1 = obj1.collidable.getBoundingBox(),
+                    box2 = obj2.collidable.getBoundingBox(),
+                    correction = Vector(0, 0),
+                    side = Vector(0, 0),
+                    bounce,
+                    velocity;
+                
+                if (rectCollision(box1, box2, correction, side)) {
+                    if (!obj2.collidable.isStatic()) { 
+                        obj2.collidable.resolveCollision(correction, side);
+                        if (Sugar.isDefined(obj2.gravitatable)) {
+                            velocity = obj2.gravitatable.getVelocity(),
+                            bounce = obj2.gravitatable.getBounce();
+                            if (correction.y !== 0) {
+                                velocity.y *= -bounce.y;
+                            } else if (correction.x !== 0){
+                                velocity.x *= -bounce.x;
+                            }
+                            obj2.gravitatable.setVelocity(velocity);
+                        }
+                    }
+                    correction.scale(-1);
+                    side.vertical *= -1;
+                    side.horizontal *= -1;
+                    if (!obj1.collidable.isStatic()) { 
+                        obj1.collidable.resolveCollision(correction, side);
+                        if (Sugar.isDefined(obj1.gravitatable)) {
+                            velocity = obj1.gravitatable.getVelocity(),
+                            bounce = obj1.gravitatable.getBounce();
+                            if (correction.y !== 0) {
+                                velocity.y *= -bounce.y;
+                            } else if (correction.x !== 0){
+                                velocity.x *= -bounce.x;
+                            }
+                            obj1.gravitatable.setVelocity(velocity);
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            },
+            module = {
+                RECTANGLE_TO_RECTANGLE: 0,
+                CIRCLE_TO_CIRCLE: 1,
+                collideGroupVsGroup: function (group1, group2, type) {
+                    var i,
+                        len;
+                    if (Sugar.isArray(group1) && Sugar.isArray(group2)) {
+                        for (i = 0, len = group1.length; i < len; ++i) {
+                            module.collideGroup(group1[i], group2, type);
+                        }
+                    } else {
+                        throw 'The colliding groups must be Arrays.';
+                    }
+                },
+                collideGroup: function (obj, group, type) {
+                    var i,
+                        len;
+                    if (Sugar.isArray(group)) {
+                        if (Sugar.isDefined(obj.collidable)) {
+                            for (i = 0, len = group.length; i < len; ++i) {
+                                if (group.indexOf(obj) < 0) {
+                                    module.collide(obj, group[i], type);
+                                }
+                            }
+                        } else {
+                            throw 'Collisions can only be tested between collidable';
+                        }
+                    } else {
+                        throw 'The colliding group must be an Array.';
+                    }
+                },
+                collide: function (obj1, obj2, type) {
+                    if (Sugar.isDefined(obj1.collidable) && Sugar.isDefined(obj2.collidable)) {
+                        type = type || 0;
+                        switch (type) {
+                            case module.RECTANGLE_TO_RECTANGLE:
+                                return solveRectangeToRectangle(obj1, obj2);
+                                break;
+                            case module.CIRCLE_TO_CIRCLE:
+                                return solveCircleToCircle(obj1, obj2);
+                                break;
+                            default:
+                                return solveRectangeToRectangle(obj1, obj2);
+                                break;
+                        }
+                        return false;
+                    } else {
+                        throw 'Collisions can only be tested between collidable';
+                    }
+                }
+            };
+        return module;
+    }
+);
 
 /**
  *  @module Screen
@@ -9398,6 +9558,14 @@ modules.glue = modules.glue || {};
 modules.glue.sugar = (function (win, doc) {
     'use strict';
     var i,
+        /**
+         * Is a given value a vector?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isVector = function (value) {
+            return isNumber(value.x) && isNumber(value.y);
+        },
         /**
          * Is a given value a string?
          * @param {Object}
@@ -10260,6 +10428,7 @@ modules.glue.sugar = (function (win, doc) {
         }());
 
     return {
+        isVector: isVector,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
