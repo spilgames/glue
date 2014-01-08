@@ -4,8 +4,9 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/math/rectangle',
+        'glue/math/vector',
         'glue/component/visible',
-        'glue/component/collisionable',
+        'glue/component/collidable',
         'glue/component/draggable',
         'glue/sat',
         'glue/baseobject'
@@ -15,8 +16,9 @@ glue.module.get(
         Loader,
         Dimension,
         Rectangle,
+        Vector,
         Visible,
-        Collisionable,
+        Collidable,
         Draggable,
         SAT,
         BaseObject
@@ -43,9 +45,8 @@ glue.module.get(
                 }
             }
         }, function () {
-            var obj1 = BaseObject(Visible, Collisionable, Draggable).add({
+            var obj1 = BaseObject(Visible, Collidable, Draggable).add({
                     init: function () {
-                        var dimension;
                         this.visible.setup({
                             position: {
                                 x: 0,
@@ -53,22 +54,13 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                        this.visible.setOrigin({
-                            x: dimension.width / 2,
-                            y: dimension.height / 2
-                        });
+                        this.collidable.isStatic(true);
                     },
                     update: function (deltaT) {
-                        this.collisionable.update(deltaT);
+                        this.collidable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
-                        var circle = this.collisionable.getBoundingCircle();
                         this.visible.draw(deltaT, context);
-                        context.beginPath();
-                        context.arc(circle.x,circle.y,circle.radius,0 , 2 * Math.PI);
-                        context.stroke();
-                        context.closePath();
                     },
                     pointerDown: function (e) {
                         this.draggable.pointerDown(e);
@@ -80,9 +72,8 @@ glue.module.get(
                         this.draggable.pointerUp(e);
                     }
                 }),
-                obj2 = BaseObject(Visible, Collisionable).add({
+                obj2 = BaseObject(Visible, Collidable).add({
                     init: function () {
-                        var dimension;
                         this.visible.setup({
                             position: {
                                 x: 400,
@@ -90,15 +81,10 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                        this.visible.setOrigin({
-                            x: dimension.width / 2,
-                            y: dimension.height / 2
-                        });
                     },
                     update: function (deltaT) {
-                        this.collisionable.update(deltaT);
-                        SAT.collide(obj1, obj2, SAT.CIRCLE_TO_CIRCLE)
+                        this.collidable.update(deltaT);
+                        SAT.collide(obj1, obj2);
 
                     },
                     draw: function (deltaT, context) {
@@ -107,6 +93,9 @@ glue.module.get(
                 });
             Game.add(obj1);
             Game.add(obj2);
+
+            var v = Vector(0, 0);
+            v.static.add(v, v);
         });
     }
 );

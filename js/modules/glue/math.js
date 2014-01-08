@@ -8,17 +8,46 @@
 glue.module.create(
     'glue/math',
     [
+        'glue',
+        'glue/math/rectangle',
         'glue/math/dimension',
         'glue/math/matrix',
         'glue/math/vector'
     ],
-    function (Dimension, Matrix, Vector) {
+    function (Glue, Rectangle, Dimension, Matrix, Vector) {
         'use strict';
         return function () {
+            var Sugar = Glue.sugar;
             return {
                 Dimension: Dimension,
                 Matrix: Matrix,
-                Vector: Vector
+                Vector: Vector,
+                random: function (min, max) {
+                    return ~~(Math.random() * (max - min + 1)) + min;
+                },
+                square: function (x) {
+                    return x * x;
+                },
+                sign: function (x) {
+                    if (Sugar.isNumber(x)) {
+                        if (x < 0) {
+                            return -1;
+                        } else if (x > 0) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                },
+                getHalfRectangle: function (rectangle) {
+                    var tempRect = Rectangle(
+                            rectangle.x1 + (rectangle.x2 / 2),
+                            rectangle.y1 + (rectangle.y2 / 2),
+                            rectangle.x2 / 2,
+                            rectangle.y2 / 2
+                        );
+                    return tempRect;
+                }
             };
         };
     }

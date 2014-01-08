@@ -4,9 +4,10 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/math/rectangle',
+        'glue/math/vector',
         'glue/component/visible',
         'glue/component/gravitatable',
-        'glue/component/collisionable',
+        'glue/component/collidable',
         'glue/component/draggable',
         'glue/sat',
         'glue/baseobject'
@@ -16,9 +17,10 @@ glue.module.get(
         Loader,
         Dimension,
         Rectangle,
+        Vector,
         Visible,
         Gravitatable,
-        Collisionable,
+        Collidable,
         Draggable,
         SAT,
         BaseObject
@@ -45,7 +47,7 @@ glue.module.get(
                 }
             }
         }, function () {
-            var obj1 = BaseObject(Visible, Collisionable, Draggable).add({
+            var obj1 = BaseObject(Visible, Collidable, Draggable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -54,10 +56,10 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        this.collisionable.setStatic(true);
+                        this.collidable.setStatic(true);
                     },
                     update: function (deltaT) {
-                        this.collisionable.update(deltaT);
+                        this.collidable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
@@ -72,7 +74,7 @@ glue.module.get(
                         this.draggable.pointerUp(e);
                     }
                 }),
-                obj2 = BaseObject(Visible, Collisionable, Gravitatable).add({
+                obj2 = BaseObject(Visible, Collidable, Gravitatable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -81,16 +83,19 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        this.gravitatable.setGravity({
-                            y: 0.5
-                        });
+                        this.gravitatable.setGravity(Vector(
+                            0,
+                            0.5
+                        ));
 
-                        this.gravitatable.setMaxVelocity({
-                            y: 20
-                        });
-                        this.gravitatable.setBounce({
-                            y: .4
-                        });
+                        this.gravitatable.setMaxVelocity(Vector(
+                            0,
+                            20
+                        ));
+                        this.gravitatable.setBounce(Vector(
+                            0,
+                            0.4
+                        ));
                     },
                     update: function (deltaT) {
                         var position = this.visible.getPosition();
@@ -99,7 +104,7 @@ glue.module.get(
                             this.visible.setPosition(position);
                         }
                         this.gravitatable.update(deltaT);
-                        this.collisionable.update(deltaT);
+                        this.collidable.update(deltaT);
                         SAT.collide(obj1, obj2);
                     },
                     draw: function (deltaT, context) {

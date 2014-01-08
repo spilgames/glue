@@ -14,6 +14,14 @@ modules.glue.sugar = (function (win, doc) {
     'use strict';
     var i,
         /**
+         * Is a given value a vector?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isVector = function (value) {
+            return isNumber(value.x) && isNumber(value.y);
+        },
+        /**
          * Is a given value a string?
          * @param {Object}
          * @return {Boolean}
@@ -875,6 +883,7 @@ modules.glue.sugar = (function (win, doc) {
         }());
 
     return {
+        isVector: isVector,
         isString: isString,
         isArray: isArray,
         isObject: isObject,

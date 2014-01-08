@@ -10,58 +10,61 @@ glue.module.create(
     'glue/component/gravitatable',
     [
         'glue',
-        'glue/sat',
+        'glue/math',
         'glue/math/vector'
     ],
-    function (Glue, SAT, Vector) {
+    function (Glue, Mathematics, Vector) {
         return function (object) {
             'use strict';
             var Sugar = Glue.sugar,
+                math = Mathematics(),
                 velocity = Vector(0, 0),
                 gravity = Vector(0, 0),
                 bounce = Vector(0, 0),
-                maxVelocity = {};
-
+                maxVelocity = Vector(0, 0);
             object = object || {};
             object.gravitatable = {
                 update: function (deltaT) {
-                    velocity.x += gravity.x;
-                    velocity.y += gravity.y;
-                    if (Sugar.isDefined(maxVelocity)) {
-                        if (Sugar.isNumber(maxVelocity.x)) {
-                            if (Math.abs(velocity.x) > maxVelocity.x) {
-                                velocity.x = maxVelocity.x * SAT.sgn(velocity.x);
-                            }
-                        }
-                        if (Sugar.isNumber(maxVelocity.y)) {
-                            if (Math.abs(velocity.y) > maxVelocity.y) {
-                                velocity.y = maxVelocity.y * SAT.sgn(velocity.y);
-                            }
-                        }
-                    }
                     var position;
+                    velocity.add(gravity);
+                    if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {
+                        velocity.x = maxVelocity.x * math.sign(velocity.x);
+                    }
+                    if (maxVelocity.y !== 0 && Math.abs(velocity.y) > maxVelocity.y) {
+                        velocity.y = maxVelocity.y * math.sign(velocity.y);
+                    }
                     if (Sugar.isDefined(object.visible)) {
                         position = object.visible.getPosition();
-                        object.visible.setPosition({
-                            x: position.x + velocity.x,
-                            y: position.y + velocity.y
-                        });
+                        object.visible.setPosition(position.add(velocity));
                     }
                 },
-                setVelocity: function (vec) {
-                    velocity.x = Sugar.isNumber(vec.x) ? vec.x : velocity.x;
-                    velocity.y = Sugar.isNumber(vec.y) ? vec.y : velocity.y;
+                setVelocity: function (vector) {
+                    if (Sugar.isVector(vector)) {
+                        velocity = vector;
+                    } else {
+                        throw 'The argument must be a Vector';
+                    }
                 },
-                setGravity: function (vec) {
-                    gravity.x = Sugar.isNumber(vec.x) ? vec.x : gravity.x;
-                    gravity.y = Sugar.isNumber(vec.y) ? vec.y : gravity.y;
+                setGravity: function (vector) {
+                    if (Sugar.isVector(vector)) {
+                        gravity = vector;
+                    } else {
+                        throw 'The argument must be a Vector';
+                    }
                 },
-                setBounce: function (vec) {
-                    bounce.x = Sugar.isNumber(vec.x) ? vec.x : bounce.x;
-                    bounce.y = Sugar.isNumber(vec.y) ? vec.y : bounce.y;
+                setBounce: function (vector) {
+                    if (Sugar.isVector(vector)) {
+                        bounce = vector;
+                    } else {
+                        throw 'The argument must be a Vector';
+                    }
                 },
-                setMaxVelocity: function (vec) {
-                    maxVelocity = vec;
+                setMaxVelocity: function (vector) {
+                    if (Sugar.isVector(vector)) {
+                        maxVelocity = vector;
+                    } else {
+                        throw 'The argument must be a Vector';
+                    }
                 },
                 getVelocity: function () {
                     return velocity;
