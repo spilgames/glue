@@ -101,7 +101,7 @@ glue.module.get(
                         });
                         this.gravitatable.setBounce({
                             x: 1,
-                            y: .4
+                            y: .6
                         });
                     },
                     update: function (deltaT) {

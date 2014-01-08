@@ -19,6 +19,11 @@ glue.module.create(
             'use strict';
             var Sugar = Glue.sugar,
                 boundingBox = Rectangle(0, 0, 0, 0),
+                circle = {
+                    x: 0,
+                    y: 0,
+                    radius: 0
+                },
                 isStatic = false,
                 collisionSide = {
                     vertical: 0,
@@ -46,6 +51,14 @@ glue.module.create(
                     boundingBox.y1 = position.y;
                     boundingBox.x2 = dimension.width;
                     boundingBox.y2 = dimension.height;
+
+                    circle.x = position.x;
+                    circle.y = position.y;
+                    circle.radius = (Math.sqrt(
+                        (-boundingBox.x2 * 0.5) * (-boundingBox.x2 * 0.5) +
+                        (-boundingBox.y2 * 0.5) * (-boundingBox.y2 * 0.5)
+                    ));
+                    
                 },
                 resolveCollision = function (vec, side) {
                     if (Sugar.isDefined(object.visible)) {
@@ -56,8 +69,10 @@ glue.module.create(
                             x: position.x - vec.x,
                             y: position.y - vec.y
                         });
-                        collisionSide.vertical = side.vertical * -1;
-                        collisionSide.horizontal = side.horizontal * -1;
+                        if (Sugar.isDefined(side)) {
+                            collisionSide.vertical = side.vertical * -1;
+                            collisionSide.horizontal = side.horizontal * -1;
+                        }
                     }
                 };
 
@@ -69,6 +84,9 @@ glue.module.create(
                 },
                 getBoundingBox: function () {
                     return boundingBox;
+                },
+                getBoundingCircle: function () {
+                    return circle;
                 },
                 setStatic: function (value) {
                     isStatic = Sugar.isBoolean(value) ? value : isStatic;
