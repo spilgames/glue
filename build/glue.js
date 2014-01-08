@@ -6778,11 +6778,11 @@ glue.module.create(
         return function (object) {
             'use strict';
             var Sugar = Glue.sugar,
-                boundingBox = Rectangle(0, 0, 0, 0),
+                boundingBox = Rectangle(0, 0, null, null),
                 circle = {
                     x: 0,
                     y: 0,
-                    radius: 0
+                    radius: null
                 },
                 isStatic = false,
                 collisionSide = Vector(0, 0),
@@ -6790,7 +6790,8 @@ glue.module.create(
                     var position,
                         origin,
                         scale,
-                        dimension;
+                        dimension,
+                        max;
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
                     } else if (Sugar.isDefined(object.visible)) {
@@ -6815,14 +6816,21 @@ glue.module.create(
                     }
                     boundingBox.x1 = position.x - origin.x * Math.abs(scale.x);
                     boundingBox.y1 = position.y - origin.y * Math.abs(scale.y);
-                    boundingBox.x2 = dimension.width * Math.abs(scale.x);
-                    boundingBox.y2 = dimension.height * Math.abs(scale.y);
+                    if (boundingBox.x2 === null || boundingBox.y2 === null) {
+                        boundingBox.x2 = dimension.width;
+                        boundingBox.y2 = dimension.height;
+                    }
+                    boundingBox.x2 *= scale.x;
+                    boundingBox.y2 *= scale.y;
                     circle.x = boundingBox.x1 + (boundingBox.x2 / 2);
                     circle.y = boundingBox.y1 + (boundingBox.y2 / 2);
-                    circle.radius = (Math.sqrt(
-                        (-boundingBox.x2 * 0.5) * (-boundingBox.x2 * 0.5) +
-                        (-boundingBox.y2 * 0.5) * (-boundingBox.y2 * 0.5)
-                    ));
+                    if (circle.radius === null) {
+                        max = Math.max(boundingBox.x2, boundingBox.y2);
+                        circle.radius = (Math.sqrt(
+                            (-max / 2) * (-max / 2) +
+                            (-max / 2) * (-max / 2)
+                        ));
+                    }
                 },
                 resolveCollision = function (vector, side) {
                     if (Sugar.isDefined(object.visible) && Sugar.isVector(vector)) {
@@ -6840,6 +6848,13 @@ glue.module.create(
                 resolveCollision: resolveCollision,
                 update: function (deltaT) {
                     updateBoundingBox();
+                },
+                setBoundingDimension: function (dimension) {
+                    boundingBox.x2 = dimension.width;
+                    boundingBox.y2 = dimension.height;
+                },
+                setBoundingCircleRadius: function (radius) {
+                    circle.radius = radius;
                 },
                 getBoundingBox: function () {
                     return boundingBox;

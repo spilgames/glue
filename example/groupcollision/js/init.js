@@ -157,6 +157,7 @@ glue.module.get(
                             1,
                             0.6
                         ));
+                        this.collidable.setBoundingCircleRadius(25);
                     },
                     update: function (deltaT) {
                         var position = this.visible.getPosition(),
@@ -176,7 +177,18 @@ glue.module.get(
                         SAT.collide(obj1, this, collisionType);
                     },
                     draw: function (deltaT, context) {
+                        var bound;
                         this.visible.draw(deltaT, context);
+                        if (collisionType === SAT.CIRCLE_TO_CIRCLE) {
+                            bound = this.collidable.getBoundingCircle();
+                            context.beginPath();
+                            context.arc(bound.x, bound.y, bound.radius, 0, Math.PI * 2);
+                            context.stroke();
+                            context.closePath();
+                        } else {
+                            bound = this.collidable.getBoundingBox();
+                            context.strokeRect(bound.x1, bound.y1, bound.x2, bound.y2);
+                        }
                     }
                 });
                 group.push(obj);
