@@ -80,7 +80,7 @@ glue.module.create(
                             reflectCircle(obj2, unit);
                         }
                     }
-                    correction.scale(-1);
+                    circleCollision(circle2, circle1, correction, unit)
                     if (!obj1.collidable.isStatic()) {
                         obj1.collidable.resolveCollision(correction);
                         if (Sugar.isDefined(obj1.gravitatable)) {
@@ -113,10 +113,8 @@ glue.module.create(
                             obj2.gravitatable.setVelocity(velocity);
                         }
                     }
-                    correction.scale(-1);
-                    side.vertical *= -1;
-                    side.horizontal *= -1;
                     if (!obj1.collidable.isStatic()) { 
+                        rectCollision(box2, box1, correction, side);
                         obj1.collidable.resolveCollision(correction, side);
                         if (Sugar.isDefined(obj1.gravitatable)) {
                             velocity = obj1.gravitatable.getVelocity(),
@@ -153,7 +151,7 @@ glue.module.create(
                     if (Sugar.isArray(group)) {
                         if (Sugar.isDefined(obj.collidable)) {
                             for (i = 0, len = group.length; i < len; ++i) {
-                                if (group.indexOf(obj) < 0) {
+                                if (group.indexOf(obj) !== i) {
                                     module.collide(obj, group[i], type);
                                 }
                             }
