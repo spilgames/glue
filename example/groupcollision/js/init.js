@@ -55,6 +55,7 @@ glue.module.get(
         }, function () {
             var math = Mathematics(),
                 collisionType = SAT.RECTANGLE_TO_RECTANGLE,
+                buttonPosition,
                 button = BaseObject(Visible, Clickable).add({
                     init: function () {
                         this.visible.setup({
@@ -64,14 +65,13 @@ glue.module.get(
                             },
                             image: Loader.getAsset('button')
                         });
-                        
+                        buttonPosition = this.visible.getPosition();
                     },
                     draw: function (deltaT, context) {
-                        var position = this.visible.getPosition(),
-                            value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
+                        var value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
                         this.visible.draw(deltaT, context);
                         context.font = '20px Verdana';
-                        context.fillText(value, position.x + 30, position.y + 30);
+                        context.fillText(value, buttonPosition.x + 30, buttonPosition.y + 30);
                     },
                     pointerDown: function (e) {
                         this.clickable.pointerDown(e);
@@ -86,7 +86,6 @@ glue.module.get(
                 }),
                 obj1 = BaseObject(Visible, Collidable, Draggable).add({
                     init: function () {
-                        var dimension;
                         this.visible.setup({
                             position: {
                                 x: 400,
@@ -94,9 +93,8 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                       
                         this.collidable.setStatic(true);
+                        this.collidable.setup();
                     },
                     update: function (deltaT) {
                         this.collidable.update(deltaT);
@@ -128,10 +126,12 @@ glue.module.get(
                 group = [],
                 i,
                 obj;
+
             Game.add(obj1);
             for (i = 0; i < 100; ++i) {
                 obj = BaseObject(Visible, Collidable, Gravitatable).add({
                     init: function () {
+                        // visible config
                         this.visible.setup({
                             position: {
                                 x: math.random(0, Game.canvas.getDimension().width),
@@ -139,39 +139,34 @@ glue.module.get(
                             },
                             image: Loader.getAsset('ball')
                         });
-                        this.gravitatable.setGravity(Vector(
-                            0,
-                            0.5
-                        ));
 
-                        this.gravitatable.setVelocity(Vector(
-                            math.random(-10, 10),
-                            0
-                        ));
-
-                        this.gravitatable.setMaxVelocity(Vector(
-                            0,
-                            20
-                        ));
-                        this.gravitatable.setBounce(Vector(
-                            1,
-                            0.6
-                        ));
+                        // collidable config
                         this.collidable.setBoundingCircleRadius(25);
+                        this.collidable.setup();
+
+                        // gravitatable config
+                        this.gravitatable.setup({
+                            gravity: Vector(0, 0.5),
+                            bounce: Vector(1, 0.6),
+                            velocity: Vector(-10, -10),
+                            maxVelocity: Vector(0, 20)
+                        });
+
+                        // assign object variables
+                        this.position = this.visible.getPosition();
+                        this.size = this.visible.getDimension();
+                        this.canvasSize = Game.canvas.getDimension();
                     },
                     update: function (deltaT) {
-                        var position = this.visible.getPosition(),
-                            size = this.visible.getDimension(),
-                            canvasSize = Game.canvas.getDimension();
-                        if (position.y > canvasSize.height) {
-                            position.y = -size.height;
+                        if (this.position.y > this.canvasSize.height) {
+                            this.position.y = -this.size.height;
                         }
-                        if (position.x > canvasSize.width) {
-                            position.x = -size.width;
-                        } else if (position.x + size.width < 0){
-                            position.x = canvasSize.width;
+                        if (this.position.x > this.canvasSize.width) {
+                            this.position.x = -this.size.width;
+                        } else if (this.position.x + this.size.width < 0){
+                            this.position.x = this.canvasSize.width;
                         }
-                        this.visible.setPosition(position);
+                        this.visible.setPosition(this.position);
                         this.gravitatable.update(deltaT);
                         this.collidable.update(deltaT);
                         SAT.collide(obj1, this, collisionType);

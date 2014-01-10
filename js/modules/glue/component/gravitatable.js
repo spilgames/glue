@@ -21,11 +21,30 @@ glue.module.create(
                 velocity = Vector(0, 0),
                 gravity = Vector(0, 0),
                 bounce = Vector(0, 0),
-                maxVelocity = Vector(0, 0);
+                maxVelocity = Vector(0, 0),
+                position;
+
             object = object || {};
             object.gravitatable = {
+                setup: function (config) {
+                    if (Sugar.isDefined(config.gravity)) {
+                        this.setGravity(config.gravity);
+                    }
+                    if (Sugar.isDefined(config.bounce)) {
+                        this.setBounce(config.bounce);
+                    }
+                    if (Sugar.isDefined(config.velocity)) {
+                        this.setVelocity(config.velocity);
+                    }                    
+                    if (Sugar.isDefined(config.maxVelocity)) {
+                        this.setMaxVelocity(config.maxVelocity);
+                    }
+                    if (Sugar.isUndefined(object.visible)) {
+                        throw 'Gravitatable needs a visible component';
+                    }
+                    position = object.visible.getPosition();
+                },
                 update: function (deltaT) {
-                    var position;
                     velocity.add(gravity);
                     if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {
                         velocity.x = maxVelocity.x * math.sign(velocity.x);
@@ -33,8 +52,7 @@ glue.module.create(
                     if (maxVelocity.y !== 0 && Math.abs(velocity.y) > maxVelocity.y) {
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
-                    if (Sugar.isDefined(object.visible)) {
-                        position = object.visible.getPosition();
+                    if (Sugar.isDefined(position)) {
                         object.visible.setPosition(position.add(velocity));
                     }
                 },

@@ -57,6 +57,7 @@ glue.module.get(
                             image: Loader.getAsset('logoLD')
                         });
                         this.collidable.setStatic(true);
+                        this.collidable.setup();
                     },
                     update: function (deltaT) {
                         this.collidable.update(deltaT);
@@ -74,6 +75,7 @@ glue.module.get(
                         this.draggable.pointerUp(e);
                     }
                 }),
+                position,
                 obj2 = BaseObject(Visible, Collidable, Gravitatable).add({
                     init: function () {
                         this.visible.setup({
@@ -83,25 +85,18 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        this.gravitatable.setGravity(Vector(
-                            0,
-                            0.5
-                        ));
-
-                        this.gravitatable.setMaxVelocity(Vector(
-                            0,
-                            20
-                        ));
-                        this.gravitatable.setBounce(Vector(
-                            0,
-                            0.4
-                        ));
+                        position = this.visible.getPosition();
+                        this.collidable.setup();
+                        this.gravitatable.setup({
+                            gravity: Vector(0, 0.5),
+                            bounce: Vector(0, 0.4),
+                            maxVelocity: Vector(0, 20)
+                        });
                     },
                     update: function (deltaT) {
-                        var position = this.visible.getPosition();
                         if (position.y > Game.canvas.getDimension().height) {
                             position.y = -this.visible.getDimension().height;
-                            this.visible.setPosition(position);
+                            this.visible.setPosition(Vector(400, 0));
                         }
                         this.gravitatable.update(deltaT);
                         this.collidable.update(deltaT);
@@ -111,6 +106,7 @@ glue.module.get(
                         this.visible.draw(deltaT, context);
                     }
                 });
+
             Game.add(obj1);
             Game.add(obj2);
         });
