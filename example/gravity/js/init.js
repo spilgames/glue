@@ -6,8 +6,7 @@ glue.module.get(
         'glue/math/rectangle',
         'glue/math/vector',
         'glue/component/visible',
-        'glue/component/gravitatable',
-        'glue/component/collidable',
+        'glue/component/kineticable',
         'glue/component/draggable',
         'glue/sat',
         'glue/baseobject'
@@ -19,8 +18,7 @@ glue.module.get(
         Rectangle,
         Vector,
         Visible,
-        Gravitatable,
-        Collidable,
+        Kineticable,
         Draggable,
         SAT,
         BaseObject
@@ -47,7 +45,7 @@ glue.module.get(
                 }
             }
         }, function () {
-            var obj1 = BaseObject(Visible, Collidable, Draggable).add({
+            var obj1 = BaseObject(Visible, Kineticable, Draggable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -56,11 +54,12 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        this.collidable.setStatic(true);
-                        this.collidable.setup();
+                        this.kineticable.setup({
+                            dynamic: false
+                        });
                     },
                     update: function (deltaT) {
-                        this.collidable.update(deltaT);
+                        this.kineticable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
@@ -76,7 +75,7 @@ glue.module.get(
                     }
                 }),
                 position,
-                obj2 = BaseObject(Visible, Collidable, Gravitatable).add({
+                obj2 = BaseObject(Visible, Kineticable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -85,22 +84,20 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        position = this.visible.getPosition();
-                        this.collidable.setup();
-                        this.gravitatable.setup({
+                        this.kineticable.setup({
                             gravity: Vector(0, 0.5),
-                            bounce: Vector(0, 0.4),
+                            bounce: 0.4,
                             maxVelocity: Vector(0, 20)
                         });
+                        position = this.kineticable.getPosition();
                     },
                     update: function (deltaT) {
                         if (position.y > Game.canvas.getDimension().height) {
                             position.y = -this.visible.getDimension().height;
-                            this.visible.setPosition(Vector(400, 0));
                         }
-                        this.gravitatable.update(deltaT);
-                        this.collidable.update(deltaT);
+                        this.kineticable.update(deltaT);
                         SAT.collide(obj1, obj2);
+                        this.visible.setPosition(position);
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
