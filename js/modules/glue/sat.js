@@ -10,12 +10,14 @@ glue.module.create(
     [
         'glue',
         'glue/math',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/spatial'
     ],
-    function (Glue, Mathematics, Vector) {
+    function (Glue, Mathematics, Vector, Spatial) {
         'use strict';
         var Sugar = Glue.sugar,
             math = Mathematics(),
+            spatial,
             circleCollision = function (circle1, circle2, correction, unit) {
                 var distance;
                 correction.copy(circle1);
@@ -134,6 +136,22 @@ glue.module.create(
             module = {
                 RECTANGLE_TO_RECTANGLE: 0,
                 CIRCLE_TO_CIRCLE: 1,
+                setup: function () {
+                    spatial = Spatial();
+                    spatial.setup({
+                        gridDimension: {
+                            width: 800,
+                            height: 600
+                        }
+                    });
+                    spatial.setDebug(true);
+                },
+                add: function (object) {
+                    spatial.addObject(object);
+                },
+                test: function (object) {
+                    console.log(spatial.getNearbyObjects(object));
+                },
                 collideGroupVsGroup: function (group1, group2, type) {
                     var i,
                         len;
@@ -148,6 +166,7 @@ glue.module.create(
                 collideGroup: function (obj, group, type) {
                     var i,
                         len;
+
                     if (Sugar.isArray(group)) {
                         if (Sugar.isDefined(obj.collidable)) {
                             for (i = 0, len = group.length; i < len; ++i) {
@@ -165,6 +184,7 @@ glue.module.create(
                 collide: function (obj1, obj2, type) {
                     if (Sugar.isDefined(obj1.collidable) && Sugar.isDefined(obj2.collidable)) {
                         type = type || 0;
+
                         switch (type) {
                             case module.RECTANGLE_TO_RECTANGLE:
                                 return solveRectangeToRectangle(obj1, obj2);
@@ -182,6 +202,7 @@ glue.module.create(
                     }
                 }
             };
+
         return module;
     }
 );
