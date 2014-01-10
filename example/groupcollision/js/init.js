@@ -5,8 +5,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/rectangle',
         'glue/component/visible',
-        'glue/component/gravitatable',
-        'glue/component/collidable',
+        'glue/component/kineticable',
         'glue/component/draggable',
         'glue/component/clickable',
         'glue/sat',
@@ -20,8 +19,7 @@ glue.module.get(
         Dimension,
         Rectangle,
         Visible,
-        Gravitatable,
-        Collidable,
+        Kineticable,
         Draggable,
         Clickable,
         SAT,
@@ -55,6 +53,7 @@ glue.module.get(
         }, function () {
             var math = Mathematics(),
                 collisionType = SAT.RECTANGLE_TO_RECTANGLE,
+                buttonPosition,
                 button = BaseObject(Visible, Clickable).add({
                     init: function () {
                         this.visible.setup({
@@ -64,14 +63,13 @@ glue.module.get(
                             },
                             image: Loader.getAsset('button')
                         });
-                        
+                        buttonPosition = this.visible.getPosition();
                     },
                     draw: function (deltaT, context) {
-                        var position = this.visible.getPosition(),
-                            value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
+                        var value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
                         this.visible.draw(deltaT, context);
                         context.font = '20px Verdana';
-                        context.fillText(value, position.x + 30, position.y + 30);
+                        context.fillText(value, buttonPosition.x + 30, buttonPosition.y + 30);
                     },
                     pointerDown: function (e) {
                         this.clickable.pointerDown(e);
@@ -84,9 +82,8 @@ glue.module.get(
                         }
                     }
                 }),
-                obj1 = BaseObject(Visible, Collidable, Draggable).add({
+                obj1 = BaseObject(Visible, Kineticable, Draggable).add({
                     init: function () {
-                        var dimension;
                         this.visible.setup({
                             position: {
                                 x: 400,
@@ -94,24 +91,24 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                       
-                        this.collidable.setStatic(true);
+                        this.kineticable.setup({
+                            dynamic: false
+                        });
                     },
                     update: function (deltaT) {
-                        this.collidable.update(deltaT);
+                        this.kineticable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
                         var bound;
                         this.visible.draw(deltaT, context);
                         if (collisionType === SAT.CIRCLE_TO_CIRCLE) {
-                            bound = this.collidable.getBoundingCircle();
+                            bound = this.kineticable.toCircle();
                             context.beginPath();
                             context.arc(bound.x, bound.y, bound.radius, 0, Math.PI * 2);
                             context.stroke();
                             context.closePath();
                         } else {
-                            bound = this.collidable.getBoundingBox();
+                            bound = this.kineticable.toRectangle();
                             context.strokeRect(bound.x1, bound.y1, bound.x2, bound.y2);
                         }
                     },
@@ -128,10 +125,12 @@ glue.module.get(
                 group = [],
                 i,
                 obj;
+
             Game.add(obj1);
             for (i = 0; i < 100; ++i) {
-                obj = BaseObject(Visible, Collidable, Gravitatable).add({
+                obj = BaseObject(Visible, Kineticable).add({
                     init: function () {
+                        // visible config
                         this.visible.setup({
                             position: {
                                 x: math.random(0, Game.canvas.getDimension().width),
@@ -139,54 +138,49 @@ glue.module.get(
                             },
                             image: Loader.getAsset('ball')
                         });
-                        this.gravitatable.setGravity(Vector(
-                            0,
-                            0.5
-                        ));
 
-                        this.gravitatable.setVelocity(Vector(
-                            math.random(-10, 10),
-                            0
-                        ));
+                        // kineticable config
+                        this.kineticable.setup({
+                            gravity: Vector(0, 0.5),
+                            bounce: 0.6,
+                            velocity: Vector(math.random(-10, 10), 0),
+                            maxVelocity: Vector(0, 20),
+                            radius: 25
+                        });
 
-                        this.gravitatable.setMaxVelocity(Vector(
-                            0,
-                            20
-                        ));
-                        this.gravitatable.setBounce(Vector(
-                            1,
-                            0.6
-                        ));
-                        this.collidable.setBoundingCircleRadius(25);
+                        // assign object variables
+                        this.position = this.kineticable.getPosition();
+                        this.size = this.kineticable.getDimension();
+                        this.canvasSize = Game.canvas.getDimension();
                     },
                     update: function (deltaT) {
-                        var position = this.visible.getPosition(),
-                            size = this.visible.getDimension(),
-                            canvasSize = Game.canvas.getDimension();
-                        if (position.y > canvasSize.height) {
-                            position.y = -size.height;
+                        if (this.position.y > this.canvasSize.height) {
+                            this.position.y = -this.size.height;
                         }
-                        if (position.x > canvasSize.width) {
-                            position.x = -size.width;
-                        } else if (position.x + size.width < 0){
-                            position.x = canvasSize.width;
+                        if (this.position.x > this.canvasSize.width) {
+                            this.position.x = -this.size.width;
+                        } else if (this.position.x + this.size.width < 0){
+                            this.position.x = this.canvasSize.width;
                         }
-                        this.visible.setPosition(position);
-                        this.gravitatable.update(deltaT);
-                        this.collidable.update(deltaT);
+                        
+                        this.kineticable.update(deltaT);
                         SAT.collide(obj1, this, collisionType);
+
+                        /*  We set the corrected position after
+                            The collision response. */
+                        this.visible.setPosition(this.position);
                     },
                     draw: function (deltaT, context) {
                         var bound;
                         this.visible.draw(deltaT, context);
                         if (collisionType === SAT.CIRCLE_TO_CIRCLE) {
-                            bound = this.collidable.getBoundingCircle();
+                            bound = this.kineticable.toCircle();
                             context.beginPath();
                             context.arc(bound.x, bound.y, bound.radius, 0, Math.PI * 2);
                             context.stroke();
                             context.closePath();
                         } else {
-                            bound = this.collidable.getBoundingBox();
+                            bound = this.kineticable.toRectangle();
                             context.strokeRect(bound.x1, bound.y1, bound.x2, bound.y2);
                         }
                     }

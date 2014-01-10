@@ -4,8 +4,7 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/component/visible',
-        'glue/component/gravitatable',
-        'glue/component/collidable',
+        'glue/component/kineticable',
         'glue/component/draggable',
         'glue/sat',
         'glue/baseobject',
@@ -17,8 +16,7 @@ glue.module.get(
         Loader,
         Dimension,
         Visible,
-        Gravitatable,
-        Collidable,
+        Kineticable,
         Draggable,
         SAT,
         BaseObject,
@@ -54,9 +52,8 @@ glue.module.get(
                 group1 = [],
                 group2 = [],
                 i,
-                logo = BaseObject(Visible, Collidable, Draggable).add({
+                logo = BaseObject(Visible, Kineticable, Draggable).add({
                     init: function () {
-                        var dimension;
                         this.visible.setup({
                             position: {
                                 x: 400,
@@ -64,12 +61,12 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logo')
                         });
-
-                        this.collidable.setStatic(true);
-                        dimension = this.visible.getDimension();
+                        this.kineticable.setup({
+                            dynamic: false
+                        });
                     },
                     update: function (deltaT) {
-                        this.collidable.update(deltaT);
+                        this.kineticable.update(deltaT);
                         SAT.collideGroup(this, group1, collisionType);
                         SAT.collideGroup(this, group2, collisionType);
                     },
@@ -91,8 +88,9 @@ glue.module.get(
             Game.add(logo);
 
             for (i = 0; i < 20; ++i) {
-                var obj1 = BaseObject(Visible, Gravitatable, Collidable).add({
+                var obj1 = BaseObject(Visible, Kineticable).add({
                         init: function () {
+                            // visible config
                             this.visible.setup({
                                 position: {
                                     x: math.random(0, Game.canvas.getDimension().width - 25),
@@ -101,51 +99,45 @@ glue.module.get(
                                 image: Loader.getAsset('ball')
                             });
 
-                            this.gravitatable.setVelocity(Vector(
-                                math.random(-10, 10),
-                                0
-                            ));
-
-                            this.gravitatable.setGravity(Vector(
-                                0,
-                                0.5
-                            ));
-
-                            this.gravitatable.setMaxVelocity(Vector(
-                                0,
-                                20
-                            ));
-
-                            this.gravitatable.setBounce(Vector(
-                                1,
-                                0.6
-                            ));
-
-                            this.collidable.setBoundingCircleRadius(25);
+                            // kineticable config
+                            this.kineticable.setup({
+                                gravity: Vector(0, 0.5),
+                                bounce: 0.6,
+                                velocity: Vector(math.random(-10, 10), 0),
+                                maxVelocity: Vector(0, 20),
+                                radius: 22
+                            });
+                            this.position = this.kineticable.getPosition();
+                            this.bound = this.kineticable.toCircle();
+                            this.dimension = this.kineticable.getDimension();
+                            this.canvasSize = Game.canvas.getDimension();
                         },
                         update: function (deltaT) {
-                            var position = this.visible.getPosition(),
-                                bound = this.collidable.getBoundingCircle(),
-                                dim = Game.canvas.getDimension();
+                            if (this.position.y > this.canvasSize.height) {
+                                this.position.y = -this.dimension.height;
+                            }
+                            if (this.position.x > this.canvasSize.width) {
+                                this.position.x = -this.dimension.width;
+                            } else if (this.position.x + this.dimension.width < 0){
+                                this.position.x = this.canvasSize.width;
+                            }
 
-                            if (position.y - bound.radius > dim.height ) {
-                                position.y = -50;
-                                position.x = math.random(0, Game.canvas.getDimension().width - 25);
-                            } 
+                            this.kineticable.update(deltaT);
+                            // Check Collision Here
 
-
-
-                            this.gravitatable.update(deltaT);
-                            this.collidable.update(deltaT);
                             SAT.collideGroup(this, group1, collisionType);
                             SAT.collideGroup(this, group2, collisionType);
+
+                            // Set the corrected position.
+                            this.visible.setPosition(this.position);
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);
                         }
                     }),
-                    obj2 = BaseObject(Visible, Gravitatable, Collidable).add({
+                    obj2 = BaseObject(Visible, Kineticable).add({
                         init: function () {
+                            // visible config
                             this.visible.setup({
                                 position: {
                                     x: math.random(0, Game.canvas.getDimension().width - 25),
@@ -154,41 +146,37 @@ glue.module.get(
                                 image: Loader.getAsset('ball2')
                             });
 
-                            this.gravitatable.setVelocity(Vector(
-                                math.random(-10, 10),
-                                0
-                            ));
-
-                            this.gravitatable.setGravity(Vector(
-                                0,
-                                0.5
-                            ));
-
-                            this.gravitatable.setMaxVelocity(Vector(
-                                0,
-                                20
-                            ));
-
-                            this.gravitatable.setBounce(Vector(
-                                1,
-                                0.6
-                            ));
-
-                            this.collidable.setBoundingCircleRadius(25);
+                            // kineticable config
+                            this.kineticable.setup({
+                                gravity: Vector(0, 0.5),
+                                bounce: 0.6,
+                                velocity: Vector(math.random(-10, 10), 0),
+                                maxVelocity: Vector(0, 20),
+                                radius: 22
+                            });
+                            this.position = this.kineticable.getPosition();
+                            this.bound = this.kineticable.toCircle();
+                            this.dimension = this.kineticable.getDimension();
+                            this.canvasSize = Game.canvas.getDimension()
                         },
                         update: function (deltaT) {
-                            var dim = Game.canvas.getDimension(),
-                                bound = this.collidable.getBoundingCircle(),
-                                position = this.visible.getPosition();
-                            if (position.y - bound.radius > dim.height ) {
-                                position.y = -50;
-                                position.x = math.random(0, Game.canvas.getDimension().width - 25);
-                            } 
+                            if (this.position.y > this.canvasSize.height) {
+                                this.position.y = -this.dimension.height;
+                            }
+                            if (this.position.x > this.canvasSize.width) {
+                                this.position.x = -this.dimension.width;
+                            } else if (this.position.x + this.dimension.width < 0){
+                                this.position.x = this.canvasSize.width;
+                            }
 
-                            this.gravitatable.update(deltaT);
-                            this.collidable.update(deltaT);
+                            this.kineticable.update(deltaT);
+                            // Check Collision Here
+
                             SAT.collideGroup(this, group1, collisionType);
-                            SAT.collideGroup(this, group2, collisionType);;
+                            SAT.collideGroup(this, group2, collisionType);
+
+                            // Set the corrected position.
+                            this.visible.setPosition(this.position);
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);

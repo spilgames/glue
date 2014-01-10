@@ -94,14 +94,20 @@ glue.module.create(
                     return position;
                 },
                 setPosition: function (value) {
-                    position = value;
-                    updateRectangle();
+                    if (Sugar.isVector(value)) {
+                        position.x = value.x;
+                        position.y = value.y;
+                        updateRectangle();
+                    }
                 },
                 getDimension: function () {
                     return dimension;
                 },
                 setDimension: function (value) {
-                    dimension = value;
+                    if (Sugar.isVector(value)) {
+                        dimension.x = value.x;
+                        dimension.y = value.y;
+                    }
                     updateRectangle();
                 },
                 getBoundingBox: function () {
@@ -121,9 +127,11 @@ glue.module.create(
                 getImage: function () {
                     return image;
                 },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
+                setOrigin: function (value) {
+                    if (Sugar.isVector(value)) {
+                        origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
+                        origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
+                    }
                 },
                 getOrigin: function () {
                     return origin;

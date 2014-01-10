@@ -6,7 +6,7 @@ glue.module.get(
         'glue/math/rectangle',
         'glue/math/vector',
         'glue/component/visible',
-        'glue/component/collidable',
+        'glue/component/kineticable',
         'glue/component/draggable',
         'glue/sat',
         'glue/baseobject'
@@ -18,7 +18,7 @@ glue.module.get(
         Rectangle,
         Vector,
         Visible,
-        Collidable,
+        Kineticable,
         Draggable,
         SAT,
         BaseObject
@@ -45,7 +45,7 @@ glue.module.get(
                 }
             }
         }, function () {
-            var obj1 = BaseObject(Visible, Collidable, Draggable).add({
+            var obj1 = BaseObject(Visible, Kineticable, Draggable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -54,10 +54,12 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
-                        this.collidable.isStatic(true);
+                        this.kineticable.setup({
+                            dynamic: false
+                        });
                     },
                     update: function (deltaT) {
-                        this.collidable.update(deltaT);
+                        this.kineticable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
@@ -72,7 +74,7 @@ glue.module.get(
                         this.draggable.pointerUp(e);
                     }
                 }),
-                obj2 = BaseObject(Visible, Collidable).add({
+                obj2 = BaseObject(Visible, Kineticable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -81,11 +83,14 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
+                        this.kineticable.setup();
                     },
                     update: function (deltaT) {
-                        this.collidable.update(deltaT);
-                        SAT.collide(obj1, obj2);
-
+                        this.kineticable.update(deltaT);
+                        if (SAT.collide(obj1, obj2)) {
+                            
+                        }
+                        this.visible.setPosition(this.kineticable.getPosition());
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
