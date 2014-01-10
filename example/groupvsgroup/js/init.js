@@ -56,7 +56,6 @@ glue.module.get(
                 i,
                 logo = BaseObject(Visible, Collidable, Draggable).add({
                     init: function () {
-                        var dimension;
                         this.visible.setup({
                             position: {
                                 x: 400,
@@ -64,9 +63,8 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logo')
                         });
-
                         this.collidable.setStatic(true);
-                        dimension = this.visible.getDimension();
+                        this.collidable.setup();
                     },
                     update: function (deltaT) {
                         this.collidable.update(deltaT);
@@ -93,6 +91,7 @@ glue.module.get(
             for (i = 0; i < 20; ++i) {
                 var obj1 = BaseObject(Visible, Gravitatable, Collidable).add({
                         init: function () {
+                            // visible config
                             this.visible.setup({
                                 position: {
                                     x: math.random(0, Game.canvas.getDimension().width - 25),
@@ -101,27 +100,17 @@ glue.module.get(
                                 image: Loader.getAsset('ball')
                             });
 
-                            this.gravitatable.setVelocity(Vector(
-                                math.random(-10, 10),
-                                0
-                            ));
+                            // gravitatable config
+                            this.gravitatable.setup({
+                                gravity: Vector(0, 0.5),
+                                bounce: Vector(1, 0.6),
+                                velocity: Vector(-10, -10),
+                                maxVelocity: Vector(0, 20)
+                            });
 
-                            this.gravitatable.setGravity(Vector(
-                                0,
-                                0.5
-                            ));
-
-                            this.gravitatable.setMaxVelocity(Vector(
-                                0,
-                                20
-                            ));
-
-                            this.gravitatable.setBounce(Vector(
-                                1,
-                                0.6
-                            ));
-
+                            // collidable config
                             this.collidable.setBoundingCircleRadius(25);
+                            this.collidable.setup();
                         },
                         update: function (deltaT) {
                             var position = this.visible.getPosition(),
@@ -131,10 +120,7 @@ glue.module.get(
                             if (position.y - bound.radius > dim.height ) {
                                 position.y = -50;
                                 position.x = math.random(0, Game.canvas.getDimension().width - 25);
-                            } 
-
-
-
+                            }
                             this.gravitatable.update(deltaT);
                             this.collidable.update(deltaT);
                             SAT.collideGroup(this, group1, collisionType);
@@ -146,6 +132,7 @@ glue.module.get(
                     }),
                     obj2 = BaseObject(Visible, Gravitatable, Collidable).add({
                         init: function () {
+                            // visible config
                             this.visible.setup({
                                 position: {
                                     x: math.random(0, Game.canvas.getDimension().width - 25),
@@ -154,27 +141,16 @@ glue.module.get(
                                 image: Loader.getAsset('ball2')
                             });
 
-                            this.gravitatable.setVelocity(Vector(
-                                math.random(-10, 10),
-                                0
-                            ));
-
-                            this.gravitatable.setGravity(Vector(
-                                0,
-                                0.5
-                            ));
-
-                            this.gravitatable.setMaxVelocity(Vector(
-                                0,
-                                20
-                            ));
-
-                            this.gravitatable.setBounce(Vector(
-                                1,
-                                0.6
-                            ));
+                            // gravitatable config
+                            this.gravitatable.setup({
+                                gravity: Vector(0, 0.5),
+                                bounce: Vector(1, 0.6),
+                                velocity: Vector(-10, -10),
+                                maxVelocity: Vector(0, 20)
+                            });
 
                             this.collidable.setBoundingCircleRadius(25);
+                            this.collidable.setup();
                         },
                         update: function (deltaT) {
                             var dim = Game.canvas.getDimension(),

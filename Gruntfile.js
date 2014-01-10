@@ -56,8 +56,6 @@ module.exports = function (grunt) {
     });
 
     // Load the plugins.
-    grunt.loadNpmTasks('grunt-usemin');
-    grunt.loadNpmTasks('grunt-rev');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
 
     // Default task(s).

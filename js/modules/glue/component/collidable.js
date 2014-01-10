@@ -11,9 +11,10 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
+        'glue/math/dimension',
         'glue/math/rectangle'
     ],
-    function (Glue, Vector, Rectangle) {
+    function (Glue, Vector, Dimension, Rectangle) {
         return function (object) {
             'use strict';
             var Sugar = Glue.sugar,
@@ -25,34 +26,12 @@ glue.module.create(
                 },
                 isStatic = false,
                 collisionSide = Vector(0, 0),
+                position,
+                dimension = Dimension(0, 0),
+                origin,
+                scale = Vector(1, 1),
+                max,
                 updateBoundingBox = function () {
-                    var position,
-                        origin,
-                        scale,
-                        dimension,
-                        max;
-                    if (Sugar.isDefined(object.animatable)) {
-                        dimension = object.animatable.getDimension();
-                    } else if (Sugar.isDefined(object.visible)) {
-                        dimension = object.visible.getDimension();
-                    } else {
-                        dimension = {
-                            width: 0,
-                            height: 0
-                        };
-                    }
-                    if (Sugar.isDefined(object.visible)) {
-                        position = object.visible.getPosition();
-                        origin = object.visible.getOrigin();
-                        if (Sugar.isDefined(object.scalable)) {
-                            scale = object.scalable.getScale();
-                        } else {
-                            scale = Vector(1, 1);
-                        }
-                    } else {
-                        position = Vector(0, 0);
-                        origin = Vector(0, 0);
-                    }
                     boundingBox.x1 = position.x - origin.x * Math.abs(scale.x);
                     boundingBox.y1 = position.y - origin.y * Math.abs(scale.y);
                     if (boundingBox.x2 === null || boundingBox.y2 === null) {
@@ -72,8 +51,7 @@ glue.module.create(
                     }
                 },
                 resolveCollision = function (vector, side) {
-                    if (Sugar.isDefined(object.visible) && Sugar.isVector(vector)) {
-                        var position = object.visible.getPosition();
+                    if (Sugar.isDefined(position) && Sugar.isVector(vector)) {
                         object.visible.setPosition(position.substract(vector));
                         if (Sugar.isDefined(side) && Sugar.isVector(side)) {
                             side.scale(-1);
@@ -85,6 +63,22 @@ glue.module.create(
             object = object || {};
             object.collidable = {
                 resolveCollision: resolveCollision,
+                setup: function () {
+                    if (Sugar.isUndefined(object.visible)) {
+                        throw 'Collidable needs a visible component';
+                    }
+                    position = object.visible.getPosition();
+                    origin = object.visible.getOrigin();
+
+                    if (Sugar.isDefined(object.animatable)) {
+                        dimension = object.animatable.getDimension();
+                    } else if (Sugar.isDefined(object.visible)) {
+                        dimension = object.visible.getDimension();
+                    }
+                    if (Sugar.isDefined(object.scalable)) {
+                        scale = object.scalable.getScale();
+                    }
+                },
                 update: function (deltaT) {
                     updateBoundingBox();
                 },

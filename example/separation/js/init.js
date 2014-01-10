@@ -55,6 +55,7 @@ glue.module.get(
                             image: Loader.getAsset('logoLD')
                         });
                         this.collidable.isStatic(true);
+                        this.collidable.setup();
                     },
                     update: function (deltaT) {
                         this.collidable.update(deltaT);
@@ -81,6 +82,7 @@ glue.module.get(
                             },
                             image: Loader.getAsset('logoLD')
                         });
+                        this.collidable.setup();
                     },
                     update: function (deltaT) {
                         this.collidable.update(deltaT);
