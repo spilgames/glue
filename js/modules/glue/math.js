@@ -30,11 +30,11 @@ glue.module.create(
                 },
                 sign: function (x) {
                     if (Sugar.isNumber(x)) {
-                        if (x < 0) {
-                            return -1;
-                        } else if (x > 0) {
+                        if (x > 0) {
                             return 1;
-                        } else {
+                        } else if (x < 0) {
+                            return -1;
+                        } else if(x === 0) {
                             return 0;
                         }
                     }

@@ -14,6 +14,14 @@ modules.glue.sugar = (function (win, doc) {
     'use strict';
     var i,
         /**
+         * Is a given value a dimension?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isDimension = function (value) {
+            return isNumber(value.width) && isNumber(value.height);
+        },
+        /**
          * Is a given value a vector?
          * @param {Object}
          * @return {Boolean}
