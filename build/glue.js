@@ -6812,7 +6812,7 @@ glue.module.create(
                     }
                 },
                 resolveCollision = function (vector, side) {
-                    if (Sugar.isDefined(object.visible) && Sugar.isVector(vector)) {
+                    if (Sugar.isDefined(position) && Sugar.isVector(vector)) {
                         object.visible.setPosition(position.substract(vector));
                         if (Sugar.isDefined(side) && Sugar.isVector(side)) {
                             side.scale(-1);
@@ -7202,7 +7202,7 @@ glue.module.create(
                 gravity = Vector(0, 0),
                 bounce = Vector(0, 0),
                 maxVelocity = Vector(0, 0),
-                position;
+                position = null;
 
             object = object || {};
             object.gravitatable = {
@@ -7232,7 +7232,7 @@ glue.module.create(
                     if (maxVelocity.y !== 0 && Math.abs(velocity.y) > maxVelocity.y) {
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
-                    if (Sugar.isDefined(position)) {
+                    if (position !== null) {
                         object.visible.setPosition(position.add(velocity));
                     }
                 },

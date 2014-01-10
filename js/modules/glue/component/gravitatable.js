@@ -22,7 +22,7 @@ glue.module.create(
                 gravity = Vector(0, 0),
                 bounce = Vector(0, 0),
                 maxVelocity = Vector(0, 0),
-                position;
+                position = null;
 
             object = object || {};
             object.gravitatable = {
@@ -52,7 +52,7 @@ glue.module.create(
                     if (maxVelocity.y !== 0 && Math.abs(velocity.y) > maxVelocity.y) {
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
-                    if (Sugar.isDefined(position)) {
+                    if (position !== null) {
                         object.visible.setPosition(position.add(velocity));
                     }
                 },

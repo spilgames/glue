@@ -51,7 +51,7 @@ glue.module.create(
                     }
                 },
                 resolveCollision = function (vector, side) {
-                    if (Sugar.isDefined(object.visible) && Sugar.isVector(vector)) {
+                    if (Sugar.isDefined(position) && Sugar.isVector(vector)) {
                         object.visible.setPosition(position.substract(vector));
                         if (Sugar.isDefined(side) && Sugar.isVector(side)) {
                             side.scale(-1);
