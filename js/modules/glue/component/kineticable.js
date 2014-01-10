@@ -175,6 +175,9 @@ glue.module.create(
                 getRadious: function () {
                     return radius;
                 },
+                getMaxVelocity: function () {
+                    return maxVelocity;
+                },
                 isTouching: function (sideTest) {
                     return (sideTest === SAT.TOP && side.y > 0) ||
                            (sideTest === SAT.BOTTOM && side.y < 0) || 
