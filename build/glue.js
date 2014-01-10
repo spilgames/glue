@@ -9647,11 +9647,20 @@ glue.module.create(
 
                     return cells;
                 },
+                resetGrid = function () {
+                    var gridCount,
+                        i = 0;
+
+                    spatialGrid = {};
+                    gridCount = 
+                        (gridDimension.width / gridSize) * 
+                        (gridDimension.height / gridSize);
+                    for (i; i < gridCount; ++i) {
+                        spatialGrid[i] = [];
+                    }
+                },
                 module = {
                     setup: function (config) {
-                        var gridCount,
-                            i = 0;
-
                         config = config || {};
                         if (Sugar.isDefined(config.gridDimension)) {
                             gridDimension = config.gridDimension;
@@ -9663,18 +9672,18 @@ glue.module.create(
                         } else {
                             gridSize = gridDimension.height / 3;
                         }
-                        spatialGrid = {};
-                        gridCount = 
-                            (gridDimension.width / gridSize) * 
-                            (gridDimension.height / gridSize);
-                        for (i; i < gridCount; ++i) {
-                            spatialGrid[i] = [];
-                        }
+                        resetGrid();
                     },
                     setDebug: function (value) {
                         if (value === true) {
                             Game.add(module);
                         }
+                        if (value === false) {
+                            Game.remove(module);
+                        }
+                    },
+                    clearObjects: function () {
+                        resetGrid();
                     },
                     addObject: function (object) {
                         var inCells = getObjectCells(object),
