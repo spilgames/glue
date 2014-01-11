@@ -33,7 +33,8 @@ glue.module.get(
                     path: 'asset/',
                     source: {
                         tile: 'tile.png',
-                        player: 'player.png'
+                        player: 'player.png',
+                        logo: 'logo.png'
                     }
                 }
             }
