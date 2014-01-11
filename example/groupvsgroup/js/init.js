@@ -127,9 +127,6 @@ glue.module.get(
 
                             SAT.collideGroup(this, group1, collisionType);
                             SAT.collideGroup(this, group2, collisionType);
-
-                            // Set the corrected position.
-                            this.visible.setPosition(this.position);
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);
@@ -174,9 +171,6 @@ glue.module.get(
 
                             SAT.collideGroup(this, group1, collisionType);
                             SAT.collideGroup(this, group2, collisionType);
-
-                            // Set the corrected position.
-                            this.visible.setPosition(this.position);
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);

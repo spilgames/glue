@@ -165,10 +165,6 @@ glue.module.get(
                         
                         this.kineticable.update(deltaT);
                         SAT.collide(obj1, this, collisionType);
-
-                        /*  We set the corrected position after
-                            The collision response. */
-                        this.visible.setPosition(this.position);
                     },
                     draw: function (deltaT, context) {
                         var bound;

@@ -2,6 +2,7 @@ glue.module.create('js/input/keyboard',
 	function () {
 		var keysDown = {},
 			keysHit = {},
+			keysClear = {},
 			handleKeyDown = function (event) {
 				keysDown[event.keyCode] = true;
 				keysHit[event.keyCode] = true;
@@ -9,6 +10,7 @@ glue.module.create('js/input/keyboard',
 			handleKeyUp = function (event) {
 				keysDown[event.keyCode] = false;
 				keysHit[event.keyCode] = false;
+				keysClear[event.keyCode] = false;
 			},
 			module = {
 				//KeyCodes
@@ -116,8 +118,9 @@ glue.module.create('js/input/keyboard',
 					return keysDown[keyCode];
 				},
 				isKeyHit: function (keyCode) {
-					if (keysHit[keyCode]) {
+					if (keysHit[keyCode] && !keysClear[keyCode]) {
 						keysHit[keyCode] = false;
+						keysClear[keyCode] = true;
 						return true;
 					}
 					return false;

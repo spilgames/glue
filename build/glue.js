@@ -7196,6 +7196,7 @@ glue.module.create(
                     }
                 },
                 update: function (deltaT) {
+                    side.x = side.y = 0;
                     velocity.add(gravity);
                     if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {
                         velocity.x = maxVelocity.x * math.sign(velocity.x);
@@ -7219,9 +7220,9 @@ glue.module.create(
                         throw 'The argument must be a Vector';
                     }
                 },
-                setDimension: function (dimension) {
-                    if (Sugar.isDimension(vector)) {
-                        gravity = vector;
+                setDimension: function (dimen) {
+                    if (Sugar.isDimension(dimension)) {
+                        dimension = dimen;
                     } else {
                         throw 'The argument must be a Dimension';
                     }
@@ -7312,6 +7313,9 @@ glue.module.create(
                             position.y + dimension.height / 2,
                             radius
                         );
+                },
+                getSide: function () {
+                    return side;
                 }
             };
             return object;
@@ -9395,14 +9399,13 @@ glue.module.create(
             rectCollision = function (rect1, rect2, correction, side, rect) {
                 if (rect1.intersect(rect2)) {
                     var inter = rect1.intersection(rect2),
-                        direction = Vector(
-                            math.sign(rect1.x1 - rect2.x1),
-                            math.sign(rect1.y1 - rect2.y1)
-                        );
+                        direction = Vector(0, 0);
                     if (inter.x2 > inter.y2) {
+                        direction.y = math.sign(rect1.y1 - rect2.y1);
                         correction.y += inter.y2 * direction.y;
                         side.y = direction.y;
                     } else {
+                        direction.x = math.sign(rect1.x1 - rect2.x1)
                         correction.x += inter.x2 * direction.x;
                         side.x = direction.x;
                     }
@@ -9475,11 +9478,11 @@ glue.module.create(
                         obj2.kineticable.setPosition(position2);
                         obj2.kineticable.setSide(side2);
                         if (side2.y !== 0) {
-                            if ((side2.y > 0 && velocity2.y < 0) || (side2.y < 0 && velocity2.y > 0)) {
+                            if ((side2.y > 0 && velocity2.y < 0) || (side2.y < 0 && velocity2.y > 0 && intersection.y2 > 1)) {
                                 velocity2.y *= -obj2.kineticable.getBounce();
                             }
                         } else if (side2.x !== 0) {
-                            if ((side2.x > 0 && velocity2.x < 0) || (side2.x < 0 && velocity2.x > 0)) {
+                            if ((side2.x > 0 && velocity2.x < 0) || (side2.x < 0 && velocity2.x > 0 && intersection.x2 > 1)) {
                                 velocity2.x *= -obj2.kineticable.getBounce();
                             }
                         }

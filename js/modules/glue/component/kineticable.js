@@ -82,6 +82,7 @@ glue.module.create(
                     }
                 },
                 update: function (deltaT) {
+                    side.x = side.y = 0;
                     velocity.add(gravity);
                     if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {
                         velocity.x = maxVelocity.x * math.sign(velocity.x);
@@ -105,9 +106,9 @@ glue.module.create(
                         throw 'The argument must be a Vector';
                     }
                 },
-                setDimension: function (dimension) {
-                    if (Sugar.isDimension(vector)) {
-                        gravity = vector;
+                setDimension: function (dimen) {
+                    if (Sugar.isDimension(dimension)) {
+                        dimension = dimen;
                     } else {
                         throw 'The argument must be a Dimension';
                     }
@@ -198,6 +199,9 @@ glue.module.create(
                             position.y + dimension.height / 2,
                             radius
                         );
+                },
+                getSide: function () {
+                    return side;
                 }
             };
             return object;

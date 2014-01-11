@@ -32,7 +32,8 @@ glue.module.get(
                 image: {
                     path: 'asset/',
                     source: {
-                        ball: 'ball.png'
+                        tile: 'tile.png',
+                        player: 'player.png'
                     }
                 }
             }

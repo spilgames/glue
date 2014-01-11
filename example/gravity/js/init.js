@@ -97,7 +97,6 @@ glue.module.get(
                         }
                         this.kineticable.update(deltaT);
                         SAT.collide(obj1, obj2);
-                        this.visible.setPosition(position);
                     },
                     draw: function (deltaT, context) {
                         this.visible.draw(deltaT, context);
