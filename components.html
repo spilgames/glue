@@ -5,6 +5,7 @@
     <title>Glue Engine Documentation - Components</title>
     <link rel="stylesheet" href="css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="js/run_prettify.js?lang=css"></script>
 </head>
 <body>
     <div class="wrapper">
@@ -49,7 +50,7 @@
                 Now that you know how modules works lets start creating our own custom component. First we need to decide what our component will do. For this example it will just print to the console the deltaT of the update cycle and we will call it Printable.
             </p>
 
-<pre>
+<pre class="prettyprint linenums">
 glue.module.create(
     'my/custom/component/printable',
     function () {
@@ -77,7 +78,7 @@ glue.module.create(
                 To use our custom component we first have to retrieve our custom component module using "glue.module.get". Then we can mis in the module in our base object and add our own methods to it using the add method.
             </p>
 
-<pre>
+<pre class="prettyprint linenums">
 glue.module.get('glue/game', 'my/custom/component/printable', function (Game, Printable) {
     // create our base object,
     // mix in our custom component
@@ -102,6 +103,5 @@ glue.module.get('glue/game', 'my/custom/component/printable', function (Game, Pr
 
         </section>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
 </body>
 </html>

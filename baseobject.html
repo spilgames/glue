@@ -5,6 +5,7 @@
     <title>Glue Engine Documentation - Base object</title>
     <link rel="stylesheet" href="css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="js/run_prettify.js?lang=css"></script>
 </head>
 <body>
     <div class="wrapper">
@@ -32,14 +33,14 @@
                 Basically a BaseObject is a container for multiple components. Creating a BaseObject is really easy.
                 For example, here you can see how an empty BaseObject is created. 
             </p>
-<pre>
+<pre class="prettyprint linenums">
 var object = BaseObject();
 </pre>
             <p>
                 If we add this to our game it will not show any behaviour. To make it work we need to add components to our BaseObject. There are different types of components, you can even create your own custom components.
                 In this example you will see how to use the Visible component which displays an image on the game screen.
             </p>
-<pre>
+<pre class="prettyprint linenums">
 var object = BaseObject(Visible).add({
         init: function () {
             this.visible.setup({
@@ -59,7 +60,7 @@ var object = BaseObject(Visible).add({
                 If we add this object to our game it will draw an image at (0, 0). For each component you mix in the BaseObject you will get a property with the same name of the component. As you can see in the previous example the property to access the Visible component is "this.visible". Through this we can use every method and property of that component.
                 On the previous example you can see how Visible is dependant of the draw method to display the image. This is also something that applies to every other component, even the custom ones you make. For example if I need to update a movable component, it should be done like this:
             </p>
-<pre>
+<pre class="prettyprint linenums">
 var object = BaseObject(Visible, Movable).add({
         init: function () {
             this.visible.setup({
@@ -91,6 +92,5 @@ var object = BaseObject(Visible, Movable).add({
 
         </section>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
 </body>
 </html>

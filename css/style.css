@@ -258,3 +258,6 @@ footer {
     color:#444;
   }
 }
+
+/* Overwrite so the linenumbers show up on every line */
+.prettyprint ol.linenums > li { list-style-type: decimal; }

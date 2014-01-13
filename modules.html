@@ -5,6 +5,7 @@
     <title>Glue Engine Documentation - Modules</title>
     <link rel="stylesheet" href="css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="js/run_prettify.js?lang=css"></script>
 </head>
 <body>
     <div class="wrapper">
@@ -19,7 +20,7 @@
                 To create a Glue module you can use the global "glue" object. You can call the "module" object which contains the "create" method. The "create" method needs to have two parameters. The first is the name of the module and the second one is the function that represents the actual module. You can create a new Glue module in the following way:
             </p>
 
-<pre>
+<pre class="prettyprint linenums">
 glue.module.create('glue/documentation/test', function () {
     return {
         init: function () {
@@ -43,7 +44,7 @@ glue.module.create('glue/documentation/test', function () {
     To get an already created Glue module you can use 'glue.module.get'. Instead of passing a string as the first parameter, you need to pass in an array with strings. The module will then automatically be passed to the module function, as you can see in the example below:
 </p>
 
-<pre>
+<pre class="prettyprint linenums">
 glue.module.get(['glue/documentation/test'], function (Test) {
     // call the init method on the the module
     Test.init();
@@ -54,7 +55,7 @@ glue.module.get(['glue/documentation/test'], function (Test) {
     To get multiple Glue modules, you can pass multiple strings in the array. The modules will then be passed to the function in the same order, like in the following example:
 </p>
 
-<pre>
+<pre class="prettyprint linenums">
 glue.module.get(['glue/documentation/test', 'glue/namespace/other'], function (Test, OtherModule) {
     // call the init method on the the module
     Test.init();
@@ -69,6 +70,5 @@ glue.module.get(['glue/documentation/test', 'glue/namespace/other'], function (T
 
         </section>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
 </body>
 </html>

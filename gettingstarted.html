@@ -5,6 +5,7 @@
     <title>Glue Engine Documentation - Getting started</title>
     <link rel="stylesheet" href="css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="js/run_prettify.js?lang=css"></script>
 </head>
 <body>
     <div class="wrapper">
@@ -23,7 +24,7 @@
                 After you did that, Glue will be in the "bower_components" directory and you can include Glue in the head of your HTML5 document, like you can see in the example code below. You need to replace <strong>[PATH]</strong> with the actual path which holds your bower_components folder.
             </p>
 
-<div class="highlight highlight-html"><pre><span class="nt">&lt;head&gt;</span>
+<div class="prettyprint linenums"><pre><span class="nt">&lt;head&gt;</span>
 <span class="nt">    &lt;script </span><span class="na">src=</span><span class="s">"[PATH]/bower_components/glue.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;/head&gt;</span>
 </pre></div>
@@ -37,7 +38,7 @@
                 To start a game you can use the 'setup' method The setup method requires a configuration object. The canvas property is mandatory, because Glue needs it to get information about the canvas you want to use to render you game in. The canvas property needs tho contain the sub-properties "id" and "dimension". If there is a canvas HTML element present in the page and it has the configured id, Glue will use this canvas, if not, Glue will automatically create the canvas for you. The dimension property needs to contain an object with the width and height of the canvas. To define the dimension you need to use the Dimension module ('glue/math/dimension'). You can see an example of this below.
             </p>
 
-<pre>
+<pre class="prettyprint linenums">
 glue.module.get(['glue/game', 'glue/math/dimension'], function (Game, Dimension) {
     Game.setup({
         game: {
@@ -61,7 +62,7 @@ glue.module.get(['glue/game', 'glue/math/dimension'], function (Game, Dimension)
                 Once the object is added to the game, it's update and draw methods will be called from the main game loop on every cycle. The update function will receive the "deltaT" parameter which is the delta time since the previous call to the update method. The draw method also receives the "deltaT" parameter, and also receives the canvas context as a second parameter, which the object can use to draw on the game canvas. You can see an example of adding the most simple Glue object, a JavaScript object literal, to the already running Glue game below:
             </p>
 
-<pre>
+<pre class="prettyprint linenums">
 glue.module.create(['glue/game'], function (Game) {
     Game.add({
         update: function (deltaT) {
@@ -96,6 +97,5 @@ glue.module.create(['glue/game'], function (Game) {
 
         </section>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
 </body>
 </html>
