@@ -31,7 +31,7 @@ glue.module.create(
                     context.fillRect(0, 0, context.canvas.width, context.canvas.height);
                     context.fillStyle = oldColor;
                 },
-                seed = 'abcdefgabcdefgababcd',
+                seed = 'abcdefgaabcdabcd',
                 tilemap = Tilemap(Generator.makeMap(Generator.makeSequence(seed)), 0, 0, 4),
                 list = tilemap.getList(),
                 position,
@@ -41,14 +41,21 @@ glue.module.create(
                 scrolling = Vector(0, 0);
             
             screen.init = function (deltaT, context) {
-                Player.init();
+                Player.init(list);
                 position = Player.kineticable.getPosition();
                 dimension = Player.kineticable.getDimension();
             };
 
             screen.update = function (deltaT) {
                 Player.update(deltaT);
+                //SAT.collideGroupVsGroup(Player.bombs, list);
                 SAT.collideGroup(Player, list, typeCollision);
+                for (var i = 0; i < Player.bombs.length; ++i) {
+                    if (Player.bombs[i].active) {
+                        SAT.collideGroup(Player.bombs[i], list);
+                    }
+                }
+
             };
 
             screen.draw = function (deltaT, context) {

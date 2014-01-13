@@ -39,6 +39,7 @@ glue.module.create(
                         this.position = this.kineticable.getPosition();
                         this.bounds = this.kineticable.getDimension();
                         rect = this.kineticable.toRectangle();
+                        this.active = true;
                     },
                     update: function (deltaT) {
 
@@ -46,6 +47,7 @@ glue.module.create(
                         this.scalable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
+                        if (!this.active) return;
                         context.globalAlpha = this.alpha;
                         this.visible.draw(deltaT, context);
                         context.globalAlpha = 1.0;

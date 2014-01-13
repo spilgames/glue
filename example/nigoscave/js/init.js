@@ -1,5 +1,6 @@
 glue.module.get(
     [
+        'glue',
         'glue/game',
         'glue/loader',
         'glue/math/dimension',
@@ -8,6 +9,7 @@ glue.module.get(
         'js/screens/play'
     ],
     function (
+        Glue,
         Game,
         Loader,
         Dimension,
@@ -34,7 +36,8 @@ glue.module.get(
                     source: {
                         tile: 'tile.png',
                         player: 'player.png',
-                        logo: 'logo.png'
+                        logo: 'logo.png',
+                        bomb: 'bomb.png'
                     }
                 }
             }

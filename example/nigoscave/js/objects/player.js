@@ -10,7 +10,8 @@ glue.module.create(
         'glue/sat',
         'glue/component/scalable',
         'js/input/keyboard',
-        'js/level/gamescale'
+        'js/level/gamescale',
+        'js/objects/bomb'
     ],
     function (
         Vector,
@@ -22,7 +23,8 @@ glue.module.create(
         SAT,
         Scalable,
         Keyboard,
-        GameScale
+        GameScale,
+        Bomb
     ) {
         var bounds,
             position,
@@ -33,8 +35,12 @@ glue.module.create(
             vBound,
             speed,
             currentAnimation,
+            sound = new Audio('asset/jump.wav'),
+            i,
+            bombIndex = 0,
+            tileList,
             module = BaseObject(Visible, Animatable, Kineticable, Scalable).add({
-                init: function () {
+                init: function (list) {
                     this.scalable.setScale(GameScale);
                     this.animatable.setup({
                         position: {
@@ -77,18 +83,36 @@ glue.module.create(
                     maxVelocity = this.kineticable.getMaxVelocity();
                     side = this.kineticable.getSide();
                     bounds = this.kineticable.getDimension();
+                    tileList = list;
+
+                    this.bombs = [];
+
+                    for (i = 0; i < 3; ++i) {
+                        this.bombs[this.bombs.length] = Bomb().init();
+                    }
                 },
                 update: function (deltaT) {
-                    
+                    var i,
+                        len;
                     velocity.x = 0;
 
-                    if (Keyboard.isKeyHit(Keyboard.KEY_W) && this.kineticable.isTouching(SAT.BOTTOM)) {
+                    if (Keyboard.isKeyHit(Keyboard.KEY_UP) && this.kineticable.isTouching(SAT.BOTTOM)) {
                         velocity.y -= speed * 2;
+                        sound.play();
                     }
-                    if (Keyboard.isKeyDown(Keyboard.KEY_D) && !Keyboard.isKeyDown(Keyboard.KEY_A) && !this.kineticable.isTouching(SAT.RIGHT)) {
+
+                    if (Keyboard.isKeyHit(Keyboard.KEY_SPACE)) {
+                        this.bombs[bombIndex].shoot(Vector(scale.x / 2,0), this.position, tileList);
+                        bombIndex++;
+                        if (bombIndex > this.bombs.length - 1) {
+                            bombIndex = 0;
+                        }
+                    }
+
+                    if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && !Keyboard.isKeyDown(Keyboard.KEY_A) && !this.kineticable.isTouching(SAT.RIGHT)) {
                         velocity.x = speed;
                         scale.x = GameScale.x;
-                    } else if (Keyboard.isKeyDown(Keyboard.KEY_A) && !this.kineticable.isTouching(SAT.LEFT)) {
+                    } else if (Keyboard.isKeyDown(Keyboard.KEY_LEFT) && !this.kineticable.isTouching(SAT.LEFT)) {
                         velocity.x = -speed;
                         scale.x = GameScale.x * -1;
                     }
@@ -106,14 +130,23 @@ glue.module.create(
                     this.scalable.update(deltaT);
                     this.kineticable.update(deltaT);
                     this.animatable.update(deltaT);
+
+                    for (i = 0, len = this.bombs.length; i < len; ++i) {
+                        this.bombs[i].update(deltaT);
+                    }
                 },
                 draw: function (deltaT, context) {
+                    var i,
+                        len;
                     context.imageSmoothingEnabled = false;        
                     context.mozImageSmoothingEnabled = false;
                     context.oImageSmoothingEnabled = false;
                     context.webkitImageSmoothingEnabled = false;
                     this.animatable.update(deltaT);
                     this.animatable.draw(deltaT, context);
+                    for (i = 0, len = this.bombs.length; i < len; ++i) {
+                        this.bombs[i].draw(deltaT, context);
+                    }
                 },
                 reset: function () {
                     this.kineticable.setVelocity(Vector(0, 0));
