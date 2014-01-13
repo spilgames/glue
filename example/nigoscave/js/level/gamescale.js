@@ -1,11 +1,11 @@
 glue.module.create(
-	'js/level/gamescale',
-	[
-		'glue/math/vector'
-	],
-	function (
-		Vector
-	) {
-		return Vector(10, 10);
-	}
+    'js/level/gamescale',
+    [
+        'glue/math/vector'
+    ],
+    function (
+        Vector
+    ) {
+        return Vector(10, 10);
+    }
 );

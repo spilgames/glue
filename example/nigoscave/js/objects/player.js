@@ -31,16 +31,18 @@ glue.module.create(
             side,
             scale,
             vBound,
+            speed,
+            currentAnimation,
             module = BaseObject(Visible, Animatable, Kineticable, Scalable).add({
                 init: function () {
                     this.scalable.setScale(GameScale);
                     this.animatable.setup({
                         position: {
-                            x: 50,
-                            y: 50
+                            x: 16 * GameScale.x,
+                            y: 16 * GameScale.y
                         },
                         animation: {
-                            fps: 30,
+                            fps: 5,
                             frameCount: 2,
                             animations: {
                                 idle: {
@@ -59,11 +61,13 @@ glue.module.create(
                         },
                         image: Loader.getAsset('player')
                     });
+                    currentAnimation = 'idle';
+                    speed = GameScale.x;
                     this.visible.setOrigin(Vector(3, 0));
-                    this.animatable.setAnimation('run');
+                    this.animatable.setAnimation(currentAnimation);
                     this.kineticable.setup({
                         velocity: Vector(0, 0),
-                        gravity: Vector(0, 0.5),
+                        gravity: Vector(0, 0.05 * speed),
                         maxVelocity: Vector(0, 40)
                     });
                     scale = this.scalable.getScale();
@@ -79,24 +83,27 @@ glue.module.create(
                     velocity.x = 0;
 
                     if (Keyboard.isKeyHit(Keyboard.KEY_W) && this.kineticable.isTouching(SAT.BOTTOM)) {
-                        velocity.y -= 20;
+                        velocity.y -= speed * 2;
                     }
                     if (Keyboard.isKeyDown(Keyboard.KEY_D) && !Keyboard.isKeyDown(Keyboard.KEY_A) && !this.kineticable.isTouching(SAT.RIGHT)) {
-                        velocity.x = 10;
+                        velocity.x = speed;
                         scale.x = GameScale.x;
                     } else if (Keyboard.isKeyDown(Keyboard.KEY_A) && !this.kineticable.isTouching(SAT.LEFT)) {
-                        velocity.x = -10;
+                        velocity.x = -speed;
                         scale.x = GameScale.x * -1;
                     }
 
-                    if (velocity.x === 0 && velocity.y === 0) {
-                        this.animatable.setAnimation('idle');
-                    } else if (velocity.x !== 0 && this.kineticable.isTouching(SAT.BOTTOM)) {
-                        this.animatable.setAnimation('run');
-                    } else if (velocity.y !== 0) {
-                        this.animatable.setAnimation('jump');
+                    if (velocity.x === 0 && velocity.y === 0 && currentAnimation !== 'idle') {
+                        currentAnimation = 'idle';
+                        this.animatable.setAnimation(currentAnimation);
+                    } else if (velocity.x !== 0 && this.kineticable.isTouching(SAT.BOTTOM) && currentAnimation !== 'run') {
+                        currentAnimation = 'run';
+                        this.animatable.setAnimation(currentAnimation);
+                    } else if (velocity.y !== 0 && !this.kineticable.isTouching(SAT.BOTTOM) && currentAnimation !== 'jump') {
+                        currentAnimation = 'jump';
+                        this.animatable.setAnimation(currentAnimation);
                     }
-
+                    this.scalable.update(deltaT);
                     this.kineticable.update(deltaT);
                     this.animatable.update(deltaT);
                 },
@@ -105,6 +112,7 @@ glue.module.create(
                     context.mozImageSmoothingEnabled = false;
                     context.oImageSmoothingEnabled = false;
                     context.webkitImageSmoothingEnabled = false;
+                    this.animatable.update(deltaT);
                     this.animatable.draw(deltaT, context);
                 },
                 reset: function () {

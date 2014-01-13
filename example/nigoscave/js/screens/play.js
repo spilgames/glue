@@ -10,7 +10,8 @@ glue.module.create(
         // Game related
         'js/objects/player',
         'js/objects/tilemap',
-        'js/level/generator'
+        'js/level/generator',
+        'js/level/gamescale'
     ],
     function (
         Director,
@@ -30,8 +31,8 @@ glue.module.create(
                     context.fillRect(0, 0, context.canvas.width, context.canvas.height);
                     context.fillStyle = oldColor;
                 },
-                seed = 'aecefgeaahdhbbdhcgbgcd',
-                tilemap = Tilemap(Generator.makeMap(Generator.makeSequence(seed)), 0, 0, 5),
+                seed = 'abcdefgabcdefgababcd',
+                tilemap = Tilemap(Generator.makeMap(Generator.makeSequence(seed)), 0, 0, 4),
                 list = tilemap.getList(),
                 position,
                 dimension,
@@ -46,17 +47,16 @@ glue.module.create(
             };
 
             screen.update = function (deltaT) {
-                Player.update();
+                Player.update(deltaT);
                 SAT.collideGroup(Player, list, typeCollision);
             };
 
             screen.draw = function (deltaT, context) {
-                clearScreen(context, '#000');
+                clearScreen(context, '#121212');
                 context.save();
                 scrolling.x = -(position.x + dimension.width / 2) + canvasSize.width / 2;
                 scrolling.y = -(position.y + dimension.height / 2) + canvasSize.height / 2;
                 context.translate(scrolling.x, scrolling.y);
-                context.fillText(tilemap.count, Player.position.x, Player.position.y);
                 scrolling.scale(-1);
                 Player.draw(deltaT, context);
                 tilemap.draw(deltaT, context, scrolling);
