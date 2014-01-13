@@ -73,6 +73,7 @@ glue.module.create(
                     }
                     dimension.width *= scale.x;
                     dimension.height *= scale.y;
+                    
                     if (Sugar.isUndefined(radius)) {
                         max = Math.max(dimension.width, dimension.height);
                         radius = (Math.sqrt(
@@ -91,6 +92,7 @@ glue.module.create(
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
                     position.add(velocity);
+                    object.visible.setPosition(position);
                 },
                 setVelocity: function (vector) {
                     if (Sugar.isVector(vector)) {
@@ -136,7 +138,7 @@ glue.module.create(
                 },
                 setPosition: function (vector) {
                     if (Sugar.isVector(vector)) {
-                        position = vector;
+                        object.visible.setPosition(vector);
                     } else {
                         throw 'The argument must be a Vector';
                     }

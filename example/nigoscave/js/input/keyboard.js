@@ -6,12 +6,18 @@ glue.module.create('js/input/keyboard',
 			handleKeyDown = function (event) {
 				keysDown[event.keyCode] = true;
 				keysHit[event.keyCode] = true;
+				currentKeyDown = event.keyCode;
+				currentKeyUp = -1;
 			},
 			handleKeyUp = function (event) {
 				keysDown[event.keyCode] = false;
 				keysHit[event.keyCode] = false;
 				keysClear[event.keyCode] = false;
+				currentKeyUp = event.keyCode;
+				currentKeyDown = -1;
 			},
+			currentKeyDown,
+			currentKeyUp,
 			module = {
 				//KeyCodes
 		        KEY_BACKSPACE: 8,
@@ -124,6 +130,12 @@ glue.module.create('js/input/keyboard',
 						return true;
 					}
 					return false;
+				},
+				getLastKeyDown: function () {
+					return currentKeyDown;
+				},
+				getLastKeyUp: function () {
+					return currentKeyUp;
 				}
  			};
 

@@ -2,22 +2,35 @@ glue.module.create(
 	'js/objects/tilemap',
 	[
 		'glue/math/vector',
+		'glue/game',
 		'js/objects/tile'
 	],
 	function (
 		Vector,
+		Game,
 		Tile
 	) {
 		return function (array, x, y, maxWidth) {
 			var list = [],
+				deadZone = Game.canvas.getDimension(),
 				object = {
 					x: x || 0,
 					y: y || 0,
-					draw: function (deltaT, context) {
+					count: 0,
+					draw: function (deltaT, context, scrolling) {
 						var i,
-							len;
+							len,
+							tile;
+						this.count = 0;
 						for (i = 0, len = list.length; i < len; ++i) {
-							list[i].draw(deltaT, context);
+							tile = list[i];
+							if (tile.position.x + tile.bounds.width > scrolling.x &&
+								tile.position.x < scrolling.x + deadZone.width &&
+								tile.position.y + tile.bounds.height > scrolling.y &&
+								tile.position.y < scrolling.y + deadZone.height) {
+								tile.draw(deltaT, context);
+								this.count++;
+							}
 						}
 					},
 					getList: function () {

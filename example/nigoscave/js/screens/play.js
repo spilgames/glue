@@ -5,6 +5,7 @@ glue.module.create(
         'glue/screen',
         'glue/game',
         'glue/sat',
+        'glue/math/vector',
 
         // Game related
         'js/objects/player',
@@ -16,6 +17,7 @@ glue.module.create(
         Screen,
         Game,
         SAT,
+        Vector,
         Player,
         Tilemap,
         Generator
@@ -28,13 +30,14 @@ glue.module.create(
                     context.fillRect(0, 0, context.canvas.width, context.canvas.height);
                     context.fillStyle = oldColor;
                 },
-                seed = 'aecefgeaahdhbbdhcgbgcdhcecfgbd',
+                seed = 'aecefgeaahdhbbdhcgbgcd',
                 tilemap = Tilemap(Generator.makeMap(Generator.makeSequence(seed)), 0, 0, 5),
                 list = tilemap.getList(),
                 position,
                 dimension,
                 typeCollision = SAT.RECTANGLE_TO_RECTANGLE,
-                canvasSize = Game.canvas.getDimension();
+                canvasSize = Game.canvas.getDimension(),
+                scrolling = Vector(0, 0);
             
             screen.init = function (deltaT, context) {
                 Player.init();
@@ -50,15 +53,14 @@ glue.module.create(
             screen.draw = function (deltaT, context) {
                 clearScreen(context, '#000');
                 context.save();
-                context.translate(-(position.x + dimension.width / 2) + canvasSize.width / 2,
-                                  -(position.y + dimension.height / 2) + canvasSize.height / 2);
+                scrolling.x = -(position.x + dimension.width / 2) + canvasSize.width / 2;
+                scrolling.y = -(position.y + dimension.height / 2) + canvasSize.height / 2;
+                context.translate(scrolling.x, scrolling.y);
+                context.fillText(tilemap.count, Player.position.x, Player.position.y);
+                scrolling.scale(-1);
                 Player.draw(deltaT, context);
-                tilemap.draw(deltaT, context);
+                tilemap.draw(deltaT, context, scrolling);
                 context.restore();
-            };
-
-            screen.pointerDown = function (e) {
-                //typeCollision = typeCollision == SAT.RECTANGLE_TO_RECTANGLE ? SAT.CIRCLE_TO_CIRCLE : SAT.RECTANGLE_TO_RECTANGLE;
             };
 
             return screen;

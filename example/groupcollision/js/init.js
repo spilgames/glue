@@ -8,6 +8,7 @@ glue.module.get(
         'glue/component/kineticable',
         'glue/component/draggable',
         'glue/component/clickable',
+        'glue/component/scalable',
         'glue/sat',
         'glue/baseobject',
         'glue/math',
@@ -22,6 +23,7 @@ glue.module.get(
         Kineticable,
         Draggable,
         Clickable,
+        Scalable,
         SAT,
         BaseObject,
         Mathematics,
@@ -82,7 +84,7 @@ glue.module.get(
                         }
                     }
                 }),
-                obj1 = BaseObject(Visible, Kineticable, Draggable).add({
+                obj1 = BaseObject(Visible, Kineticable, Draggable, Scalable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -94,8 +96,10 @@ glue.module.get(
                         this.kineticable.setup({
                             dynamic: false
                         });
+                        this.scalable.setTarget(Vector(4, 4));
                     },
                     update: function (deltaT) {
+                        this.scalable.update(deltaT);
                         this.kineticable.update(deltaT);
                     },
                     draw: function (deltaT, context) {

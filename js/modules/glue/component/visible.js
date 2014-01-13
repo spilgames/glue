@@ -105,8 +105,8 @@ glue.module.create(
                 },
                 setDimension: function (value) {
                     if (Sugar.isVector(value)) {
-                        dimension.x = value.x;
-                        dimension.y = value.y;
+                        dimension.width = value.x;
+                        dimension.height = value.y;
                     }
                     updateRectangle();
                 },

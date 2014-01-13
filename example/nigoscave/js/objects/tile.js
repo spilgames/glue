@@ -2,25 +2,30 @@ glue.module.create(
 	'js/objects/tile',
 	[
 		'glue/loader',
+		'glue/game',
 		'glue/baseobject',
 		'glue/component/visible',
 		'glue/component/kineticable',
 		'glue/component/scalable',
-		'glue/math/vector'
+		'glue/math/vector',
+		'js/level/gamescale'
 	],
 	function (
 		Loader,
+		Game,
 		BaseObject,
 		Visible,
 		Kineticable,
 		Scalable,
-		Vector
+		Vector,
+		GameScale
 	) {
 		return function (x, y) {
-			var position,
-				bounds,
+			var rect,
+				deadZone = Game.canvas.getDimension(),
 				object = BaseObject(Visible, Kineticable, Scalable).add({
 					init: function () {
+						this.scalable.setScale(GameScale);
 						this.visible.setup({
 							position: {
 								x: x,
@@ -31,10 +36,9 @@ glue.module.create(
 						this.kineticable.setup({
 							dynamic: false
 						});
-						this.scalable.setScale(Vector(10, 10));
-						position = this.kineticable.getPosition();
-						bounds = this.kineticable.getDimension();
-						bounds.width = bounds.height = 160;
+						this.position = this.kineticable.getPosition();
+						this.bounds = this.kineticable.getDimension();
+						rect = this.kineticable.toRectangle();
 					},
 					update: function (deltaT) {
 						this.kineticable.update(deltaT);

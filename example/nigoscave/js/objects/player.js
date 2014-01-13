@@ -9,7 +9,8 @@ glue.module.create(
         'glue/component/kineticable',
         'glue/sat',
         'glue/component/scalable',
-        'js/input/keyboard'
+        'js/input/keyboard',
+        'js/level/gamescale'
     ],
     function (
         Vector,
@@ -20,7 +21,8 @@ glue.module.create(
         Kineticable,
         SAT,
         Scalable,
-        Keyboard
+        Keyboard,
+        GameScale
     ) {
         var bounds,
             position,
@@ -28,8 +30,10 @@ glue.module.create(
             maxVelocity,
             side,
             scale,
+            vBound,
             module = BaseObject(Visible, Animatable, Kineticable, Scalable).add({
                 init: function () {
+                    this.scalable.setScale(GameScale);
                     this.animatable.setup({
                         position: {
                             x: 50,
@@ -55,24 +59,20 @@ glue.module.create(
                         },
                         image: Loader.getAsset('player')
                     });
+                    this.visible.setOrigin(Vector(3, 0));
+                    this.animatable.setAnimation('run');
                     this.kineticable.setup({
                         velocity: Vector(0, 0),
                         gravity: Vector(0, 0.5),
                         maxVelocity: Vector(0, 40)
                     });
-                    this.visible.setOrigin(Vector(3, 0));
-                    this.animatable.setAnimation('run');
-                    this.scalable.setScale(Vector(10, 10));
                     scale = this.scalable.getScale();
-                    bounds = this.kineticable.toRectangle();
-                    position = this.kineticable.getPosition();
-                    bounds = this.kineticable.getDimension();
+                    boundsR = this.kineticable.toRectangle();
+                    this.position = this.kineticable.getPosition();
                     velocity = this.kineticable.getVelocity();
                     maxVelocity = this.kineticable.getMaxVelocity();
                     side = this.kineticable.getSide();
-                    bounds.width = 60;
-                    bounds.height = 80;
-
+                    bounds = this.kineticable.getDimension();
                 },
                 update: function (deltaT) {
                     
@@ -81,13 +81,12 @@ glue.module.create(
                     if (Keyboard.isKeyHit(Keyboard.KEY_W) && this.kineticable.isTouching(SAT.BOTTOM)) {
                         velocity.y -= 20;
                     }
-
-                    if (Keyboard.isKeyDown(Keyboard.KEY_D) && !this.kineticable.isTouching(SAT.RIGHT)) {
+                    if (Keyboard.isKeyDown(Keyboard.KEY_D) && !Keyboard.isKeyDown(Keyboard.KEY_A) && !this.kineticable.isTouching(SAT.RIGHT)) {
                         velocity.x = 10;
-                        scale.x = 10;
+                        scale.x = GameScale.x;
                     } else if (Keyboard.isKeyDown(Keyboard.KEY_A) && !this.kineticable.isTouching(SAT.LEFT)) {
                         velocity.x = -10;
-                        scale.x = -10;
+                        scale.x = GameScale.x * -1;
                     }
 
                     if (velocity.x === 0 && velocity.y === 0) {
@@ -106,7 +105,6 @@ glue.module.create(
                     context.mozImageSmoothingEnabled = false;
                     context.oImageSmoothingEnabled = false;
                     context.webkitImageSmoothingEnabled = false;
-                    var rect = this.kineticable.toRectangle();
                     this.animatable.draw(deltaT, context);
                 },
                 reset: function () {

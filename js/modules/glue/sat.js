@@ -11,9 +11,10 @@ glue.module.create(
         'glue',
         'glue/math',
         'glue/math/vector',
+        'glue/math/rectangle',
         'glue/game'
     ],
-    function (Glue, Mathematics, Vector, Game) {
+    function (Glue, Mathematics, Vector, Rectangle, Game) {
         'use strict';
         var Sugar = Glue.sugar,
             math = Mathematics(),
@@ -44,7 +45,10 @@ glue.module.create(
                         correction.x += inter.x2 * direction.x;
                         side.x = direction.x;
                     }
-                    rect = inter;
+                    rect.x1 = inter.x1;
+                    rect.y1 = inter.y1;
+                    rect.x2 = inter.x2;
+                    rect.y2 = inter.y2;
                     return true;
                 }
                 return false;
@@ -103,7 +107,7 @@ glue.module.create(
                     velocity2,
                     position1,
                     position2,
-                    intersection;
+                    intersection = Rectangle(0, 0, 0, 0);
                 if (rectCollision(bound1, bound2, correction2, side2, intersection)) {
                     if (obj2.kineticable.isDynamic()) {
                         velocity2 = obj2.kineticable.getVelocity();
