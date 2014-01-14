@@ -54,21 +54,27 @@ glue.module.get(
         }, function () {
             var math = Mathematics(),
                 createObject = function () {
-                    var object = BaseObject(Visible, Kineticable).add({
+                    var position,
+                        object = BaseObject(Visible, Kineticable).add({
                         init: function () {
                             this.visible.setup({
                                 position: {
                                     x: 400,
-                                    y: Mathematics().random(0, Game.canvas.getDimension().height)
+                                    y: Mathematics().random(0, Game.canvas.getDimension().height - 100)
                                 },
                                 image: Loader.getAsset('blueBall')
                             });
+                            position = this.visible.getPosition();
                             this.kineticable.setup({
-                                dynamic: false
+                                dynamic: false,
+                                velocity: Vector(1, 0)
                             });
                         },
                         update: function (deltaT) {
                             this.kineticable.update(deltaT);
+                            if (position.x > 800) {
+                                position.x = 0;
+                            }
                         },
                         draw: function (deltaT, context) {
                             this.visible.draw(deltaT, context);
@@ -110,6 +116,7 @@ glue.module.get(
                 });
             
             SAT.setup();
+            createObject();
             createObject();
             createObject();
             Game.add(redBall);
