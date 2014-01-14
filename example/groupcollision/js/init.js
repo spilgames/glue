@@ -8,6 +8,7 @@ glue.module.get(
         'glue/component/kineticable',
         'glue/component/draggable',
         'glue/component/clickable',
+        'glue/component/scalable',
         'glue/sat',
         'glue/baseobject',
         'glue/math',
@@ -22,6 +23,7 @@ glue.module.get(
         Kineticable,
         Draggable,
         Clickable,
+        Scalable,
         SAT,
         BaseObject,
         Mathematics,
@@ -165,10 +167,6 @@ glue.module.get(
                         
                         this.kineticable.update(deltaT);
                         SAT.collide(obj1, this, collisionType);
-
-                        /*  We set the corrected position after
-                            The collision response. */
-                        this.visible.setPosition(this.position);
                     },
                     draw: function (deltaT, context) {
                         var bound;

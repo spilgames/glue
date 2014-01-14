@@ -7187,6 +7187,7 @@ glue.module.create(
                     }
                     dimension.width *= scale.x;
                     dimension.height *= scale.y;
+                    
                     if (Sugar.isUndefined(radius)) {
                         max = Math.max(dimension.width, dimension.height);
                         radius = (Math.sqrt(
@@ -7196,6 +7197,7 @@ glue.module.create(
                     }
                 },
                 update: function (deltaT) {
+                    side.x = side.y = 0;
                     velocity.add(gravity);
                     if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {
                         velocity.x = maxVelocity.x * math.sign(velocity.x);
@@ -7204,6 +7206,7 @@ glue.module.create(
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
                     position.add(velocity);
+                    object.visible.setPosition(position);
                 },
                 setVelocity: function (vector) {
                     if (Sugar.isVector(vector)) {
@@ -7219,9 +7222,9 @@ glue.module.create(
                         throw 'The argument must be a Vector';
                     }
                 },
-                setDimension: function (dimension) {
-                    if (Sugar.isDimension(vector)) {
-                        gravity = vector;
+                setDimension: function (dimen) {
+                    if (Sugar.isDimension(dimension)) {
+                        dimension = dimen;
                     } else {
                         throw 'The argument must be a Dimension';
                     }
@@ -7249,7 +7252,7 @@ glue.module.create(
                 },
                 setPosition: function (vector) {
                     if (Sugar.isVector(vector)) {
-                        position = vector;
+                        object.visible.setPosition(vector);
                     } else {
                         throw 'The argument must be a Vector';
                     }
@@ -7289,6 +7292,9 @@ glue.module.create(
                 getRadious: function () {
                     return radius;
                 },
+                getMaxVelocity: function () {
+                    return maxVelocity;
+                },
                 isTouching: function (sideTest) {
                     return (sideTest === SAT.TOP && side.y > 0) ||
                            (sideTest === SAT.BOTTOM && side.y < 0) || 
@@ -7309,6 +7315,9 @@ glue.module.create(
                             position.y + dimension.height / 2,
                             radius
                         );
+                },
+                getSide: function () {
+                    return side;
                 }
             };
             return object;
@@ -8221,8 +8230,8 @@ glue.module.create(
                 },
                 setDimension: function (value) {
                     if (Sugar.isVector(value)) {
-                        dimension.x = value.x;
-                        dimension.y = value.y;
+                        dimension.width = value.x;
+                        dimension.height = value.y;
                     }
                     updateRectangle();
                 },
@@ -9369,9 +9378,11 @@ glue.module.create(
         'glue',
         'glue/math',
         'glue/math/vector',
+        'glue/math/rectangle',
+        'glue/math/dimension',
         'glue/game'
     ],
-    function (Glue, Mathematics, Vector, Game) {
+    function (Glue, Mathematics, Vector, Rectangle, Dimension, Game) {
         'use strict';
         var Sugar = Glue.sugar,
             math = Mathematics(),
@@ -9392,18 +9403,20 @@ glue.module.create(
             rectCollision = function (rect1, rect2, correction, side, rect) {
                 if (rect1.intersect(rect2)) {
                     var inter = rect1.intersection(rect2),
-                        direction = Vector(
-                            math.sign(rect1.x1 - rect2.x1),
-                            math.sign(rect1.y1 - rect2.y1)
-                        );
+                        direction = Vector(0, 0);
                     if (inter.x2 > inter.y2) {
+                        direction.y = math.sign(rect1.y1 - rect2.y1);
                         correction.y += inter.y2 * direction.y;
                         side.y = direction.y;
                     } else {
+                        direction.x = math.sign(rect1.x1 - rect2.x1)
                         correction.x += inter.x2 * direction.x;
                         side.x = direction.x;
                     }
-                    rect = inter;
+                    rect.x1 = inter.x1;
+                    rect.y1 = inter.y1;
+                    rect.x2 = inter.x2;
+                    rect.y2 = inter.y2;
                     return true;
                 }
                 return false;
@@ -9462,7 +9475,7 @@ glue.module.create(
                     velocity2,
                     position1,
                     position2,
-                    intersection;
+                    intersection = Rectangle(0, 0, 0, 0);
                 if (rectCollision(bound1, bound2, correction2, side2, intersection)) {
                     if (obj2.kineticable.isDynamic()) {
                         velocity2 = obj2.kineticable.getVelocity();
@@ -9472,11 +9485,11 @@ glue.module.create(
                         obj2.kineticable.setPosition(position2);
                         obj2.kineticable.setSide(side2);
                         if (side2.y !== 0) {
-                            if ((side2.y > 0 && velocity2.y < 0) || (side2.y < 0 && velocity2.y > 0)) {
+                            if ((side2.y > 0 && velocity2.y < 0) || (side2.y < 0 && velocity2.y > 0 && intersection.y2 > 1)) {
                                 velocity2.y *= -obj2.kineticable.getBounce();
                             }
                         } else if (side2.x !== 0) {
-                            if ((side2.x > 0 && velocity2.x < 0) || (side2.x < 0 && velocity2.x > 0)) {
+                            if ((side2.x > 0 && velocity2.x < 0) || (side2.x < 0 && velocity2.x > 0 && intersection.x2 > 1)) {
                                 velocity2.x *= -obj2.kineticable.getBounce();
                             }
                         }
@@ -9604,6 +9617,9 @@ glue.module.create(
                     } else {
                         throw 'The colliding group must be an Array.';
                     }
+                },
+                update: function (deltaT, scroll) {
+
                 }
             };
         return module;
@@ -9643,6 +9659,181 @@ glue.module.create(
 
             return module;
         };
+    }
+);
+
+/**
+ *  @module Spatial
+ *  @desc Checks if collision is needed using a spatial matrix
+ *  @copyright (C) SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/spatial',
+    [
+        'glue',
+        'glue/game',
+        'glue/math',
+        'glue/math/vector',
+        'glue/math/dimension'
+    ],
+    function (
+        Glue,
+        Game,
+        Mathematics,
+        Vector,
+        Dimension
+    ) {
+        'use strict';
+        return function () {
+            var Sugar = Glue.sugar,
+                math = Mathematics(),
+                debug = false,
+                gridDimension,
+                gridSize,
+                spatialGrid,
+                addCell = function (position, cells) {
+                    var gridPosition = parseInt(
+                           (Math.floor(position.x / gridSize)) +
+                           (Math.floor(position.y / gridSize)) *
+                           (gridDimension.width / gridSize) 
+                        );
+
+                    if (!Sugar.contains(cells, gridPosition)) {
+                        cells.push(gridPosition);
+                    }
+                },
+                getObjectCells = function (object) {
+                    var cells = [],
+                        position = object.visible.getPosition(),
+                        dimension = object.visible.getDimension(),
+                        min = Vector(
+                            position.x,
+                            position.y
+                        ),
+                        max = Vector(
+                            position.x + dimension.width,
+                            position.y + dimension.height
+                        );
+
+                    // top left
+                    addCell(Vector(min.x, min.y), cells);
+                    // top right
+                    addCell(Vector(max.x, min.y), cells);
+                    // bottom right
+                    addCell(Vector(max.x, max.y), cells);
+                    // bottom left
+                    addCell(Vector(min.x, max.y), cells);
+
+                    return cells;
+                },
+                resetGrid = function () {
+                    var gridCount,
+                        i = 0;
+
+                    spatialGrid = {};
+                    gridCount = 
+                        (gridDimension.width / gridSize) * 
+                        (gridDimension.height / gridSize);
+                    for (i; i < gridCount; ++i) {
+                        spatialGrid[i] = [];
+                    }
+                },
+                module = {
+                    setup: function (config) {
+                        config = config || {};
+                        if (Sugar.isDefined(config.gridDimension)) {
+                            gridDimension = config.gridDimension;
+                        } else {
+                            gridDimension = Game.canvas.getDimension();
+                        }
+                        if (Sugar.isDefined(config.gridSize)) {
+                            gridSize = config.gridSize;
+                        } else {
+                            gridSize = gridDimension.height / 3;
+                        }
+                        resetGrid();
+                    },
+                    setDebug: function (value) {
+                        if (value === true) {
+                            Game.add(module);
+                        }
+                        if (value === false) {
+                            Game.remove(module);
+                        }
+                    },
+                    clearObjects: function () {
+                        resetGrid();
+                    },
+                    addObject: function (object) {
+                        var inCells = getObjectCells(object),
+                            i = 0,
+                            l = inCells.length;
+                        for (i; i < l; ++i) {
+                            spatialGrid[inCells[i]].push(object);
+                        }
+                    },
+                    addArray: function (array) {
+                        var i,
+                            len;
+                        for (i = 0, len = array.length; i < len; ++i) {
+                            module.addObject(array[i]);
+                        }
+                    },
+                    getNearbyObjects: function (object) {
+                        var nearby = [],
+                            inCells = getObjectCells(object),
+                            i = 0,
+                            l = inCells.length;
+
+                        for (i; i < l; ++i) {
+                            nearby.push(spatialGrid[inCells[i]]);
+                        }
+                        return nearby;
+                    },
+                    handleNearbyObjects: function (obj, func) {
+                        var list,
+                            i,
+                            len,
+                            j,
+                            jlen;
+                        if (Sugar.isFunction(func)) {
+                            list = module.getNearbyObjects(obj);
+                            for (i = 0, len = list.length; i < len; ++i) {
+                                if (list[i]) {
+                                    for (j = 0, jlen = list[i].length; j < jlen; ++j) {
+                                        if (list[i].indexOf(obj) !== j) {
+                                            func(list[i][j]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    draw: function (deltaT, context) {
+                        var x = 0,
+                            y = 0;
+
+                        context.save();
+                        context.beginPath();
+                        for (x; x <= gridDimension.width; x += gridSize) {
+                            context.moveTo(x, 0);
+                            context.lineTo(x, gridDimension.height);
+                        }
+                        for (y; y <= gridDimension.height; y += gridSize) {
+                            context.moveTo(0, y);
+                            context.lineTo(gridDimension.width, y);
+                        }
+                        context.strokeStyle = 'black';
+                        context.stroke();
+                        context.closePath();
+                        context.restore();
+                    }
+                };
+
+            return module;
+        }
     }
 );
 

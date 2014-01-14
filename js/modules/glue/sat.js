@@ -11,9 +11,11 @@ glue.module.create(
         'glue',
         'glue/math',
         'glue/math/vector',
+        'glue/math/rectangle',
+        'glue/math/dimension',
         'glue/game'
     ],
-    function (Glue, Mathematics, Vector, Game) {
+    function (Glue, Mathematics, Vector, Rectangle, Dimension, Game) {
         'use strict';
         var Sugar = Glue.sugar,
             math = Mathematics(),
@@ -34,18 +36,20 @@ glue.module.create(
             rectCollision = function (rect1, rect2, correction, side, rect) {
                 if (rect1.intersect(rect2)) {
                     var inter = rect1.intersection(rect2),
-                        direction = Vector(
-                            math.sign(rect1.x1 - rect2.x1),
-                            math.sign(rect1.y1 - rect2.y1)
-                        );
+                        direction = Vector(0, 0);
                     if (inter.x2 > inter.y2) {
+                        direction.y = math.sign(rect1.y1 - rect2.y1);
                         correction.y += inter.y2 * direction.y;
                         side.y = direction.y;
                     } else {
+                        direction.x = math.sign(rect1.x1 - rect2.x1)
                         correction.x += inter.x2 * direction.x;
                         side.x = direction.x;
                     }
-                    rect = inter;
+                    rect.x1 = inter.x1;
+                    rect.y1 = inter.y1;
+                    rect.x2 = inter.x2;
+                    rect.y2 = inter.y2;
                     return true;
                 }
                 return false;
@@ -104,7 +108,7 @@ glue.module.create(
                     velocity2,
                     position1,
                     position2,
-                    intersection;
+                    intersection = Rectangle(0, 0, 0, 0);
                 if (rectCollision(bound1, bound2, correction2, side2, intersection)) {
                     if (obj2.kineticable.isDynamic()) {
                         velocity2 = obj2.kineticable.getVelocity();
@@ -114,11 +118,11 @@ glue.module.create(
                         obj2.kineticable.setPosition(position2);
                         obj2.kineticable.setSide(side2);
                         if (side2.y !== 0) {
-                            if ((side2.y > 0 && velocity2.y < 0) || (side2.y < 0 && velocity2.y > 0)) {
+                            if ((side2.y > 0 && velocity2.y < 0) || (side2.y < 0 && velocity2.y > 0 && intersection.y2 > 1)) {
                                 velocity2.y *= -obj2.kineticable.getBounce();
                             }
                         } else if (side2.x !== 0) {
-                            if ((side2.x > 0 && velocity2.x < 0) || (side2.x < 0 && velocity2.x > 0)) {
+                            if ((side2.x > 0 && velocity2.x < 0) || (side2.x < 0 && velocity2.x > 0 && intersection.x2 > 1)) {
                                 velocity2.x *= -obj2.kineticable.getBounce();
                             }
                         }
@@ -246,6 +250,9 @@ glue.module.create(
                     } else {
                         throw 'The colliding group must be an Array.';
                     }
+                },
+                update: function (deltaT, scroll) {
+
                 }
             };
         return module;

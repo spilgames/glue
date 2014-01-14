@@ -73,6 +73,7 @@ glue.module.create(
                     }
                     dimension.width *= scale.x;
                     dimension.height *= scale.y;
+                    
                     if (Sugar.isUndefined(radius)) {
                         max = Math.max(dimension.width, dimension.height);
                         radius = (Math.sqrt(
@@ -82,6 +83,7 @@ glue.module.create(
                     }
                 },
                 update: function (deltaT) {
+                    side.x = side.y = 0;
                     velocity.add(gravity);
                     if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {
                         velocity.x = maxVelocity.x * math.sign(velocity.x);
@@ -90,6 +92,7 @@ glue.module.create(
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
                     position.add(velocity);
+                    object.visible.setPosition(position);
                 },
                 setVelocity: function (vector) {
                     if (Sugar.isVector(vector)) {
@@ -105,9 +108,9 @@ glue.module.create(
                         throw 'The argument must be a Vector';
                     }
                 },
-                setDimension: function (dimension) {
-                    if (Sugar.isDimension(vector)) {
-                        gravity = vector;
+                setDimension: function (dimen) {
+                    if (Sugar.isDimension(dimension)) {
+                        dimension = dimen;
                     } else {
                         throw 'The argument must be a Dimension';
                     }
@@ -135,7 +138,7 @@ glue.module.create(
                 },
                 setPosition: function (vector) {
                     if (Sugar.isVector(vector)) {
-                        position = vector;
+                        object.visible.setPosition(vector);
                     } else {
                         throw 'The argument must be a Vector';
                     }
@@ -175,6 +178,9 @@ glue.module.create(
                 getRadious: function () {
                     return radius;
                 },
+                getMaxVelocity: function () {
+                    return maxVelocity;
+                },
                 isTouching: function (sideTest) {
                     return (sideTest === SAT.TOP && side.y > 0) ||
                            (sideTest === SAT.BOTTOM && side.y < 0) || 
@@ -195,6 +201,9 @@ glue.module.create(
                             position.y + dimension.height / 2,
                             radius
                         );
+                },
+                getSide: function () {
+                    return side;
                 }
             };
             return object;
