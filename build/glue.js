@@ -9380,10 +9380,9 @@ glue.module.create(
         'glue/math/vector',
         'glue/math/rectangle',
         'glue/math/dimension',
-        'glue/game',
-        'glue/spatial'
+        'glue/game'
     ],
-    function (Glue, Mathematics, Vector, Rectangle, Dimension, Game, Spatial) {
+    function (Glue, Mathematics, Vector, Rectangle, Dimension, Game) {
         'use strict';
         var Sugar = Glue.sugar,
             math = Mathematics(),
