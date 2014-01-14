@@ -12,9 +12,11 @@ glue.module.create(
         'glue/math',
         'glue/math/vector',
         'glue/math/rectangle',
-        'glue/game'
+        'glue/math/dimension',
+        'glue/game',
+        'glue/spatial'
     ],
-    function (Glue, Mathematics, Vector, Rectangle, Game) {
+    function (Glue, Mathematics, Vector, Rectangle, Dimension, Game, Spatial) {
         'use strict';
         var Sugar = Glue.sugar,
             math = Mathematics(),
@@ -249,6 +251,9 @@ glue.module.create(
                     } else {
                         throw 'The colliding group must be an Array.';
                     }
+                },
+                update: function (deltaT, scroll) {
+
                 }
             };
         return module;

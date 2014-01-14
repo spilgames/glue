@@ -95,7 +95,6 @@ glue.module.get(
                 });
             Game.add(obj1);
             Game.add(obj2);
-
             var v = Vector(0, 0);
             v.static.add(v, v);
         });

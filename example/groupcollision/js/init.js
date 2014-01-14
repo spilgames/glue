@@ -84,7 +84,7 @@ glue.module.get(
                         }
                     }
                 }),
-                obj1 = BaseObject(Visible, Kineticable, Draggable, Scalable).add({
+                obj1 = BaseObject(Visible, Kineticable, Draggable).add({
                     init: function () {
                         this.visible.setup({
                             position: {
@@ -96,10 +96,8 @@ glue.module.get(
                         this.kineticable.setup({
                             dynamic: false
                         });
-                        this.scalable.setTarget(Vector(4, 4));
                     },
                     update: function (deltaT) {
-                        this.scalable.update(deltaT);
                         this.kineticable.update(deltaT);
                     },
                     draw: function (deltaT, context) {

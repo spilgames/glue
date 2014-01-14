@@ -35,6 +35,12 @@ glue.module.create(
                     },
                     getList: function () {
                         return list;
+                    },
+                    getWidth: function () {
+                        return 16;//(maxWidth - 1) * size.width;
+                    },
+                    getHeight: function () {
+
                     }
                 },
                 ix,

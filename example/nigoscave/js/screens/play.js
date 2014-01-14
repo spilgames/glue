@@ -48,7 +48,6 @@ glue.module.create(
 
             screen.update = function (deltaT) {
                 Player.update(deltaT);
-                //SAT.collideGroupVsGroup(Player.bombs, list);
                 SAT.collideGroup(Player, list, typeCollision);
                 for (var i = 0; i < Player.bombs.length; ++i) {
                     if (Player.bombs[i].active) {
