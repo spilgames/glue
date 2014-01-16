@@ -106,8 +106,11 @@ glue.module.create(
                         var inCells = getObjectCells(object),
                             i = 0,
                             l = inCells.length;
+
                         for (i; i < l; ++i) {
-                            spatialGrid[inCells[i]].push(object);
+                            if (spatialGrid[inCells[i]]) {
+                                spatialGrid[inCells[i]].push(object);
+                            }
                         }
                     },
                     addArray: function (array) {
@@ -124,7 +127,7 @@ glue.module.create(
                             l = inCells.length;
 
                         for (i; i < l; ++i) {
-                            nearby.push(spatialGrid[inCells[i]]);
+                            nearby = nearby.concat(spatialGrid[inCells[i]]);
                         }
                         return nearby;
                     },

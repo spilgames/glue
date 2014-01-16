@@ -9,7 +9,7 @@ glue.module.get(
         'glue/component/draggable',
         'glue/component/clickable',
         'glue/component/scalable',
-        'glue/fastsat',
+        'glue/sat',
         'glue/baseobject',
         'glue/math',
         'glue/math/vector'
@@ -53,27 +53,34 @@ glue.module.get(
             }
         }, function () {
             var math = Mathematics(),
-                createObject = function () {
+                createObject = function (x, y) {
                     var position,
                         object = BaseObject(Visible, Kineticable).add({
                         init: function () {
                             this.visible.setup({
                                 position: {
-                                    x: 400,
-                                    y: Mathematics().random(0, Game.canvas.getDimension().height - 100)
+                                    x: x,
+                                    y: y
                                 },
                                 image: Loader.getAsset('blueBall')
                             });
                             position = this.visible.getPosition();
                             this.kineticable.setup({
-                                dynamic: false,
-                                velocity: Vector(1, 0)
+                                dynamic: true,
+                                gravity: Vector(0, 0.5),
+                                bounce: 0.6,
+                                velocity: Vector(math.random(-10, 10), 0),
+                                maxVelocity: Vector(0, 20)
                             });
                         },
                         update: function (deltaT) {
+                            SAT.collide(this);
                             this.kineticable.update(deltaT);
                             if (position.x > 800) {
-                                position.x = 0;
+                                position.x = -50;
+                            }
+                            if (position.y > 600) {
+                                position.y = -50;
                             }
                         },
                         draw: function (deltaT, context) {
@@ -97,7 +104,7 @@ glue.module.get(
                         });
                     },
                     update: function (deltaT) {
-                        SAT.resetSpatial();
+                        SAT.collide(this);
                         this.kineticable.update(deltaT);
                     },
                     draw: function (deltaT, context) {
@@ -111,14 +118,13 @@ glue.module.get(
                     },
                     pointerUp: function (e) {
                         this.draggable.pointerUp(e);
-                        SAT.checkOverlap(this);
                     }
                 });
             
             SAT.setup();
-            createObject();
-            createObject();
-            createObject();
+            for (var i = 0; i < 50; ++i) {
+                createObject(math.random(0, Game.canvas.getDimension().width - 25), -50);
+            }
             Game.add(redBall);
         });
     }
