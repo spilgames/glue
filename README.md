@@ -17,7 +17,7 @@ You can view the examples build using Glue directly on the [example page](https:
 
 * Drag & Drop: Glue supports Drag & Drop through the Draggable and Droptarget components, making it easy to create a rich user experience.
 
-* Audio: Glue contains a cross device audio module which uses the Webaudio API with a fallback to the audio tag.
+* Audio: Glue contains a plugin for Howler which uses the Webaudio API with a fallback to the audio tag, making it possible to have a wide device support for playing audio.
 
 * Physics: Glue has a SET based Pysics system that alows you to add gravity and collisions to your games.
 
