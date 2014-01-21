@@ -6063,7 +6063,7 @@ adapters.glue = (function (win, Glue) {
     };
     win.game = {};
     glue.module.create('glue', function () {
-        //glue.audio = Howl;
+        glue.audio = Howl;
         return glue;
     });
 }(window));

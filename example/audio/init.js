@@ -44,6 +44,7 @@ glue.module.get(
             var Audio = Glue.audio,
                 playing = false,
                 buttonPosition,
+                sound = null,
                 playButton = BaseObject(Visible, Clickable).add({
                     init: function () {
                         this.visible.setup({
@@ -62,9 +63,15 @@ glue.module.get(
                         this.clickable.pointerDown(e);
                     },
                     onClick: function (e) {
-                        var sound = new Howl({
-                            urls: ['asset/audio/thunder.ogg']
-                        }).play();
+                        if (this.playing) {
+                            sound.stop();
+                            this.playing = false;
+                        } else {
+                            sound = new Audio({
+                                urls: ['asset/audio/thunder.ogg']
+                            }).play();
+                            this.playing = true;
+                        }
                     }
                 });
 
