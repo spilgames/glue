@@ -20,8 +20,8 @@
         module: glue.module
     };
     win.game = {};
-    glue.module.create('glue', ['audio51'], function (Audio) {
-        glue.audio = Audio;
+    glue.module.create('glue', function () {
+        glue.audio = Howl;
         return glue;
     });
 }(window));
