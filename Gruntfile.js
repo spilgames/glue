@@ -1,16 +1,32 @@
 module.exports = function (grunt) {
-    require('matchdep').filterDev('grunt-contrib*').forEach(grunt.loadNpmTasks);
+    // Load Grunt tasks declared in the package.json file
+    require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        'regex-replace': {
+            head: {
+                src: ['bower_components/howler/howler.js'],
+                actions: [
+                    {
+                        name: 'name anonymous define',
+                        search: new RegExp(
+                        /define\(function/g),
+                        replace: function () {
+                            return 'define(\'howler\', function';
+                        }
+                    }
+                ]
+            }
+        },
         concat: {
             dist: {
                 files: {
                     'build/src/vendors.js': [
                         'bower_components/requirejs/require.js',
                         'bower_components/spine/spine-js/spine.js',
-                        'js/vendors/rsvp.js'
+                        'bower_components/howler/howler.js'
                     ],
                     'build/src/adapters.js': [
                         'js/adapters/**/*'
@@ -61,6 +77,7 @@ module.exports = function (grunt) {
     // Default task(s).
     grunt.registerTask('default', [
         'clean:beforeRelease',
+        'regex-replace',
         'concat',
         'uglify',
         'clean:afterRelease'
@@ -68,6 +85,7 @@ module.exports = function (grunt) {
     // Default task(s).
     grunt.registerTask('dev', [
         'clean:beforeRelease',
+        'regex-replace',
         'concat',
         'clean:afterRelease'
     ]);
