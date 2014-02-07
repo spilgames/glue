@@ -40,8 +40,8 @@ glue.module.get(
                 debug: true
             },
             asset: {
+                path: 'asset/',
                 image: {
-                    path: 'asset/',
                     source: {
                         bed: 'bed.png',
                         chair: 'chair.png',

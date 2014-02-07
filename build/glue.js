@@ -8463,18 +8463,23 @@ glue.module.create(
                         debugBar.id = 'debugBar';
                         document.body.appendChild(debugBar);
                     }
-                    if (config.asset && config.asset.image && config.asset.image.path &&
-                        config.asset.image.source) {
-                        Loader.setAssetPath(config.asset.image.path);
-                        Loader.setAssets(config.asset.image.source);
+                    /*
+                    // save color in variable and move code before calling other draw functions
+                    if (config.canvas.color) {
+                        backBufferContext2D.fillStyle = config.canvas.color;
+                        backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                    */
+                    if (config.asset && config.asset.path) {
+                        Loader.setAssetPath(config.asset.path);
+                        if (config.asset.image) {
+                            Loader.setAssets('image', config.asset.image.source);
+                        }
+                        if (config.asset.audio) {
+                            Loader.setAssets('audio', config.asset.audio.source);
+                        }
                         Loader.load(function () {
                             startup();
-                            /*
-                            if (config.canvas.color) {
-                                backBufferContext2D.fillStyle = config.canvas.color;
-                                backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
-                            }
-                            */
                             if (onReady) {
                                 onReady();
                             }
@@ -8544,11 +8549,12 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
-        var loaded = false,
+        var Audio = Glue.audio,
+            loaded = false,
             assetCount = 0,
             loadCount = 0,
             assetPath = null,
-            assets = null,
+            assets = {},
             loadedAssets = {},
             completedHandler,
             loader = document.getElementById('loader'),
@@ -8573,32 +8579,47 @@ glue.module.create(
                     completedHandler();
                 }
             },
-            loadAsset = function (source) {
-                var asset = new Image();
-                asset.src = assetPath + source;
-                asset.addEventListener('load', assetLoadedHandler, false);
-                return asset;
+            loadAsset = function (type, source) {
+                var asset;
+                if (type === 'image') {
+                    asset = new Image();
+                    asset.src = assetPath + 'image/' + source;
+                    asset.addEventListener('load', assetLoadedHandler, false);
+                    return asset;
+                } else if (type === 'audio') {
+                    asset = new Audio({
+                        urls: [assetPath + 'audio/' + source],
+                        onload: assetLoadedHandler
+                    });
+                    return asset;
+                }
             },
             module = {
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
-                setAssets: function (value) {
-                    assets = value;
-                    for (asset in assets) {
-                        if (assets.hasOwnProperty(asset)) {
+                setAssets: function (type, value) {
+                    assets[type] = value;
+                    for (asset in value) {
+                        if (value.hasOwnProperty(asset)) {
                             ++assetCount;
                         }
                     }
                 },
                 load: function (onReady) {
+                    var typeList;
                     if (percentageBar !== null) {
                         percentageBar.innerHTML = '0%';
                     }
                     completedHandler = onReady;
-                    for (asset in assets) {
-                        if (assets.hasOwnProperty(asset)) {
-                            loadedAssets[asset] = loadAsset(assets[asset]);
+                    for (type in assets) {
+                        if (assets.hasOwnProperty(type)) {
+                            typeList = assets[type];
+                            for (source in typeList) {
+                                if (assets[type].hasOwnProperty(source)) {
+                                    loadedAssets[source] = loadAsset(type, typeList[source]);
+                                }
+                            }
                         }
                     }
                 },

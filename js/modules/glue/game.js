@@ -326,18 +326,23 @@ glue.module.create(
                         debugBar.id = 'debugBar';
                         document.body.appendChild(debugBar);
                     }
-                    if (config.asset && config.asset.image && config.asset.image.path &&
-                        config.asset.image.source) {
-                        Loader.setAssetPath(config.asset.image.path);
-                        Loader.setAssets(config.asset.image.source);
+                    /*
+                    // save color in variable and move code before calling other draw functions
+                    if (config.canvas.color) {
+                        backBufferContext2D.fillStyle = config.canvas.color;
+                        backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                    */
+                    if (config.asset && config.asset.path) {
+                        Loader.setAssetPath(config.asset.path);
+                        if (config.asset.image) {
+                            Loader.setAssets('image', config.asset.image.source);
+                        }
+                        if (config.asset.audio) {
+                            Loader.setAssets('audio', config.asset.audio.source);
+                        }
                         Loader.load(function () {
                             startup();
-                            /*
-                            if (config.canvas.color) {
-                                backBufferContext2D.fillStyle = config.canvas.color;
-                                backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
-                            }
-                            */
                             if (onReady) {
                                 onReady();
                             }

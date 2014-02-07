@@ -29,8 +29,8 @@ glue.module.get(
                 debug: true
             },
             asset: {
+                path: '../',
                 image: {
-                    path: '../image/',
                     source: {
                         glue: 'glue-logo.png',
                         spil: 'spil-logo.png',
