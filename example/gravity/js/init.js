@@ -37,8 +37,8 @@ glue.module.get(
                 debug: true
             },
             asset: {
+                path: 'asset/',
                 image: {
-                    path: 'asset/',
                     source: {
                         logoLD: 'glue-logo-ld.png'
                     }

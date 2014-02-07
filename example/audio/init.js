@@ -33,10 +33,16 @@ glue.module.get(
                 debug: true
             },
             asset: {
+                path: 'asset/',
                 image: {
-                    path: 'asset/image/',
                     source: {
                         button: 'button.png'
+                    }
+                },
+                audio: {
+                    source: {
+                        thunder: 'thunder.ogg',
+                        sounds: 'sounds.ogg'
                     }
                 }
             }
@@ -67,9 +73,10 @@ glue.module.get(
                             sound.stop();
                             this.playing = false;
                         } else {
-                            sound = new Audio({
-                                urls: ['asset/audio/thunder.ogg']
-                            }).play();
+                            // get sound asset from loader
+                            sound = Loader.getAsset('thunder');
+                            // play the sound
+                            sound.play();
                             this.playing = true;
                         }
                     }

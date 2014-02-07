@@ -31,8 +31,8 @@ glue.module.get(
                 debug: true
             },
             asset: {
+                path: 'asset/',
                 image: {
-                    path: 'asset/',
                     source: {
                         tile: 'tile.png',
                         player: 'player.png',

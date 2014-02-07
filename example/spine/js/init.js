@@ -39,10 +39,9 @@ glue.module.get(
                     debug: true
                 },
                 asset: {
+                    path: 'asset/',
                     image: {
                         // Capivara spine animation is copyright by SpilGames
-                        // Will be replaced in the future
-                        path: 'asset/',
                         source: {
                             capivara: 'capivara.png',
                             capivara_sideview: 'capivara-sideview.png'
