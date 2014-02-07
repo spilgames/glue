@@ -11,8 +11,7 @@
             return {
                 module: adapters.glue.module,
                 sugar: adapters.glue.sugar,
-                component: adapters.glue.component,
-                game: adapters.glue.game
+                audio: adapters.glue.audio
             };
         }(adapters));
 
@@ -21,7 +20,6 @@
     };
     win.game = {};
     glue.module.create('glue', function () {
-        glue.audio = Howl;
         return glue;
     });
 }(window));

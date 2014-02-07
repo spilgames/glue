@@ -16,24 +16,6 @@ adapters.glue = (function (win, Glue) {
             config: win.requirejs.config
         },
         sugar: Glue.sugar,
-        component: function () {
-            var self = this;
-            return {
-               create: function (mixins, callback) {
-                    var i,
-                        l,
-                        mixinModules,
-                        mixed = {};
-                    
-                    self.module.get(mixins, function () {
-                        mixinModules = Array.prototype.slice.call(arguments);
-                        for (i = 0, l = mixinModules.length; i < l; ++i) {
-                            mixinModules[i](mixed)
-                        }
-                        callback.call(self, mixed);
-                    });
-                }
-            };
-        }
+        audio: Howl
     };
 }(window, modules.glue));

@@ -6019,25 +6019,7 @@ adapters.glue = (function (win, Glue) {
             config: win.requirejs.config
         },
         sugar: Glue.sugar,
-        component: function () {
-            var self = this;
-            return {
-               create: function (mixins, callback) {
-                    var i,
-                        l,
-                        mixinModules,
-                        mixed = {};
-                    
-                    self.module.get(mixins, function () {
-                        mixinModules = Array.prototype.slice.call(arguments);
-                        for (i = 0, l = mixinModules.length; i < l; ++i) {
-                            mixinModules[i](mixed)
-                        }
-                        callback.call(self, mixed);
-                    });
-                }
-            };
-        }
+        audio: Howl
     };
 }(window, modules.glue));
 /**
@@ -6053,8 +6035,7 @@ adapters.glue = (function (win, Glue) {
             return {
                 module: adapters.glue.module,
                 sugar: adapters.glue.sugar,
-                component: adapters.glue.component,
-                game: adapters.glue.game
+                audio: adapters.glue.audio
             };
         }(adapters));
 
@@ -6063,7 +6044,6 @@ adapters.glue = (function (win, Glue) {
     };
     win.game = {};
     glue.module.create('glue', function () {
-        glue.audio = Howl;
         return glue;
     });
 }(window));
