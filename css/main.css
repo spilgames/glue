@@ -38,11 +38,10 @@ body {
 	color: #333;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 10px;
-	line-height: 1;
 	margin: 15px;
 	display: inline-block;
 	background: #fff;
-	border: 1px solid #549b44;
+	border: 1px solid #ddd;
 	-webkit-border-radius: 10px;
 	-moz-border-radius: 10px;
 	border-radius: 10px;
@@ -55,18 +54,22 @@ body {
 	clear: both;
 }
 .header a {
-	color: #000;
-	text-decoration: underline;
+	color: #7d9ab0;
+}
+.header a:hover {
+	color: #333;
 }
 .header ul {
 	list-style: normal;
-	padding-left: 20px;
 }
 .header li {
 	font-family: "Lucida Grande", Verdana, sans-serif;
 	font-size: 12px;
 	color: #777;
 	padding-top: 5px;
+	list-style: none;
+	padding-left: 20px;
+	background: #ffffff url('../img/bullet.gif') 0 9px no-repeat;
 }
 .header .logo {
 	background: #ffffff url('../img/logo.png') 0 0 no-repeat;
