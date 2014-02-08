@@ -72,7 +72,7 @@ body {
 	background: #ffffff url('../img/bullet.gif') 0 9px no-repeat;
 }
 .header .logo {
-	background: #ffffff url('../img/logo.png') 0 0 no-repeat;
+	background: #ffffff url('../img/logo.png') 0 4px no-repeat;
 	width: 130px;
 	height: 123px;
 	float: left;
