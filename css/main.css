@@ -54,6 +54,10 @@ body {
 	padding: 20px;
 	clear: both;
 }
+.header a {
+	color: #000;
+	text-decoration: underline;
+}
 .header ul {
 	list-style: normal;
 	padding-left: 20px;
@@ -99,7 +103,6 @@ h2 {
 }
 a {
 	text-decoration: none;
-	color: #000033;
 }
 
 /* ------------------------------------------------------------
@@ -119,9 +122,12 @@ a {
 	float: none;
 	clear: both;
 	position: relative;	
-	background: #ffffff url('../img/L1-left.png') center bottom no-repeat;
+	background: #ffffff url('../img/left.png') center bottom no-repeat;
 	z-index: 2;
 	padding: 0 0 30px 0;
+}
+.mainNav .home a {
+	background-color: #cee3ac;
 }
 .mainNav .top {
 	display: block;
@@ -133,11 +139,11 @@ a {
 	margin: 0 auto;
 }
 .mainNav .first {
-	background: url('../img/L1-first.png') 53% top no-repeat;
+	background: url('../img/first.png') 53% top no-repeat;
 }
 .mainNav li {
 	float: left;
-	background: url('../img/L1-center.png') center top no-repeat;
+	background: url('../img/center.png') center top no-repeat;
 	padding: 30px 0;
 	margin-top: -30px;
 	display: inline-block;
@@ -197,7 +203,7 @@ a {
   visibility: visible;
 }
 .mainNav li:last-child {
-	background: url('../img/L1-right.png') center top no-repeat;
+	background: url('../img/right.png') center top no-repeat;
 }
 a:link:before,
 a:visited:before {
@@ -263,45 +269,5 @@ a:visited:after {
 .mainNav li li a:link:after,
 .mainNav li li a:visited:after {
 	color: #6faf5c;
-	font-size: 12px;
-}
-
-/* --------	Third Level --------- */
-
-.mainNav li li ul {
-	margin: 10px 0 0 0;
-	width: 100%;
-	float: right;
-	padding: 9px 0 20px 0;
-	background: #ffffff url('../img/L3-ul-top.png') center top no-repeat;
-}
-.mainNav li li li {
-	background: url('../img/L3-center.png') left center no-repeat;
-	padding: 5px 0;
-}
-.mainNav li li li a {
-	background-color: #fff7aa;
-	border-color: #e3ca4b;
-	font-size: 14px;
-	padding: 5px 0;
-	width: 75%;
-	float: right;
-}
-.mainNav li li li a:hover {
-	background-color: #fffce5;
-	border-color: #d1b62c;
-}
-.mainNav li li li:first-child {
-	padding: 15px 0 5px 0;
-	background: url('../img/L3-li-top.png') left center no-repeat;
-}
-.mainNav li li li:last-child {
-	background: url('../img/L3-bottom.png') left center no-repeat;
-}
-.mainNav li li li a:link:before,
-.mainNav li li li a:visited:before,
-.mainNav li li li a:link:after,
-.mainNav li li li a:visited:after {
-	color: #bbae14;
 	font-size: 12px;
 }
