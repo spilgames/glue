@@ -50,7 +50,7 @@ body {
 	box-shadow: 2px 2px 3px #999;	
 }
 .header {
-	padding: 20px;
+	padding: 10px;
 	clear: both;
 }
 .header a {
@@ -93,16 +93,16 @@ body {
 	clear: both;
 }
 h1 {
-	color: #466a3e;	
+	color: #566a3e;	
 	font-weight: bold;
 	font-size: 19px;
 	margin: 0 0 5px 0;
 }
 h2 {
 	font-family: "Lucida Grande", Verdana, sans-serif;
-	font-size: 12px;
-	color: #777777;
-	margin: 0 0 20px 0;
+	font-size: 15px;
+	color: #666;
+	margin: 0 0 11px 0;
 }
 a {
 	text-decoration: none;
