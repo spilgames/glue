@@ -34,9 +34,7 @@ glue.module.get(
             asset: {
                 path: 'asset/',
                 image: {
-                    source: {
-                        blocks: 'block-sheet.png'
-                    }
+                    blocks: 'block-sheet.png'
                 }
             }
         }, function () {

@@ -39,11 +39,9 @@ glue.module.get(
             asset: {
                 path: 'asset/',
                 image: {
-                    source: {
-                        ball: 'ball.png',
-                        ball2: 'ball2.png',
-                        logo: 'glue.png'
-                    }
+                    ball: 'ball.png',
+                    ball2: 'ball2.png',
+                    logo: 'glue.png'
                 }
             }
         }, function () {

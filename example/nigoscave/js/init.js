@@ -33,12 +33,10 @@ glue.module.get(
             asset: {
                 path: 'asset/',
                 image: {
-                    source: {
-                        tile: 'tile.png',
-                        player: 'player.png',
-                        logo: 'logo.png',
-                        bomb: 'bomb.png'
-                    }
+                    tile: 'tile.png',
+                    player: 'player.png',
+                    logo: 'logo.png',
+                    bomb: 'bomb.png'
                 }
             }
         }, function () {

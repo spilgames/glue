@@ -42,19 +42,17 @@ glue.module.get(
             asset: {
                 path: 'asset/',
                 image: {
-                    source: {
-                        bed: 'bed.png',
-                        chair: 'chair.png',
-                        enemy: 'enemy.png',
-                        eye: 'eye.png',
-                        hand: 'hand.png',
-                        jailBackground: 'jail-background.png',
-                        jailBars: 'jail-bars.png',
-                        jailDoor: 'jail-door.png',
-                        key: 'key.png',
-                        player: 'player.png',
-                        zzzBubble: 'zzz-bubble.png'
-                    }
+                    bed: 'bed.png',
+                    chair: 'chair.png',
+                    enemy: 'enemy.png',
+                    eye: 'eye.png',
+                    hand: 'hand.png',
+                    jailBackground: 'jail-background.png',
+                    jailBars: 'jail-bars.png',
+                    jailDoor: 'jail-door.png',
+                    key: 'key.png',
+                    player: 'player.png',
+                    zzzBubble: 'zzz-bubble.png'
                 }
             }
         }, function () {
