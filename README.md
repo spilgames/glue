@@ -1,6 +1,10 @@
 ![Logo](https://raw.github.com/spilgames/glue/gh-pages/img/logo.png)
 ### Glue Game Framework
 #### For games that stick
+* Modular
+* Component based
+* Works cross device
+* Easy to learn
 Copyright (C) 2014, [SpilGames](http://www.spilgames.com), all rights reserved.   
 Licensed under the BSD 3-Clause license, see the [license file](https://github.com/spilgames/5-glue-engine/blob/master/LICENSE).  
 Created & maintained by Jeroen Reurings - [Buffer-Overflow](https://github.com/Buffer-Overflow)  
