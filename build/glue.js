@@ -5949,6 +5949,19 @@ modules.glue.sugar = (function (win, doc) {
             }
         }());
 
+        CanvasRenderingContext2D.prototype.clear = 
+            CanvasRenderingContext2D.prototype.clear || function (preserveTransform) {
+                if (preserveTransform) {
+                    this.save();
+                    this.setTransform(1, 0, 0, 1, 0, 0);
+                }
+                this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (preserveTransform) {
+                    this.restore();
+                }           
+            };
+
     return {
         isVector: isVector,
         isString: isString,
@@ -8147,8 +8160,8 @@ glue.module.create(
                 }
             },
             redraw = function () {
-                backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
-                context2D.clearRect(0, 0, canvas.width, canvas.height);
+                backBufferContext2D.clear(true);
+                context2D.clear(true);
             }
             cycle = function (time) {
                 var deltaT,
@@ -10433,6 +10446,19 @@ modules.glue.sugar = (function (win, doc) {
                 };
             }
         }());
+
+        CanvasRenderingContext2D.prototype.clear = 
+            CanvasRenderingContext2D.prototype.clear || function (preserveTransform) {
+                if (preserveTransform) {
+                    this.save();
+                    this.setTransform(1, 0, 0, 1, 0, 0);
+                }
+                this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (preserveTransform) {
+                    this.restore();
+                }           
+            };
 
     return {
         isVector: isVector,

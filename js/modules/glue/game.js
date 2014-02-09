@@ -116,8 +116,8 @@ glue.module.create(
                 }
             },
             redraw = function () {
-                backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
-                context2D.clearRect(0, 0, canvas.width, canvas.height);
+                backBufferContext2D.clear(true);
+                context2D.clear(true);
             }
             cycle = function (time) {
                 var deltaT,
