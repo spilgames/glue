@@ -8453,10 +8453,10 @@ glue.module.create(
                     if (config.asset && config.asset.path) {
                         Loader.setAssetPath(config.asset.path);
                         if (config.asset.image) {
-                            Loader.setAssets('image', config.asset.image.source);
+                            Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image.source);
                         }
                         if (config.asset.audio) {
-                            Loader.setAssets('audio', config.asset.audio.source);
+                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio.source);
                         }
                         Loader.load(function () {
                             startup();
@@ -8559,22 +8559,96 @@ glue.module.create(
                     completedHandler();
                 }
             },
-            loadAsset = function (type, source) {
+            assetErrorHandler = function (name) {
+                throw 'An error occurred while trying to load asset ' + name;
+            },
+            loadImage = function (name, source, success, failure) {
+                // TODO: Implement failure
+                var asset = new Image();
+                asset.src = assetPath + 'image/' + source;
+                asset.addEventListener('load', success, false);
+                loadedAssets[name] = asset;
+            },
+            loadAudio = function (name, source, success, failure) {
+                // TODO: Implement failure
+                var asset = new Audio({
+                    urls: [assetPath + 'audio/' + source],
+                    onload: success
+                });
+                loadedAssets[name] = asset;
+            },            
+            loadJSON = function (name, source, success, failure) {
+                var xhr = new XMLHttpRequest();
+                if (xhr.overrideMimeType) {
+                    xhr.overrideMimeType('application/json');
+                }
+                xhr.open('GET', source, true);
+                xhr.onerror = function () {
+                    failure(name);
+                };
+                xhr.ontimeout = function () {
+                    failure(name);
+                };
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if ((xhr.status === 200) || ((xhr.status === 0) && xhr.responseText)) {
+                            loadedAssets[name] = JSON.parse(xhr.responseText);
+                            success();
+                        } else {
+                            failure(name);
+                        }
+                    }
+                };
+                xhr.send(null);
+            },
+            loadBinary = function (name, source, success, failure) {
+                var xhr = new XMLHttpRequest(),
+                    arrayBuffer,
+                    byteArray,
+                    buffer,
+                    i = 0;
+
+                xhr.open('GET', source, true);
+                xhr.onerror = function () {
+                    failure(name);
+                };
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = function (e) {
+                    arrayBuffer = xhr.response;
+                    if (arrayBuffer) {
+                        byteArray = new Uint8Array(arrayBuffer);
+                        buffer = [];
+                        for (i; i < byteArray.byteLength; ++i) {
+                            buffer[i] = String.fromCharCode(byteArray[i]);
+                        }
+                        loadedAssets[name] = buffer.join('');
+                        success();
+                    }
+                };
+                xhr.send();
+            },
+            loadAsset = function (name, type, source) {
                 var asset;
-                if (type === 'image') {
-                    asset = new Image();
-                    asset.src = assetPath + 'image/' + source;
-                    asset.addEventListener('load', assetLoadedHandler, false);
-                    return asset;
-                } else if (type === 'audio') {
-                    asset = new Audio({
-                        urls: [assetPath + 'audio/' + source],
-                        onload: assetLoadedHandler
-                    });
-                    return asset;
+                switch (type) {
+                    case module.ASSET_TYPE_IMAGE:
+                        loadImage(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
+                    case module.ASSET_TYPE_AUDIO:
+                        loadAudio(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
+                    case module.ASSET_TYPE_JSON:
+                        loadJSON(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
+                    case module.ASSET_TYPE_BINARY:
+                        loadBinary(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
                 }
             },
             module = {
+                ASSET_TYPE_IMAGE: 'image',
+                ASSET_TYPE_AUDIO: 'audio',
+                ASSET_TYPE_JSON: 'json',
+                ASSET_TYPE_BINARY: 'binary',
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
@@ -8595,9 +8669,9 @@ glue.module.create(
                     for (type in assets) {
                         if (assets.hasOwnProperty(type)) {
                             typeList = assets[type];
-                            for (source in typeList) {
-                                if (assets[type].hasOwnProperty(source)) {
-                                    loadedAssets[source] = loadAsset(type, typeList[source]);
+                            for (name in typeList) {
+                                if (typeList.hasOwnProperty(name)) {
+                                    loadAsset(name, type, typeList[name]);
                                 }
                             }
                         }
