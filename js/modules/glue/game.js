@@ -336,10 +336,16 @@ glue.module.create(
                     if (config.asset && config.asset.path) {
                         Loader.setAssetPath(config.asset.path);
                         if (config.asset.image) {
-                            Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image.source);
+                            Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image);
                         }
                         if (config.asset.audio) {
-                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio.source);
+                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
+                        }
+                        if (config.asset.json) {
+                            Loader.setAssets(Loader.ASSET_TYPE_JSON, config.asset.json);
+                        }
+                        if (config.asset.binary) {
+                            Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
                         }
                         Loader.load(function () {
                             startup();

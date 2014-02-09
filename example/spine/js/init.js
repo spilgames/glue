@@ -41,11 +41,16 @@ glue.module.get(
                 asset: {
                     path: 'asset/',
                     image: {
-                        // Capivara spine animation is copyright by SpilGames
-                        source: {
-                            capivara: 'capivara.png',
-                            capivara_sideview: 'capivara-sideview.png'
-                        }
+                        capivara: 'capivara.png',
+                        capivara_sideview: 'capivara-sideview.png'
+                    },
+                    json: {
+                        capivara_skeleton: 'asset/capivara-skeleton.json',
+                        capivara_sideview_skeleton: 'asset/capivara-skeleton-sideview.json'
+                    },
+                    binary: {
+                        capivara_atlas: 'asset/capivara.atlas',
+                        capivara_sideview_atlas: 'asset/capivara-sideview.atlas'
                     }
                 }
             }, function () {
@@ -57,9 +62,9 @@ glue.module.get(
                                     x: 300,
                                     y: 300
                                 },
-                                atlasImage: 'capivara_sideview',
-                                atlas: 'capivara_sideview_atlas',
-                                skeleton: 'capivara_sideview_skeleton',
+                                atlasImage: Loader.getAsset('capivara_sideview'),
+                                atlas: Loader.getAsset('capivara_sideview_atlas'),
+                                skeleton: Loader.getAsset('capivara_sideview_skeleton'),
                                 // optional setting: you can rescale the bones
                                 // useful for using differently sized assets
                                 skeletonResolution: 1

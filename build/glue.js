@@ -6931,92 +6931,6 @@ glue.module.create(
     function (Glue, Rectangle, Vector, Dimension, Loader) {
         // - cross instance private members -
 
-        // temporary
-        var assets = {},
-            loadJSON = function (data, success, failure) {
-                var xhr = new XMLHttpRequest();
-                if (xhr.overrideMimeType) {
-                    xhr.overrideMimeType('application/json');
-                }
-                xhr.open('GET', data.src, true);
-                xhr.onerror = failure;
-                xhr.ontimeout = failure;
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4) {
-                        if ((xhr.status === 200) || ((xhr.status === 0) && xhr.responseText)) {
-                            assets[data.name] = JSON.parse(xhr.responseText);
-                            success();
-                        } else {
-                            failure();
-                        }
-                    }
-                };
-                xhr.send(null);
-            },
-            loadBinary = function (data, success, failure) {
-                var xhr = new XMLHttpRequest(),
-                    arrayBuffer,
-                    byteArray,
-                    buffer,
-                    i = 0;
-
-                xhr.open('GET', data.src, true);
-                xhr.onerror = failure;
-                xhr.responseType = 'arraybuffer';
-                xhr.onload = function (e) {
-                    arrayBuffer = xhr.response;
-                    if (arrayBuffer) {
-                        byteArray = new Uint8Array(arrayBuffer);
-                        buffer = [];
-                        for (i; i < byteArray.byteLength; ++i) {
-                            buffer[i] = String.fromCharCode(byteArray[i]);
-                        }
-                        assets[data.name] = buffer.join('');
-                        success();
-                    }
-                };
-                xhr.send();
-            };
-
-        Loader.loadJSON = function (source, name, onLoad, onError) {
-            loadJSON({
-                name: name,
-                src: source
-            }, onLoad, onError);
-        };
-        Loader.loadBinary = function (source, name, onLoad, onError) {
-            loadBinary({
-                name: name,
-                src: source
-            }, onLoad, onError);
-        };
-
-        //load in assets 
-        Loader.loadJSON('asset/capivara-skeleton.json', 'capivara_skeleton', function () {
-            // console.log(assets);
-        });
-        Loader.loadJSON('asset/capivara-skeleton-sideview.json', 'capivara_sideview_skeleton', function () {
-            // console.log(assets);
-        });
-        Loader.loadBinary('asset/capivara.atlas', 'capivara_atlas', function () {
-            // console.log(assets);
-        });
-        Loader.loadBinary('asset/capivara-sideview.atlas', 'capivara_sideview_atlas', function () {
-            //console.log(assets);
-        });
-
-        //replacer functions for spine implementation
-        Loader.getJSON = function (str) {
-            return assets[str];
-        };
-        Loader.getBinary = function (str) {
-            return assets[str];
-        };
-        Loader.getImage = function (str) {
-            return Loader.getAsset(str);
-        };
-
-
         /**
          * Constructor
          * @name
@@ -7076,12 +6990,12 @@ glue.module.create(
                  * @function
                  */
                 addAtlas = function (spineSettings) {
-                    var atlasText = Loader.getBinary(spineSettings.atlas),
+                    var atlasText = spineSettings.atlas,
                         p = {},
                         image = spineSettings.atlasImage;
                     atlas[currentSkeleton] = new spine.Atlas(atlasText, {
                         load: function (page, path) {
-                            var texture = Loader.getImage(image);
+                            var texture = image;
                             page.image = texture;
                             page.width = texture.width;
                             page.height = texture.height;
@@ -7105,7 +7019,7 @@ glue.module.create(
                     }
 
                     skeletonData[currentSkeleton] = skeletonJson[currentSkeleton].readSkeletonData(
-                        Loader.getJSON(spineSettings.skeleton)
+                        spineSettings.skeleton
                     );
                     skeletons[currentSkeleton] = new spine.Skeleton(skeletonData[currentSkeleton]);
                     spine.Bone.yDown = true;
@@ -8453,10 +8367,16 @@ glue.module.create(
                     if (config.asset && config.asset.path) {
                         Loader.setAssetPath(config.asset.path);
                         if (config.asset.image) {
-                            Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image.source);
+                            Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image);
                         }
                         if (config.asset.audio) {
-                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio.source);
+                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
+                        }
+                        if (config.asset.json) {
+                            Loader.setAssets(Loader.ASSET_TYPE_JSON, config.asset.json);
+                        }
+                        if (config.asset.binary) {
+                            Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
                         }
                         Loader.load(function () {
                             startup();
