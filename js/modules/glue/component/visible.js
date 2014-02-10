@@ -98,7 +98,8 @@ glue.module.create(
                 },
                 setPosition: function (value) {
                     if (Sugar.isVector(value)) {
-                        position = value;
+                        position.x = value.x;
+                        position.y = value.y;
                         updateRectangle();
                     }
                 },
