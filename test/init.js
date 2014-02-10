@@ -31,9 +31,9 @@
         },
         // glue specs
         specs = [
-            'spec/modules/glue/example',
-            'spec/modules/glue/sugar.js',
-            'spec/modules/glue/baseobject.js'
+            'spec/modules/glue/baseobject.js',
+            'spec/modules/glue/component/visible.js',
+            'spec/modules/glue/sugar.js'
         ],
         // enable game canvas below for debugging
         showCanvas = false,
@@ -82,11 +82,9 @@
                             asset: {
                                 path: '../example/',
                                 image: {
-                                    source: {
-                                        glue: 'glue-logo.png',
-                                        spil: 'spil-logo.png',
-                                        dog: 'dog-sit.png'
-                                    }
+                                    glue: 'glue-logo.png',
+                                    spil: 'spil-logo.png',
+                                    dog: 'dog-sit.png'
                                 }
                             }
                         }, function () {
