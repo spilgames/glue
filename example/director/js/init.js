@@ -31,11 +31,9 @@ glue.module.get(
             asset: {
                 path: '../',
                 image: {
-                    source: {
-                        glue: 'glue-logo.png',
-                        spil: 'spil-logo.png',
-                        dog: 'dog-sit.png'
-                    }
+                    glue: 'glue-logo.png',
+                    spil: 'spil-logo.png',
+                    dog: 'dog-sit.png'
                 }
             }
         }, function () {

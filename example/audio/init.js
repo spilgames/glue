@@ -35,15 +35,11 @@ glue.module.get(
             asset: {
                 path: 'asset/',
                 image: {
-                    source: {
-                        button: 'button.png'
-                    }
+                    button: 'button.png'
                 },
                 audio: {
-                    source: {
-                        thunder: 'thunder.ogg',
-                        sounds: 'sounds.ogg'
-                    }
+                    thunder: 'thunder.ogg',
+                    sounds: 'sounds.ogg'
                 }
             }
         }, function () {

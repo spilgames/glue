@@ -37,9 +37,7 @@ glue.module.get(
             asset: {
                 path: 'asset/',
                 image: {
-                    source: {
-                        logoLD: 'glue-logo-ld.png'
-                    }
+                    logoLD: 'glue-logo-ld.png'
                 }
             }
         }, function () {

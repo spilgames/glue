@@ -40,19 +40,17 @@ glue.module.get(
             asset: {
                 path: 'asset/',
                 image: {
-                    source: {
-                        background: 'background.jpg',
-                        clouds: 'clouds.png',
-                        dog: 'dog-sit.png',
-                        hills: 'hills.gif',
-                        moon: 'moon.png',
-                        stones: 'stones.gif',
-                        tree: 'tree.png',
-                        standDown: 'stand-down.gif',
-                        standDownLeft: 'stand-down-left.gif',
-                        standDownRight: 'stand-down-right.gif',
-                        walk: 'walk.png'
-                    }
+                    background: 'background.jpg',
+                    clouds: 'clouds.png',
+                    dog: 'dog-sit.png',
+                    hills: 'hills.gif',
+                    moon: 'moon.png',
+                    stones: 'stones.gif',
+                    tree: 'tree.png',
+                    standDown: 'stand-down.gif',
+                    standDownLeft: 'stand-down-left.gif',
+                    standDownRight: 'stand-down-right.gif',
+                    walk: 'walk.png'
                 }
             }
         }, function () {

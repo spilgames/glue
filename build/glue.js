@@ -5949,6 +5949,19 @@ modules.glue.sugar = (function (win, doc) {
             }
         }());
 
+        CanvasRenderingContext2D.prototype.clear = 
+            CanvasRenderingContext2D.prototype.clear || function (preserveTransform) {
+                if (preserveTransform) {
+                    this.save();
+                    this.setTransform(1, 0, 0, 1, 0, 0);
+                }
+                this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (preserveTransform) {
+                    this.restore();
+                }           
+            };
+
     return {
         isVector: isVector,
         isString: isString,
@@ -6931,92 +6944,6 @@ glue.module.create(
     function (Glue, Rectangle, Vector, Dimension, Loader) {
         // - cross instance private members -
 
-        // temporary
-        var assets = {},
-            loadJSON = function (data, success, failure) {
-                var xhr = new XMLHttpRequest();
-                if (xhr.overrideMimeType) {
-                    xhr.overrideMimeType('application/json');
-                }
-                xhr.open('GET', data.src, true);
-                xhr.onerror = failure;
-                xhr.ontimeout = failure;
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4) {
-                        if ((xhr.status === 200) || ((xhr.status === 0) && xhr.responseText)) {
-                            assets[data.name] = JSON.parse(xhr.responseText);
-                            success();
-                        } else {
-                            failure();
-                        }
-                    }
-                };
-                xhr.send(null);
-            },
-            loadBinary = function (data, success, failure) {
-                var xhr = new XMLHttpRequest(),
-                    arrayBuffer,
-                    byteArray,
-                    buffer,
-                    i = 0;
-
-                xhr.open('GET', data.src, true);
-                xhr.onerror = failure;
-                xhr.responseType = 'arraybuffer';
-                xhr.onload = function (e) {
-                    arrayBuffer = xhr.response;
-                    if (arrayBuffer) {
-                        byteArray = new Uint8Array(arrayBuffer);
-                        buffer = [];
-                        for (i; i < byteArray.byteLength; ++i) {
-                            buffer[i] = String.fromCharCode(byteArray[i]);
-                        }
-                        assets[data.name] = buffer.join('');
-                        success();
-                    }
-                };
-                xhr.send();
-            };
-
-        Loader.loadJSON = function (source, name, onLoad, onError) {
-            loadJSON({
-                name: name,
-                src: source
-            }, onLoad, onError);
-        };
-        Loader.loadBinary = function (source, name, onLoad, onError) {
-            loadBinary({
-                name: name,
-                src: source
-            }, onLoad, onError);
-        };
-
-        //load in assets 
-        Loader.loadJSON('asset/capivara-skeleton.json', 'capivara_skeleton', function () {
-            // console.log(assets);
-        });
-        Loader.loadJSON('asset/capivara-skeleton-sideview.json', 'capivara_sideview_skeleton', function () {
-            // console.log(assets);
-        });
-        Loader.loadBinary('asset/capivara.atlas', 'capivara_atlas', function () {
-            // console.log(assets);
-        });
-        Loader.loadBinary('asset/capivara-sideview.atlas', 'capivara_sideview_atlas', function () {
-            //console.log(assets);
-        });
-
-        //replacer functions for spine implementation
-        Loader.getJSON = function (str) {
-            return assets[str];
-        };
-        Loader.getBinary = function (str) {
-            return assets[str];
-        };
-        Loader.getImage = function (str) {
-            return Loader.getAsset(str);
-        };
-
-
         /**
          * Constructor
          * @name
@@ -7076,12 +7003,12 @@ glue.module.create(
                  * @function
                  */
                 addAtlas = function (spineSettings) {
-                    var atlasText = Loader.getBinary(spineSettings.atlas),
+                    var atlasText = spineSettings.atlas,
                         p = {},
                         image = spineSettings.atlasImage;
                     atlas[currentSkeleton] = new spine.Atlas(atlasText, {
                         load: function (page, path) {
-                            var texture = Loader.getImage(image);
+                            var texture = image;
                             page.image = texture;
                             page.width = texture.width;
                             page.height = texture.height;
@@ -7105,7 +7032,7 @@ glue.module.create(
                     }
 
                     skeletonData[currentSkeleton] = skeletonJson[currentSkeleton].readSkeletonData(
-                        Loader.getJSON(spineSettings.skeleton)
+                        spineSettings.skeleton
                     );
                     skeletons[currentSkeleton] = new spine.Skeleton(skeletonData[currentSkeleton]);
                     spine.Bone.yDown = true;
@@ -8233,8 +8160,8 @@ glue.module.create(
                 }
             },
             redraw = function () {
-                backBufferContext2D.clearRect(0, 0, backBuffer.width, backBuffer.height);
-                context2D.clearRect(0, 0, canvas.width, canvas.height);
+                backBufferContext2D.clear(true);
+                context2D.clear(true);
             }
             cycle = function (time) {
                 var deltaT,
@@ -8453,10 +8380,16 @@ glue.module.create(
                     if (config.asset && config.asset.path) {
                         Loader.setAssetPath(config.asset.path);
                         if (config.asset.image) {
-                            Loader.setAssets('image', config.asset.image.source);
+                            Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image);
                         }
                         if (config.asset.audio) {
-                            Loader.setAssets('audio', config.asset.audio.source);
+                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
+                        }
+                        if (config.asset.json) {
+                            Loader.setAssets(Loader.ASSET_TYPE_JSON, config.asset.json);
+                        }
+                        if (config.asset.binary) {
+                            Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
                         }
                         Loader.load(function () {
                             startup();
@@ -8559,22 +8492,96 @@ glue.module.create(
                     completedHandler();
                 }
             },
-            loadAsset = function (type, source) {
+            assetErrorHandler = function (name) {
+                throw 'An error occurred while trying to load asset ' + name;
+            },
+            loadImage = function (name, source, success, failure) {
+                // TODO: Implement failure
+                var asset = new Image();
+                asset.src = assetPath + 'image/' + source;
+                asset.addEventListener('load', success, false);
+                loadedAssets[name] = asset;
+            },
+            loadAudio = function (name, source, success, failure) {
+                // TODO: Implement failure
+                var asset = new Audio({
+                    urls: [assetPath + 'audio/' + source],
+                    onload: success
+                });
+                loadedAssets[name] = asset;
+            },            
+            loadJSON = function (name, source, success, failure) {
+                var xhr = new XMLHttpRequest();
+                if (xhr.overrideMimeType) {
+                    xhr.overrideMimeType('application/json');
+                }
+                xhr.open('GET', source, true);
+                xhr.onerror = function () {
+                    failure(name);
+                };
+                xhr.ontimeout = function () {
+                    failure(name);
+                };
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if ((xhr.status === 200) || ((xhr.status === 0) && xhr.responseText)) {
+                            loadedAssets[name] = JSON.parse(xhr.responseText);
+                            success();
+                        } else {
+                            failure(name);
+                        }
+                    }
+                };
+                xhr.send(null);
+            },
+            loadBinary = function (name, source, success, failure) {
+                var xhr = new XMLHttpRequest(),
+                    arrayBuffer,
+                    byteArray,
+                    buffer,
+                    i = 0;
+
+                xhr.open('GET', source, true);
+                xhr.onerror = function () {
+                    failure(name);
+                };
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = function (e) {
+                    arrayBuffer = xhr.response;
+                    if (arrayBuffer) {
+                        byteArray = new Uint8Array(arrayBuffer);
+                        buffer = [];
+                        for (i; i < byteArray.byteLength; ++i) {
+                            buffer[i] = String.fromCharCode(byteArray[i]);
+                        }
+                        loadedAssets[name] = buffer.join('');
+                        success();
+                    }
+                };
+                xhr.send();
+            },
+            loadAsset = function (name, type, source) {
                 var asset;
-                if (type === 'image') {
-                    asset = new Image();
-                    asset.src = assetPath + 'image/' + source;
-                    asset.addEventListener('load', assetLoadedHandler, false);
-                    return asset;
-                } else if (type === 'audio') {
-                    asset = new Audio({
-                        urls: [assetPath + 'audio/' + source],
-                        onload: assetLoadedHandler
-                    });
-                    return asset;
+                switch (type) {
+                    case module.ASSET_TYPE_IMAGE:
+                        loadImage(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
+                    case module.ASSET_TYPE_AUDIO:
+                        loadAudio(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
+                    case module.ASSET_TYPE_JSON:
+                        loadJSON(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
+                    case module.ASSET_TYPE_BINARY:
+                        loadBinary(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
                 }
             },
             module = {
+                ASSET_TYPE_IMAGE: 'image',
+                ASSET_TYPE_AUDIO: 'audio',
+                ASSET_TYPE_JSON: 'json',
+                ASSET_TYPE_BINARY: 'binary',
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
@@ -8595,9 +8602,9 @@ glue.module.create(
                     for (type in assets) {
                         if (assets.hasOwnProperty(type)) {
                             typeList = assets[type];
-                            for (source in typeList) {
-                                if (assets[type].hasOwnProperty(source)) {
-                                    loadedAssets[source] = loadAsset(type, typeList[source]);
+                            for (name in typeList) {
+                                if (typeList.hasOwnProperty(name)) {
+                                    loadAsset(name, type, typeList[name]);
                                 }
                             }
                         }
@@ -10439,6 +10446,19 @@ modules.glue.sugar = (function (win, doc) {
                 };
             }
         }());
+
+        CanvasRenderingContext2D.prototype.clear = 
+            CanvasRenderingContext2D.prototype.clear || function (preserveTransform) {
+                if (preserveTransform) {
+                    this.save();
+                    this.setTransform(1, 0, 0, 1, 0, 0);
+                }
+                this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (preserveTransform) {
+                    this.restore();
+                }           
+            };
 
     return {
         isVector: isVector,
