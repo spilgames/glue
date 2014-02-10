@@ -1,3 +1,16 @@
+version 0.0.8 
+February 10, 2014
+
+- Added SAT
+- Added Kineticable component
+- Added Math circle
+- Added Spatial Hashmap
+- Added Nigo's Cave game to examples to demo SAT and Physics
+- Added JSON and Binary files to Loader
+- Added the Howler plugin for playing audio cross device
+- Added Tweenable component (Robbert Penner's easing equations)
+- Updated documentation
+
 version 0.0.7 
 January 6, 2014
 
