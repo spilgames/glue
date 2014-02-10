@@ -5964,6 +5964,7 @@ modules.glue.sugar = (function (win, doc) {
 
     return {
         isVector: isVector,
+        isDimension: isDimension,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
@@ -7781,6 +7782,7 @@ glue.module.create(
             object = object || {};
             object.visible = {
                 setup: function (settings) {
+                    var customPosition;
                     if (settings) {
                         if (settings.image) {
                             image = settings.image;
@@ -7790,24 +7792,26 @@ glue.module.create(
                             customPosition = settings.position;
                             // using proper rounding:
                             // http://jsperf.com/math-round-vs-hack/66
-                            position = Vector(
+                            this.setPosition(Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
-                            );
+                            ));
                         }
                         if (settings.dimension) {
-                            dimension = settings.dimension;
+                            this.setDimension(settings.dimension);
                         } else if (image) {
-                            dimension = {
-                                width: image.naturalWidth,
-                                height: image.naturalHeight
-                            };
-                            rectangle = Rectangle(
+                            this.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
+                        }
+                        if (Sugar.isDefined(dimension)) {
+                            this.setBoundingBox(Rectangle(
                                 position.x,
                                 position.y,
                                 position.x + dimension.width,
                                 position.y + dimension.height
-                            );
+                            ));
+                        }
+                        if (settings.origin) {
+                            this.setOrigin(settings.origin);
                         }
                     }
                 },
@@ -7837,8 +7841,7 @@ glue.module.create(
                 },
                 setPosition: function (value) {
                     if (Sugar.isVector(value)) {
-                        position.x = value.x;
-                        position.y = value.y;
+                        position = value;
                         updateRectangle();
                     }
                 },
@@ -7846,11 +7849,10 @@ glue.module.create(
                     return dimension;
                 },
                 setDimension: function (value) {
-                    if (Sugar.isVector(value)) {
-                        dimension.width = value.x;
-                        dimension.height = value.y;
+                    if (Sugar.isDimension(value)) {
+                        dimension = value;
+                        updateRectangle();
                     }
-                    updateRectangle();
                 },
                 getBoundingBox: function () {
                     return rectangle;
@@ -7860,10 +7862,7 @@ glue.module.create(
                 },
                 setImage: function (value) {
                     image = value;
-                    dimension = {
-                        width: image.naturalWidth,
-                        height: image.naturalHeight
-                    };
+                    dimension = Dimension(image.naturalWidth, image.naturalHeight);
                     updateRectangle();
                 },
                 getImage: function () {
@@ -10462,6 +10461,7 @@ modules.glue.sugar = (function (win, doc) {
 
     return {
         isVector: isVector,
+        isDimension: isDimension,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
