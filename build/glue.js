@@ -8133,12 +8133,12 @@ glue.module.create(
                 });
             },
             addObjects = function () {
-                var component;
+                var object;
                 if (addedObjects.length) {
                     for (var i = 0; i < addedObjects.length; ++i) {
-                        component = addedObjects[i];
-                        if (component.init) {
-                            component.init();
+                        object = addedObjects[i];
+                        if (object.init) {
+                            object.init();
                         }
                         objects.push(addedObjects[i]);
                     };
@@ -8147,14 +8147,14 @@ glue.module.create(
                 }
             },
             removeObjects = function () {
-                var component;
+                var object;
                 if (removedObjects.length) {
                     for (var i = 0; i < removedObjects.length; ++i) {
-                        component = removedObjects[i];
-                        if (component.destroy) {
-                            component.destroy();
+                        object = removedObjects[i];
+                        if (object.destroy) {
+                            object.destroy();
                         }
-                        Sugar.removeObject(objects, component);
+                        Sugar.removeObject(objects, object);
                     };
                     removedObjects = [];
                 }
