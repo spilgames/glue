@@ -47,7 +47,6 @@ glue.module.create(
             };
 
             object.register('pointerDown', object.clickable.pointerDown);
-            object.register('pointerUp', object.clickable.pointerUp);
 
             return object;
         };
