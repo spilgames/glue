@@ -277,8 +277,7 @@ modules.glue.sugar = (function (win, doc) {
          * Will combine two objects (or arrays)
          * The properties of the second object will be added to the first
          * If the second object contains the same property name as the first
-         * object, the property will be overwritten, so property two is
-         * leading
+         * object, the property will be saved in the base property
          * @param {Object} The first object
          * @param {Object} The second object
          * @return {Object} If both params are objects: The combined first
@@ -293,6 +292,10 @@ modules.glue.sugar = (function (win, doc) {
             }
             for (prop in obj2) {
                 if (this.has(obj2, prop)) {
+                    if (this.has(obj1, prop)) {
+                        obj1['base'] = obj1['base'] || {};
+                        obj1['base'][prop] = obj1[prop];
+                    }
                     if (this.isObject(obj2[prop])) {
                         obj1[prop] = clone(obj2[prop]);
                     } else {

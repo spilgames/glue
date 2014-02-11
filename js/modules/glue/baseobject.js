@@ -16,10 +16,7 @@ glue.module.create(
             var name = '',
                 module = {
                     add: function (object) {
-                        return Sugar.combine(this, object)
-                    },
-                    overwrite: function (object) {
-                        
+                        return Sugar.combine(this, object);
                     }
                 },
                 mixins = Array.prototype.slice.call(arguments),

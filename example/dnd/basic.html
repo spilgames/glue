@@ -36,8 +36,11 @@
                     }
                 }, function () {
                     var object = BaseObject(Visible, Draggable).add({
+                            pointerDown: function (e) {
+                                this.base.pointerDown(e);
+                                console.log('add custom logic');
+                            }
                         });
-
 
                     object.visible.setup({
                         image: Loader.getAsset('glueLogo')
