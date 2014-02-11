@@ -57,7 +57,7 @@ glue.module.get(
                     },
                     draw: function (deltaT, context) {
                         var value = this.playing ? 'Stop' : 'Play';
-                        //this.base.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                         context.font = '20px Verdana';
                         context.fillText(value, buttonPosition.x + 30, buttonPosition.y + 30);
                     },
