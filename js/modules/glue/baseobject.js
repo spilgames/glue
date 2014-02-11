@@ -11,12 +11,12 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
+        var Sugar = Glue.sugar;
         return function () {
             var name = '',
                 module = {
-                    add: function (value) {
-                        this.mix(value);
-                        return this;
+                    add: function (object) {
+                        return Sugar.combine(this, object)
                     }
                 },
                 mixins = Array.prototype.slice.call(arguments),
@@ -28,14 +28,14 @@ glue.module.create(
                 mixin = mixins[i];
                 mixin(module);
             }
-            return module.mix({
+            return Sugar.combine(module, {
                 setName: function (value) {
                     name = value;
                 },
                 getName: function (value) {
                     return name;
                 }
-            })
+            });
         };
     }
 );

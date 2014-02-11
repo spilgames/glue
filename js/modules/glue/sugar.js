@@ -821,32 +821,6 @@ modules.glue.sugar = (function (win, doc) {
             };
         }
 
-        /**
-         * Can be used to mix modules, to combine abilities
-         * @name mix
-         * @memberOf Object.prototype
-         * @function
-         * @param {Object} mixin: the object you want to throw in the mix
-         */
-         // there ain't no problem we can't fix, cause we can do it in the mix
-        if (!Object.prototype.mix) {
-            Object.prototype.mix = function (mixin) {
-                var i,
-                    self = this;
-
-                // iterate over the mixin properties
-                for (i in mixin) {
-                    // if the current property belongs to the mixin
-                    if (mixin.hasOwnProperty(i)) {
-                        // add the property to the mix
-                        self[i] = mixin[i];
-                    }
-                }
-                // return the mixed object
-                return self;
-            };
-        };
-
         // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
         // http://my.opera.com/emoller/blog/2011/12/20
         //  /requestanimationframe-for-smart-er-animating
