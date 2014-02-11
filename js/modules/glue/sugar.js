@@ -905,6 +905,7 @@ modules.glue.sugar = (function (win, doc) {
 
     return {
         isVector: isVector,
+        isDimension: isDimension,
         isString: isString,
         isArray: isArray,
         isObject: isObject,

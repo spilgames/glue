@@ -9,11 +9,31 @@
             'plugins/plugins.js',
             'spec/spechelper.js',
             // glue
-            '../build/glue.js',
+            '../build/glue.js'
+            //'../build/glue.min.js'
         ],
+        init = function () {
+            // load includes and test scripts
+            for (i = 0, l = testScripts.length; i < l; ++i) {
+                var script = document.createElement('script');
+                // create script and append to head
+                script.src = testScripts[i];
+                script.async = false;
+                document.head.appendChild(script);
+                // call the callback function when a script is loaded
+                script.onreadystatechange = script.onload = function () {
+                    var state = script.readyState;
+                    if (!state || /loaded|complete/.test(state)) {
+                        callback();
+                    }
+                };
+            }
+        },
         // glue specs
         specs = [
-            'spec/modules/glue/example'
+            'spec/modules/glue/baseobject.js',
+            'spec/modules/glue/component/visible.js',
+            'spec/modules/glue/sugar.js'
         ],
         // enable game canvas below for debugging
         showCanvas = false,
@@ -46,40 +66,35 @@
                 // load non spec module dependencies
                 specs.unshift('glue');
                 specs.unshift('glue/game');
+                specs.unshift('glue/math/dimension');
                 // load spec modules
                 glue.module.get(
                     specs,
-                    function (Game, Glue) {
+                    function (Dimension, Game, Glue) {
                         Game.setup({
+                            game: {
+                                name: 'Director'
+                            },
                             canvas: {
                                 id: 'canvas',
-                                dimension: {
-                                    width: 800,
-                                    height: 600
+                                dimension: Dimension(800, 600)
+                            },
+                            asset: {
+                                path: '../example/',
+                                image: {
+                                    glue: 'glue-logo.png',
+                                    spil: 'spil-logo.png',
+                                    dog: 'dog-sit.png'
                                 }
                             }
                         }, function () {
-                            // load jasmine
+                            document.getElementById('canvas').style.display = 'none';
                             loadJasmine();
                         });
-                        return;
                     }
                 );
             }
         };
-    // load includes and test scripts
-    for (i = 0, l = testScripts.length; i < l; ++i) {
-        var script = document.createElement('script');
-        // create script and append to head
-        script.src = testScripts[i];
-        script.async = false;
-        document.head.appendChild(script);
-        // call the callback function when a script is loaded
-        script.onreadystatechange = script.onload = function () {
-            var state = script.readyState;
-            if (!state || /loaded|complete/.test(state)) {
-                callback();
-            }
-        };
-    }
+
+    init();
 }());
