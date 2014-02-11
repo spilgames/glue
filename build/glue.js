@@ -6059,20 +6059,65 @@ glue.module.create(
                 mixins = Array.prototype.slice.call(arguments),
                 mixin = null,
                 l = mixins.length,
-                i = 0;
+                i = 0,
+                j = 0,
+                typeRegistrants,
+                typeRegistrantsLength,
+                typeRegistrant,
+                acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
+                registrants = {
+                    init: [],
+                    draw: [],
+                    update: [],
+                    pointerDown: [],
+                    pointerMove: [],
+                    pointerUp: []
+                },
+                callRegistrants = function (type, parameters) {
+                    parameters = Array.prototype.slice.call(parameters);
+                    typeRegistrants = registrants[type];
+                    typeRegistrantsLength = typeRegistrants.length;
+                    for (j = 0; j < typeRegistrantsLength; ++j) {
+                        typeRegistrants[j].apply(null, parameters);
+                    }
+                };
 
-            for (i; i < l; ++i) {
-                mixin = mixins[i];
-                mixin(module);
-            }
-            return Sugar.combine(module, {
+            module = Sugar.combine(module, {
                 setName: function (value) {
                     name = value;
                 },
                 getName: function (value) {
                     return name;
+                },
+                init: function () {
+                    callRegistrants('init', arguments);
+                },
+                update: function (deltaT) {
+                    callRegistrants('update', arguments);                  
+                },
+                draw: function (deltaT, context, scroll) {
+                    callRegistrants('draw', arguments);
+                },
+                pointerDown: function (e) {
+                    callRegistrants('pointerDown', arguments);
+                },
+                pointerMove: function (e) {
+                    callRegistrants('pointerMove', arguments);
+                },
+                pointerUp: function (e) {
+                    callRegistrants('pointerUp', arguments);
+                },
+                register: function (type, callback) {
+                    if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(callback)) {
+                        registrants[type].push(callback);
+                    }
                 }
             });
+            for (i; i < l; ++i) {
+                mixin = mixins[i];
+                mixin(module);
+            }
+            return module;
         };
     }
 );
@@ -6393,6 +6438,11 @@ glue.module.create(
                     dragStartTimeout = value;
                 }
             };
+
+            // Register methods to base object
+            object.register('pointerDown', object.draggable.pointerDown);
+            object.register('pointerMove', object.draggable.pointerMove);
+            object.register('pointerUp', object.draggable.pointerUp);
 
             return object;
         };
@@ -7722,8 +7772,6 @@ glue.module.create(
  *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/visible',
@@ -7788,6 +7836,9 @@ glue.module.create(
                             this.setOrigin(settings.origin);
                         }
                     }
+
+                    // Register methods to base object
+                    object.register('draw', this.draw);
                 },
                 draw: function (deltaT, context, scroll) {
                     scroll = scroll || Vector(0, 0);
