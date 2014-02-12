@@ -6995,9 +6995,9 @@ glue.module.create(
                         currentSkeleton = spineSettings.assets[i];
                         addAtlas(spineSettings.assets[i]);
                         addSkeletonData(spineSettings.assets[i]);
-                        if (spineSettings.position && object.visible) {
-                            object.visible.setPosition(spineSettings.position);
-                        }
+                    }
+                    if (spineSettings.position && object.visible) {
+                        object.visible.setPosition(spineSettings.position);
                     }
                     // set skeleton back to first specified
                 },
@@ -7029,7 +7029,8 @@ glue.module.create(
                  * @function
                  */
                 addSkeletonData = function (assetName) {
-                    var i = 0;
+                    var i = 0,
+                        name;
                     skeletonJson[currentSkeleton] = new spine.SkeletonJson(
                         new spine.AtlasAttachmentLoader(atlas[currentSkeleton])
                     );
@@ -7053,10 +7054,12 @@ glue.module.create(
 
                     // remember which animations belong to which animation
                     for (i; i < skeletonData[currentSkeleton].animations.length; ++i) {
-                        animations[skeletonData[currentSkeleton].animations[i].name] = currentSkeleton;
-                        console.log(skeletonData[currentSkeleton].animations[i].name);
+                        name = skeletonData[currentSkeleton].animations[i].name;
+                        if (Sugar.has(animations, name)) {
+                            throw ('Animation with name ' + name + ' already exists');
+                        }
+                        animations[name] = currentSkeleton;
                     }
-
                     calculateRectangle();
                 },
                 /**
@@ -7097,6 +7100,36 @@ glue.module.create(
                     cornerPoints[currentSkeleton].x = skeletonRectangle.x1 - rootBone.x;
                     cornerPoints[currentSkeleton].y = skeletonRectangle.y1 - rootBone.y;
                     origins[currentSkeleton] = Vector(0, 0);
+                    // set default origin
+                    switch (settings.origin) {
+                    case object.spineable.ORIGIN_CENTER:
+                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth() / 2, skeletonRectangle.getHeight() / 2);
+                        break;
+                    case object.spineable.ORIGIN_TOP:
+                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth() / 2, 0);
+                        break;
+                    case object.spineable.ORIGIN_BOTTOM:
+                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth() / 2, skeletonRectangle.getHeight());
+                        break;
+                    case object.spineable.ORIGIN_LEFT:
+                        origins[currentSkeleton] = Vector(0, skeletonRectangle.getHeight() / 2);
+                        break;
+                    case object.spineable.ORIGIN_RIGHT:
+                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth(), skeletonRectangle.getHeight() / 2);
+                        break;
+                    case object.spineable.ORIGIN_TOP_LEFT:
+                        origins[currentSkeleton] = Vector(0, 0);
+                        break;
+                    case object.spineable.ORIGIN_TOP_RIGHT:
+                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth(), 0);
+                        break;
+                    case object.spineable.ORIGIN_BOTTOM_LEFT:
+                        origins[currentSkeleton] = Vector(0, skeletonRectangle.getHeight());
+                        break;
+                    case object.spineable.ORIGIN_BOTTOM_RIGHT:
+                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth(), skeletonRectangle.getHeight());
+                        break;
+                    }
                     updateVisible();
                 },
                 /**
@@ -7130,8 +7163,8 @@ glue.module.create(
                 ORIGIN_LEFT: 3,
                 ORIGIN_RIGHT: 4,
                 ORIGIN_TOP_LEFT: 5,
-                ORIGIN_BOTTOM_LEFT: 6,
-                ORIGIN_TOP_RIGHT: 7,
+                ORIGIN_TOP_RIGHT: 6,
+                ORIGIN_BOTTOM_LEFT: 7,
                 ORIGIN_BOTTOM_RIGHT: 8,
                 /**
                  * Draw the spine component
@@ -7199,8 +7232,8 @@ glue.module.create(
                     context.restore();
 
                     // draw boundingbox
-                    var b=object.visible.getBoundingBox();
-                    context.strokeRect(b.x1,b.y1,b.getWidth(),b.getHeight());
+                    var b = object.visible.getBoundingBox();
+                    context.strokeRect(b.x1, b.y1, b.getWidth(), b.getHeight());
                 },
                 /**
                  * Update the animation
@@ -7247,9 +7280,14 @@ glue.module.create(
                  * @param {String} animationName: Name of the animation
                  */
                 setAnimation: function (animationName) {
+                    if (!Sugar.has(animations, animationName)) {
+                        throw ('There is no skeleton which contains an animation called ' + animationName);
+                    }
                     if (currentAnimationStr === animationName) {
                         return false;
                     }
+                    // set to correct skeleton if needed
+                    object.spineable.setSkeleton(animations[animationName]);
                     object.spineable.setAnimationByName(0, animationName, true);
                     return true;
                 },
@@ -7302,7 +7340,7 @@ glue.module.create(
                         return;
                     }
                     currentSkeleton = strSkeleton;
-                    object.spineable.update();
+                    updateVisible();
                 },
                 /**
                  * Returns the name of the current skeleton json
@@ -7314,15 +7352,20 @@ glue.module.create(
                     return currentSkeleton;
                 },
                 /**
-                 * Sets the origin of the current skeleton (it's summed with visible's origin)
+                 * Sets the origin of the a skeleton (it's summed with visible's origin)
                  * @name setOrigin
                  * @memberOf Spineable
                  * @function
                  * @param {Object} pos: x and y position relative to the upper left corner point
                  */
-                setOrigin: function (pos) {
-                    origins[currentSkeleton] = pos;
-                    updateVisible();
+                setOrigin: function (pos, skeletonName) {
+                    if (Sugar.has(origins, skeletonName)) {
+                        throw ("This skeleton doesn't exist: " + skeletonName);
+                    }
+                    origins[skeletonName] = pos;
+                    if (currentSkeleton === skeletonName) {
+                        updateVisible();
+                    }
                 },
                 /**
                  * Gets the origin of the current skeleton
