@@ -7483,6 +7483,9 @@ glue.module.create(
                 }
             };
 
+            object.register('update', object.rotatable.update);
+            object.register('draw', object.rotatable.draw);
+
             return object;
         };
     }
@@ -7591,6 +7594,9 @@ glue.module.create(
                         ); 
                 }
             };
+
+            object.register('update', object.scalable.update);
+            object.register('draw', object.scalable.draw);
 
             return object;
         };

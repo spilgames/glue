@@ -118,6 +118,9 @@ glue.module.create(
                 }
             };
 
+            object.register('update', object.rotatable.update);
+            object.register('draw', object.rotatable.draw);
+
             return object;
         };
     }
