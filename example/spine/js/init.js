@@ -42,15 +42,15 @@ glue.module.get(
                     path: 'asset/',
                     image: {
                         capivara: 'capivara.png',
-                        capivara_sideview: 'capivara-sideview.png'
+                        capivara_sideview: 'capivara_sideview.png'
                     },
                     json: {
-                        capivara_skeleton: 'asset/capivara-skeleton.json',
-                        capivara_sideview_skeleton: 'asset/capivara-skeleton-sideview.json'
+                        capivara: 'asset/capivara.json',
+                        capivara_sideview: 'asset/capivara_sideview.json'
                     },
                     binary: {
-                        capivara_atlas: 'asset/capivara.atlas',
-                        capivara_sideview_atlas: 'asset/capivara-sideview.atlas'
+                        capivara: 'asset/capivara.atlas',
+                        capivara_sideview: 'asset/capivara_sideview.atlas'
                     }
                 }
             }, function () {
@@ -62,9 +62,7 @@ glue.module.get(
                                     x: 300,
                                     y: 300
                                 },
-                                atlasImage: Loader.getAsset('capivara_sideview'),
-                                atlas: Loader.getAsset('capivara_sideview_atlas'),
-                                skeleton: Loader.getAsset('capivara_sideview_skeleton'),
+                                assets: ['capivara', 'capivara_sideview'],
                                 // optional setting: you can rescale the bones
                                 // useful for using differently sized assets
                                 skeletonResolution: 1
