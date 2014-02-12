@@ -55,21 +55,6 @@ glue.module.get(
                         this.kineticable.setup({
                             dynamic: false
                         });
-                    },
-                    update: function (deltaT) {
-                        this.kineticable.update(deltaT);
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
-                    },
-                    pointerDown: function (e) {
-                        this.draggable.pointerDown(e);
-                    },
-                    pointerMove: function (e) {
-                        this.draggable.pointerMove(e);
-                    },
-                    pointerUp: function (e) {
-                        this.draggable.pointerUp(e);
                     }
                 }),
                 position,
@@ -93,11 +78,8 @@ glue.module.get(
                         if (position.y > Game.canvas.getDimension().height) {
                             position.y = -this.visible.getDimension().height;
                         }
-                        this.kineticable.update(deltaT);
+                        this.base.update(deltaT);
                         SAT.collide(obj1, obj2);
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 });
 

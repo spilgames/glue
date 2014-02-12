@@ -6874,6 +6874,9 @@ glue.module.create(
                     return side;
                 }
             };
+
+            object.register('update', object.kineticable.update);
+
             return object;
         }
     }
