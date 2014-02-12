@@ -6492,9 +6492,6 @@ glue.module.create(
                 },
                 destroy: function () {
                     Event.off('draggable.drop', draggableDropHandler);
-                },
-                update: function (deltaT) {
-
                 }
             };
 
@@ -6961,6 +6958,9 @@ glue.module.create(
                     moveSpeed = speed;
                 }
             };
+
+            object.register('update', object.movable.update);
+
             return object;
         };
     }

@@ -33,9 +33,6 @@ glue.module.create(
                 },
                 destroy: function () {
                     Event.off('draggable.drop', draggableDropHandler);
-                },
-                update: function (deltaT) {
-
                 }
             };
 
