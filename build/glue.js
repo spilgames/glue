@@ -6549,7 +6549,7 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (context, deltaT) {
+                draw: function (deltaT, context) {
                     context.globalAlpha = alpha;
                 },
                 fade: function (callback, startAlpha, endAlpha) {
@@ -6605,6 +6605,9 @@ glue.module.create(
                     return !fadingIn && !fadingOut;
                 }
             };
+
+            object.register('draw', object.fadable.draw);
+            object.register('update', object.fadable.update);
 
             return object;
         };
