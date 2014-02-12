@@ -6651,19 +6651,13 @@ glue.module.create(
 
             object = object || {};
             object.hoverable = {
-                setup: function (settings) {
-
-                },
-                destroy: function () {
-
-                },
-                update: function (deltaT) {
-
-                },
                 pointerMove: function (e) {
                     pointerMoveHandler(e);
                 }
             };
+
+            object.register('pointerMove', object.hoverable.pointerMove);
+
             return object;
         };
     }
