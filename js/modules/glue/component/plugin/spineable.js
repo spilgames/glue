@@ -257,8 +257,8 @@ glue.module.create(
                     context.restore();
 
                     // draw boundingbox
-                    var b = object.visible.getBoundingBox();
-                    context.strokeRect(b.x1, b.y1, b.getWidth(), b.getHeight());
+                    // var b = object.visible.getBoundingBox();
+                    // context.strokeRect(b.x1, b.y1, b.getWidth(), b.getHeight());
                 },
                 /**
                  * Update the animation
