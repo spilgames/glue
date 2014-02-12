@@ -39,6 +39,7 @@ glue.module.create(
             fpsAccumulator = 0,
             fpsTicks = 0,
             fpsMaxAverage = 500000,
+            useSort = true,
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -99,7 +100,9 @@ glue.module.create(
                         objects.push(addedObjects[i]);
                     };
                     addedObjects = [];
-                    sort();
+                    if (useSort) {
+                        sort();
+                    }
                 }
             },
             removeObjects = function () {
@@ -128,8 +131,9 @@ glue.module.create(
                 if (isRunning) {
                     requestAnimationFrame(cycle);
                 }
-                sort();
-
+                if (useSort) {
+                    sort();
+                }
                 if (canvasSupported) {
                     redraw();
                     removeObjects();
@@ -325,6 +329,9 @@ glue.module.create(
                         debugBar = document.createElement('div');
                         debugBar.id = 'debugBar';
                         document.body.appendChild(debugBar);
+                    }
+                    if (config.sort && config.sort === false) {
+                        useSort = false;
                     }
                     /*
                     // save color in variable and move code before calling other draw functions
