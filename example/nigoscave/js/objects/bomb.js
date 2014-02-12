@@ -53,7 +53,7 @@ glue.module.create(
 						var i,
 							len;
 						if (this.active) {
-							this.kineticable.update(deltaT);
+							this.base.update(deltaT);
 							if (millisecs() - timer > life) {
 								this.active = false;
 								explode = true;

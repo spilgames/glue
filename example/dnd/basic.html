@@ -35,22 +35,7 @@
                         }
                     }
                 }, function () {
-                    var object = BaseObject(Visible, Draggable).add({
-                            draw: function (deltaT, context) {
-                                this.visible.draw(deltaT, context);
-                            },
-                            pointerDown: function (e) {
-                                this.draggable.pointerDown(e);
-                            },
-                            pointerMove: function (e) {
-                                this.draggable.pointerMove(e);
-                            },
-                            pointerUp: function (e) {
-                                this.draggable.pointerUp(e);
-                            }
-                        });
-
-
+                    var object = BaseObject(Visible, Draggable);
                     object.visible.setup({
                         image: Loader.getAsset('glueLogo')
                     });

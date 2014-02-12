@@ -38,21 +38,8 @@ glue.module.create(
                         });
                         this.animatable.setAnimation('wiggleTail');
                     },
-                    update: function (deltaT, context) {
-                        this.animatable.update(deltaT);
-                        this.draggable.update(deltaT);
-                    },
                     draw: function (deltaT, context, scroll) {
                         this.animatable.draw(deltaT, context, scroll);
-                    },
-                    pointerDown: function (e) {
-                        this.draggable.pointerDown(e);
-                    },
-                    pointerMove: function (e) {
-                        this.draggable.pointerMove(e);
-                    },
-                    pointerUp: function (e) {
-                        this.draggable.pointerUp(e);
                     }
                 });
             return object;

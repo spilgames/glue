@@ -5336,8 +5336,7 @@ modules.glue.sugar = (function (win, doc) {
          * Will combine two objects (or arrays)
          * The properties of the second object will be added to the first
          * If the second object contains the same property name as the first
-         * object, the property will be overwritten, so property two is
-         * leading
+         * object, the property will be saved in the base property
          * @param {Object} The first object
          * @param {Object} The second object
          * @return {Object} If both params are objects: The combined first
@@ -5352,6 +5351,10 @@ modules.glue.sugar = (function (win, doc) {
             }
             for (prop in obj2) {
                 if (this.has(obj2, prop)) {
+                    if (this.has(obj1, prop)) {
+                        obj1['base'] = obj1['base'] || {};
+                        obj1['base'][prop] = obj1[prop];
+                    }
                     if (this.isObject(obj2[prop])) {
                         obj1[prop] = clone(obj2[prop]);
                     } else {
@@ -5880,32 +5883,6 @@ modules.glue.sugar = (function (win, doc) {
             };
         }
 
-        /**
-         * Can be used to mix modules, to combine abilities
-         * @name mix
-         * @memberOf Object.prototype
-         * @function
-         * @param {Object} mixin: the object you want to throw in the mix
-         */
-         // there ain't no problem we can't fix, cause we can do it in the mix
-        if (!Object.prototype.mix) {
-            Object.prototype.mix = function (mixin) {
-                var i,
-                    self = this;
-
-                // iterate over the mixin properties
-                for (i in mixin) {
-                    // if the current property belongs to the mixin
-                    if (mixin.hasOwnProperty(i)) {
-                        // add the property to the mix
-                        self[i] = mixin[i];
-                    }
-                }
-                // return the mixed object
-                return self;
-            };
-        };
-
         // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
         // http://my.opera.com/emoller/blog/2011/12/20
         //  /requestanimationframe-for-smart-er-animating
@@ -6074,31 +6051,76 @@ glue.module.create(
         'glue'
     ],
     function (Glue) {
+        var Sugar = Glue.sugar;
         return function () {
             var name = '',
                 module = {
-                    add: function (value) {
-                        this.mix(value);
-                        return this;
+                    add: function (object) {
+                        return Sugar.combine(this, object);
                     }
                 },
                 mixins = Array.prototype.slice.call(arguments),
                 mixin = null,
                 l = mixins.length,
-                i = 0;
+                i = 0,
+                j = 0,
+                typeRegistrants,
+                typeRegistrantsLength,
+                typeRegistrant,
+                acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
+                registrants = {
+                    init: [],
+                    draw: [],
+                    update: [],
+                    pointerDown: [],
+                    pointerMove: [],
+                    pointerUp: []
+                },
+                callRegistrants = function (type, parameters) {
+                    parameters = Array.prototype.slice.call(parameters);
+                    typeRegistrants = registrants[type];
+                    typeRegistrantsLength = typeRegistrants.length;
+                    for (j = 0; j < typeRegistrantsLength; ++j) {
+                        typeRegistrants[j].apply(module, parameters);
+                    }
+                };
 
-            for (i; i < l; ++i) {
-                mixin = mixins[i];
-                mixin(module);
-            }
-            return module.mix({
+            module = Sugar.combine(module, {
                 setName: function (value) {
                     name = value;
                 },
                 getName: function (value) {
                     return name;
+                },
+                init: function () {
+                    callRegistrants('init', arguments);
+                },
+                update: function (deltaT) {
+                    callRegistrants('update', arguments);                  
+                },
+                draw: function (deltaT, context, scroll) {
+                    callRegistrants('draw', arguments);
+                },
+                pointerDown: function (e) {
+                    callRegistrants('pointerDown', arguments);
+                },
+                pointerMove: function (e) {
+                    callRegistrants('pointerMove', arguments);
+                },
+                pointerUp: function (e) {
+                    callRegistrants('pointerUp', arguments);
+                },
+                register: function (type, callback) {
+                    if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(callback)) {
+                        registrants[type].push(callback);
+                    }
                 }
-            })
+            });
+            for (i; i < l; ++i) {
+                mixin = mixins[i];
+                mixin(module);
+            }
+            return module;
         };
     }
 );
@@ -6237,6 +6259,9 @@ glue.module.create(
                 }
             };
 
+            object.register('draw', object.animatable.draw);
+            object.register('update', object.animatable.update);
+
             return object;
         };
     }
@@ -6289,6 +6314,8 @@ glue.module.create(
                     pointerUpHandler(e);
                 }
             };
+
+            object.register('pointerDown', object.clickable.pointerDown);
 
             return object;
         };
@@ -6420,6 +6447,11 @@ glue.module.create(
                 }
             };
 
+            // Register methods to base object
+            object.register('pointerDown', object.draggable.pointerDown);
+            object.register('pointerMove', object.draggable.pointerMove);
+            object.register('pointerUp', object.draggable.pointerUp);
+
             return object;
         };
     }
@@ -6460,9 +6492,6 @@ glue.module.create(
                 },
                 destroy: function () {
                     Event.off('draggable.drop', draggableDropHandler);
-                },
-                update: function (deltaT) {
-
                 }
             };
 
@@ -6520,7 +6549,7 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (context, deltaT) {
+                draw: function (deltaT, context) {
                     context.globalAlpha = alpha;
                 },
                 fade: function (callback, startAlpha, endAlpha) {
@@ -6577,6 +6606,9 @@ glue.module.create(
                 }
             };
 
+            object.register('draw', object.fadable.draw);
+            object.register('update', object.fadable.update);
+
             return object;
         };
     }
@@ -6622,19 +6654,13 @@ glue.module.create(
 
             object = object || {};
             object.hoverable = {
-                setup: function (settings) {
-
-                },
-                destroy: function () {
-
-                },
-                update: function (deltaT) {
-
-                },
                 pointerMove: function (e) {
                     pointerMoveHandler(e);
                 }
             };
+
+            object.register('pointerMove', object.hoverable.pointerMove);
+
             return object;
         };
     }
@@ -6848,6 +6874,9 @@ glue.module.create(
                     return side;
                 }
             };
+
+            object.register('update', object.kineticable.update);
+
             return object;
         }
     }
@@ -6929,6 +6958,9 @@ glue.module.create(
                     moveSpeed = speed;
                 }
             };
+
+            object.register('update', object.movable.update);
+
             return object;
         };
     }
@@ -7327,6 +7359,10 @@ glue.module.create(
                     updateVisible();
                 }
             };
+
+            object.register('update', object.spineable.update);
+            object.register('draw', object.spineable.draw);
+
             return object;
         };
     }
@@ -7365,18 +7401,17 @@ glue.module.create(
                     var tarDeg,
                         curDeg,
                         finalSpeed,
-                        distance;
+                        distance,
+                        self = object.rotatable;
                     
-                    if (this.getAngleDegree() < 0) {
-                        this.setAngleDegree(359);
-                    } else if (this.getAngleDegree() > 360) {
-                        this.setAngleDegree(1);
+                    if (self.getAngleDegree() < 0) {
+                        self.setAngleDegree(359);
+                    } else if (self.getAngleDegree() > 360) {
+                        self.setAngleDegree(1);
                     }
-
                     if (angle !== targetAngle) {
-                        
-                        tarDeg = this.getTargetDegree(),
-                        curDeg = this.getAngleDegree(),
+                        tarDeg = self.getTargetDegree(),
+                        curDeg = self.getAngleDegree(),
                         finalSpeed = rotationSpeed * rotationDirection,
                         distance = (tarDeg > curDeg) ? (tarDeg - curDeg) : (curDeg - tarDeg);
 
@@ -7385,7 +7420,7 @@ glue.module.create(
                             atTarget = true;
                         } else {
                             curDeg += finalSpeed * deltaT;
-                            this.setAngleDegree(curDeg);
+                            self.setAngleDegree(curDeg);
                         }
                     }
                 },
@@ -7450,6 +7485,9 @@ glue.module.create(
                     return origin;
                 }
             };
+
+            object.register('update', object.rotatable.update);
+            object.register('draw', object.rotatable.draw);
 
             return object;
         };
@@ -7559,6 +7597,9 @@ glue.module.create(
                         ); 
                 }
             };
+
+            object.register('update', object.scalable.update);
+            object.register('draw', object.scalable.draw);
 
             return object;
         };
@@ -7748,8 +7789,6 @@ glue.module.create(
  *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/visible',
@@ -7879,6 +7918,9 @@ glue.module.create(
                     return origin;
                 }
             };
+
+            // Register methods to base object
+            object.register('draw', object.visible.draw);
 
             return object;
         };
@@ -9834,8 +9876,7 @@ modules.glue.sugar = (function (win, doc) {
          * Will combine two objects (or arrays)
          * The properties of the second object will be added to the first
          * If the second object contains the same property name as the first
-         * object, the property will be overwritten, so property two is
-         * leading
+         * object, the property will be saved in the base property
          * @param {Object} The first object
          * @param {Object} The second object
          * @return {Object} If both params are objects: The combined first
@@ -9850,6 +9891,10 @@ modules.glue.sugar = (function (win, doc) {
             }
             for (prop in obj2) {
                 if (this.has(obj2, prop)) {
+                    if (this.has(obj1, prop)) {
+                        obj1['base'] = obj1['base'] || {};
+                        obj1['base'][prop] = obj1[prop];
+                    }
                     if (this.isObject(obj2[prop])) {
                         obj1[prop] = clone(obj2[prop]);
                     } else {
@@ -10377,32 +10422,6 @@ modules.glue.sugar = (function (win, doc) {
                 return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
             };
         }
-
-        /**
-         * Can be used to mix modules, to combine abilities
-         * @name mix
-         * @memberOf Object.prototype
-         * @function
-         * @param {Object} mixin: the object you want to throw in the mix
-         */
-         // there ain't no problem we can't fix, cause we can do it in the mix
-        if (!Object.prototype.mix) {
-            Object.prototype.mix = function (mixin) {
-                var i,
-                    self = this;
-
-                // iterate over the mixin properties
-                for (i in mixin) {
-                    // if the current property belongs to the mixin
-                    if (mixin.hasOwnProperty(i)) {
-                        // add the property to the mix
-                        self[i] = mixin[i];
-                    }
-                }
-                // return the mixed object
-                return self;
-            };
-        };
 
         // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
         // http://my.opera.com/emoller/blog/2011/12/20

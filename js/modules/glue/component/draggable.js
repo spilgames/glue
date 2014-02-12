@@ -123,6 +123,11 @@ glue.module.create(
                 }
             };
 
+            // Register methods to base object
+            object.register('pointerDown', object.draggable.pointerDown);
+            object.register('pointerMove', object.draggable.pointerMove);
+            object.register('pointerUp', object.draggable.pointerUp);
+
             return object;
         };
     }

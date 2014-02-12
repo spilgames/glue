@@ -5,8 +5,6 @@
  *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/visible',
@@ -136,6 +134,9 @@ glue.module.create(
                     return origin;
                 }
             };
+
+            // Register methods to base object
+            object.register('draw', object.visible.draw);
 
             return object;
         };

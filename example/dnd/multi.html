@@ -25,18 +25,6 @@
                         init: function () {
                             this.z = this.visible.getPosition().y;
                         },
-                        draw: function (deltaT, context) {
-                            this.visible.draw(deltaT, context);
-                        },
-                        pointerDown: function (e) {
-                            this.draggable.pointerDown(e);
-                        },
-                        pointerMove: function (e) {
-                            this.draggable.pointerMove(e);
-                        },
-                        pointerUp: function (e) {
-                            this.draggable.pointerUp(e);
-                        },
                         dragStart: function (e) {
                             this.z = 9999;
                         },

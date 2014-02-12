@@ -54,20 +54,6 @@
                         init: function () {
                             this.z = this.visible.getPosition().y;
                         },
-                        draw: function (deltaT, context) {
-                            this.visible.draw(deltaT, context);
-                        },
-                        pointerDown: function (e) {
-                            this.draggable.pointerDown(e);
-                            this.clickable.pointerDown(e);
-                        },
-                        pointerMove: function (e) {
-                            this.draggable.pointerMove(e);
-                            this.hoverable.pointerMove(e);
-                        },
-                        pointerUp: function (e) {
-                            this.draggable.pointerUp(e);
-                        },
                         dragStart: function (e) {
                             this.z = 9999;
                         },
@@ -99,7 +85,7 @@
                             this.z = this.visible.getPosition().y;
                         },
                         draw: function (deltaT, context) {
-                            this.visible.draw(deltaT, context);
+                            this.base.draw(deltaT, context);
                             context.fillStyle = 'blue';
                             context.font = 'bold 16px Arial';
                             context.fillText(dropText, 255, 180);

@@ -47,9 +47,6 @@ glue.module.get(
                             image: Loader.getAsset('glue')
                         });
                     },
-                    draw: function (deltaT, context, scroll) {
-                        this.visible.draw(deltaT, context, scroll);
-                    },
                     pointerMove: function (e) {
                         var position = Vector(
                             Math.round(e.position.x),

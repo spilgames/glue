@@ -70,24 +70,6 @@ glue.module.get(
                                 skeletonResolution: 1
                             });
                             this.spineable.setAnimation('walk');
-                        },
-                        update: function (deltaT, context) {
-                            this.spineable.update(deltaT);
-                        },
-                        draw: function (deltaT, context, scroll) {
-                            this.spineable.draw(deltaT, context, scroll);
-                        },
-                        // pointerMove: function (e) {
-                        //     this.visible.setPosition(e.position);
-                        // },
-                        pointerDown: function (e) {
-                            this.draggable.pointerDown(e);
-                        },
-                        pointerMove: function (e) {
-                            this.draggable.pointerMove(e);
-                        },
-                        pointerUp: function (e) {
-                            this.draggable.pointerUp(e);
                         }
                     });
 

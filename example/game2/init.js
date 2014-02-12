@@ -60,9 +60,6 @@ glue.module.get(
                         this.visible.setup({
                             image: Loader.getAsset('background')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 canvasDimension = Game.canvas.getDimension(),
@@ -86,9 +83,6 @@ glue.module.get(
                             cloudsPosition.x = -cloudsDimension.width;
                         }
                         cloudsPosition.x += moveSpeed * deltaT;
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 dog = BaseObject(Visible, Animatable).add({
@@ -112,9 +106,6 @@ glue.module.get(
                         });
                         this.animatable.setAnimation('wiggleTail');
                     },
-                    update: function (deltaT, context) {
-                        this.animatable.update(deltaT);
-                    },
                     draw: function (deltaT, context) {
                         this.animatable.draw(deltaT, context);
                     }
@@ -128,9 +119,6 @@ glue.module.get(
                             },
                             image: Loader.getAsset('hills')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 moon = BaseObject(Visible).add({
@@ -142,9 +130,6 @@ glue.module.get(
                             },
                             image: Loader.getAsset('moon')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 stones = BaseObject(Visible).add({
@@ -156,9 +141,6 @@ glue.module.get(
                             },
                             image: Loader.getAsset('stones')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 tree = BaseObject(Visible).add({
@@ -170,9 +152,6 @@ glue.module.get(
                             },
                             image: Loader.getAsset('tree')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 // TODO: Documentation:

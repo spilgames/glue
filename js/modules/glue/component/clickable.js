@@ -46,6 +46,8 @@ glue.module.create(
                 }
             };
 
+            object.register('pointerDown', object.clickable.pointerDown);
+
             return object;
         };
     }

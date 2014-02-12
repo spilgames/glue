@@ -58,16 +58,13 @@ glue.module.get(
                         });
                     },
                     update: function (deltaT) {
-                        this.scalable.update(deltaT);
+                        this.base.update(deltaT);
                         if (this.scalable.atTarget()) {
                             this.scalable.setTarget({
                                 x: 1,
                                 y: 1
                             });
                         }
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);              
                     }
                 });
             Game.add(object);

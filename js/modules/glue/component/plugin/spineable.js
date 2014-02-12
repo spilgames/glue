@@ -391,6 +391,10 @@ glue.module.create(
                     updateVisible();
                 }
             };
+
+            object.register('update', object.spineable.update);
+            object.register('draw', object.spineable.draw);
+
             return object;
         };
     }

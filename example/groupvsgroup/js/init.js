@@ -64,23 +64,10 @@ glue.module.get(
                         });
                     },
                     update: function (deltaT) {
-                        this.kineticable.update(deltaT);
+                        this.base.update(deltaT);
                         SAT.collideGroup(this, group1, collisionType);
                         SAT.collideGroup(this, group2, collisionType);
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
-                    },
-                    pointerDown: function (e) {
-                        this.draggable.pointerDown(e);
-                    },
-                    pointerMove: function (e) {
-                        this.draggable.pointerMove(e);
-                    },
-                    pointerUp: function (e) {
-                        this.draggable.pointerUp(e);
                     }
-
                 });
         
             Game.add(logo);
@@ -120,14 +107,11 @@ glue.module.get(
                                 this.position.x = this.canvasSize.width;
                             }
 
-                            this.kineticable.update(deltaT);
+                            this.base.update(deltaT);
                             // Check Collision Here
 
                             SAT.collideGroup(this, group1, collisionType);
                             SAT.collideGroup(this, group2, collisionType);
-                        },
-                        draw: function (deltaT, context) {
-                            this.visible.draw(deltaT, context);
                         }
                     }),
                     obj2 = BaseObject(Visible, Kineticable).add({
@@ -164,14 +148,11 @@ glue.module.get(
                                 this.position.x = this.canvasSize.width;
                             }
 
-                            this.kineticable.update(deltaT);
+                            this.base.update(deltaT);
                             // Check Collision Here
 
                             SAT.collideGroup(this, group1, collisionType);
                             SAT.collideGroup(this, group2, collisionType);
-                        },
-                        draw: function (deltaT, context) {
-                            this.visible.draw(deltaT, context);
                         }
                     });
 

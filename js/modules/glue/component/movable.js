@@ -75,6 +75,9 @@ glue.module.create(
                     moveSpeed = speed;
                 }
             };
+
+            object.register('update', object.movable.update);
+
             return object;
         };
     }

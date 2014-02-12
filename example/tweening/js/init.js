@@ -80,7 +80,7 @@ glue.module.get(
                         }
                     },
                     draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                         context.fillStyle = 'green';
                         context.font = 'bold 16px Arial';
                         context.fillText(tweenFunction, 180, 20);           

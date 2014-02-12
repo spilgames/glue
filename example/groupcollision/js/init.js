@@ -8,7 +8,6 @@ glue.module.get(
         'glue/component/kineticable',
         'glue/component/draggable',
         'glue/component/clickable',
-        'glue/component/scalable',
         'glue/sat',
         'glue/baseobject',
         'glue/math',
@@ -23,7 +22,6 @@ glue.module.get(
         Kineticable,
         Draggable,
         Clickable,
-        Scalable,
         SAT,
         BaseObject,
         Mathematics,
@@ -67,12 +65,9 @@ glue.module.get(
                     },
                     draw: function (deltaT, context) {
                         var value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
-                        this.visible.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                         context.font = '20px Verdana';
                         context.fillText(value, buttonPosition.x + 30, buttonPosition.y + 30);
-                    },
-                    pointerDown: function (e) {
-                        this.clickable.pointerDown(e);
                     },
                     onClick: function (e) {
                         if (collisionType === SAT.RECTANGLE_TO_RECTANGLE) {
@@ -95,12 +90,9 @@ glue.module.get(
                             dynamic: false
                         });
                     },
-                    update: function (deltaT) {
-                        this.kineticable.update(deltaT);
-                    },
                     draw: function (deltaT, context) {
                         var bound;
-                        this.visible.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                         if (collisionType === SAT.CIRCLE_TO_CIRCLE) {
                             bound = this.kineticable.toCircle();
                             context.beginPath();
@@ -111,15 +103,6 @@ glue.module.get(
                             bound = this.kineticable.toRectangle();
                             context.strokeRect(bound.x1, bound.y1, bound.x2, bound.y2);
                         }
-                    },
-                    pointerDown: function (e) {
-                        this.draggable.pointerDown(e);
-                    },
-                    pointerMove: function (e) {
-                        this.draggable.pointerMove(e);
-                    },
-                    pointerUp: function (e) {
-                        this.draggable.pointerUp(e);
                     }
                 }),
                 group = [],
@@ -163,12 +146,12 @@ glue.module.get(
                             this.position.x = this.canvasSize.width;
                         }
                         
-                        this.kineticable.update(deltaT);
+                        this.base.update(deltaT);
                         SAT.collide(obj1, this, collisionType);
                     },
                     draw: function (deltaT, context) {
                         var bound;
-                        this.visible.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                         if (collisionType === SAT.CIRCLE_TO_CIRCLE) {
                             bound = this.kineticable.toCircle();
                             context.beginPath();

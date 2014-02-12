@@ -29,9 +29,6 @@ glue.module.create(
                         });
                         this.droptarget.setup();
                     },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
-                    },
                     onDrop: function (object, e) {
                         if (object.getName && object.getName() === 'dog') {
                             Director.showScreen('Screen1');

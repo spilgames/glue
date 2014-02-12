@@ -36,14 +36,11 @@ glue.module.create(
                         this.droptarget.setup();
                     },
                     update: function (deltaT) {
-                        this.movable.update(deltaT);
+                        this.base.update(deltaT);
                         if (dropped && this.movable.atTarget()) {
                             Director.showScreen('Screen2');
                             dropped = false;
                         }
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     },
                     onDrop: function (obj, e) {
                         var position = this.visible.getPosition();
