@@ -62,9 +62,6 @@ glue.module.get(
                         this.visible.setup({
                             image: Loader.getAsset('jailBackground')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 jailBars = BaseObject(Visible).add({
@@ -76,9 +73,6 @@ glue.module.get(
                             },                            
                             image: Loader.getAsset('jailBars')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 jailDoor = BaseObject(Visible).add({
@@ -90,9 +84,6 @@ glue.module.get(
                             },
                             image: Loader.getAsset('jailDoor')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 bed = BaseObject(Visible).add({
@@ -104,9 +95,6 @@ glue.module.get(
                             },
                             image: Loader.getAsset('bed')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 chair = BaseObject(Visible).add({
@@ -118,9 +106,6 @@ glue.module.get(
                             },
                             image: Loader.getAsset('chair')
                         });
-                    },
-                    draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
                     }
                 }),
                 playerSpeed = 80,
@@ -183,8 +168,7 @@ glue.module.get(
                     },
                     update: function (deltaT) {
                         var rotation;
-                        this.animatable.update(deltaT);
-                        this.movable.update(deltaT);
+                        this.base.update(deltaT);
                         if (this.movable.atTarget()) {
                             if (down) {
                                 this.animatable.setAnimation('standDown');
@@ -281,7 +265,7 @@ glue.module.get(
                         enemyPosition = this.visible.getPosition();
                     },
                     update: function (deltaT) {
-                        this.animatable.update(deltaT);
+                        this.base.update(deltaT);
                         if (enemyPosition.x > canvasDimension.width -
                                 this.animatable.getFrameWidth()) {
                             this.animatable.setAnimation('walkLeft')
