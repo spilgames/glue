@@ -41,7 +41,7 @@ glue.module.create(
                     typeRegistrants = registrants[type];
                     typeRegistrantsLength = typeRegistrants.length;
                     for (j = 0; j < typeRegistrantsLength; ++j) {
-                        typeRegistrants[j].apply(null, parameters);
+                        typeRegistrants[j].apply(module, parameters);
                     }
                 };
 

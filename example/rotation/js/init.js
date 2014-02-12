@@ -60,6 +60,9 @@ glue.module.get(
                         if (this.rotatable.atTarget()) {
                             this.rotatable.setTargetDegree(0, false);
                         }
+                    },
+                    draw: function (deltaT, context) {
+                        this.visible.draw(deltaT, context);
                     }
                 });
 

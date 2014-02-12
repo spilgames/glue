@@ -32,18 +32,17 @@ glue.module.create(
                     var tarDeg,
                         curDeg,
                         finalSpeed,
-                        distance;
+                        distance,
+                        self = object.rotatable;
                     
-                    if (this.getAngleDegree() < 0) {
-                        this.setAngleDegree(359);
-                    } else if (this.getAngleDegree() > 360) {
-                        this.setAngleDegree(1);
+                    if (self.getAngleDegree() < 0) {
+                        self.setAngleDegree(359);
+                    } else if (self.getAngleDegree() > 360) {
+                        self.setAngleDegree(1);
                     }
-
                     if (angle !== targetAngle) {
-                        
-                        tarDeg = this.getTargetDegree(),
-                        curDeg = this.getAngleDegree(),
+                        tarDeg = self.getTargetDegree(),
+                        curDeg = self.getAngleDegree(),
                         finalSpeed = rotationSpeed * rotationDirection,
                         distance = (tarDeg > curDeg) ? (tarDeg - curDeg) : (curDeg - tarDeg);
 
@@ -52,7 +51,7 @@ glue.module.create(
                             atTarget = true;
                         } else {
                             curDeg += finalSpeed * deltaT;
-                            this.setAngleDegree(curDeg);
+                            self.setAngleDegree(curDeg);
                         }
                     }
                 },
