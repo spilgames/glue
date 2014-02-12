@@ -19,7 +19,7 @@ glue.module.create(
          */
         return function (object) {
             // - per instance private members -
-            var sugar = Glue.sugar,
+            var Sugar = Glue.sugar,
                 atlas = {},
                 skeletons = {},
                 skeletonJson = {},
@@ -35,6 +35,8 @@ glue.module.create(
                 skeletonRectangles = {},
                 cornerPoints = {},
                 origins = {},
+                // remembers the skeleton attached to the animatino
+                animations = {},
                 /**
                  * Initalizes the animation
                  * @name initSpine
@@ -42,24 +44,26 @@ glue.module.create(
                  * @function
                  */
                 initSpine = function (spineSettings) {
-                    if (!sugar.isDefined(spineSettings)) {
+                    var i = 0;
+                    if (!Sugar.isDefined(spineSettings)) {
                         throw 'Specify settings object to Spine';
                     }
-                    if (!sugar.isDefined(spineSettings.atlas)) {
-                        throw 'Specify an atlas to settings object ';
+                    if (!Sugar.isDefined(spineSettings.assets)) {
+                        throw 'Specify assets to Spine';
                     }
-                    if (!sugar.isDefined(spineSettings.atlasImage)) {
-                        throw 'Specify an atlasImage to settings object ';
+                    // convert to array of strings
+                    if (typeof spineSettings.assets === 'string') {
+                        spineSettings.assets = [spineSettings.assets];
                     }
-                    if (!sugar.isDefined(spineSettings.skeleton)) {
-                        throw 'Specify a skeleton JSON to settings object ';
+                    for (i; i < spineSettings.assets.length; ++i) {
+                        currentSkeleton = spineSettings.assets[i];
+                        addAtlas(spineSettings.assets[i]);
+                        addSkeletonData(spineSettings.assets[i]);
+                        if (spineSettings.position && object.visible) {
+                            object.visible.setPosition(spineSettings.position);
+                        }
                     }
-                    currentSkeleton = spineSettings.skeleton;
-                    addAtlas(spineSettings);
-                    addSkeletonData(spineSettings);
-                    if (spineSettings.position && object.visible) {
-                        object.visible.setPosition(spineSettings.position);
-                    }
+                    // set skeleton back to first specified
                 },
                 /**
                  * Loads the atlas data
@@ -67,10 +71,10 @@ glue.module.create(
                  * @memberOf Spineable
                  * @function
                  */
-                addAtlas = function (spineSettings) {
-                    var atlasText = spineSettings.atlas,
+                addAtlas = function (assetName) {
+                    var atlasText = Loader.getBinary(assetName),
                         p = {},
-                        image = spineSettings.atlasImage;
+                        image = Loader.getImage(assetName);
                     atlas[currentSkeleton] = new spine.Atlas(atlasText, {
                         load: function (page, path) {
                             var texture = image;
@@ -88,16 +92,17 @@ glue.module.create(
                  * @memberOf Spineable
                  * @function
                  */
-                addSkeletonData = function (spineSettings) {
+                addSkeletonData = function (assetName) {
+                    var i = 0;
                     skeletonJson[currentSkeleton] = new spine.SkeletonJson(
                         new spine.AtlasAttachmentLoader(atlas[currentSkeleton])
                     );
-                    if (spineSettings.skeletonResolution) {
-                        skeletonJson[currentSkeleton].scale = spineSettings.skeletonResolution;
+                    if (settings.skeletonResolution) {
+                        skeletonJson[currentSkeleton].scale = settings.skeletonResolution;
                     }
 
                     skeletonData[currentSkeleton] = skeletonJson[currentSkeleton].readSkeletonData(
-                        spineSettings.skeleton
+                        Loader.getJSON(assetName)
                     );
                     skeletons[currentSkeleton] = new spine.Skeleton(skeletonData[currentSkeleton]);
                     spine.Bone.yDown = true;
@@ -109,6 +114,12 @@ glue.module.create(
 
                     stateData[currentSkeleton] = new spine.AnimationStateData(skeletonData[currentSkeleton]);
                     state[currentSkeleton] = new spine.AnimationState(stateData[currentSkeleton]);
+
+                    // remember which animations belong to which animation
+                    for (i; i < skeletonData[currentSkeleton].animations.length; ++i) {
+                        animations[skeletonData[currentSkeleton].animations[i].name] = currentSkeleton;
+                        console.log(skeletonData[currentSkeleton].animations[i].name);
+                    }
 
                     calculateRectangle();
                 },
@@ -177,6 +188,15 @@ glue.module.create(
             // - external interface -
             object = object || {};
             object.spineable = {
+                ORIGIN_CENTER: 0,
+                ORIGIN_TOP: 1,
+                ORIGIN_BOTTOM: 2,
+                ORIGIN_LEFT: 3,
+                ORIGIN_RIGHT: 4,
+                ORIGIN_TOP_LEFT: 5,
+                ORIGIN_BOTTOM_LEFT: 6,
+                ORIGIN_TOP_RIGHT: 7,
+                ORIGIN_BOTTOM_RIGHT: 8,
                 /**
                  * Draw the spine component
                  * @name draw
@@ -243,8 +263,8 @@ glue.module.create(
                     context.restore();
 
                     // draw boundingbox
-                    // var b=object.visible.getBoundingBox();
-                    // context.strokeRect(b.x1,b.y1,b.getWidth(),b.getHeight());
+                    var b=object.visible.getBoundingBox();
+                    context.strokeRect(b.x1,b.y1,b.getWidth(),b.getHeight());
                 },
                 /**
                  * Update the animation
