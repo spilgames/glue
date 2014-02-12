@@ -6259,6 +6259,9 @@ glue.module.create(
                 }
             };
 
+            object.register('draw', object.animatable.draw);
+            object.register('update', object.animatable.update);
+
             return object;
         };
     }
