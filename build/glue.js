@@ -6971,7 +6971,7 @@ glue.module.create(
                 skeletonRectangles = {},
                 cornerPoints = {},
                 origins = {},
-                // remembers the skeleton attached to the animatino
+                // remembers the skeleton attached to the animation
                 animations = {},
                 /**
                  * Initalizes the animation
@@ -7100,36 +7100,6 @@ glue.module.create(
                     cornerPoints[currentSkeleton].x = skeletonRectangle.x1 - rootBone.x;
                     cornerPoints[currentSkeleton].y = skeletonRectangle.y1 - rootBone.y;
                     origins[currentSkeleton] = Vector(0, 0);
-                    // set default origin
-                    switch (settings.origin) {
-                    case object.spineable.ORIGIN_CENTER:
-                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth() / 2, skeletonRectangle.getHeight() / 2);
-                        break;
-                    case object.spineable.ORIGIN_TOP:
-                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth() / 2, 0);
-                        break;
-                    case object.spineable.ORIGIN_BOTTOM:
-                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth() / 2, skeletonRectangle.getHeight());
-                        break;
-                    case object.spineable.ORIGIN_LEFT:
-                        origins[currentSkeleton] = Vector(0, skeletonRectangle.getHeight() / 2);
-                        break;
-                    case object.spineable.ORIGIN_RIGHT:
-                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth(), skeletonRectangle.getHeight() / 2);
-                        break;
-                    case object.spineable.ORIGIN_TOP_LEFT:
-                        origins[currentSkeleton] = Vector(0, 0);
-                        break;
-                    case object.spineable.ORIGIN_TOP_RIGHT:
-                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth(), 0);
-                        break;
-                    case object.spineable.ORIGIN_BOTTOM_LEFT:
-                        origins[currentSkeleton] = Vector(0, skeletonRectangle.getHeight());
-                        break;
-                    case object.spineable.ORIGIN_BOTTOM_RIGHT:
-                        origins[currentSkeleton] = Vector(skeletonRectangle.getWidth(), skeletonRectangle.getHeight());
-                        break;
-                    }
                     updateVisible();
                 },
                 /**
@@ -7157,15 +7127,6 @@ glue.module.create(
             // - external interface -
             object = object || {};
             object.spineable = {
-                ORIGIN_CENTER: 0,
-                ORIGIN_TOP: 1,
-                ORIGIN_BOTTOM: 2,
-                ORIGIN_LEFT: 3,
-                ORIGIN_RIGHT: 4,
-                ORIGIN_TOP_LEFT: 5,
-                ORIGIN_TOP_RIGHT: 6,
-                ORIGIN_BOTTOM_LEFT: 7,
-                ORIGIN_BOTTOM_RIGHT: 8,
                 /**
                  * Draw the spine component
                  * @name draw
@@ -7259,27 +7220,16 @@ glue.module.create(
                     initSpine(settings);
                 },
                 /**
-                 * Set a new animation
-                 * @name setAnimationByName
-                 * @memberOf Spineable
-                 * @function
-                 * @param {Number} trackIndex: Track number
-                 * @param {String} animationName: Name of the animation
-                 * @param {Bool} loop: Wether the animation loops
-                 */
-                setAnimationByName: function (trackIndex, animationName, loop) {
-                    currentAnimationStr = animationName;
-                    state[currentSkeleton].setAnimationByName(trackIndex, animationName, loop);
-                    skeletons[currentSkeleton].setSlotsToSetupPose();
-                },
-                /**
                  * Set a new animation if it's not playing yet, returns true if successful
                  * @name setAnimation
                  * @memberOf Spineable
                  * @function
                  * @param {String} animationName: Name of the animation
+                 * @param {Boolean} loop: (Optional) Wether the animation should loop, default is true
+                 * @param {Number} speed:(Optional)  Speed of the animation, default is 1.0
+                 * @param {Function} onComplete: (Optional) Callback function when animation ends/loops
                  */
-                setAnimation: function (animationName) {
+                setAnimation: function (animationName, loop, speed, onComplete) {
                     if (!Sugar.has(animations, animationName)) {
                         throw ('There is no skeleton which contains an animation called ' + animationName);
                     }
@@ -7288,7 +7238,23 @@ glue.module.create(
                     }
                     // set to correct skeleton if needed
                     object.spineable.setSkeleton(animations[animationName]);
-                    object.spineable.setAnimationByName(0, animationName, true);
+                    // set callback
+                    if (Sugar.isDefined(onComplete)) {
+                        state[currentSkeleton].onComplete = onComplete;
+                    } else {
+                        state[currentSkeleton].onComplete = null;
+                    }
+                    if (!Sugar.isDefined(loop)) {
+                        loop = true;
+                    }
+                    if (!Sugar.isDefined(speed)) {
+                        speed = 1.0;
+                    }
+                    // set animation
+                    currentAnimationStr = animationName;
+                    state[currentSkeleton].setAnimationByName(0, animationName, loop);
+                    state[currentSkeleton].timeScale = speed;
+                    skeletons[currentSkeleton].setSlotsToSetupPose();
                     return true;
                 },
                 /**

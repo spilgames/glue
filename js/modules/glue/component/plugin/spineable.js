@@ -284,27 +284,16 @@ glue.module.create(
                     initSpine(settings);
                 },
                 /**
-                 * Set a new animation
-                 * @name setAnimationByName
-                 * @memberOf Spineable
-                 * @function
-                 * @param {Number} trackIndex: Track number
-                 * @param {String} animationName: Name of the animation
-                 * @param {Bool} loop: Wether the animation loops
-                 */
-                setAnimationByName: function (trackIndex, animationName, loop) {
-                    currentAnimationStr = animationName;
-                    state[currentSkeleton].setAnimationByName(trackIndex, animationName, loop);
-                    skeletons[currentSkeleton].setSlotsToSetupPose();
-                },
-                /**
                  * Set a new animation if it's not playing yet, returns true if successful
                  * @name setAnimation
                  * @memberOf Spineable
                  * @function
                  * @param {String} animationName: Name of the animation
+                 * @param {Boolean} loop: (Optional) Wether the animation should loop, default is true
+                 * @param {Number} speed:(Optional)  Speed of the animation, default is 1.0
+                 * @param {Function} onComplete: (Optional) Callback function when animation ends/loops
                  */
-                setAnimation: function (animationName) {
+                setAnimation: function (animationName, loop, speed, onComplete) {
                     if (!Sugar.has(animations, animationName)) {
                         throw ('There is no skeleton which contains an animation called ' + animationName);
                     }
@@ -313,7 +302,23 @@ glue.module.create(
                     }
                     // set to correct skeleton if needed
                     object.spineable.setSkeleton(animations[animationName]);
-                    object.spineable.setAnimationByName(0, animationName, true);
+                    // set callback
+                    if (Sugar.isDefined(onComplete)) {
+                        state[currentSkeleton].onComplete = onComplete;
+                    } else {
+                        state[currentSkeleton].onComplete = null;
+                    }
+                    if (!Sugar.isDefined(loop)) {
+                        loop = true;
+                    }
+                    if (!Sugar.isDefined(speed)) {
+                        speed = 1.0;
+                    }
+                    // set animation
+                    currentAnimationStr = animationName;
+                    state[currentSkeleton].setAnimationByName(0, animationName, loop);
+                    state[currentSkeleton].timeScale = speed;
+                    skeletons[currentSkeleton].setSlotsToSetupPose();
                     return true;
                 },
                 /**
