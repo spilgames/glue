@@ -217,7 +217,6 @@ glue.module.create(
                     if (object) {
                         vOrigin = object.getOrigin();
                         position = object.getPosition();
-                        context.translate(~~position.x, ~~position.y);
                     }
                     offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));
                     if (object.scalable) {
@@ -246,7 +245,7 @@ glue.module.create(
                         angle = -(slot.bone.worldRotation + attachment.rotation) * Math.PI / 180;
 
                         context.save();
-                        context.translate(~~x, ~~y);
+                        context.translate(Math.round(x), Math.round(y));
                         context.rotate(angle);
                         context.globalAlpha = slot.a;
                         context.scale(boneScaleX * scaleX, boneScaleY * scaleY);
@@ -257,7 +256,7 @@ glue.module.create(
                     context.restore();
 
                     // draw boundingbox
-                    // var b = object.visible.getBoundingBox();
+                    // var b = object.getBoundingBox();
                     // context.strokeRect(b.x1, b.y1, b.getWidth(), b.getHeight());
                 },
                 /**
