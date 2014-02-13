@@ -55,13 +55,10 @@ glue.module.get(
                 }
             }, function () {
                 var scroll = Game.getScroll(),
-                    capivara = BaseObject(Visible, Spineable, Scalable, Rotatable, Draggable).add({
+                    capivara = BaseObject(Spineable, Scalable, Rotatable, Draggable).add({
                         init: function () {
                             this.spineable.setup({
-                                position: {
-                                    x: 300,
-                                    y: 300
-                                },
+                                position: Vector(300, 300),
                                 atlasImage: Loader.getAsset('capivara_sideview'),
                                 atlas: Loader.getAsset('capivara_sideview_atlas'),
                                 skeleton: Loader.getAsset('capivara_sideview_skeleton'),
@@ -75,7 +72,7 @@ glue.module.get(
 
                 Game.add(capivara);
                 // set origin
-                capivara.visible.setOrigin(Vector(150, 150));
+                capivara.setOrigin(Vector(150, 150));
                 // set an angle
                 // capivara.rotatable.setAngleDegree(45);
                 // scale

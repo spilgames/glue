@@ -76,7 +76,7 @@ glue.module.get(
                     },
                     update: function (deltaT) {
                         if (position.y > Game.canvas.getDimension().height) {
-                            position.y = -this.visible.getDimension().height;
+                            position.y = -this.getDimension().height;
                         }
                         this.base.update(deltaT);
                         SAT.collide(obj1, obj2);

@@ -62,9 +62,6 @@ glue.module.get(
                             position: Vector(800, 400),
                             image: Loader.getAsset('spil')
                         });
-                    },
-                    draw: function (deltaT, context, scroll) {
-                        this.visible.draw(deltaT, context, scroll);
                     }
                 }),
                 dog = BaseObject(Visible, Animatable).add({

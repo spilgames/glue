@@ -7085,8 +7085,8 @@ glue.module.create(
                     currentSkeleton = spineSettings.skeleton;
                     addAtlas(spineSettings);
                     addSkeletonData(spineSettings);
-                    if (spineSettings.position && object.visible) {
-                        object.visible.setPosition(spineSettings.position);
+                    if (spineSettings.position && object) {
+                        object.setPosition(spineSettings.position);
                     }
                 },
                 /**
@@ -7129,9 +7129,9 @@ glue.module.create(
                     );
                     skeletons[currentSkeleton] = new spine.Skeleton(skeletonData[currentSkeleton]);
                     spine.Bone.yDown = true;
-                    if (object.visible) {
-                        skeletons[currentSkeleton].getRootBone().x = object.visible.getPosition().x;
-                        skeletons[currentSkeleton].getRootBone().y = object.visible.getPosition().y;
+                    if (object) {
+                        skeletons[currentSkeleton].getRootBone().x = object.getPosition().x;
+                        skeletons[currentSkeleton].getRootBone().y = object.getPosition().y;
                     }
                     skeletons[currentSkeleton].updateWorldTransform();
 
@@ -7155,9 +7155,9 @@ glue.module.create(
                         boneRectangle = Rectangle(0, 0, 0, 0),
                         rootBone = skeleton.getRootBone(),
                         skeletonRectangle = Rectangle(0, 0, 0, 0);
-                    if (object.visible) {
-                        skeletonRectangle.x1 = object.visible.getPosition().x;
-                        skeletonRectangle.y1 = object.visible.getPosition().y;
+                    if (object) {
+                        skeletonRectangle.x1 = object.getPosition().x;
+                        skeletonRectangle.y1 = object.getPosition().y;
                     }
                     // set up the skeleton to get width/height of the sprite
                     for (i; i < l; ++i) {
@@ -7191,14 +7191,14 @@ glue.module.create(
                         skeletonRectangle = skeletonRectangles[currentSkeleton],
                         width,
                         height;
-                    if (object.visible) {
+                    if (object) {
                         if (object.scalable) {
                             scale = object.scalable.getScale();
                         }
                         // update visible dimension
                         width = skeletonRectangle.getWidth() * Math.abs(scale.x);
                         height = skeletonRectangle.getHeight() * Math.abs(scale.y);
-                        object.visible.setDimension(Dimension(width, height));
+                        object.setDimension(Dimension(width, height));
                     }
                 };
 
@@ -7228,9 +7228,9 @@ glue.module.create(
                         position = Vector(0, 0),
                         offset;
                     context.save();
-                    if (object.visible) {
-                        vOrigin = object.visible.getOrigin();
-                        position = object.visible.getPosition();
+                    if (object) {
+                        vOrigin = object.getOrigin();
+                        position = object.getPosition();
                         context.translate(~~position.x, ~~position.y);
                     }
                     offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));

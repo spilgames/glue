@@ -57,9 +57,9 @@ glue.module.get(
                         this.visible.setup({
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                        position = this.visible.getPosition();
-                        this.visible.setPosition(Vector(startValue, startValue));
+                        dimension = this.getDimension();
+                        position = this.getPosition();
+                        this.setPosition(Vector(startValue, startValue));
                         tweenFunction = this.tweenable.getRandomTween();
                     },
                     update: function (deltaT) {
@@ -72,7 +72,7 @@ glue.module.get(
                             easingValue = 0;
                             changeInValue = mathematics.random(5, 15);
                             tweenFunction = this.tweenable.getRandomTween();
-                            this.visible.setPosition(Vector(startValue, startValue));
+                            this.setPosition(Vector(startValue, startValue));
                         } else {
                             position.y = easingValue * speed;
                             position.x = easingValue * speed;

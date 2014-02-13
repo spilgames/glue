@@ -61,7 +61,7 @@ glue.module.get(
                             },
                             image: Loader.getAsset('button')
                         });
-                        buttonPosition = this.visible.getPosition();
+                        buttonPosition = this.getPosition();
                     },
                     draw: function (deltaT, context) {
                         var value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
