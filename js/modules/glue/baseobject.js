@@ -42,7 +42,7 @@ glue.module.create(
                     parameters = Array.prototype.slice.call(parameters);
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
-                        if (type === 'draw' && registrant === 'visible') {
+                        if (type === 'draw' && registrant === 'spritable') {
                             continue;
                         }
                         typeRegistrants[registrant].apply(module, parameters);
@@ -85,8 +85,8 @@ glue.module.create(
                         );
                         callRegistrants('draw', arguments);
                         context.translate(-origin.x, -origin.y);
-                        if (registrants.draw.visible) {
-                            registrants.draw.visible(deltaT, context, scroll);
+                        if (registrants.draw.spritable) {
+                            registrants.draw.spritable(deltaT, context, scroll);
                         }
                         context.restore();
                     },

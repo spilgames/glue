@@ -6,7 +6,7 @@ glue.module.get(
         'glue/math/vector',
         'glue/baseobject',
         'glue/component/scalable',
-        'glue/component/visible'
+        'glue/component/spritable'
     ],
     function (
         Game,
@@ -15,7 +15,7 @@ glue.module.get(
         Vector,
         BaseObject,
         Scalable,
-        Visible
+        Spritable
     ) {
         'use strict';
 
@@ -37,10 +37,10 @@ glue.module.get(
                 }
             }
         }, function () {
-            var object = BaseObject(Visible, Scalable).add({
+            var object = BaseObject(Spritable, Scalable).add({
                     init: function () {
                         var dimension;
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: Vector(300, 300),
                             image: Loader.getAsset('logoLD')
                         });

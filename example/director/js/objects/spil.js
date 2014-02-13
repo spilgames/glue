@@ -5,7 +5,7 @@ glue.module.create(
         'glue/loader',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/movable',
         'glue/component/droptarget',
         'glue/director'
@@ -15,15 +15,15 @@ glue.module.create(
         Loader,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Movable,
         Droptarget,
         Director
     ) {
         return function () {
-            var object = BaseObject(Visible, Movable, Droptarget).add({
+            var object = BaseObject(Spritable, Movable, Droptarget).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: Vector(400, 400),
                             image: Loader.getAsset('spil')
                         });

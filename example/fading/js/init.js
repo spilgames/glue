@@ -5,7 +5,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/movable',
         'glue/component/fadable'
     ],
@@ -15,7 +15,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Movable,
         Fadable
     ) {
@@ -38,9 +38,9 @@ glue.module.get(
                 }
             }
         }, function () {
-            var object = BaseObject(Visible, Movable, Fadable).add({
+            var object = BaseObject(Spritable, Movable, Fadable).add({
                 init: function () {
-                    this.visible.setup({
+                    this.spritable.setup({
                         position: Vector(320, 300),
                         image: Loader.getAsset('blocks')
                     });

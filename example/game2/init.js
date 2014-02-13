@@ -4,7 +4,7 @@ glue.module.get(
         'glue/math/vector',
         'glue/math/dimension',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/animatable',
         'glue/component/draggable',
         'glue/component/droptarget',
@@ -17,7 +17,7 @@ glue.module.get(
         Vector,
         Dimension,
         BaseObject,
-        Visible,
+        Spritable,
         Animatable,
         Draggable,
         Droptarget,
@@ -55,9 +55,9 @@ glue.module.get(
             }
         }, function () {
             // define level components
-            var background = BaseObject(Visible).add({
+            var background = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             image: Loader.getAsset('background')
                         });
                     }
@@ -66,9 +66,9 @@ glue.module.get(
                 cloudsPosition,
                 cloudsDimension,
                 moveSpeed = 20,
-                clouds = BaseObject(Visible).add({
+                clouds = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: -332,
                                 y: 30
@@ -85,7 +85,7 @@ glue.module.get(
                         cloudsPosition.x += moveSpeed * deltaT;
                     }
                 }),
-                dog = BaseObject(Visible, Animatable).add({
+                dog = BaseObject(Spritable, Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -110,9 +110,9 @@ glue.module.get(
                         this.animatable.draw(deltaT, context);
                     }
                 }),
-                hills = BaseObject(Visible).add({
+                hills = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 0,
                                 y: 200
@@ -121,9 +121,9 @@ glue.module.get(
                         });
                     }
                 }),
-                moon = BaseObject(Visible).add({
+                moon = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 100,
                                 y: 50
@@ -132,9 +132,9 @@ glue.module.get(
                         });
                     }
                 }),
-                stones = BaseObject(Visible).add({
+                stones = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 0,
                                 y: 300
@@ -143,9 +143,9 @@ glue.module.get(
                         });
                     }
                 }),
-                tree = BaseObject(Visible).add({
+                tree = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 510,
                                 y: 0
@@ -162,7 +162,7 @@ glue.module.get(
                 playerPosition,
                 playerDimension,
                 walkSpeed = 80,
-                player = BaseObject(Visible, Animatable).add({
+                player = BaseObject(Spritable, Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {

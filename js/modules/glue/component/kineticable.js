@@ -58,9 +58,6 @@ glue.module.create(
                             this.setDynamic(config.dynamic);
                         }
                     }
-                    if (Sugar.isUndefined(object.visible)) {
-                        throw 'Kineticable needs a visible component';
-                    }
                     position = object.getPosition();
                     origin = object.getOrigin(); 
                     if (Sugar.isDefined(object.scalable)) {

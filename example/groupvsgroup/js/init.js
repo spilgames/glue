@@ -3,7 +3,7 @@ glue.module.get(
         'glue/game',
         'glue/loader',
         'glue/math/dimension',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/kineticable',
         'glue/component/draggable',
         'glue/sat',
@@ -15,7 +15,7 @@ glue.module.get(
         Game,
         Loader,
         Dimension,
-        Visible,
+        Spritable,
         Kineticable,
         Draggable,
         SAT,
@@ -50,9 +50,9 @@ glue.module.get(
                 group1 = [],
                 group2 = [],
                 i,
-                logo = BaseObject(Visible, Kineticable, Draggable).add({
+                logo = BaseObject(Spritable, Kineticable, Draggable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 400,
                                 y: 300
@@ -73,10 +73,10 @@ glue.module.get(
             Game.add(logo);
 
             for (i = 0; i < 20; ++i) {
-                var obj1 = BaseObject(Visible, Kineticable).add({
+                var obj1 = BaseObject(Spritable, Kineticable).add({
                         init: function () {
-                            // visible config
-                            this.visible.setup({
+                            // spritable config
+                            this.spritable.setup({
                                 position: {
                                     x: math.random(0, Game.canvas.getDimension().width - 25),
                                     y: 0
@@ -114,10 +114,10 @@ glue.module.get(
                             SAT.collideGroup(this, group2, collisionType);
                         }
                     }),
-                    obj2 = BaseObject(Visible, Kineticable).add({
+                    obj2 = BaseObject(Spritable, Kineticable).add({
                         init: function () {
-                            // visible config
-                            this.visible.setup({
+                            // spritable config
+                            this.spritable.setup({
                                 position: {
                                     x: math.random(0, Game.canvas.getDimension().width - 25),
                                     y: Game.canvas.getDimension().height - 25

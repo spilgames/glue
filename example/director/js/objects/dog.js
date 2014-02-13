@@ -5,7 +5,7 @@ glue.module.create(
         'glue/loader',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/animatable',
         'glue/component/draggable'
     ],
@@ -14,12 +14,12 @@ glue.module.create(
         Loader,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Animatable,
         Draggable
     ) {
         return function () {
-            var object = BaseObject(Visible, Animatable, Draggable).add({
+            var object = BaseObject(Spritable, Animatable, Draggable).add({
                     init: function () {
                         this.setName('dog');
                         this.animatable.setup({

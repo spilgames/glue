@@ -1,13 +1,13 @@
 /*
- *  @module Visible
+ *  @module Spritable
  *  @namespace component
- *  @desc Represents a visible component
+ *  @desc Represents a spritable component consisting of a simple image
  *  @copyright (C) SpilGames
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
-    'glue/component/visible',
+    'glue/component/spritable',
     [
         'glue',
         'glue/math/vector',
@@ -21,7 +21,7 @@ glue.module.create(
                 image = null;
 
             object = object || {};
-            object.visible = {
+            object.spritable = {
                 setup: function (settings) {
                     var customPosition;
                     if (settings) {
@@ -65,7 +65,7 @@ glue.module.create(
             };
 
             // Register methods to base object
-            object.register('draw', object.visible.draw, 'visible');
+            object.register('draw', object.spritable.draw, 'spritable');
 
             return object;
         };

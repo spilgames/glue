@@ -4,7 +4,7 @@ glue.module.get(
         'glue/math/vector',
         'glue/math/dimension',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/animatable',
         'glue/component/draggable',
         'glue/component/droptarget',
@@ -18,7 +18,7 @@ glue.module.get(
         Vector,
         Dimension,
         BaseObject,
-        Visible,
+        Spritable,
         Animatable,
         Draggable,
         Droptarget,
@@ -57,16 +57,16 @@ glue.module.get(
             }
         }, function () {
             // define level components
-            var jailBackground = BaseObject(Visible).add({
+            var jailBackground = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             image: Loader.getAsset('jailBackground')
                         });
                     }
                 }),
-                jailBars = BaseObject(Visible).add({
+                jailBars = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 0,
                                 y: 36
@@ -75,9 +75,9 @@ glue.module.get(
                         });
                     }
                 }),
-                jailDoor = BaseObject(Visible).add({
+                jailDoor = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 772,
                                 y: 132
@@ -86,9 +86,9 @@ glue.module.get(
                         });
                     }
                 }),
-                bed = BaseObject(Visible).add({
+                bed = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 20,
                                 y: 80
@@ -97,9 +97,9 @@ glue.module.get(
                         });
                     }
                 }),
-                chair = BaseObject(Visible).add({
+                chair = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 600,
                                 y: 30
@@ -116,7 +116,7 @@ glue.module.get(
                 down = false,
                 radian,
                 rotation,
-                player = BaseObject(Visible, Animatable, Movable).add({
+                player = BaseObject(Spritable, Animatable, Movable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -229,7 +229,7 @@ glue.module.get(
                 walkSpeed = 80,
                 direction = 'left',
                 canvasDimension = Game.canvas.getDimension(),
-                enemy = BaseObject(Visible, Animatable).add({
+                enemy = BaseObject(Spritable, Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {

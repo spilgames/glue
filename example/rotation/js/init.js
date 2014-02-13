@@ -5,7 +5,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/rotatable'
     ],
     function (
@@ -14,7 +14,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Rotatable
     ) {
         'use strict';
@@ -37,10 +37,10 @@ glue.module.get(
                 }
             }
         }, function () {
-            var object = BaseObject(Visible, Rotatable).add({
+            var object = BaseObject(Spritable, Rotatable).add({
                     init: function () {
                         var dimension;
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: Vector(300, 300),
                             image: Loader.getAsset('logoLD')
                         });

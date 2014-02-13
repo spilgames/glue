@@ -6082,7 +6082,7 @@ glue.module.create(
                     parameters = Array.prototype.slice.call(parameters);
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
-                        if (type === 'draw' && registrant === 'visible') {
+                        if (type === 'draw' && registrant === 'spritable') {
                             continue;
                         }
                         typeRegistrants[registrant].apply(module, parameters);
@@ -6125,8 +6125,8 @@ glue.module.create(
                         );
                         callRegistrants('draw', arguments);
                         context.translate(-origin.x, -origin.y);
-                        if (registrants.draw.visible) {
-                            registrants.draw.visible(deltaT, context, scroll);
+                        if (registrants.draw.spritable) {
+                            registrants.draw.spritable(deltaT, context, scroll);
                         }
                         context.restore();
                     },
@@ -6203,11 +6203,13 @@ glue.module.create(
     'glue/component/animatable',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/component/spritable'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Spritable) {
         return function (object) {
             var Sugar = Glue.sugar,
+                spritable = Spritable(object).spritable,
                 animationSettings,
                 animations = {},
                 currentAnimation,
@@ -6222,7 +6224,7 @@ glue.module.create(
                 image,
                 setAnimation = function () {
                     if (!image) {
-                        object.visible.setImage(currentAnimation.image);
+                        spritable.setImage(currentAnimation.image);
                         image = currentAnimation.image;
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
@@ -6252,13 +6254,7 @@ glue.module.create(
                             }
                         }
                     }
-                    if (Sugar.isDefined(object.visible)) {
-                        object.visible.setup(settings);
-                    } else {
-                        if (window.console) {
-                            throw 'Animatable needs a Visible component';
-                        }
-                    }
+                    spritable.setup(settings);
                     if (settings.image) {
                         image = settings.image;
                     }
@@ -6785,9 +6781,6 @@ glue.module.create(
                         if (Sugar.isDefined(config.dynamic)) {
                             this.setDynamic(config.dynamic);
                         }
-                    }
-                    if (Sugar.isUndefined(object.visible)) {
-                        throw 'Kineticable needs a visible component';
                     }
                     position = object.getPosition();
                     origin = object.getOrigin(); 
@@ -7462,8 +7455,6 @@ glue.module.create(
  *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/rotatable',
@@ -7675,8 +7666,8 @@ glue.module.create(
                     var dimension;
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
-                    } else if (Sugar.isDefined(object.visible)) {
-                        dimension = object.visible.getDimension();
+                    } else if (Sugar.isDefined(object.spritable)) {
+                        dimension = object.spritable.getDimension();
                     } else {
                         dimension = Dimension(1, 1);
                     }
@@ -7689,6 +7680,80 @@ glue.module.create(
 
             object.register('update', object.scalable.update, 'scalable');
             object.register('draw', object.scalable.draw, 'scalable');
+
+            return object;
+        };
+    }
+);
+
+/*
+ *  @module Spritable
+ *  @namespace component
+ *  @desc Represents a spritable component consisting of a simple image
+ *  @copyright (C) SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/component/spritable',
+    [
+        'glue',
+        'glue/math/vector',
+        'glue/math/dimension',
+        'glue/math/rectangle',
+        'glue/component/rotatable'
+    ],
+    function (Glue, Vector, Dimension, Rectangle) {
+        return function (object) {
+            var Sugar = Glue.sugar,
+                image = null;
+
+            object = object || {};
+            object.spritable = {
+                setup: function (settings) {
+                    var customPosition;
+                    if (settings) {
+                        if (settings.image) {
+                            image = settings.image;
+                        }
+                        image = settings.image;
+                        if (settings.position) {
+                            customPosition = settings.position;
+                            // using proper rounding:
+                            // http://jsperf.com/math-round-vs-hack/66
+                            object.setPosition(Vector(
+                                Math.round(customPosition.x),
+                                Math.round(customPosition.y)
+                            ));
+                        }
+                        if (settings.dimension) {
+                            object.setDimension(settings.dimension);
+                        } else if (image) {
+                            object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
+                        }
+                        if (settings.origin) {
+                            object.setOrigin(settings.origin);
+                        }
+                    }
+                },
+                draw: function (deltaT, context, scroll) {
+                    context.drawImage(
+                        image,
+                        0,
+                        0
+                    );
+                },
+                setImage: function (value) {
+                    image = value;
+                    object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
+                },
+                getImage: function () {
+                    return image;
+                }
+            };
+
+            // Register methods to base object
+            object.register('draw', object.spritable.draw, 'spritable');
 
             return object;
         };
@@ -7865,80 +7930,6 @@ glue.module.create(
                     return this.easeOutBounce (t*2-d, 0, c, d) * .5 + c*.5 + b;
                 }
             };
-
-            return object;
-        };
-    }
-);
-
-/*
- *  @module Visible
- *  @namespace component
- *  @desc Represents a visible component
- *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
- *  @license BSD 3-Clause License (see LICENSE file in project root)
- */
-glue.module.create(
-    'glue/component/visible',
-    [
-        'glue',
-        'glue/math/vector',
-        'glue/math/dimension',
-        'glue/math/rectangle',
-        'glue/component/rotatable'
-    ],
-    function (Glue, Vector, Dimension, Rectangle) {
-        return function (object) {
-            var Sugar = Glue.sugar,
-                image = null;
-
-            object = object || {};
-            object.visible = {
-                setup: function (settings) {
-                    var customPosition;
-                    if (settings) {
-                        if (settings.image) {
-                            image = settings.image;
-                        }
-                        image = settings.image;
-                        if (settings.position) {
-                            customPosition = settings.position;
-                            // using proper rounding:
-                            // http://jsperf.com/math-round-vs-hack/66
-                            object.setPosition(Vector(
-                                Math.round(customPosition.x),
-                                Math.round(customPosition.y)
-                            ));
-                        }
-                        if (settings.dimension) {
-                            object.setDimension(settings.dimension);
-                        } else if (image) {
-                            object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
-                        }
-                        if (settings.origin) {
-                            object.setOrigin(settings.origin);
-                        }
-                    }
-                },
-                draw: function (deltaT, context, scroll) {
-                    context.drawImage(
-                        image,
-                        0,
-                        0
-                    );
-                },
-                setImage: function (value) {
-                    image = value;
-                    object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
-                },
-                getImage: function () {
-                    return image;
-                }
-            };
-
-            // Register methods to base object
-            object.register('draw', object.visible.draw, 'visible');
 
             return object;
         };
@@ -9536,8 +9527,8 @@ glue.module.create(
                 },
                 getObjectCells = function (object) {
                     var cells = [],
-                        position = object.visible.getPosition(),
-                        dimension = object.visible.getDimension(),
+                        position = object.spritable.getPosition(),
+                        dimension = object.spritable.getDimension(),
                         min = Vector(
                             position.x,
                             position.y

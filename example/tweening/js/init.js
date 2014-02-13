@@ -7,7 +7,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/tweenable'
     ],
     function (
@@ -18,7 +18,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Tweenable
     ) {
         'use strict';
@@ -52,9 +52,9 @@ glue.module.get(
                 easingValue = 0,
                 tweenFunction,
                 speed = 35,
-                object = BaseObject(Visible, Tweenable).add({
+                object = BaseObject(Spritable, Tweenable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             image: Loader.getAsset('logoLD')
                         });
                         dimension = this.getDimension();

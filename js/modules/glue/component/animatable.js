@@ -11,12 +11,12 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/component/visible'
+        'glue/component/spritable'
     ],
-    function (Glue, Vector, Visible) {
+    function (Glue, Vector, Spritable) {
         return function (object) {
             var Sugar = Glue.sugar,
-                visible = Visible(object).visible,
+                spritable = Spritable(object).spritable,
                 animationSettings,
                 animations = {},
                 currentAnimation,
@@ -31,7 +31,7 @@ glue.module.create(
                 image,
                 setAnimation = function () {
                     if (!image) {
-                        visible.setImage(currentAnimation.image);
+                        spritable.setImage(currentAnimation.image);
                         image = currentAnimation.image;
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
@@ -61,8 +61,7 @@ glue.module.create(
                             }
                         }
                     }
-                    console.log(visible)
-                    visible.setup(settings);
+                    spritable.setup(settings);
                     if (settings.image) {
                         image = settings.image;
                     }

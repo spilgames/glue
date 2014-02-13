@@ -14,7 +14,7 @@
                 'glue/math/vector',
                 'glue/math/dimension',
                 'glue/baseobject',
-                'glue/component/visible',
+                'glue/component/spritable',
                 'glue/component/draggable',
                 'glue/component/droptarget',
                 'glue/component/hoverable',
@@ -26,7 +26,7 @@
                 Vector,
                 Dimension,
                 BaseObject,
-                Visible,
+                Spritable,
                 Draggable,
                 Droptarget,
                 Hoverable,
@@ -50,7 +50,7 @@
                         }
                     }
                 }, function () {
-                    var glueObject = BaseObject(Visible, Draggable, Hoverable, Clickable).add({
+                    var glueObject = BaseObject(Spritable, Draggable, Hoverable, Clickable).add({
                         init: function () {
                             this.z = this.getPosition().y;
                         },
@@ -73,14 +73,14 @@
                             console.log('glue is clicked...');
                         }
                     });
-                    glueObject.visible.setup({
+                    glueObject.spritable.setup({
                         image: Loader.getAsset('glueLogo')
                     });
                     glueObject.setName('glue');
                     Game.add(glueObject);
 
                     var dropText = '',
-                        dropObject = BaseObject(Visible, Droptarget).add({
+                        dropObject = BaseObject(Spritable, Droptarget).add({
                         init: function () {
                             this.z = this.getPosition().y;
                         },
@@ -97,7 +97,7 @@
                             }, 2000);
                         }
                     });
-                    dropObject.visible.setup({
+                    dropObject.spritable.setup({
                         position: Vector(250, 222),
                         image: Loader.getAsset('spilLogo')
                     });

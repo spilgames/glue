@@ -42,8 +42,8 @@ glue.module.create(
                 },
                 getObjectCells = function (object) {
                     var cells = [],
-                        position = object.visible.getPosition(),
-                        dimension = object.visible.getDimension(),
+                        position = object.spritable.getPosition(),
+                        dimension = object.spritable.getDimension(),
                         min = Vector(
                             position.x,
                             position.y
