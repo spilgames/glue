@@ -104,8 +104,8 @@ glue.module.create(
                 }
             };
 
-            object.register('draw', object.fadable.draw);
-            object.register('update', object.fadable.update);
+            object.register('draw', object.fadable.draw, 'fadable');
+            object.register('update', object.fadable.update, 'fadable');
 
             return object;
         };

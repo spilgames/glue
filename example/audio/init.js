@@ -6,7 +6,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/clickable'
     ],
     function (
@@ -16,7 +16,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Clickable
     ) {
         'use strict';
@@ -47,13 +47,13 @@ glue.module.get(
                 playing = false,
                 buttonPosition,
                 sound = null,
-                playButton = BaseObject(Visible, Clickable).add({
+                playButton = BaseObject(Spritable, Clickable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: Vector(0, 0),
                             image: Loader.getAsset('button')
                         });
-                        buttonPosition = this.visible.getPosition();
+                        buttonPosition = this.getPosition();
                     },
                     draw: function (deltaT, context) {
                         var value = this.playing ? 'Stop' : 'Play';

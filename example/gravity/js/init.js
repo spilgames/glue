@@ -5,7 +5,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/rectangle',
         'glue/math/vector',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/kineticable',
         'glue/component/draggable',
         'glue/sat',
@@ -17,7 +17,7 @@ glue.module.get(
         Dimension,
         Rectangle,
         Vector,
-        Visible,
+        Spritable,
         Kineticable,
         Draggable,
         SAT,
@@ -43,9 +43,9 @@ glue.module.get(
                 }
             }
         }, function () {
-            var obj1 = BaseObject(Visible, Kineticable, Draggable).add({
+            var obj1 = BaseObject(Spritable, Kineticable, Draggable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 400,
                                 y: 400
@@ -58,9 +58,9 @@ glue.module.get(
                     }
                 }),
                 position,
-                obj2 = BaseObject(Visible, Kineticable).add({
+                obj2 = BaseObject(Spritable, Kineticable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 400,
                                 y: 0
@@ -76,7 +76,7 @@ glue.module.get(
                     },
                     update: function (deltaT) {
                         if (position.y > Game.canvas.getDimension().height) {
-                            position.y = -this.visible.getDimension().height;
+                            position.y = -this.getDimension().height;
                         }
                         this.base.update(deltaT);
                         SAT.collide(obj1, obj2);

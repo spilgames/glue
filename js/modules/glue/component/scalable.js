@@ -28,7 +28,8 @@ glue.module.create(
                     if (!atTarget) {
                         var radian,
                             deltaX,
-                            deltaY;
+                            deltaY,
+                            self = this.scalable;
 
                         deltaX = targetScale.x - currentScale.x,
                         deltaY = targetScale.y - currentScale.y;
@@ -38,7 +39,7 @@ glue.module.create(
                         // is smaller then the step iterator (scaleSpeed * deltaT).
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
                             atTarget = true;
-                            this.setScale(targetScale);
+                            self.setScale(targetScale);
                         } else {
                             // Update the x and y scale, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
@@ -90,8 +91,8 @@ glue.module.create(
                     var dimension;
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
-                    } else if (Sugar.isDefined(object.visible)) {
-                        dimension = object.visible.getDimension();
+                    } else if (Sugar.isDefined(object.spritable)) {
+                        dimension = object.spritable.getDimension();
                     } else {
                         dimension = Dimension(1, 1);
                     }
@@ -102,8 +103,8 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.scalable.update);
-            object.register('draw', object.scalable.draw);
+            object.register('update', object.scalable.update, 'scalable');
+            object.register('draw', object.scalable.draw, 'scalable');
 
             return object;
         };

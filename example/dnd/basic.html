@@ -13,11 +13,11 @@
                 'glue/game',
                 'glue/math/dimension',
                 'glue/baseobject',
-                'glue/component/visible',
+                'glue/component/spritable',
                 'glue/component/draggable',
                 'glue/loader'
             ],
-            function (Game, Dimension, BaseObject, Visible, Draggable, Loader) {
+            function (Game, Dimension, BaseObject, Spritable, Draggable, Loader) {
                 'use strict';
 
                 Game.setup({
@@ -35,8 +35,8 @@
                         }
                     }
                 }, function () {
-                    var object = BaseObject(Visible, Draggable);
-                    object.visible.setup({
+                    var object = BaseObject(Spritable, Draggable);
+                    object.spritable.setup({
                         image: Loader.getAsset('glueLogo')
                     });
                     Game.add(object);

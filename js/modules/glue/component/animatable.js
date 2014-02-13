@@ -10,11 +10,13 @@ glue.module.create(
     'glue/component/animatable',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/component/spritable'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Spritable) {
         return function (object) {
             var Sugar = Glue.sugar,
+                spritable = Spritable(object).spritable,
                 animationSettings,
                 animations = {},
                 currentAnimation,
@@ -29,8 +31,8 @@ glue.module.create(
                 image,
                 setAnimation = function () {
                     if (!image) {
-                        object.visible.setImage(currentAnimation.image);
-                        image = object.visible.getImage();
+                        spritable.setImage(currentAnimation.image);
+                        image = currentAnimation.image;
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
                     timeBetweenFrames = currentAnimation.fps ?
@@ -59,13 +61,7 @@ glue.module.create(
                             }
                         }
                     }
-                    if (Sugar.isDefined(object.visible)) {
-                        object.visible.setup(settings);
-                    } else {
-                        if (window.console) {
-                            throw 'Animatable needs a Visible component';
-                        }
-                    }
+                    spritable.setup(settings);
                     if (settings.image) {
                         image = settings.image;
                     }
@@ -81,9 +77,9 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    var position = object.visible.getPosition(),
+                    var position = object.getPosition(),
                         sourceX = frameWidth * currentFrame,
-                        origin = object.visible.getOrigin();
+                        origin = object.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -118,12 +114,11 @@ glue.module.create(
                     }
                 },
                 getDimension: function () {
-                    var dimension = object.visible.getDimension();
+                    var dimension = object.getDimension();
                     dimension.width = frameWidth;
                     return dimension;
                 },
-                getBoundingBox: function () {
-                    var rectangle = object.visible.getBoundingBox();
+                getBoundingBox: function (rectangle) {
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },

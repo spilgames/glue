@@ -4,7 +4,7 @@ glue.module.get(
         'glue/loader',
         'glue/math/dimension',
         'glue/math/rectangle',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/kineticable',
         'glue/component/draggable',
         'glue/component/clickable',
@@ -18,7 +18,7 @@ glue.module.get(
         Loader,
         Dimension,
         Rectangle,
-        Visible,
+        Spritable,
         Kineticable,
         Draggable,
         Clickable,
@@ -52,16 +52,16 @@ glue.module.get(
             var math = Mathematics(),
                 collisionType = SAT.RECTANGLE_TO_RECTANGLE,
                 buttonPosition,
-                button = BaseObject(Visible, Clickable).add({
+                button = BaseObject(Spritable, Clickable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 0,
                                 y: 0
                             },
                             image: Loader.getAsset('button')
                         });
-                        buttonPosition = this.visible.getPosition();
+                        buttonPosition = this.getPosition();
                     },
                     draw: function (deltaT, context) {
                         var value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
@@ -77,9 +77,9 @@ glue.module.get(
                         }
                     }
                 }),
-                obj1 = BaseObject(Visible, Kineticable, Draggable).add({
+                obj1 = BaseObject(Spritable, Kineticable, Draggable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: {
                                 x: 400,
                                 y: 400
@@ -111,10 +111,10 @@ glue.module.get(
 
             Game.add(obj1);
             for (i = 0; i < 100; ++i) {
-                obj = BaseObject(Visible, Kineticable).add({
+                obj = BaseObject(Spritable, Kineticable).add({
                     init: function () {
-                        // visible config
-                        this.visible.setup({
+                        // spritable config
+                        this.spritable.setup({
                             position: {
                                 x: math.random(0, Game.canvas.getDimension().width),
                                 y: math.random(-10, 0)

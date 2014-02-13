@@ -14,7 +14,7 @@ glue.module.create(
     function (Glue) {
         return function (object) {
             var isClicked = function (e) {
-                    return object.visible.getBoundingBox().hasPosition(e.position);
+                    return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
                     if (isClicked(e) && object.onClick) {

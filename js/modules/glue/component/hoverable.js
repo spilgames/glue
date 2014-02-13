@@ -16,7 +16,7 @@ glue.module.create(
             // TODO: add state constants
             var state = 'not hovered',
                 isHovered = function (e) {
-                    return object.visible.getBoundingBox().hasPosition(e.position);
+                    return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerMoveHandler = function (e) {
                     if (isHovered(e)) {

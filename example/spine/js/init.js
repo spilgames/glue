@@ -6,7 +6,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/draggable',
         'glue/component/scalable',
         'glue/component/rotatable',
@@ -19,7 +19,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Draggable,
         Scalable,
         Rotatable,
@@ -42,29 +42,24 @@ glue.module.get(
                     path: 'asset/',
                     image: {
                         capivara: 'capivara.png',
-                        capivara_sideview: 'capivara-sideview.png'
+                        capivara_sideview: 'capivara_sideview.png'
                     },
                     json: {
-                        capivara_skeleton: 'asset/capivara-skeleton.json',
-                        capivara_sideview_skeleton: 'asset/capivara-skeleton-sideview.json'
+                        capivara: 'asset/capivara.json',
+                        capivara_sideview: 'asset/capivara_sideview.json'
                     },
                     binary: {
-                        capivara_atlas: 'asset/capivara.atlas',
-                        capivara_sideview_atlas: 'asset/capivara-sideview.atlas'
+                        capivara: 'asset/capivara.atlas',
+                        capivara_sideview: 'asset/capivara_sideview.atlas'
                     }
                 }
             }, function () {
                 var scroll = Game.getScroll(),
-                    capivara = BaseObject(Visible, Spineable, Scalable, Rotatable, Draggable).add({
+                    capivara = BaseObject(Spineable, Scalable, Rotatable, Draggable).add({
                         init: function () {
                             this.spineable.setup({
-                                position: {
-                                    x: 300,
-                                    y: 300
-                                },
-                                atlasImage: Loader.getAsset('capivara_sideview'),
-                                atlas: Loader.getAsset('capivara_sideview_atlas'),
-                                skeleton: Loader.getAsset('capivara_sideview_skeleton'),
+                                position: Vector(200, 150),
+                                assets: ['capivara', 'capivara_sideview'],
                                 // optional setting: you can rescale the bones
                                 // useful for using differently sized assets
                                 skeletonResolution: 1
@@ -75,7 +70,7 @@ glue.module.get(
 
                 Game.add(capivara);
                 // set origin
-                capivara.visible.setOrigin(Vector(150, 150));
+                capivara.setOrigin(Vector(150, 150));
                 // set an angle
                 // capivara.rotatable.setAngleDegree(45);
                 // scale

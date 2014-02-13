@@ -5,7 +5,7 @@ glue.module.create(
         'glue/loader',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/movable',
         'glue/component/droptarget',
         'glue/director'
@@ -15,7 +15,7 @@ glue.module.create(
         Loader,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Movable,
         Droptarget,
         Director
@@ -23,11 +23,11 @@ glue.module.create(
         return function () {
             var init = false,
                 dropped = false,
-                object = BaseObject(Visible, Movable, Droptarget).add({
+                object = BaseObject(Spritable, Movable, Droptarget).add({
                     init: function () {
                         if (!init) {
                             init = true;
-                            this.visible.setup({
+                            this.spritable.setup({
                                 position: Vector(600, 400),
                                 image: Loader.getAsset('glue')
                             });
@@ -43,7 +43,7 @@ glue.module.create(
                         }
                     },
                     onDrop: function (obj, e) {
-                        var position = this.visible.getPosition();
+                        var position = this.getPosition();
                         if (position.x === 200) {
                             this.movable.setTarget(Vector(
                                 600,

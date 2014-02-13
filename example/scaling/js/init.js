@@ -6,7 +6,7 @@ glue.module.get(
         'glue/math/vector',
         'glue/baseobject',
         'glue/component/scalable',
-        'glue/component/visible'
+        'glue/component/spritable'
     ],
     function (
         Game,
@@ -15,7 +15,7 @@ glue.module.get(
         Vector,
         BaseObject,
         Scalable,
-        Visible
+        Spritable
     ) {
         'use strict';
 
@@ -37,21 +37,15 @@ glue.module.get(
                 }
             }
         }, function () {
-            var object = BaseObject(Visible, Scalable).add({
+            var object = BaseObject(Spritable, Scalable).add({
                     init: function () {
                         var dimension;
-                        this.visible.setup({
-                            position: {
-                                x: 300,
-                                y: 300
-                            },
+                        this.spritable.setup({
+                            position: Vector(300, 300),
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                        this.visible.setOrigin({
-                            x: dimension.width / 2,
-                            y: dimension.height / 2
-                        });
+                        dimension = this.getDimension();
+                        this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.scalable.setTarget({
                             x: 2,
                             y: 2
@@ -65,6 +59,9 @@ glue.module.get(
                                 y: 1
                             });
                         }
+                    },
+                    draw: function (deltaT, context) {
+                        this.base.draw(deltaT, context);
                     }
                 });
             Game.add(object);

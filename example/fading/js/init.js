@@ -5,7 +5,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/movable',
         'glue/component/fadable'
     ],
@@ -15,7 +15,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Movable,
         Fadable
     ) {
@@ -38,14 +38,10 @@ glue.module.get(
                 }
             }
         }, function () {
-            var wasAtTarget = false,
-                object = BaseObject(Visible, Movable, Fadable).add({
+            var object = BaseObject(Spritable, Movable, Fadable).add({
                 init: function () {
-                    this.visible.setup({
-                        position: {
-                            x: 320,
-                            y: 300
-                        },
+                    this.spritable.setup({
+                        position: Vector(320, 300),
                         image: Loader.getAsset('blocks')
                     });
                     this.movable.setMoveSpeed(150);
@@ -55,10 +51,9 @@ glue.module.get(
                 },
                 update: function (deltaT) {
                     this.base.update(deltaT);
-                    if (this.movable.atTarget() && !wasAtTarget) {
-                        this.fadable.fadeOut();
-                        wasAtTarget = true;
-                    }
+                },
+                draw: function (deltaT, context, scroll) {
+                    this.base.draw(deltaT, context, scroll);
                 }
             });
 

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Drag & Drop</title>
+    <title>Drag &amp; Drop</title>
     <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,25 +14,25 @@
                 'glue/math/vector',
                 'glue/math/dimension',
                 'glue/baseobject',
-                'glue/component/visible',
+                'glue/component/spritable',
                 'glue/component/draggable',
                 'glue/loader'
             ],
-            function (Game, Vector, Dimension, BaseObject, Visible, Draggable, Loader) {
+            function (Game, Vector, Dimension, BaseObject, Spritable, Draggable, Loader) {
                 'use strict';
 
                 var myComponent = {
                         init: function () {
-                            this.z = this.visible.getPosition().y;
+                            this.z = this.getPosition().y;
                         },
                         dragStart: function (e) {
                             this.z = 9999;
                         },
                         dragMove: function (e) {
-                            this.z = this.visible.getPosition().y;
+                            this.z = this.getPosition().y;
                         },
                         dragEnd: function (e) {
-                            this.z = this.visible.getPosition().y;
+                            this.z = this.getPosition().y;
                         }
                     };
 
@@ -52,15 +52,15 @@
                         }
                     }
                 }, function () {
-                    var glueObject = BaseObject(Visible, Draggable).add(myComponent);
-                    glueObject.visible.setup({
+                    var glueObject = BaseObject(Spritable, Draggable).add(myComponent);
+                    glueObject.spritable.setup({
                         image: Loader.getAsset('glueLogo')
                     });
                     glueObject.setName('glue');
                     Game.add(glueObject);
 
-                    var spilObject = BaseObject(Visible, Draggable).add(myComponent);
-                    spilObject.visible.setup({
+                    var spilObject = BaseObject(Spritable, Draggable).add(myComponent);
+                    spilObject.spritable.setup({
                         position: Vector(200, 200),
                         image: Loader.getAsset('spilLogo')
                     });

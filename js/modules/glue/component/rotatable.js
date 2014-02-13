@@ -5,8 +5,6 @@
  *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/rotatable',
@@ -117,8 +115,8 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.rotatable.update);
-            object.register('draw', object.rotatable.draw);
+            object.register('update', object.rotatable.update, 'rotatable');
+            object.register('draw', object.rotatable.draw, 'rotatable');
 
             return object;
         };

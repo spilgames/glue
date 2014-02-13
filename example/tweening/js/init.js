@@ -7,7 +7,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/tweenable'
     ],
     function (
@@ -18,7 +18,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Tweenable
     ) {
         'use strict';
@@ -52,14 +52,14 @@ glue.module.get(
                 easingValue = 0,
                 tweenFunction,
                 speed = 35,
-                object = BaseObject(Visible, Tweenable).add({
+                object = BaseObject(Spritable, Tweenable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                        position = this.visible.getPosition();
-                        this.visible.setPosition(Vector(startValue, startValue));
+                        dimension = this.getDimension();
+                        position = this.getPosition();
+                        this.setPosition(Vector(startValue, startValue));
                         tweenFunction = this.tweenable.getRandomTween();
                     },
                     update: function (deltaT) {
@@ -72,7 +72,7 @@ glue.module.get(
                             easingValue = 0;
                             changeInValue = mathematics.random(5, 15);
                             tweenFunction = this.tweenable.getRandomTween();
-                            this.visible.setPosition(Vector(startValue, startValue));
+                            this.setPosition(Vector(startValue, startValue));
                         } else {
                             position.y = easingValue * speed;
                             position.x = easingValue * speed;

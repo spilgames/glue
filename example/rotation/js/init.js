@@ -5,7 +5,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/rotatable'
     ],
     function (
@@ -14,7 +14,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Rotatable
     ) {
         'use strict';
@@ -37,21 +37,15 @@ glue.module.get(
                 }
             }
         }, function () {
-            var object = BaseObject(Visible, Rotatable).add({
+            var object = BaseObject(Spritable, Rotatable).add({
                     init: function () {
                         var dimension;
-                        this.visible.setup({
-                            position: {
-                                x: 300,
-                                y: 300
-                            },
+                        this.spritable.setup({
+                            position: Vector(300, 300),
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                        this.rotatable.setOrigin({
-                            x: dimension.width / 2,
-                            y: dimension.height / 2
-                        });
+                        dimension = this.getDimension();
+                        this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.rotatable.setTargetDegree(360, true);
                         this.rotatable.setSpeed(100);
                     },
@@ -62,7 +56,7 @@ glue.module.get(
                         }
                     },
                     draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                     }
                 });
 

@@ -5,7 +5,7 @@ glue.module.get(
         'glue/math/dimension',
         'glue/math/vector',
         'glue/baseobject',
-        'glue/component/visible',
+        'glue/component/spritable',
         'glue/component/animatable'
     ],
     function (
@@ -14,7 +14,7 @@ glue.module.get(
         Dimension,
         Vector,
         BaseObject,
-        Visible,
+        Spritable,
         Animatable
     ) {
         'use strict';
@@ -40,9 +40,9 @@ glue.module.get(
             }
         }, function () {
             var scroll = Game.getScroll(),
-                object = BaseObject(Visible).add({
+                object = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: Vector(600, 400),
                             image: Loader.getAsset('glue')
                         });
@@ -56,18 +56,15 @@ glue.module.get(
                         scroll.y = position.y;
                     }
                 }),
-                object2 = BaseObject(Visible).add({
+                object2 = BaseObject(Spritable).add({
                     init: function () {
-                        this.visible.setup({
+                        this.spritable.setup({
                             position: Vector(800, 400),
                             image: Loader.getAsset('spil')
                         });
-                    },
-                    draw: function (deltaT, context, scroll) {
-                        this.visible.draw(deltaT, context, scroll);
                     }
                 }),
-                dog = BaseObject(Visible, Animatable).add({
+                dog = BaseObject(Spritable, Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {

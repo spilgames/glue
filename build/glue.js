@@ -6048,19 +6048,21 @@ adapters.glue = (function (win, Glue) {
 glue.module.create(
     'glue/baseobject',
     [
-        'glue'
+        'glue',
+        'glue/math/vector',
+        'glue/math/rectangle',
+        'glue/math/dimension'
     ],
-    function (Glue) {
+    function (Glue, Vector, Rectangle, Dimension) {
         var Sugar = Glue.sugar;
         return function () {
             var name = '',
-                module = {
-                    add: function (object) {
-                        return Sugar.combine(this, object);
-                    }
-                },
                 mixins = Array.prototype.slice.call(arguments),
                 mixin = null,
+                position = Vector(0, 0),
+                origin = Vector(0, 0),
+                dimension = Dimension(0, 0),
+                rectangle,
                 l = mixins.length,
                 i = 0,
                 j = 0,
@@ -6069,53 +6071,117 @@ glue.module.create(
                 typeRegistrant,
                 acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
                 registrants = {
-                    init: [],
-                    draw: [],
-                    update: [],
-                    pointerDown: [],
-                    pointerMove: [],
-                    pointerUp: []
+                    init: {},
+                    draw: {},
+                    update: {},
+                    pointerDown: {},
+                    pointerMove: {},
+                    pointerUp: {}
                 },
                 callRegistrants = function (type, parameters) {
                     parameters = Array.prototype.slice.call(parameters);
                     typeRegistrants = registrants[type];
-                    typeRegistrantsLength = typeRegistrants.length;
-                    for (j = 0; j < typeRegistrantsLength; ++j) {
-                        typeRegistrants[j].apply(module, parameters);
+                    for (registrant in typeRegistrants) {
+                        if (type === 'draw' && registrant === 'spritable') {
+                            continue;
+                        }
+                        typeRegistrants[registrant].apply(module, parameters);
+                    }
+                },
+                updateRectangle = function () {
+                    var scale = Vector(1, 1);
+                    if (module.scalable) {
+                        scale = module.scalable.getScale();
+                    }
+                    rectangle = Rectangle(
+                        position.x - origin.x * Math.abs(scale.x),
+                        position.y - origin.y * Math.abs(scale.y),
+                        position.x - origin.x * Math.abs(scale.x) + dimension.width,
+                        position.y - origin.y * Math.abs(scale.y) + dimension.height
+                    );
+                },
+                module = {
+                    add: function (object) {
+                        return Sugar.combine(this, object);
+                    },
+                    setName: function (value) {
+                        name = value;
+                    },
+                    getName: function (value) {
+                        return name;
+                    },
+                    init: function () {
+                        callRegistrants('init', arguments);
+                    },
+                    update: function (deltaT) {
+                        callRegistrants('update', arguments);
+                    },
+                    draw: function (deltaT, context, scroll) {
+                        scroll = scroll || Vector(0, 0);
+                        context.save();
+                        context.translate(
+                            position.x - scroll.x,
+                            position.y - scroll.y
+                        );
+                        callRegistrants('draw', arguments);
+                        context.translate(-origin.x, -origin.y);
+                        if (registrants.draw.spritable) {
+                            registrants.draw.spritable(deltaT, context, scroll);
+                        }
+                        context.restore();
+                    },
+                    pointerDown: function (e) {
+                        callRegistrants('pointerDown', arguments);
+                    },
+                    pointerMove: function (e) {
+                        callRegistrants('pointerMove', arguments);
+                    },
+                    pointerUp: function (e) {
+                        callRegistrants('pointerUp', arguments);
+                    },
+                    register: function (type, registrant, name) {
+                        if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(registrant)) {
+                            registrants[type][name] = registrant;
+                        }
+                    },
+                    getPosition: function () {
+                        return position;
+                    },
+                    setPosition: function (value) {
+                        if (Sugar.isVector(value)) {
+                            position.x = value.x;
+                            position.y = value.y;
+                            updateRectangle();
+                        }
+                    },
+                    getDimension: function () {
+                        return dimension;
+                    },
+                    setDimension: function (value) {
+                        if (Sugar.isDimension(value)) {
+                            dimension = value;
+                            updateRectangle();
+                        }
+                    },
+                    getBoundingBox: function () {
+                        return module.animatable ?
+                            module.animatable.getBoundingBox(rectangle) :
+                            rectangle;
+                    },
+                    setBoundingBox: function (value) {
+                        rectangle = value;
+                    },
+                    setOrigin: function (value) {
+                        if (Sugar.isVector(value)) {
+                            origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
+                            origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
+                        }
+                    },
+                    getOrigin: function () {
+                        return origin;
                     }
                 };
 
-            module = Sugar.combine(module, {
-                setName: function (value) {
-                    name = value;
-                },
-                getName: function (value) {
-                    return name;
-                },
-                init: function () {
-                    callRegistrants('init', arguments);
-                },
-                update: function (deltaT) {
-                    callRegistrants('update', arguments);                  
-                },
-                draw: function (deltaT, context, scroll) {
-                    callRegistrants('draw', arguments);
-                },
-                pointerDown: function (e) {
-                    callRegistrants('pointerDown', arguments);
-                },
-                pointerMove: function (e) {
-                    callRegistrants('pointerMove', arguments);
-                },
-                pointerUp: function (e) {
-                    callRegistrants('pointerUp', arguments);
-                },
-                register: function (type, callback) {
-                    if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(callback)) {
-                        registrants[type].push(callback);
-                    }
-                }
-            });
             for (i; i < l; ++i) {
                 mixin = mixins[i];
                 mixin(module);
@@ -6137,11 +6203,13 @@ glue.module.create(
     'glue/component/animatable',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/component/spritable'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Spritable) {
         return function (object) {
             var Sugar = Glue.sugar,
+                spritable = Spritable(object).spritable,
                 animationSettings,
                 animations = {},
                 currentAnimation,
@@ -6156,8 +6224,8 @@ glue.module.create(
                 image,
                 setAnimation = function () {
                     if (!image) {
-                        object.visible.setImage(currentAnimation.image);
-                        image = object.visible.getImage();
+                        spritable.setImage(currentAnimation.image);
+                        image = currentAnimation.image;
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
                     timeBetweenFrames = currentAnimation.fps ?
@@ -6186,13 +6254,7 @@ glue.module.create(
                             }
                         }
                     }
-                    if (Sugar.isDefined(object.visible)) {
-                        object.visible.setup(settings);
-                    } else {
-                        if (window.console) {
-                            throw 'Animatable needs a Visible component';
-                        }
-                    }
+                    spritable.setup(settings);
                     if (settings.image) {
                         image = settings.image;
                     }
@@ -6208,9 +6270,9 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    var position = object.visible.getPosition(),
+                    var position = object.getPosition(),
                         sourceX = frameWidth * currentFrame,
-                        origin = object.visible.getOrigin();
+                        origin = object.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -6245,12 +6307,11 @@ glue.module.create(
                     }
                 },
                 getDimension: function () {
-                    var dimension = object.visible.getDimension();
+                    var dimension = object.getDimension();
                     dimension.width = frameWidth;
                     return dimension;
                 },
-                getBoundingBox: function () {
-                    var rectangle = object.visible.getBoundingBox();
+                getBoundingBox: function (rectangle) {
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
@@ -6283,7 +6344,7 @@ glue.module.create(
     function (Glue) {
         return function (object) {
             var isClicked = function (e) {
-                    return object.visible.getBoundingBox().hasPosition(e.position);
+                    return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
                     if (isClicked(e) && object.onClick) {
@@ -6361,9 +6422,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    return object.animatable ?
-                        object.animatable.getBoundingBox().hasPosition(e.position) :
-                        object.visible.getBoundingBox().hasPosition(e.position);
+                    return object.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity
@@ -6379,7 +6438,7 @@ glue.module.create(
                             if (isHeighestDraggable(object)) {
                                 dragging = true;
                                 dragId = e.pointerId;
-                                grabOffset = e.position.substract(object.visible.getPosition());
+                                grabOffset = e.position.substract(object.getPosition());
                                 if (object.dragStart) {
                                     object.dragStart(e);
                                 }
@@ -6398,7 +6457,7 @@ glue.module.create(
                 dragMove = function (e) {
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            object.visible.setPosition(e.position.substract(grabOffset));
+                            object.setPosition(e.position.substract(grabOffset));
                             if (object.dragMove) {
                                 object.dragMove(e);
                             }
@@ -6448,9 +6507,9 @@ glue.module.create(
             };
 
             // Register methods to base object
-            object.register('pointerDown', object.draggable.pointerDown);
-            object.register('pointerMove', object.draggable.pointerMove);
-            object.register('pointerUp', object.draggable.pointerUp);
+            object.register('pointerDown', object.draggable.pointerDown, 'draggable');
+            object.register('pointerMove', object.draggable.pointerMove, 'draggable');
+            object.register('pointerUp', object.draggable.pointerUp, 'draggable');
 
             return object;
         };
@@ -6474,10 +6533,7 @@ glue.module.create(
     function (Glue, Event) {
         return function (object) {
             var droppedOnMe = function (draggable, e) {
-                    // TODO: add more methods (constants) to check on me
-                    return object.animatable ?
-                        object.animatable.getBoundingBox().hasPosition(e.position) :
-                        object.visible.getBoundingBox().hasPosition(e.position);
+                    return object.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
                     if (droppedOnMe(object, e) && object.onDrop) {
@@ -6606,8 +6662,8 @@ glue.module.create(
                 }
             };
 
-            object.register('draw', object.fadable.draw);
-            object.register('update', object.fadable.update);
+            object.register('draw', object.fadable.draw, 'fadable');
+            object.register('update', object.fadable.update, 'fadable');
 
             return object;
         };
@@ -6632,7 +6688,7 @@ glue.module.create(
             // TODO: add state constants
             var state = 'not hovered',
                 isHovered = function (e) {
-                    return object.visible.getBoundingBox().hasPosition(e.position);
+                    return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerMoveHandler = function (e) {
                     if (isHovered(e)) {
@@ -6726,18 +6782,15 @@ glue.module.create(
                             this.setDynamic(config.dynamic);
                         }
                     }
-                    if (Sugar.isUndefined(object.visible)) {
-                        throw 'Kineticable needs a visible component';
-                    }
-                    position = object.visible.getPosition();
-                    origin = object.visible.getOrigin(); 
+                    position = object.getPosition();
+                    origin = object.getOrigin(); 
                     if (Sugar.isDefined(object.scalable)) {
                         scale = object.scalable.getScale();
                     }
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
                     } else {
-                        dimension = object.visible.getDimension();
+                        dimension = object.getDimension();
                     }
                     dimension.width *= scale.x;
                     dimension.height *= scale.y;
@@ -6760,7 +6813,7 @@ glue.module.create(
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
                     position.add(velocity);
-                    object.visible.setPosition(position);
+                    object.setPosition(position);
                 },
                 setVelocity: function (vector) {
                     if (Sugar.isVector(vector)) {
@@ -6806,7 +6859,7 @@ glue.module.create(
                 },
                 setPosition: function (vector) {
                     if (Sugar.isVector(vector)) {
-                        object.visible.setPosition(vector);
+                        object.setPosition(vector);
                     } else {
                         throw 'The argument must be a Vector';
                     }
@@ -6912,7 +6965,7 @@ glue.module.create(
                             deltaX,
                             deltaY;
 
-                        position = object.visible.getPosition();
+                        position = object.getPosition();
                         deltaX = targetPosition.x - position.x,
                         deltaY = targetPosition.y - position.y;
 
@@ -6922,7 +6975,7 @@ glue.module.create(
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < moveSpeed * deltaT) {
                             atTarget = true;
                             position = targetPosition;
-                            object.visible.setPosition(position);
+                            object.setPosition(position);
                         } else {
                             // Update the x and y position, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
@@ -6930,7 +6983,7 @@ glue.module.create(
                             position.x += Math.cos(radian) * moveSpeed * deltaT;
                             position.y += Math.sin(radian) * moveSpeed * deltaT;
                             rotation = radian * 180 / Math.PI;
-                            object.visible.setPosition(position);                      
+                            object.setPosition(position);                      
                         }
                     }
                 },
@@ -6959,7 +7012,7 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.movable.update);
+            object.register('update', object.movable.update, 'movable');
 
             return object;
         };
@@ -6987,7 +7040,7 @@ glue.module.create(
          */
         return function (object) {
             // - per instance private members -
-            var sugar = Glue.sugar,
+            var Sugar = Glue.sugar,
                 atlas = {},
                 skeletons = {},
                 skeletonJson = {},
@@ -7003,6 +7056,8 @@ glue.module.create(
                 skeletonRectangles = {},
                 cornerPoints = {},
                 origins = {},
+                // remembers the skeleton attached to the animation
+                animations = {},
                 /**
                  * Initalizes the animation
                  * @name initSpine
@@ -7010,24 +7065,26 @@ glue.module.create(
                  * @function
                  */
                 initSpine = function (spineSettings) {
-                    if (!sugar.isDefined(spineSettings)) {
+                    var i = 0;
+                    if (!Sugar.isDefined(spineSettings)) {
                         throw 'Specify settings object to Spine';
                     }
-                    if (!sugar.isDefined(spineSettings.atlas)) {
-                        throw 'Specify an atlas to settings object ';
+                    if (!Sugar.isDefined(spineSettings.assets)) {
+                        throw 'Specify assets to Spine';
                     }
-                    if (!sugar.isDefined(spineSettings.atlasImage)) {
-                        throw 'Specify an atlasImage to settings object ';
+                    // convert to array of strings
+                    if (typeof spineSettings.assets === 'string') {
+                        spineSettings.assets = [spineSettings.assets];
                     }
-                    if (!sugar.isDefined(spineSettings.skeleton)) {
-                        throw 'Specify a skeleton JSON to settings object ';
+                    for (i; i < spineSettings.assets.length; ++i) {
+                        currentSkeleton = spineSettings.assets[i];
+                        addAtlas(spineSettings.assets[i]);
+                        addSkeletonData(spineSettings.assets[i]);
                     }
-                    currentSkeleton = spineSettings.skeleton;
-                    addAtlas(spineSettings);
-                    addSkeletonData(spineSettings);
-                    if (spineSettings.position && object.visible) {
-                        object.visible.setPosition(spineSettings.position);
+                    if (spineSettings.position && object) {
+                        object.setPosition(spineSettings.position);
                     }
+                    // set skeleton back to first specified
                 },
                 /**
                  * Loads the atlas data
@@ -7035,10 +7092,10 @@ glue.module.create(
                  * @memberOf Spineable
                  * @function
                  */
-                addAtlas = function (spineSettings) {
-                    var atlasText = spineSettings.atlas,
+                addAtlas = function (assetName) {
+                    var atlasText = Loader.getBinary(assetName),
                         p = {},
-                        image = spineSettings.atlasImage;
+                        image = Loader.getImage(assetName);
                     atlas[currentSkeleton] = new spine.Atlas(atlasText, {
                         load: function (page, path) {
                             var texture = image;
@@ -7056,28 +7113,38 @@ glue.module.create(
                  * @memberOf Spineable
                  * @function
                  */
-                addSkeletonData = function (spineSettings) {
+                addSkeletonData = function (assetName) {
+                    var i = 0,
+                        name;
                     skeletonJson[currentSkeleton] = new spine.SkeletonJson(
                         new spine.AtlasAttachmentLoader(atlas[currentSkeleton])
                     );
-                    if (spineSettings.skeletonResolution) {
-                        skeletonJson[currentSkeleton].scale = spineSettings.skeletonResolution;
+                    if (settings.skeletonResolution) {
+                        skeletonJson[currentSkeleton].scale = settings.skeletonResolution;
                     }
 
                     skeletonData[currentSkeleton] = skeletonJson[currentSkeleton].readSkeletonData(
-                        spineSettings.skeleton
+                        Loader.getJSON(assetName)
                     );
                     skeletons[currentSkeleton] = new spine.Skeleton(skeletonData[currentSkeleton]);
                     spine.Bone.yDown = true;
-                    if (object.visible) {
-                        skeletons[currentSkeleton].getRootBone().x = object.visible.getPosition().x;
-                        skeletons[currentSkeleton].getRootBone().y = object.visible.getPosition().y;
+                    if (object) {
+                        skeletons[currentSkeleton].getRootBone().x = object.getPosition().x;
+                        skeletons[currentSkeleton].getRootBone().y = object.getPosition().y;
                     }
                     skeletons[currentSkeleton].updateWorldTransform();
 
                     stateData[currentSkeleton] = new spine.AnimationStateData(skeletonData[currentSkeleton]);
                     state[currentSkeleton] = new spine.AnimationState(stateData[currentSkeleton]);
 
+                    // remember which animations belong to which animation
+                    for (i; i < skeletonData[currentSkeleton].animations.length; ++i) {
+                        name = skeletonData[currentSkeleton].animations[i].name;
+                        if (Sugar.has(animations, name)) {
+                            throw ('Animation with name ' + name + ' already exists');
+                        }
+                        animations[name] = currentSkeleton;
+                    }
                     calculateRectangle();
                 },
                 /**
@@ -7095,9 +7162,9 @@ glue.module.create(
                         boneRectangle = Rectangle(0, 0, 0, 0),
                         rootBone = skeleton.getRootBone(),
                         skeletonRectangle = Rectangle(0, 0, 0, 0);
-                    if (object.visible) {
-                        skeletonRectangle.x1 = object.visible.getPosition().x;
-                        skeletonRectangle.y1 = object.visible.getPosition().y;
+                    if (object) {
+                        skeletonRectangle.x1 = object.getPosition().x;
+                        skeletonRectangle.y1 = object.getPosition().y;
                     }
                     // set up the skeleton to get width/height of the sprite
                     for (i; i < l; ++i) {
@@ -7131,14 +7198,14 @@ glue.module.create(
                         skeletonRectangle = skeletonRectangles[currentSkeleton],
                         width,
                         height;
-                    if (object.visible) {
+                    if (object) {
                         if (object.scalable) {
                             scale = object.scalable.getScale();
                         }
                         // update visible dimension
                         width = skeletonRectangle.getWidth() * Math.abs(scale.x);
                         height = skeletonRectangle.getHeight() * Math.abs(scale.y);
-                        object.visible.setDimension(Dimension(width, height));
+                        object.setDimension(Dimension(width, height));
                     }
                 };
 
@@ -7168,10 +7235,9 @@ glue.module.create(
                         position = Vector(0, 0),
                         offset;
                     context.save();
-                    if (object.visible) {
-                        vOrigin = object.visible.getOrigin();
-                        position = object.visible.getPosition();
-                        context.translate(~~position.x, ~~position.y);
+                    if (object) {
+                        vOrigin = object.getOrigin();
+                        position = object.getPosition();
                     }
                     offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));
                     if (object.scalable) {
@@ -7200,7 +7266,7 @@ glue.module.create(
                         angle = -(slot.bone.worldRotation + attachment.rotation) * Math.PI / 180;
 
                         context.save();
-                        context.translate(~~x, ~~y);
+                        context.translate(Math.round(x), Math.round(y));
                         context.rotate(angle);
                         context.globalAlpha = slot.a;
                         context.scale(boneScaleX * scaleX, boneScaleY * scaleY);
@@ -7211,8 +7277,8 @@ glue.module.create(
                     context.restore();
 
                     // draw boundingbox
-                    // var b=object.visible.getBoundingBox();
-                    // context.strokeRect(b.x1,b.y1,b.getWidth(),b.getHeight());
+                    // var b = object.getBoundingBox();
+                    // context.strokeRect(b.x1, b.y1, b.getWidth(), b.getHeight());
                 },
                 /**
                  * Update the animation
@@ -7238,31 +7304,41 @@ glue.module.create(
                     initSpine(settings);
                 },
                 /**
-                 * Set a new animation
-                 * @name setAnimationByName
-                 * @memberOf Spineable
-                 * @function
-                 * @param {Number} trackIndex: Track number
-                 * @param {String} animationName: Name of the animation
-                 * @param {Bool} loop: Wether the animation loops
-                 */
-                setAnimationByName: function (trackIndex, animationName, loop) {
-                    currentAnimationStr = animationName;
-                    state[currentSkeleton].setAnimationByName(trackIndex, animationName, loop);
-                    skeletons[currentSkeleton].setSlotsToSetupPose();
-                },
-                /**
                  * Set a new animation if it's not playing yet, returns true if successful
                  * @name setAnimation
                  * @memberOf Spineable
                  * @function
                  * @param {String} animationName: Name of the animation
+                 * @param {Boolean} loop: (Optional) Wether the animation should loop, default is true
+                 * @param {Number} speed:(Optional)  Speed of the animation, default is 1.0
+                 * @param {Function} onComplete: (Optional) Callback function when animation ends/loops
                  */
-                setAnimation: function (animationName) {
+                setAnimation: function (animationName, loop, speed, onComplete) {
+                    if (!Sugar.has(animations, animationName)) {
+                        throw ('There is no skeleton which contains an animation called ' + animationName);
+                    }
                     if (currentAnimationStr === animationName) {
                         return false;
                     }
-                    object.spineable.setAnimationByName(0, animationName, true);
+                    // set to correct skeleton if needed
+                    object.spineable.setSkeleton(animations[animationName]);
+                    // set callback
+                    if (Sugar.isDefined(onComplete)) {
+                        state[currentSkeleton].onComplete = onComplete;
+                    } else {
+                        state[currentSkeleton].onComplete = null;
+                    }
+                    if (!Sugar.isDefined(loop)) {
+                        loop = true;
+                    }
+                    if (!Sugar.isDefined(speed)) {
+                        speed = 1.0;
+                    }
+                    // set animation
+                    currentAnimationStr = animationName;
+                    state[currentSkeleton].setAnimationByName(0, animationName, loop);
+                    state[currentSkeleton].timeScale = speed;
+                    skeletons[currentSkeleton].setSlotsToSetupPose();
                     return true;
                 },
                 /**
@@ -7314,7 +7390,7 @@ glue.module.create(
                         return;
                     }
                     currentSkeleton = strSkeleton;
-                    object.spineable.update();
+                    updateVisible();
                 },
                 /**
                  * Returns the name of the current skeleton json
@@ -7326,15 +7402,20 @@ glue.module.create(
                     return currentSkeleton;
                 },
                 /**
-                 * Sets the origin of the current skeleton (it's summed with visible's origin)
+                 * Sets the origin of the a skeleton (it's summed with visible's origin)
                  * @name setOrigin
                  * @memberOf Spineable
                  * @function
                  * @param {Object} pos: x and y position relative to the upper left corner point
                  */
-                setOrigin: function (pos) {
-                    origins[currentSkeleton] = pos;
-                    updateVisible();
+                setOrigin: function (pos, skeletonName) {
+                    if (Sugar.has(origins, skeletonName)) {
+                        throw ("This skeleton doesn't exist: " + skeletonName);
+                    }
+                    origins[skeletonName] = pos;
+                    if (currentSkeleton === skeletonName) {
+                        updateVisible();
+                    }
                 },
                 /**
                  * Gets the origin of the current skeleton
@@ -7374,8 +7455,6 @@ glue.module.create(
  *  @copyright (C) SpilGames
  *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
- *
- *  Only when performance issues: Remove the need for getters and setters in visible
  */
 glue.module.create(
     'glue/component/rotatable',
@@ -7486,8 +7565,8 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.rotatable.update);
-            object.register('draw', object.rotatable.draw);
+            object.register('update', object.rotatable.update, 'rotatable');
+            object.register('draw', object.rotatable.draw, 'rotatable');
 
             return object;
         };
@@ -7524,7 +7603,8 @@ glue.module.create(
                     if (!atTarget) {
                         var radian,
                             deltaX,
-                            deltaY;
+                            deltaY,
+                            self = this.scalable;
 
                         deltaX = targetScale.x - currentScale.x,
                         deltaY = targetScale.y - currentScale.y;
@@ -7534,7 +7614,7 @@ glue.module.create(
                         // is smaller then the step iterator (scaleSpeed * deltaT).
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
                             atTarget = true;
-                            this.setScale(targetScale);
+                            self.setScale(targetScale);
                         } else {
                             // Update the x and y scale, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
@@ -7586,8 +7666,8 @@ glue.module.create(
                     var dimension;
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
-                    } else if (Sugar.isDefined(object.visible)) {
-                        dimension = object.visible.getDimension();
+                    } else if (Sugar.isDefined(object.spritable)) {
+                        dimension = object.spritable.getDimension();
                     } else {
                         dimension = Dimension(1, 1);
                     }
@@ -7598,8 +7678,82 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.scalable.update);
-            object.register('draw', object.scalable.draw);
+            object.register('update', object.scalable.update, 'scalable');
+            object.register('draw', object.scalable.draw, 'scalable');
+
+            return object;
+        };
+    }
+);
+
+/*
+ *  @module Spritable
+ *  @namespace component
+ *  @desc Represents a spritable component consisting of a simple image
+ *  @copyright (C) SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/component/spritable',
+    [
+        'glue',
+        'glue/math/vector',
+        'glue/math/dimension',
+        'glue/math/rectangle',
+        'glue/component/rotatable'
+    ],
+    function (Glue, Vector, Dimension, Rectangle) {
+        return function (object) {
+            var Sugar = Glue.sugar,
+                image = null;
+
+            object = object || {};
+            object.spritable = {
+                setup: function (settings) {
+                    var customPosition;
+                    if (settings) {
+                        if (settings.image) {
+                            image = settings.image;
+                        }
+                        image = settings.image;
+                        if (settings.position) {
+                            customPosition = settings.position;
+                            // using proper rounding:
+                            // http://jsperf.com/math-round-vs-hack/66
+                            object.setPosition(Vector(
+                                Math.round(customPosition.x),
+                                Math.round(customPosition.y)
+                            ));
+                        }
+                        if (settings.dimension) {
+                            object.setDimension(settings.dimension);
+                        } else if (image) {
+                            object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
+                        }
+                        if (settings.origin) {
+                            object.setOrigin(settings.origin);
+                        }
+                    }
+                },
+                draw: function (deltaT, context, scroll) {
+                    context.drawImage(
+                        image,
+                        0,
+                        0
+                    );
+                },
+                setImage: function (value) {
+                    image = value;
+                    object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
+                },
+                getImage: function () {
+                    return image;
+                }
+            };
+
+            // Register methods to base object
+            object.register('draw', object.spritable.draw, 'spritable');
 
             return object;
         };
@@ -7776,151 +7930,6 @@ glue.module.create(
                     return this.easeOutBounce (t*2-d, 0, c, d) * .5 + c*.5 + b;
                 }
             };
-
-            return object;
-        };
-    }
-);
-
-/*
- *  @module Visible
- *  @namespace component
- *  @desc Represents a visible component
- *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
- *  @license BSD 3-Clause License (see LICENSE file in project root)
- */
-glue.module.create(
-    'glue/component/visible',
-    [
-        'glue',
-        'glue/math/vector',
-        'glue/math/dimension',
-        'glue/math/rectangle',
-        'glue/component/rotatable'
-    ],
-    function (Glue, Vector, Dimension, Rectangle) {
-        return function (object) {
-            var Sugar = Glue.sugar,
-                position = Vector(0, 0),
-                origin = Vector(0, 0),
-                dimension = Dimension(0, 0),
-                image = null,
-                rectangle = Rectangle(0, 0, 0, 0),
-                updateRectangle = function () {
-                    var scale = Vector(1, 1);
-                    if (object.scalable) {
-                        scale = object.scalable.getScale();
-                    }
-                    rectangle.x1 = position.x - origin.x * Math.abs(scale.x);
-                    rectangle.y1 = position.y - origin.y * Math.abs(scale.y);
-                    rectangle.x2 = position.x - origin.x * Math.abs(scale.x) + dimension.width;
-                    rectangle.y2 = position.y - origin.y * Math.abs(scale.y) + dimension.height;
-                };
-
-            object = object || {};
-            object.visible = {
-                setup: function (settings) {
-                    var customPosition;
-                    if (settings) {
-                        if (settings.image) {
-                            image = settings.image;
-                        }
-                        image = settings.image;
-                        if (settings.position) {
-                            customPosition = settings.position;
-                            // using proper rounding:
-                            // http://jsperf.com/math-round-vs-hack/66
-                            this.setPosition(Vector(
-                                Math.round(customPosition.x),
-                                Math.round(customPosition.y)
-                            ));
-                        }
-                        if (settings.dimension) {
-                            this.setDimension(settings.dimension);
-                        } else if (image) {
-                            this.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
-                        }
-                        if (Sugar.isDefined(dimension)) {
-                            this.setBoundingBox(Rectangle(
-                                position.x,
-                                position.y,
-                                position.x + dimension.width,
-                                position.y + dimension.height
-                            ));
-                        }
-                        if (settings.origin) {
-                            this.setOrigin(settings.origin);
-                        }
-                    }
-                },
-                draw: function (deltaT, context, scroll) {
-                    scroll = scroll || Vector(0, 0);
-                    context.save();
-                    context.translate(
-                        position.x - scroll.x,
-                        position.y - scroll.y
-                    );
-                    if (Sugar.isDefined(object.rotatable)) {
-                        object.rotatable.draw(deltaT, context);
-                    }
-                    if (Sugar.isDefined(object.scalable)) {
-                        object.scalable.draw(deltaT, context);
-                    }    
-                    context.translate(-origin.x, -origin.y);
-                    context.drawImage(
-                        image,
-                        0,
-                        0
-                    );
-                    context.restore();
-                },
-                getPosition: function () {
-                    return position;
-                },
-                setPosition: function (value) {
-                    if (Sugar.isVector(value)) {
-                        position.x = value.x;
-                        position.y = value.y;
-                        updateRectangle();
-                    }
-                },
-                getDimension: function () {
-                    return dimension;
-                },
-                setDimension: function (value) {
-                    if (Sugar.isDimension(value)) {
-                        dimension = value;
-                        updateRectangle();
-                    }
-                },
-                getBoundingBox: function () {
-                    return rectangle;
-                },
-                setBoundingBox: function (value) {
-                    rectangle = value;
-                },
-                setImage: function (value) {
-                    image = value;
-                    dimension = Dimension(image.naturalWidth, image.naturalHeight);
-                    updateRectangle();
-                },
-                getImage: function () {
-                    return image;
-                },
-                setOrigin: function (value) {
-                    if (Sugar.isVector(value)) {
-                        origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
-                        origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
-                    }
-                },
-                getOrigin: function () {
-                    return origin;
-                }
-            };
-
-            // Register methods to base object
-            object.register('draw', object.visible.draw);
 
             return object;
         };
@@ -8125,6 +8134,7 @@ glue.module.create(
             fpsAccumulator = 0,
             fpsTicks = 0,
             fpsMaxAverage = 500000,
+            useSort = true,
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -8185,7 +8195,9 @@ glue.module.create(
                         objects.push(addedObjects[i]);
                     };
                     addedObjects = [];
-                    sort();
+                    if (useSort) {
+                        sort();
+                    }
                 }
             },
             removeObjects = function () {
@@ -8214,8 +8226,9 @@ glue.module.create(
                 if (isRunning) {
                     requestAnimationFrame(cycle);
                 }
-                sort();
-
+                if (useSort) {
+                    sort();
+                }
                 if (canvasSupported) {
                     redraw();
                     removeObjects();
@@ -8412,6 +8425,9 @@ glue.module.create(
                         debugBar.id = 'debugBar';
                         document.body.appendChild(debugBar);
                     }
+                    if (config.sort && config.sort === false) {
+                        useSort = false;
+                    }
                     /*
                     // save color in variable and move code before calling other draw functions
                     if (config.canvas.color) {
@@ -8505,12 +8521,18 @@ glue.module.create(
     ],
     function (Glue) {
         var Audio = Glue.audio,
+            Sugar = Glue.sugar,
             loaded = false,
             assetCount = 0,
             loadCount = 0,
             assetPath = null,
             assets = {},
-            loadedAssets = {},
+            loadedAssets = {
+                image: {},
+                audio: {},
+                json: {},
+                binary: {}
+            },
             completedHandler,
             loader = document.getElementById('loader'),
             loadBar = document.getElementById('loadbar'),
@@ -8542,7 +8564,7 @@ glue.module.create(
                 var asset = new Image();
                 asset.src = assetPath + 'image/' + source;
                 asset.addEventListener('load', success, false);
-                loadedAssets[name] = asset;
+                loadedAssets.image[name] = asset;
             },
             loadAudio = function (name, source, success, failure) {
                 // TODO: Implement failure
@@ -8550,7 +8572,7 @@ glue.module.create(
                     urls: [assetPath + 'audio/' + source],
                     onload: success
                 });
-                loadedAssets[name] = asset;
+                loadedAssets.audio[name] = asset;
             },            
             loadJSON = function (name, source, success, failure) {
                 var xhr = new XMLHttpRequest();
@@ -8567,7 +8589,7 @@ glue.module.create(
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if ((xhr.status === 200) || ((xhr.status === 0) && xhr.responseText)) {
-                            loadedAssets[name] = JSON.parse(xhr.responseText);
+                            loadedAssets.json[name] = JSON.parse(xhr.responseText);
                             success();
                         } else {
                             failure(name);
@@ -8596,7 +8618,7 @@ glue.module.create(
                         for (i; i < byteArray.byteLength; ++i) {
                             buffer[i] = String.fromCharCode(byteArray[i]);
                         }
-                        loadedAssets[name] = buffer.join('');
+                        loadedAssets.binary[name] = buffer.join('');
                         success();
                     }
                 };
@@ -8661,11 +8683,50 @@ glue.module.create(
                     }
                     return loadedAssets;
                 },
+                getImage: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets.image[name];
+                },
+                getAudio: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets.audio[name];
+                },
+                getJSON: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets.json[name];
+                },
+                getBinary: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets.binary[name];
+                },
+                /**
+                 * Get the first asset with the provided name
+                 * @name getAsset
+                 * @memberOf loader
+                 * @function
+                 */
                 getAsset: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
                     }
-                    return loadedAssets[name];
+                    if (Sugar.has(loadedAssets.image, name)) {
+                        return loadedAssets.image[name];
+                    } else if (Sugar.has(loadedAssets.audio, name)) {
+                        return loadedAssets.audio[name];
+                    } else if (Sugar.has(loadedAssets.json, name)) {
+                        return loadedAssets.json[name];
+                    } else if (Sugar.has(loadedAssets.binary, name)) {
+                        return loadedAssets.binary[name];
+                    }
+                    throw('Asset ' + name + ' could not be found');
                 }
             };
 
@@ -9466,8 +9527,8 @@ glue.module.create(
                 },
                 getObjectCells = function (object) {
                     var cells = [],
-                        position = object.visible.getPosition(),
-                        dimension = object.visible.getDimension(),
+                        position = object.spritable.getPosition(),
+                        dimension = object.spritable.getDimension(),
                         min = Vector(
                             position.x,
                             position.y
