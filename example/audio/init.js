@@ -53,7 +53,7 @@ glue.module.get(
                             position: Vector(0, 0),
                             image: Loader.getAsset('button')
                         });
-                        buttonPosition = this.visible.getPosition();
+                        buttonPosition = this.getPosition();
                     },
                     draw: function (deltaT, context) {
                         var value = this.playing ? 'Stop' : 'Play';
