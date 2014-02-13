@@ -29,7 +29,7 @@ glue.module.create(
                         var radian,
                             deltaX,
                             deltaY,
-                            self =  this.scalable;
+                            self = this.scalable;
 
                         deltaX = targetScale.x - currentScale.x,
                         deltaY = targetScale.y - currentScale.y;
@@ -103,8 +103,8 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.scalable.update);
-            object.register('draw', object.scalable.draw);
+            object.register('update', object.scalable.update, 'scalable');
+            object.register('draw', object.scalable.draw, 'scalable');
 
             return object;
         };

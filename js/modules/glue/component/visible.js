@@ -47,18 +47,18 @@ glue.module.create(
                             customPosition = settings.position;
                             // using proper rounding:
                             // http://jsperf.com/math-round-vs-hack/66
-                            this.setPosition(Vector(
+                            object.setPosition(Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
                             ));
                         }
                         if (settings.dimension) {
-                            this.setDimension(settings.dimension);
+                            object.setDimension(settings.dimension);
                         } else if (image) {
-                            this.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
+                            object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
                         }
                         if (Sugar.isDefined(dimension)) {
-                            this.setBoundingBox(Rectangle(
+                            object.setBoundingBox(Rectangle(
                                 position.x,
                                 position.y,
                                 position.x + dimension.width,
@@ -66,77 +66,28 @@ glue.module.create(
                             ));
                         }
                         if (settings.origin) {
-                            this.setOrigin(settings.origin);
+                            object.setOrigin(settings.origin);
                         }
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    scroll = scroll || Vector(0, 0);
-                    context.save();
-                    context.translate(
-                        position.x - scroll.x,
-                        position.y - scroll.y
-                    );
-                    if (Sugar.isDefined(object.rotatable)) {
-                        object.rotatable.draw(deltaT, context);
-                    }
-                    if (Sugar.isDefined(object.scalable)) {
-                        object.scalable.draw(deltaT, context);
-                    }    
-                    context.translate(-origin.x, -origin.y);
                     context.drawImage(
                         image,
                         0,
                         0
                     );
-                    context.restore();
-                },
-                getPosition: function () {
-                    return position;
-                },
-                setPosition: function (value) {
-                    if (Sugar.isVector(value)) {
-                        position.x = value.x;
-                        position.y = value.y;
-                        updateRectangle();
-                    }
-                },
-                getDimension: function () {
-                    return dimension;
-                },
-                setDimension: function (value) {
-                    if (Sugar.isDimension(value)) {
-                        dimension = value;
-                        updateRectangle();
-                    }
-                },
-                getBoundingBox: function () {
-                    return rectangle;
-                },
-                setBoundingBox: function (value) {
-                    rectangle = value;
                 },
                 setImage: function (value) {
                     image = value;
-                    dimension = Dimension(image.naturalWidth, image.naturalHeight);
-                    updateRectangle();
+                    object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
                 },
                 getImage: function () {
                     return image;
-                },
-                setOrigin: function (value) {
-                    if (Sugar.isVector(value)) {
-                        origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
-                        origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
-                    }
-                },
-                getOrigin: function () {
-                    return origin;
                 }
             };
 
             // Register methods to base object
-            object.register('draw', object.visible.draw);
+            object.register('draw', object.visible.draw, 'visible');
 
             return object;
         };

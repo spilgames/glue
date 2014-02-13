@@ -6048,9 +6048,12 @@ adapters.glue = (function (win, Glue) {
 glue.module.create(
     'glue/baseobject',
     [
-        'glue'
+        'glue',
+        'glue/math/vector',
+        'glue/math/rectangle',
+        'glue/math/dimension'
     ],
-    function (Glue) {
+    function (Glue, Vector, Rectangle, Dimension) {
         var Sugar = Glue.sugar;
         return function () {
             var name = '',
@@ -6061,6 +6064,10 @@ glue.module.create(
                 },
                 mixins = Array.prototype.slice.call(arguments),
                 mixin = null,
+                position = Vector(0, 0),
+                origin = Vector(0, 0),
+                dimension = Dimension(0, 0),
+                rectangle = Rectangle(0, 0, 0, 0),
                 l = mixins.length,
                 i = 0,
                 j = 0,
@@ -6069,20 +6076,30 @@ glue.module.create(
                 typeRegistrant,
                 acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
                 registrants = {
-                    init: [],
-                    draw: [],
-                    update: [],
-                    pointerDown: [],
-                    pointerMove: [],
-                    pointerUp: []
+                    init: {},
+                    draw: {},
+                    update: {},
+                    pointerDown: {},
+                    pointerMove: {},
+                    pointerUp: {}
                 },
                 callRegistrants = function (type, parameters) {
                     parameters = Array.prototype.slice.call(parameters);
                     typeRegistrants = registrants[type];
-                    typeRegistrantsLength = typeRegistrants.length;
-                    for (j = 0; j < typeRegistrantsLength; ++j) {
-                        typeRegistrants[j].apply(module, parameters);
+                    for (registrant in typeRegistrants) {
+                        typeRegistrants[registrant].apply(module, parameters);
+                        console.log('calling', registrant);
                     }
+                },
+                updateRectangle = function () {
+                    var scale = Vector(1, 1);
+                    if (module.scalable) {
+                        scale = module.scalable.getScale();
+                    }
+                    rectangle.x1 = position.x - origin.x * Math.abs(scale.x);
+                    rectangle.y1 = position.y - origin.y * Math.abs(scale.y);
+                    rectangle.x2 = position.x - origin.x * Math.abs(scale.x) + dimension.width;
+                    rectangle.y2 = position.y - origin.y * Math.abs(scale.y) + dimension.height;
                 };
 
             module = Sugar.combine(module, {
@@ -6093,13 +6110,32 @@ glue.module.create(
                     return name;
                 },
                 init: function () {
-                    callRegistrants('init', arguments);
+                    //callRegistrants('init', arguments);
                 },
                 update: function (deltaT) {
-                    callRegistrants('update', arguments);                  
+                    //callRegistrants('update', arguments);
+                    if (registrants.update.scalable) {
+                        registrants.update.scalable.call(module, deltaT);
+                    }
                 },
                 draw: function (deltaT, context, scroll) {
-                    callRegistrants('draw', arguments);
+                    scroll = scroll || Vector(0, 0);
+                    context.save();
+                    context.translate(
+                        position.x - scroll.x,
+                        position.y - scroll.y
+                    );
+                    if (registrants.draw.scalable) {
+                        registrants.draw.scalable(deltaT, context, scroll);
+                    }
+                    if (registrants.draw.rotatable) {
+                        registrants.draw.rotatable(deltaT, context, scroll);
+                    }   
+                    context.translate(-origin.x, -origin.y);
+                    if (registrants.draw.visible) {
+                        registrants.draw.visible(deltaT, context, scroll);
+                    }
+                    context.restore();
                 },
                 pointerDown: function (e) {
                     callRegistrants('pointerDown', arguments);
@@ -6110,10 +6146,44 @@ glue.module.create(
                 pointerUp: function (e) {
                     callRegistrants('pointerUp', arguments);
                 },
-                register: function (type, callback) {
-                    if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(callback)) {
-                        registrants[type].push(callback);
+                register: function (type, registrant, name) {
+                    if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(registrant)) {
+                        registrants[type][name] = registrant;
                     }
+                },
+                getPosition: function () {
+                    return position;
+                },
+                setPosition: function (value) {
+                    if (Sugar.isVector(value)) {
+                        position.x = value.x;
+                        position.y = value.y;
+                        updateRectangle();
+                    }
+                },
+                getDimension: function () {
+                    return dimension;
+                },
+                setDimension: function (value) {
+                    if (Sugar.isDimension(value)) {
+                        dimension = value;
+                        updateRectangle();
+                    }
+                },
+                getBoundingBox: function () {
+                    return rectangle;
+                },
+                setBoundingBox: function (value) {
+                    rectangle = value;
+                },
+                setOrigin: function (value) {
+                    if (Sugar.isVector(value)) {
+                        origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
+                        origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
+                    }
+                },
+                getOrigin: function () {
+                    return origin;
                 }
             });
             for (i; i < l; ++i) {
@@ -6261,151 +6331,6 @@ glue.module.create(
 
             object.register('draw', object.animatable.draw);
             object.register('update', object.animatable.update);
-
-            return object;
-        };
-    }
-);
-
-/*
- *  @module Base
- *  @namespace component
- *  @desc The base component for all other components
- *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
- *  @license BSD 3-Clause License (see LICENSE file in project root)
- */
-glue.module.create(
-    'glue/component/base',
-    [
-        'glue',
-        'glue/math/vector',
-        'glue/math/dimension',
-        'glue/math/rectangle',
-        'glue/component/rotatable'
-    ],
-    function (Glue, Vector, Dimension, Rectangle) {
-        return function (object) {
-            var Sugar = Glue.sugar,
-                position = Vector(0, 0),
-                origin = Vector(0, 0),
-                dimension = Dimension(0, 0),
-                image = null,
-                rectangle = Rectangle(0, 0, 0, 0),
-                updateRectangle = function () {
-                    var scale = Vector(1, 1);
-                    if (object.scalable) {
-                        scale = object.scalable.getScale();
-                    }
-                    rectangle.x1 = position.x - origin.x * Math.abs(scale.x);
-                    rectangle.y1 = position.y - origin.y * Math.abs(scale.y);
-                    rectangle.x2 = position.x - origin.x * Math.abs(scale.x) + dimension.width;
-                    rectangle.y2 = position.y - origin.y * Math.abs(scale.y) + dimension.height;
-                };
-
-            object = object || {};
-            object.base = {
-                setup: function (settings) {
-                    var customPosition;
-                    if (settings) {
-                        if (settings.image) {
-                            image = settings.image;
-                        }
-                        image = settings.image;
-                        if (settings.position) {
-                            customPosition = settings.position;
-                            // using proper rounding:
-                            // http://jsperf.com/math-round-vs-hack/66
-                            this.setPosition(Vector(
-                                Math.round(customPosition.x),
-                                Math.round(customPosition.y)
-                            ));
-                        }
-                        if (settings.dimension) {
-                            this.setDimension(settings.dimension);
-                        } else if (image) {
-                            this.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
-                        }
-                        if (Sugar.isDefined(dimension)) {
-                            this.setBoundingBox(Rectangle(
-                                position.x,
-                                position.y,
-                                position.x + dimension.width,
-                                position.y + dimension.height
-                            ));
-                        }
-                        if (settings.origin) {
-                            this.setOrigin(settings.origin);
-                        }
-                    }
-                },
-                draw: function (deltaT, context, scroll) {
-                    scroll = scroll || Vector(0, 0);
-                    context.save();
-                    context.translate(
-                        position.x - scroll.x,
-                        position.y - scroll.y
-                    );
-                    if (Sugar.isDefined(object.rotatable)) {
-                        object.rotatable.draw(deltaT, context);
-                    }
-                    if (Sugar.isDefined(object.scalable)) {
-                        object.scalable.draw(deltaT, context);
-                    }    
-                    context.translate(-origin.x, -origin.y);
-                    context.drawImage(
-                        image,
-                        0,
-                        0
-                    );
-                    context.restore();
-                },
-                getPosition: function () {
-                    return position;
-                },
-                setPosition: function (value) {
-                    if (Sugar.isVector(value)) {
-                        position.x = value.x;
-                        position.y = value.y;
-                        updateRectangle();
-                    }
-                },
-                getDimension: function () {
-                    return dimension;
-                },
-                setDimension: function (value) {
-                    if (Sugar.isDimension(value)) {
-                        dimension = value;
-                        updateRectangle();
-                    }
-                },
-                getBoundingBox: function () {
-                    return rectangle;
-                },
-                setBoundingBox: function (value) {
-                    rectangle = value;
-                },
-                setImage: function (value) {
-                    image = value;
-                    dimension = Dimension(image.naturalWidth, image.naturalHeight);
-                    updateRectangle();
-                },
-                getImage: function () {
-                    return image;
-                },
-                setOrigin: function (value) {
-                    if (Sugar.isVector(value)) {
-                        origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
-                        origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
-                    }
-                },
-                getOrigin: function () {
-                    return origin;
-                }
-            };
-
-            // Register methods to base object
-            object.register('draw', object.base.draw);
 
             return object;
         };
@@ -7670,7 +7595,7 @@ glue.module.create(
                         var radian,
                             deltaX,
                             deltaY,
-                            self =  this.scalable;
+                            self = this.scalable;
 
                         deltaX = targetScale.x - currentScale.x,
                         deltaY = targetScale.y - currentScale.y;
@@ -7744,8 +7669,8 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.scalable.update);
-            object.register('draw', object.scalable.draw);
+            object.register('update', object.scalable.update, 'scalable');
+            object.register('draw', object.scalable.draw, 'scalable');
 
             return object;
         };
@@ -7977,18 +7902,18 @@ glue.module.create(
                             customPosition = settings.position;
                             // using proper rounding:
                             // http://jsperf.com/math-round-vs-hack/66
-                            this.setPosition(Vector(
+                            object.setPosition(Vector(
                                 Math.round(customPosition.x),
                                 Math.round(customPosition.y)
                             ));
                         }
                         if (settings.dimension) {
-                            this.setDimension(settings.dimension);
+                            object.setDimension(settings.dimension);
                         } else if (image) {
-                            this.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
+                            object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
                         }
                         if (Sugar.isDefined(dimension)) {
-                            this.setBoundingBox(Rectangle(
+                            object.setBoundingBox(Rectangle(
                                 position.x,
                                 position.y,
                                 position.x + dimension.width,
@@ -7996,77 +7921,28 @@ glue.module.create(
                             ));
                         }
                         if (settings.origin) {
-                            this.setOrigin(settings.origin);
+                            object.setOrigin(settings.origin);
                         }
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    scroll = scroll || Vector(0, 0);
-                    context.save();
-                    context.translate(
-                        position.x - scroll.x,
-                        position.y - scroll.y
-                    );
-                    if (Sugar.isDefined(object.rotatable)) {
-                        object.rotatable.draw(deltaT, context);
-                    }
-                    if (Sugar.isDefined(object.scalable)) {
-                        object.scalable.draw(deltaT, context);
-                    }    
-                    context.translate(-origin.x, -origin.y);
                     context.drawImage(
                         image,
                         0,
                         0
                     );
-                    context.restore();
-                },
-                getPosition: function () {
-                    return position;
-                },
-                setPosition: function (value) {
-                    if (Sugar.isVector(value)) {
-                        position.x = value.x;
-                        position.y = value.y;
-                        updateRectangle();
-                    }
-                },
-                getDimension: function () {
-                    return dimension;
-                },
-                setDimension: function (value) {
-                    if (Sugar.isDimension(value)) {
-                        dimension = value;
-                        updateRectangle();
-                    }
-                },
-                getBoundingBox: function () {
-                    return rectangle;
-                },
-                setBoundingBox: function (value) {
-                    rectangle = value;
                 },
                 setImage: function (value) {
                     image = value;
-                    dimension = Dimension(image.naturalWidth, image.naturalHeight);
-                    updateRectangle();
+                    object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
                 },
                 getImage: function () {
                     return image;
-                },
-                setOrigin: function (value) {
-                    if (Sugar.isVector(value)) {
-                        origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
-                        origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
-                    }
-                },
-                getOrigin: function () {
-                    return origin;
                 }
             };
 
             // Register methods to base object
-            object.register('draw', object.visible.draw);
+            object.register('draw', object.visible.draw, 'visible');
 
             return object;
         };

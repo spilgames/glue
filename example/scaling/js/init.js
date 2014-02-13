@@ -41,14 +41,11 @@ glue.module.get(
                     init: function () {
                         var dimension;
                         this.visible.setup({
-                            position: {
-                                x: 300,
-                                y: 300
-                            },
+                            position: Vector(300, 300),
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                        this.visible.setOrigin({
+                        dimension = this.getDimension();
+                        this.setOrigin({
                             x: dimension.width / 2,
                             y: dimension.height / 2
                         });
@@ -67,7 +64,7 @@ glue.module.get(
                         }
                     },
                     draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                     }
                 });
             Game.add(object);
