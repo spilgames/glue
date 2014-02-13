@@ -12,12 +12,18 @@ glue.module.create(
     ],
     function (Glue) {
         var Audio = Glue.audio,
+            Sugar = Glue.sugar,
             loaded = false,
             assetCount = 0,
             loadCount = 0,
             assetPath = null,
             assets = {},
-            loadedAssets = {},
+            loadedAssets = {
+                image: {},
+                audio: {},
+                json: {},
+                binary: {}
+            },
             completedHandler,
             loader = document.getElementById('loader'),
             loadBar = document.getElementById('loadbar'),
@@ -49,7 +55,7 @@ glue.module.create(
                 var asset = new Image();
                 asset.src = assetPath + 'image/' + source;
                 asset.addEventListener('load', success, false);
-                loadedAssets[name] = asset;
+                loadedAssets.image[name] = asset;
             },
             loadAudio = function (name, source, success, failure) {
                 // TODO: Implement failure
@@ -57,7 +63,7 @@ glue.module.create(
                     urls: [assetPath + 'audio/' + source],
                     onload: success
                 });
-                loadedAssets[name] = asset;
+                loadedAssets.audio[name] = asset;
             },            
             loadJSON = function (name, source, success, failure) {
                 var xhr = new XMLHttpRequest();
@@ -74,7 +80,7 @@ glue.module.create(
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if ((xhr.status === 200) || ((xhr.status === 0) && xhr.responseText)) {
-                            loadedAssets[name] = JSON.parse(xhr.responseText);
+                            loadedAssets.json[name] = JSON.parse(xhr.responseText);
                             success();
                         } else {
                             failure(name);
@@ -103,7 +109,7 @@ glue.module.create(
                         for (i; i < byteArray.byteLength; ++i) {
                             buffer[i] = String.fromCharCode(byteArray[i]);
                         }
-                        loadedAssets[name] = buffer.join('');
+                        loadedAssets.binary[name] = buffer.join('');
                         success();
                     }
                 };
@@ -168,11 +174,50 @@ glue.module.create(
                     }
                     return loadedAssets;
                 },
+                getImage: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets.image[name];
+                },
+                getAudio: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets.audio[name];
+                },
+                getJSON: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets.json[name];
+                },
+                getBinary: function (name) {
+                    if (!loaded) {
+                        throw('Asset ' + name + ' is not loaded yet');
+                    }
+                    return loadedAssets.binary[name];
+                },
+                /**
+                 * Get the first asset with the provided name
+                 * @name getAsset
+                 * @memberOf loader
+                 * @function
+                 */
                 getAsset: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
                     }
-                    return loadedAssets[name];
+                    if (Sugar.has(loadedAssets.image, name)) {
+                        return loadedAssets.image[name];
+                    } else if (Sugar.has(loadedAssets.audio, name)) {
+                        return loadedAssets.audio[name];
+                    } else if (Sugar.has(loadedAssets.json, name)) {
+                        return loadedAssets.json[name];
+                    } else if (Sugar.has(loadedAssets.binary, name)) {
+                        return loadedAssets.binary[name];
+                    }
+                    throw('Asset ' + name + ' could not be found');
                 }
             };
 
