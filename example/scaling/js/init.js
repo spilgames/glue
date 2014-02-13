@@ -65,6 +65,9 @@ glue.module.get(
                                 y: 1
                             });
                         }
+                    },
+                    draw: function (deltaT, context) {
+                        this.visible.draw(deltaT, context);
                     }
                 });
             Game.add(object);

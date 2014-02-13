@@ -28,7 +28,8 @@ glue.module.create(
                     if (!atTarget) {
                         var radian,
                             deltaX,
-                            deltaY;
+                            deltaY,
+                            self =  this.scalable;
 
                         deltaX = targetScale.x - currentScale.x,
                         deltaY = targetScale.y - currentScale.y;
@@ -38,7 +39,7 @@ glue.module.create(
                         // is smaller then the step iterator (scaleSpeed * deltaT).
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < scaleSpeed * deltaT) {
                             atTarget = true;
-                            this.setScale(targetScale);
+                            self.setScale(targetScale);
                         } else {
                             // Update the x and y scale, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
