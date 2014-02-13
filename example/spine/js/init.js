@@ -58,7 +58,7 @@ glue.module.get(
                     capivara = BaseObject(Spineable, Scalable, Rotatable, Draggable).add({
                         init: function () {
                             this.spineable.setup({
-                                position: Vector(300, 300),
+                                position: Vector(200, 150),
                                 atlasImage: Loader.getAsset('capivara_sideview'),
                                 atlas: Loader.getAsset('capivara_sideview_atlas'),
                                 skeleton: Loader.getAsset('capivara_sideview_skeleton'),
