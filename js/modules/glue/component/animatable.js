@@ -10,11 +10,13 @@ glue.module.create(
     'glue/component/animatable',
     [
         'glue',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/component/visible'
     ],
-    function (Glue, Vector) {
+    function (Glue, Vector, Visible) {
         return function (object) {
             var Sugar = Glue.sugar,
+                visible = Visible(object).visible,
                 animationSettings,
                 animations = {},
                 currentAnimation,
@@ -29,7 +31,7 @@ glue.module.create(
                 image,
                 setAnimation = function () {
                     if (!image) {
-                        object.visible.setImage(currentAnimation.image);
+                        visible.setImage(currentAnimation.image);
                         image = currentAnimation.image;
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
@@ -59,13 +61,8 @@ glue.module.create(
                             }
                         }
                     }
-                    if (Sugar.isDefined(object.visible)) {
-                        object.visible.setup(settings);
-                    } else {
-                        if (window.console) {
-                            throw 'Animatable needs a Visible component';
-                        }
-                    }
+                    console.log(visible)
+                    visible.setup(settings);
                     if (settings.image) {
                         image = settings.image;
                     }
