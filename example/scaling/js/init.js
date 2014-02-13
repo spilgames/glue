@@ -45,10 +45,7 @@ glue.module.get(
                             image: Loader.getAsset('logoLD')
                         });
                         dimension = this.getDimension();
-                        this.setOrigin({
-                            x: dimension.width / 2,
-                            y: dimension.height / 2
-                        });
+                        this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.scalable.setTarget({
                             x: 2,
                             y: 2

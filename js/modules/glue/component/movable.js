@@ -29,7 +29,7 @@ glue.module.create(
                             deltaX,
                             deltaY;
 
-                        position = object.visible.getPosition();
+                        position = object.getPosition();
                         deltaX = targetPosition.x - position.x,
                         deltaY = targetPosition.y - position.y;
 
@@ -39,7 +39,7 @@ glue.module.create(
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < moveSpeed * deltaT) {
                             atTarget = true;
                             position = targetPosition;
-                            object.visible.setPosition(position);
+                            object.setPosition(position);
                         } else {
                             // Update the x and y position, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
@@ -47,7 +47,7 @@ glue.module.create(
                             position.x += Math.cos(radian) * moveSpeed * deltaT;
                             position.y += Math.sin(radian) * moveSpeed * deltaT;
                             rotation = radian * 180 / Math.PI;
-                            object.visible.setPosition(position);                      
+                            object.setPosition(position);                      
                         }
                     }
                 },
@@ -76,7 +76,7 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.movable.update);
+            object.register('update', object.movable.update, 'movable');
 
             return object;
         };

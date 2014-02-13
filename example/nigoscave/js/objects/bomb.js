@@ -44,7 +44,7 @@ glue.module.create(
 							bounce: .6,
 							maxVelocity: Vector(0, 10)
 						});
-						this.position = this.visible.getPosition();
+						this.position = this.getPosition();
 						velocity = this.kineticable.getVelocity();
 						this.active = false;
 						return this;

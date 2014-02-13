@@ -41,17 +41,11 @@ glue.module.get(
                     init: function () {
                         var dimension;
                         this.visible.setup({
-                            position: {
-                                x: 300,
-                                y: 300
-                            },
+                            position: Vector(300, 300),
                             image: Loader.getAsset('logoLD')
                         });
-                        dimension = this.visible.getDimension();
-                        this.rotatable.setOrigin({
-                            x: dimension.width / 2,
-                            y: dimension.height / 2
-                        });
+                        dimension = this.getDimension();
+                        this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.rotatable.setTargetDegree(360, true);
                         this.rotatable.setSpeed(100);
                     },
@@ -62,7 +56,7 @@ glue.module.get(
                         }
                     },
                     draw: function (deltaT, context) {
-                        this.visible.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                     }
                 });
 

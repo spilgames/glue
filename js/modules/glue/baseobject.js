@@ -48,7 +48,6 @@ glue.module.create(
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
                         typeRegistrants[registrant].apply(module, parameters);
-                        console.log('calling', registrant);
                     }
                 },
                 updateRectangle = function () {
@@ -70,13 +69,10 @@ glue.module.create(
                     return name;
                 },
                 init: function () {
-                    //callRegistrants('init', arguments);
+                    callRegistrants('init', arguments);
                 },
                 update: function (deltaT) {
-                    //callRegistrants('update', arguments);
-                    if (registrants.update.scalable) {
-                        registrants.update.scalable.call(module, deltaT);
-                    }
+                    callRegistrants('update', arguments);
                 },
                 draw: function (deltaT, context, scroll) {
                     scroll = scroll || Vector(0, 0);
@@ -90,7 +86,11 @@ glue.module.create(
                     }
                     if (registrants.draw.rotatable) {
                         registrants.draw.rotatable(deltaT, context, scroll);
-                    }   
+                    }
+                    if (registrants.draw.fadable) {
+                        registrants.draw.fadable(deltaT, context, scroll);
+                    }
+
                     context.translate(-origin.x, -origin.y);
                     if (registrants.draw.visible) {
                         registrants.draw.visible(deltaT, context, scroll);

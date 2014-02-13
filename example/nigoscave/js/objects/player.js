@@ -69,7 +69,7 @@ glue.module.create(
                     });
                     currentAnimation = 'idle';
                     speed = GameScale.x;
-                    this.visible.setOrigin(Vector(3, 0));
+                    this.setOrigin(Vector(3, 0));
                     this.animatable.setAnimation(currentAnimation);
                     this.kineticable.setup({
                         velocity: Vector(0, 0),

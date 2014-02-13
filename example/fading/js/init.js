@@ -38,14 +38,10 @@ glue.module.get(
                 }
             }
         }, function () {
-            var wasAtTarget = false,
-                object = BaseObject(Visible, Movable, Fadable).add({
+            var object = BaseObject(Visible, Movable, Fadable).add({
                 init: function () {
                     this.visible.setup({
-                        position: {
-                            x: 320,
-                            y: 300
-                        },
+                        position: Vector(320, 300),
                         image: Loader.getAsset('blocks')
                     });
                     this.movable.setMoveSpeed(150);
@@ -55,10 +51,9 @@ glue.module.get(
                 },
                 update: function (deltaT) {
                     this.base.update(deltaT);
-                    if (this.movable.atTarget() && !wasAtTarget) {
-                        this.fadable.fadeOut();
-                        wasAtTarget = true;
-                    }
+                },
+                draw: function (deltaT, context, scroll) {
+                    this.base.draw(deltaT, context, scroll);
                 }
             });
 

@@ -61,15 +61,15 @@ glue.module.create(
                     if (Sugar.isUndefined(object.visible)) {
                         throw 'Kineticable needs a visible component';
                     }
-                    position = object.visible.getPosition();
-                    origin = object.visible.getOrigin(); 
+                    position = object.getPosition();
+                    origin = object.getOrigin(); 
                     if (Sugar.isDefined(object.scalable)) {
                         scale = object.scalable.getScale();
                     }
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
                     } else {
-                        dimension = object.visible.getDimension();
+                        dimension = object.getDimension();
                     }
                     dimension.width *= scale.x;
                     dimension.height *= scale.y;
@@ -92,7 +92,7 @@ glue.module.create(
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
                     position.add(velocity);
-                    object.visible.setPosition(position);
+                    object.setPosition(position);
                 },
                 setVelocity: function (vector) {
                     if (Sugar.isVector(vector)) {
@@ -138,7 +138,7 @@ glue.module.create(
                 },
                 setPosition: function (vector) {
                     if (Sugar.isVector(vector)) {
-                        object.visible.setPosition(vector);
+                        object.setPosition(vector);
                     } else {
                         throw 'The argument must be a Vector';
                     }

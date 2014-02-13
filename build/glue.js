@@ -6088,7 +6088,6 @@ glue.module.create(
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
                         typeRegistrants[registrant].apply(module, parameters);
-                        console.log('calling', registrant);
                     }
                 },
                 updateRectangle = function () {
@@ -6110,13 +6109,10 @@ glue.module.create(
                     return name;
                 },
                 init: function () {
-                    //callRegistrants('init', arguments);
+                    callRegistrants('init', arguments);
                 },
                 update: function (deltaT) {
-                    //callRegistrants('update', arguments);
-                    if (registrants.update.scalable) {
-                        registrants.update.scalable.call(module, deltaT);
-                    }
+                    callRegistrants('update', arguments);
                 },
                 draw: function (deltaT, context, scroll) {
                     scroll = scroll || Vector(0, 0);
@@ -6130,7 +6126,11 @@ glue.module.create(
                     }
                     if (registrants.draw.rotatable) {
                         registrants.draw.rotatable(deltaT, context, scroll);
-                    }   
+                    }
+                    if (registrants.draw.fadable) {
+                        registrants.draw.fadable(deltaT, context, scroll);
+                    }
+
                     context.translate(-origin.x, -origin.y);
                     if (registrants.draw.visible) {
                         registrants.draw.visible(deltaT, context, scroll);
@@ -6227,7 +6227,7 @@ glue.module.create(
                 setAnimation = function () {
                     if (!image) {
                         object.visible.setImage(currentAnimation.image);
-                        image = object.visible.getImage();
+                        image = currentAnimation.image;
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
                     timeBetweenFrames = currentAnimation.fps ?
@@ -6278,9 +6278,9 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    var position = object.visible.getPosition(),
+                    var position = object.getPosition(),
                         sourceX = frameWidth * currentFrame,
-                        origin = object.visible.getOrigin();
+                        origin = object.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -6315,12 +6315,12 @@ glue.module.create(
                     }
                 },
                 getDimension: function () {
-                    var dimension = object.visible.getDimension();
+                    var dimension = object.getDimension();
                     dimension.width = frameWidth;
                     return dimension;
                 },
                 getBoundingBox: function () {
-                    var rectangle = object.visible.getBoundingBox();
+                    var rectangle = object.getBoundingBox();
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
@@ -6676,8 +6676,8 @@ glue.module.create(
                 }
             };
 
-            object.register('draw', object.fadable.draw);
-            object.register('update', object.fadable.update);
+            object.register('draw', object.fadable.draw, 'fadable');
+            object.register('update', object.fadable.update, 'fadable');
 
             return object;
         };
@@ -6799,15 +6799,15 @@ glue.module.create(
                     if (Sugar.isUndefined(object.visible)) {
                         throw 'Kineticable needs a visible component';
                     }
-                    position = object.visible.getPosition();
-                    origin = object.visible.getOrigin(); 
+                    position = object.getPosition();
+                    origin = object.getOrigin(); 
                     if (Sugar.isDefined(object.scalable)) {
                         scale = object.scalable.getScale();
                     }
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
                     } else {
-                        dimension = object.visible.getDimension();
+                        dimension = object.getDimension();
                     }
                     dimension.width *= scale.x;
                     dimension.height *= scale.y;
@@ -6830,7 +6830,7 @@ glue.module.create(
                         velocity.y = maxVelocity.y * math.sign(velocity.y);
                     }
                     position.add(velocity);
-                    object.visible.setPosition(position);
+                    object.setPosition(position);
                 },
                 setVelocity: function (vector) {
                     if (Sugar.isVector(vector)) {
@@ -6876,7 +6876,7 @@ glue.module.create(
                 },
                 setPosition: function (vector) {
                     if (Sugar.isVector(vector)) {
-                        object.visible.setPosition(vector);
+                        object.setPosition(vector);
                     } else {
                         throw 'The argument must be a Vector';
                     }
@@ -6982,7 +6982,7 @@ glue.module.create(
                             deltaX,
                             deltaY;
 
-                        position = object.visible.getPosition();
+                        position = object.getPosition();
                         deltaX = targetPosition.x - position.x,
                         deltaY = targetPosition.y - position.y;
 
@@ -6992,7 +6992,7 @@ glue.module.create(
                         if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < moveSpeed * deltaT) {
                             atTarget = true;
                             position = targetPosition;
-                            object.visible.setPosition(position);
+                            object.setPosition(position);
                         } else {
                             // Update the x and y position, using cos for x and sin for y
                             // and get the right speed by multiplying by the speed and delta time.
@@ -7000,7 +7000,7 @@ glue.module.create(
                             position.x += Math.cos(radian) * moveSpeed * deltaT;
                             position.y += Math.sin(radian) * moveSpeed * deltaT;
                             rotation = radian * 180 / Math.PI;
-                            object.visible.setPosition(position);                      
+                            object.setPosition(position);                      
                         }
                     }
                 },
@@ -7029,7 +7029,7 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.movable.update);
+            object.register('update', object.movable.update, 'movable');
 
             return object;
         };
@@ -7556,8 +7556,8 @@ glue.module.create(
                 }
             };
 
-            object.register('update', object.rotatable.update);
-            object.register('draw', object.rotatable.draw);
+            object.register('update', object.rotatable.update, 'rotatable');
+            object.register('draw', object.rotatable.draw, 'rotatable');
 
             return object;
         };

@@ -30,7 +30,7 @@ glue.module.create(
                 setAnimation = function () {
                     if (!image) {
                         object.visible.setImage(currentAnimation.image);
-                        image = object.visible.getImage();
+                        image = currentAnimation.image;
                     }
                     frameCount = currentAnimation.endFrame - currentAnimation.startFrame;
                     timeBetweenFrames = currentAnimation.fps ?
@@ -81,9 +81,9 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    var position = object.visible.getPosition(),
+                    var position = object.getPosition(),
                         sourceX = frameWidth * currentFrame,
-                        origin = object.visible.getOrigin();
+                        origin = object.getOrigin();
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -118,12 +118,12 @@ glue.module.create(
                     }
                 },
                 getDimension: function () {
-                    var dimension = object.visible.getDimension();
+                    var dimension = object.getDimension();
                     dimension.width = frameWidth;
                     return dimension;
                 },
                 getBoundingBox: function () {
-                    var rectangle = object.visible.getBoundingBox();
+                    var rectangle = object.getBoundingBox();
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
