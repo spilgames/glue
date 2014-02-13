@@ -6082,6 +6082,9 @@ glue.module.create(
                     parameters = Array.prototype.slice.call(parameters);
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
+                        if (type === 'draw' && registrant === 'visible') {
+                            continue;
+                        }
                         typeRegistrants[registrant].apply(module, parameters);
                     }
                 },
@@ -6120,16 +6123,7 @@ glue.module.create(
                             position.x - scroll.x,
                             position.y - scroll.y
                         );
-                        if (registrants.draw.scalable) {
-                            registrants.draw.scalable(deltaT, context, scroll);
-                        }
-                        if (registrants.draw.rotatable) {
-                            registrants.draw.rotatable(deltaT, context, scroll);
-                        }
-                        if (registrants.draw.fadable) {
-                            registrants.draw.fadable(deltaT, context, scroll);
-                        }
-
+                        callRegistrants('draw', arguments);
                         context.translate(-origin.x, -origin.y);
                         if (registrants.draw.visible) {
                             registrants.draw.visible(deltaT, context, scroll);
