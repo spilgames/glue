@@ -18,21 +18,7 @@ glue.module.create(
     function (Glue, Vector, Dimension, Rectangle) {
         return function (object) {
             var Sugar = Glue.sugar,
-                position = Vector(0, 0),
-                origin = Vector(0, 0),
-                dimension = Dimension(0, 0),
-                image = null,
-                rectangle = Rectangle(0, 0, 0, 0),
-                updateRectangle = function () {
-                    var scale = Vector(1, 1);
-                    if (object.scalable) {
-                        scale = object.scalable.getScale();
-                    }
-                    rectangle.x1 = position.x - origin.x * Math.abs(scale.x);
-                    rectangle.y1 = position.y - origin.y * Math.abs(scale.y);
-                    rectangle.x2 = position.x - origin.x * Math.abs(scale.x) + dimension.width;
-                    rectangle.y2 = position.y - origin.y * Math.abs(scale.y) + dimension.height;
-                };
+                image = null;
 
             object = object || {};
             object.visible = {
@@ -56,14 +42,6 @@ glue.module.create(
                             object.setDimension(settings.dimension);
                         } else if (image) {
                             object.setDimension(Dimension(image.naturalWidth, image.naturalHeight));
-                        }
-                        if (Sugar.isDefined(dimension)) {
-                            object.setBoundingBox(Rectangle(
-                                position.x,
-                                position.y,
-                                position.x + dimension.width,
-                                position.y + dimension.height
-                            ));
                         }
                         if (settings.origin) {
                             object.setOrigin(settings.origin);

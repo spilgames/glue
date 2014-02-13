@@ -43,7 +43,7 @@ glue.module.create(
                         }
                     },
                     onDrop: function (obj, e) {
-                        var position = this.visible.getPosition();
+                        var position = this.getPosition();
                         if (position.x === 200) {
                             this.movable.setTarget(Vector(
                                 600,

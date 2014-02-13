@@ -122,8 +122,7 @@ glue.module.create(
                     dimension.width = frameWidth;
                     return dimension;
                 },
-                getBoundingBox: function () {
-                    var rectangle = object.getBoundingBox();
+                getBoundingBox: function (rectangle) {
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },

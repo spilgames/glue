@@ -77,8 +77,8 @@ glue.module.get(
                         });
                     },
                     update: function (deltaT, context) {
-                        cloudsDimension = this.visible.getDimension();
-                        cloudsPosition = this.visible.getPosition();
+                        cloudsDimension = this.getDimension();
+                        cloudsPosition = this.getPosition();
                         if (cloudsPosition.x > canvasDimension.width - cloudsDimension.width) {
                             cloudsPosition.x = -cloudsDimension.width;
                         }
@@ -190,7 +190,7 @@ glue.module.get(
                     update: function (deltaT) {
                         this.animatable.update(deltaT);
                         playerDimension = this.animatable.getDimension();
-                        playerPosition = this.visible.getPosition();
+                        playerPosition = this.getPosition();
                         if (playerPosition.x > canvasDimension.width -
                                 this.animatable.getFrameWidth()) {
                             this.animatable.setAnimation('walkLeft');

@@ -262,7 +262,7 @@ glue.module.get(
                         });
                         this.animatable.setAnimation('walkLeft');
                         enemyDimension = this.animatable.getDimension();
-                        enemyPosition = this.visible.getPosition();
+                        enemyPosition = this.getPosition();
                     },
                     update: function (deltaT) {
                         this.base.update(deltaT);

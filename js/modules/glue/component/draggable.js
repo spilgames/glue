@@ -37,9 +37,7 @@ glue.module.create(
                     return result;
                 },
                 checkOnMe = function (e) {
-                    return object.animatable ?
-                        object.animatable.getBoundingBox().hasPosition(e.position) :
-                        object.visible.getBoundingBox().hasPosition(e.position);
+                    return object.getBoundingBox().hasPosition(e.position);
                 },
                 /**
                  * Gets called when the user starts dragging the entity
@@ -55,7 +53,7 @@ glue.module.create(
                             if (isHeighestDraggable(object)) {
                                 dragging = true;
                                 dragId = e.pointerId;
-                                grabOffset = e.position.substract(object.visible.getPosition());
+                                grabOffset = e.position.substract(object.getPosition());
                                 if (object.dragStart) {
                                     object.dragStart(e);
                                 }
@@ -74,7 +72,7 @@ glue.module.create(
                 dragMove = function (e) {
                     if (dragging === true) {
                         if (dragId === e.pointerId) {
-                            object.visible.setPosition(e.position.substract(grabOffset));
+                            object.setPosition(e.position.substract(grabOffset));
                             if (object.dragMove) {
                                 object.dragMove(e);
                             }
@@ -124,9 +122,9 @@ glue.module.create(
             };
 
             // Register methods to base object
-            object.register('pointerDown', object.draggable.pointerDown);
-            object.register('pointerMove', object.draggable.pointerMove);
-            object.register('pointerUp', object.draggable.pointerUp);
+            object.register('pointerDown', object.draggable.pointerDown, 'draggable');
+            object.register('pointerMove', object.draggable.pointerMove, 'draggable');
+            object.register('pointerUp', object.draggable.pointerUp, 'draggable');
 
             return object;
         };

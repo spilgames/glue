@@ -23,16 +23,16 @@
 
                 var myComponent = {
                         init: function () {
-                            this.z = this.visible.getPosition().y;
+                            this.z = this.getPosition().y;
                         },
                         dragStart: function (e) {
                             this.z = 9999;
                         },
                         dragMove: function (e) {
-                            this.z = this.visible.getPosition().y;
+                            this.z = this.getPosition().y;
                         },
                         dragEnd: function (e) {
-                            this.z = this.visible.getPosition().y;
+                            this.z = this.getPosition().y;
                         }
                     };
 
