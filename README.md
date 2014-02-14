@@ -11,7 +11,7 @@ Licensed under the BSD 3-Clause license, see the [license file](https://github.c
 Created & maintained by Jeroen Reurings - [Buffer-Overflow](https://github.com/Buffer-Overflow)  
 
 ### Website
-For more information about Glue, her features and how to use Glue, you can visit the [Glue website](http://glue-engine.com).
+For more information about Glue, her features and documentation, you can visit the [Glue website](http://glue-engine.com).
 
 ### Examples
 You can view the examples build using Glue directly on the [example page](https://rawgithub.com/spilgames/glue/master/example/index.html).
