@@ -1,5 +1,5 @@
 ![Logo](https://raw.github.com/spilgames/glue/gh-pages/img/logo.png)
-### Glue Game Framework
+### Glue Game Engine
 #### For games that stick
 * Modular
 * Component based
@@ -10,34 +10,11 @@ Copyright (C) 2014, [SpilGames](http://www.spilgames.com), all rights reserved.
 Licensed under the BSD 3-Clause license, see the [license file](https://github.com/spilgames/5-glue-engine/blob/master/LICENSE).  
 Created & maintained by Jeroen Reurings - [Buffer-Overflow](https://github.com/Buffer-Overflow)  
 
+### Website
+For more information about Glue, her features and how to use Glue, you can visit the [Glue website](http://glue-engine.com).
+
 ### Examples
 You can view the examples build using Glue directly on the [example page](https://rawgithub.com/spilgames/glue/master/example/index.html).
-
-### Documentation
-Read the [Glue documentation](http://spilgames.github.io/glue) to learn how to use Glue.
-
-### Features
-* Performance: Glue is tested on all recent touch/mobile devices to be sure it delivers a performant gaming experience to your users no matter what device they are playing your game on.
-
-* Dynamic scaling: Your game scales automatically to fit the device it's being played on. Landscape and portrait mode are also supported.
-
-* Component based: Create components to control the behaviour of you game objects in a reusable way.
-
-* Drag & Drop: Glue supports Drag & Drop through the Draggable and Droptarget components, making it easy to create a rich user experience.
-
-* Audio: Glue contains a plugin for Howler which uses the Webaudio API with a fallback to the audio tag, making it possible to have a wide device support for playing audio.
-
-* Physics: Glue has a SET based Pysics system that alows you to add gravity and collisions to your games.
-
-* Event driven: Glue has built-in delegation of browser events to all game components and also contains system events to develop your games in an event driven way.
-
-* Sprite sheet animations: The built-in Animatable component contains all you need to be able to create sprite animations.
-
-* Skeleton animations: Glue has a Spine plugin for creating 2D skeleton animations.
-
-* Asset loader: Glue comes with an asset loader which displays a progress indicator and loading bar while the assets are being loaded.
-
-* Director: Glue has a director module which you can use to navigate from one screen to another while the state of the screen objects is being kept.
 
 ### Release notes
 The Glue release notes can be found in the [release notes document](https://github.com/spilgames/glue/blob/master/RELEASE.md).
