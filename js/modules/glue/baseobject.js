@@ -16,7 +16,7 @@ glue.module.create(
     function (Glue, Vector, Rectangle, Dimension) {
         var Sugar = Glue.sugar;
         return function () {
-            var name = '',
+            var name,
                 mixins = Array.prototype.slice.call(arguments),
                 mixin = null,
                 position = Vector(0, 0),
@@ -102,6 +102,12 @@ glue.module.create(
                     register: function (type, registrant, name) {
                         if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(registrant)) {
                             registrants[type][name] = registrant;
+                        }
+                    },
+                    unregister: function (type, name) {
+                        if (Sugar.contains(acceptedTypes, type) &&
+                            Sugar.isFunction(registrants[type][name])) {
+                            delete registrants[type][name];
                         }
                     },
                     getPosition: function () {

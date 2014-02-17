@@ -13,15 +13,17 @@ glue.module.create(
         'glue/math/vector',
         'glue/math/dimension',
         'glue/math/rectangle',
-        'glue/component/rotatable'
+        'glue/basecomponent'
     ],
-    function (Glue, Vector, Dimension, Rectangle) {
+    function (Glue, Vector, Dimension, Rectangle, BaseComponent) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('spritable', object),
                 image = null;
 
-            object = object || {};
-            object.spritable = {
+            baseComponent.set({
                 setup: function (settings) {
                     var customPosition;
                     if (settings) {
@@ -62,10 +64,10 @@ glue.module.create(
                 getImage: function () {
                     return image;
                 }
-            };
+            });
 
-            // Register methods to base object
-            object.register('draw', object.spritable.draw, 'spritable');
+            // Register the methods we want to update in the game cycle
+            baseComponent.register('draw');
 
             return object;
         };

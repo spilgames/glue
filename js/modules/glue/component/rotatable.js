@@ -10,22 +10,25 @@ glue.module.create(
     'glue/component/rotatable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math/vector'
     ],
-    function (Glue, Vector) {
+    function (Glue, BaseComponent, Vector) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('rotatable', object),
                 angle = 0,
                 rotationSpeed = 100,
                 targetAngle = 0,
                 rotationDirection = 1,
                 toDegree = 180 / Math.PI,
                 atTarget = true,
-                toRadian = Math.PI / 180;
+                toRadian = Math.PI / 180,
                 origin = Vector(0, 0);
 
-            object = object || {};
-            object.rotatable = {
+            baseComponent.set({
                 update: function (deltaT) {
                     var tarDeg,
                         curDeg,
@@ -113,10 +116,10 @@ glue.module.create(
                 getOrigin: function () {
                     return origin;
                 }
-            };
+            });
 
-            object.register('update', object.rotatable.update, 'rotatable');
-            object.register('draw', object.rotatable.draw, 'rotatable');
+            baseComponent.register('update');
+            baseComponent.register('draw');
 
             return object;
         };

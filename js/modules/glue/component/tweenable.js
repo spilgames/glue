@@ -11,11 +11,15 @@ glue.module.create(
     'glue/component/tweenable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math'
     ],
-    function (Glue, Mathematics) {
+    function (Glue, BaseComponent, Mathematics) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('tweenable', object),
                 mathematics = Mathematics(),
                 availableTweens = ['easeInQuad', 'easeOutQuad', 'easeInOutQuad', 'easeInCubic',
                     'easeOutCubic', 'easeInOutCubic', 'easeInQuart', 'easeOutQuart',
@@ -25,8 +29,7 @@ glue.module.create(
                     'easeOutElastic', 'easeInOutElastic', 'easeInBack', 'easeOutBack',
                     'easeInOutBack', 'easeInBounce', 'easeOutBounce', 'easeInOutBounce'];
 
-            object = object || {};
-            object.tweenable = {
+            baseComponent.set({
                 /*
                     t: current time
                     b: start value
@@ -167,7 +170,7 @@ glue.module.create(
                     if (t < d/2) return this.easeInBounce (t*2, 0, c, d) * .5 + b;
                     return this.easeOutBounce (t*2-d, 0, c, d) * .5 + c*.5 + b;
                 }
-            };
+            });
 
             return object;
         };

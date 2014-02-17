@@ -10,11 +10,15 @@ glue.module.create(
     'glue/component/droptarget',
     [
         'glue',
-        'glue/event/system'
+        'glue/event/system',
+        'glue/basecomponent'
     ],
-    function (Glue, Event) {
+    function (Glue, Event, BaseComponent) {
+        'use strict';
+
         return function (object) {
-            var droppedOnMe = function (draggable, e) {
+            var baseComponent = BaseComponent('droptarget', object),
+                droppedOnMe = function (draggable, e) {
                     return object.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
@@ -23,15 +27,14 @@ glue.module.create(
                     }
                 };
 
-            object = object || {};
-            object.droptarget = {
+            baseComponent.set({
                 setup: function (settings) {
                     Event.on('draggable.drop', draggableDropHandler);
                 },
                 destroy: function () {
                     Event.off('draggable.drop', draggableDropHandler);
                 }
-            };
+            });
 
             return object;
         };

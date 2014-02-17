@@ -10,6 +10,7 @@ glue.module.create(
     'glue/component/kineticable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math',
         'glue/math/vector',
         'glue/math/dimension',
@@ -17,10 +18,12 @@ glue.module.create(
         'glue/math/circle',
         'glue/sat'
     ],
-    function (Glue, Mathematics, Vector, Dimension, Rectangle, Circle, SAT) {
+    function (Glue, BaseComponent, Mathematics, Vector, Dimension, Rectangle, Circle, SAT) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            'use strict';
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('kineticable', object),
                 math = Mathematics(),
                 velocity = Vector(0, 0),
                 gravity = Vector(0, 0),
@@ -35,8 +38,7 @@ glue.module.create(
                 origin,
                 max;
 
-            object = object || {};
-            object.kineticable = {
+            baseComponent.set({
                 setup: function (config) {
                     if (Sugar.isDefined(config)) {
                         if (Sugar.isDefined(config.gravity)) {
@@ -202,9 +204,9 @@ glue.module.create(
                 getSide: function () {
                     return side;
                 }
-            };
+            });
 
-            object.register('update', object.kineticable.update);
+            baseComponent.register('update');
 
             return object;
         }

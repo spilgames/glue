@@ -10,20 +10,23 @@ glue.module.create(
     'glue/component/scalable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math/vector',
         'glue/math/dimension'
     ],
-    function (Glue, Vector, Dimension) {
+    function (Glue, BaseComponent, Vector, Dimension) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('scalable', object),
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
                 origin = Vector(0, 0),
                 scaleSpeed = 1,
                 atTarget = true;
 
-            object = object || {};
-            object.scalable = {
+            baseComponent.set({
                 update: function (deltaT) {
                     if (!atTarget) {
                         var radian,
@@ -101,10 +104,10 @@ glue.module.create(
                             dimension.height * currentScale.y
                         ); 
                 }
-            };
+            });
 
-            object.register('update', object.scalable.update, 'scalable');
-            object.register('draw', object.scalable.draw, 'scalable');
+            baseComponent.register('update');
+            baseComponent.register('draw');
 
             return object;
         };

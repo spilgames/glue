@@ -10,19 +10,22 @@ glue.module.create(
     'glue/component/movable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math/vector'
     ],
-    function (Glue, Vector) {
+    function (Glue, BaseComponent, Vector) {
+        'use strict';
         var Sugar = Glue.sugar;
+
         return function (object) {
-            var position,
+            var baseComponent = BaseComponent('movable', object),
+                position,
                 targetPosition = null,
                 moveSpeed = 100,
                 atTarget = true,
                 rotation = 0;
 
-            object = object || {};
-            object.movable = {
+            baseComponent.set({
                 update: function (deltaT) {
                     if (targetPosition !== null) {
                         var radian,
@@ -74,9 +77,9 @@ glue.module.create(
                     }
                     moveSpeed = speed;
                 }
-            };
+            });
 
-            object.register('update', object.movable.update, 'movable');
+            baseComponent.register('update');
 
             return object;
         };

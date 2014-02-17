@@ -6039,6 +6039,59 @@ adapters.glue = (function (win, Glue) {
     });
 }(window));
 /*
+ *  @module BaseComponent
+ *  @desc Represents the base for all components
+ *  @copyright (C) SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create(
+    'glue/basecomponent',
+    [
+        'glue'
+    ],
+    function (Glue) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
+        return function (componentName, baseObject) {
+            var name,
+                object,
+                component;
+
+            if (Sugar.isString(componentName)) {
+                name = componentName;
+                object = baseObject || {};
+            }
+
+            return {
+                set: function (componentObject) {
+                    if (Sugar.isObject(componentObject)) {
+                        component = componentObject;
+                        object[componentName] = componentObject;
+                    }
+                },
+                getName: function () {
+                    return name;
+                },
+                getBaseObject: function () {
+                    return object;
+                },
+                getComponent: function () {
+                    return component;
+                },
+                register: function (functionName) {
+                    object.register(functionName, component[functionName], name);
+                },
+                unregister: function (functionName) {
+                    object.unregister(functionName, name);
+                }
+            };
+        };
+    }
+);
+
+/*
  *  @module BaseObject
  *  @desc Represents a base object
  *  @copyright (C) SpilGames
@@ -6056,7 +6109,7 @@ glue.module.create(
     function (Glue, Vector, Rectangle, Dimension) {
         var Sugar = Glue.sugar;
         return function () {
-            var name = '',
+            var name,
                 mixins = Array.prototype.slice.call(arguments),
                 mixin = null,
                 position = Vector(0, 0),
@@ -6144,6 +6197,12 @@ glue.module.create(
                             registrants[type][name] = registrant;
                         }
                     },
+                    unregister: function (type, name) {
+                        if (Sugar.contains(acceptedTypes, type) &&
+                            Sugar.isFunction(registrants[type][name])) {
+                            delete registrants[type][name];
+                        }
+                    },
                     getPosition: function () {
                         return position;
                     },
@@ -6204,11 +6263,15 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
+        'glue/basecomponent',
         'glue/component/spritable'
     ],
-    function (Glue, Vector, Spritable) {
+    function (Glue, Vector, BaseComponent, Spritable) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('animatable', object),
                 spritable = Spritable(object).spritable,
                 animationSettings,
                 animations = {},
@@ -6242,8 +6305,7 @@ glue.module.create(
                 successCallback,
                 errorCallback;
 
-            object = object || {};
-            object.animatable = {
+            baseComponent.set({
                 setup: function (settings) {
                     var animation;
                     if (settings) {
@@ -6318,10 +6380,11 @@ glue.module.create(
                 getFrameWidth: function () {
                     return frameWidth;
                 }
-            };
+            });
 
-            object.register('draw', object.animatable.draw);
-            object.register('update', object.animatable.update);
+            // Register the methods we want to update in the game cycle
+            baseComponent.register('draw');
+            baseComponent.register('update');
 
             return object;
         };
@@ -6339,11 +6402,15 @@ glue.module.create(
 glue.module.create(
     'glue/component/clickable',
     [
-        'glue'
+        'glue',
+        'glue/basecomponent'
     ],
-    function (Glue) {
+    function (Glue, BaseComponent) {
+        'use strict';
+
         return function (object) {
-            var isClicked = function (e) {
+            var baseComponent = BaseComponent('clickable', object),
+                isClicked = function (e) {
                     return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
@@ -6357,8 +6424,7 @@ glue.module.create(
                     }
                 };
 
-            object = object || {};
-            object.clickable = {
+            baseComponent.set({
                 setup: function (settings) {
 
                 },
@@ -6374,9 +6440,10 @@ glue.module.create(
                 pointerUp: function (e) {
                     pointerUpHandler(e);
                 }
-            };
+            });
 
-            object.register('pointerDown', object.clickable.pointerDown);
+            // Register the methods we want to update in the game cycle
+            baseComponent.register('pointerDown');
 
             return object;
         };
@@ -6396,14 +6463,17 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/event/system'
+        'glue/event/system',
+        'glue/basecomponent'
     ],
-    function (Glue, Vector, Event) {
+    function (Glue, Vector, Event, BaseComponent) {
+        'use strict';
         var draggables = [],
             dragStartTimeout = 30;
 
         return function (object) {
-            var dragging = false,
+            var baseComponent = BaseComponent('draggable', object),
+                dragging = false,
                 dragId,
                 grabOffset = Vector(0, 0),
                 isHeighestDraggable = function (object) {
@@ -6484,8 +6554,7 @@ glue.module.create(
                     }
                 };
 
-            object = object || {};
-            object.draggable = {
+            baseComponent.set({
                 setup: function (settings) {
 
                 },
@@ -6504,12 +6573,11 @@ glue.module.create(
                 dragStartTimeout: function (value) {
                     dragStartTimeout = value;
                 }
-            };
+            });
 
-            // Register methods to base object
-            object.register('pointerDown', object.draggable.pointerDown, 'draggable');
-            object.register('pointerMove', object.draggable.pointerMove, 'draggable');
-            object.register('pointerUp', object.draggable.pointerUp, 'draggable');
+            baseComponent.register('pointerDown');
+            baseComponent.register('pointerMove');
+            baseComponent.register('pointerUp');
 
             return object;
         };
@@ -6528,11 +6596,15 @@ glue.module.create(
     'glue/component/droptarget',
     [
         'glue',
-        'glue/event/system'
+        'glue/event/system',
+        'glue/basecomponent'
     ],
-    function (Glue, Event) {
+    function (Glue, Event, BaseComponent) {
+        'use strict';
+
         return function (object) {
-            var droppedOnMe = function (draggable, e) {
+            var baseComponent = BaseComponent('droptarget', object),
+                droppedOnMe = function (draggable, e) {
                     return object.getBoundingBox().hasPosition(e.position);
                 },
                 draggableDropHandler = function (draggable, e) {
@@ -6541,15 +6613,14 @@ glue.module.create(
                     }
                 };
 
-            object = object || {};
-            object.droptarget = {
+            baseComponent.set({
                 setup: function (settings) {
                     Event.on('draggable.drop', draggableDropHandler);
                 },
                 destroy: function () {
                     Event.off('draggable.drop', draggableDropHandler);
                 }
-            };
+            });
 
             return object;
         };
@@ -6567,20 +6638,23 @@ glue.module.create(
 glue.module.create(
     'glue/component/fadable',
     [
-        'glue'
+        'glue',
+        'glue/basecomponent'
     ],
-    function (Glue) {
+    function (Glue, BaseComponent) {
+        'use strict';
         var Sugar = Glue.sugar;
+
         return function (object) {
-            var alpha,
+            var baseComponent = BaseComponent('fadable', object),
+                alpha,
                 targetAlpha,
                 fadingIn = false,
                 fadingOut = false,
                 fadeSpeed = 0.5,
                 atTargetCallback = null;
 
-            object = object || {};
-            object.fadable = {
+            baseComponent.set({
                 update: function (deltaT) {
                     if (fadingIn === true) {
                         if (alpha < targetAlpha + (deltaT * fadeSpeed)) {
@@ -6660,10 +6734,10 @@ glue.module.create(
                 atTarget: function () {
                     return !fadingIn && !fadingOut;
                 }
-            };
+            });
 
-            object.register('draw', object.fadable.draw, 'fadable');
-            object.register('update', object.fadable.update, 'fadable');
+            baseComponent.register('draw');
+            baseComponent.register('update');
 
             return object;
         };
@@ -6681,12 +6755,16 @@ glue.module.create(
 glue.module.create(
     'glue/component/hoverable',
     [
-        'glue'
+        'glue',
+        'glue/basecomponent'
     ],
-    function (Glue) {
+    function (Glue, BaseComponent) {
+        'use strict';
+
         return function (object) {
             // TODO: add state constants
-            var state = 'not hovered',
+            var baseComponent = BaseComponent('hoverable', object),
+                state = 'not hovered',
                 isHovered = function (e) {
                     return object.getBoundingBox().hasPosition(e.position);
                 },
@@ -6708,14 +6786,13 @@ glue.module.create(
                     }
                 };
 
-            object = object || {};
-            object.hoverable = {
+            baseComponent.set({
                 pointerMove: function (e) {
                     pointerMoveHandler(e);
                 }
-            };
+            });
 
-            object.register('pointerMove', object.hoverable.pointerMove);
+            baseComponent.register('pointerMove');
 
             return object;
         };
@@ -6734,6 +6811,7 @@ glue.module.create(
     'glue/component/kineticable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math',
         'glue/math/vector',
         'glue/math/dimension',
@@ -6741,10 +6819,12 @@ glue.module.create(
         'glue/math/circle',
         'glue/sat'
     ],
-    function (Glue, Mathematics, Vector, Dimension, Rectangle, Circle, SAT) {
+    function (Glue, BaseComponent, Mathematics, Vector, Dimension, Rectangle, Circle, SAT) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            'use strict';
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('kineticable', object),
                 math = Mathematics(),
                 velocity = Vector(0, 0),
                 gravity = Vector(0, 0),
@@ -6759,8 +6839,7 @@ glue.module.create(
                 origin,
                 max;
 
-            object = object || {};
-            object.kineticable = {
+            baseComponent.set({
                 setup: function (config) {
                     if (Sugar.isDefined(config)) {
                         if (Sugar.isDefined(config.gravity)) {
@@ -6926,9 +7005,9 @@ glue.module.create(
                 getSide: function () {
                     return side;
                 }
-            };
+            });
 
-            object.register('update', object.kineticable.update);
+            baseComponent.register('update');
 
             return object;
         }
@@ -6946,19 +7025,22 @@ glue.module.create(
     'glue/component/movable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math/vector'
     ],
-    function (Glue, Vector) {
+    function (Glue, BaseComponent, Vector) {
+        'use strict';
         var Sugar = Glue.sugar;
+
         return function (object) {
-            var position,
+            var baseComponent = BaseComponent('movable', object),
+                position,
                 targetPosition = null,
                 moveSpeed = 100,
                 atTarget = true,
                 rotation = 0;
 
-            object = object || {};
-            object.movable = {
+            baseComponent.set({
                 update: function (deltaT) {
                     if (targetPosition !== null) {
                         var radian,
@@ -7010,9 +7092,9 @@ glue.module.create(
                     }
                     moveSpeed = speed;
                 }
-            };
+            });
 
-            object.register('update', object.movable.update, 'movable');
+            baseComponent.register('update');
 
             return object;
         };
@@ -7022,13 +7104,16 @@ glue.module.create(
 glue.module.create(
     'glue/component/plugin/spineable', [
         'glue',
+        'glue/basecomponent',
         'glue/math/rectangle',
         'glue/math/vector',
         'glue/math/dimension',
         'glue/loader'
     ],
-    function (Glue, Rectangle, Vector, Dimension, Loader) {
+    function (Glue, BaseComponent, Rectangle, Vector, Dimension, Loader) {
+        'use strict';
         // - cross instance private members -
+        var Sugar = Glue.sugar;
 
         /**
          * Constructor
@@ -7040,7 +7125,7 @@ glue.module.create(
          */
         return function (object) {
             // - per instance private members -
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('spineable', object),
                 atlas = {},
                 skeletons = {},
                 skeletonJson = {},
@@ -7210,8 +7295,7 @@ glue.module.create(
                 };
 
             // - external interface -
-            object = object || {};
-            object.spineable = {
+            baseComponent.set({
                 /**
                  * Draw the spine component
                  * @name draw
@@ -7439,10 +7523,10 @@ glue.module.create(
                     };
                     updateVisible();
                 }
-            };
+            });
 
-            object.register('update', object.spineable.update);
-            object.register('draw', object.spineable.draw);
+            baseComponent.register('update');
+            baseComponent.register('draw');
 
             return object;
         };
@@ -7460,22 +7544,25 @@ glue.module.create(
     'glue/component/rotatable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math/vector'
     ],
-    function (Glue, Vector) {
+    function (Glue, BaseComponent, Vector) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('rotatable', object),
                 angle = 0,
                 rotationSpeed = 100,
                 targetAngle = 0,
                 rotationDirection = 1,
                 toDegree = 180 / Math.PI,
                 atTarget = true,
-                toRadian = Math.PI / 180;
+                toRadian = Math.PI / 180,
                 origin = Vector(0, 0);
 
-            object = object || {};
-            object.rotatable = {
+            baseComponent.set({
                 update: function (deltaT) {
                     var tarDeg,
                         curDeg,
@@ -7563,10 +7650,10 @@ glue.module.create(
                 getOrigin: function () {
                     return origin;
                 }
-            };
+            });
 
-            object.register('update', object.rotatable.update, 'rotatable');
-            object.register('draw', object.rotatable.draw, 'rotatable');
+            baseComponent.register('update');
+            baseComponent.register('draw');
 
             return object;
         };
@@ -7585,20 +7672,23 @@ glue.module.create(
     'glue/component/scalable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math/vector',
         'glue/math/dimension'
     ],
-    function (Glue, Vector, Dimension) {
+    function (Glue, BaseComponent, Vector, Dimension) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('scalable', object),
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
                 origin = Vector(0, 0),
                 scaleSpeed = 1,
                 atTarget = true;
 
-            object = object || {};
-            object.scalable = {
+            baseComponent.set({
                 update: function (deltaT) {
                     if (!atTarget) {
                         var radian,
@@ -7676,10 +7766,10 @@ glue.module.create(
                             dimension.height * currentScale.y
                         ); 
                 }
-            };
+            });
 
-            object.register('update', object.scalable.update, 'scalable');
-            object.register('draw', object.scalable.draw, 'scalable');
+            baseComponent.register('update');
+            baseComponent.register('draw');
 
             return object;
         };
@@ -7701,15 +7791,17 @@ glue.module.create(
         'glue/math/vector',
         'glue/math/dimension',
         'glue/math/rectangle',
-        'glue/component/rotatable'
+        'glue/basecomponent'
     ],
-    function (Glue, Vector, Dimension, Rectangle) {
+    function (Glue, Vector, Dimension, Rectangle, BaseComponent) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('spritable', object),
                 image = null;
 
-            object = object || {};
-            object.spritable = {
+            baseComponent.set({
                 setup: function (settings) {
                     var customPosition;
                     if (settings) {
@@ -7750,10 +7842,10 @@ glue.module.create(
                 getImage: function () {
                     return image;
                 }
-            };
+            });
 
-            // Register methods to base object
-            object.register('draw', object.spritable.draw, 'spritable');
+            // Register the methods we want to update in the game cycle
+            baseComponent.register('draw');
 
             return object;
         };
@@ -7773,11 +7865,15 @@ glue.module.create(
     'glue/component/tweenable',
     [
         'glue',
+        'glue/basecomponent',
         'glue/math'
     ],
-    function (Glue, Mathematics) {
+    function (Glue, BaseComponent, Mathematics) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('tweenable', object),
                 mathematics = Mathematics(),
                 availableTweens = ['easeInQuad', 'easeOutQuad', 'easeInOutQuad', 'easeInCubic',
                     'easeOutCubic', 'easeInOutCubic', 'easeInQuart', 'easeOutQuart',
@@ -7787,8 +7883,7 @@ glue.module.create(
                     'easeOutElastic', 'easeInOutElastic', 'easeInBack', 'easeOutBack',
                     'easeInOutBack', 'easeInBounce', 'easeOutBounce', 'easeInOutBounce'];
 
-            object = object || {};
-            object.tweenable = {
+            baseComponent.set({
                 /*
                     t: current time
                     b: start value
@@ -7929,7 +8024,7 @@ glue.module.create(
                     if (t < d/2) return this.easeInBounce (t*2, 0, c, d) * .5 + b;
                     return this.easeOutBounce (t*2-d, 0, c, d) * .5 + c*.5 + b;
                 }
-            };
+            });
 
             return object;
         };

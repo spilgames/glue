@@ -1,13 +1,16 @@
 glue.module.create(
     'glue/component/plugin/spineable', [
         'glue',
+        'glue/basecomponent',
         'glue/math/rectangle',
         'glue/math/vector',
         'glue/math/dimension',
         'glue/loader'
     ],
-    function (Glue, Rectangle, Vector, Dimension, Loader) {
+    function (Glue, BaseComponent, Rectangle, Vector, Dimension, Loader) {
+        'use strict';
         // - cross instance private members -
+        var Sugar = Glue.sugar;
 
         /**
          * Constructor
@@ -19,7 +22,7 @@ glue.module.create(
          */
         return function (object) {
             // - per instance private members -
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('spineable', object),
                 atlas = {},
                 skeletons = {},
                 skeletonJson = {},
@@ -189,8 +192,7 @@ glue.module.create(
                 };
 
             // - external interface -
-            object = object || {};
-            object.spineable = {
+            baseComponent.set({
                 /**
                  * Draw the spine component
                  * @name draw
@@ -418,10 +420,10 @@ glue.module.create(
                     };
                     updateVisible();
                 }
-            };
+            });
 
-            object.register('update', object.spineable.update);
-            object.register('draw', object.spineable.draw);
+            baseComponent.register('update');
+            baseComponent.register('draw');
 
             return object;
         };
