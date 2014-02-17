@@ -9,20 +9,23 @@
 glue.module.create(
     'glue/component/fadable',
     [
-        'glue'
+        'glue',
+        'glue/basecomponent'
     ],
-    function (Glue) {
+    function (Glue, BaseComponent) {
+        'use strict';
         var Sugar = Glue.sugar;
+
         return function (object) {
-            var alpha,
+            var baseComponent = BaseComponent('fadable', object),
+                alpha,
                 targetAlpha,
                 fadingIn = false,
                 fadingOut = false,
                 fadeSpeed = 0.5,
                 atTargetCallback = null;
 
-            object = object || {};
-            object.fadable = {
+            baseComponent.set({
                 update: function (deltaT) {
                     if (fadingIn === true) {
                         if (alpha < targetAlpha + (deltaT * fadeSpeed)) {
@@ -102,10 +105,10 @@ glue.module.create(
                 atTarget: function () {
                     return !fadingIn && !fadingOut;
                 }
-            };
+            });
 
-            object.register('draw', object.fadable.draw, 'fadable');
-            object.register('update', object.fadable.update, 'fadable');
+            baseComponent.register('draw');
+            baseComponent.register('update');
 
             return object;
         };

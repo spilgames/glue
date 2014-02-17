@@ -11,11 +11,15 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
+        'glue/basecomponent',
         'glue/component/spritable'
     ],
-    function (Glue, Vector, Spritable) {
+    function (Glue, Vector, BaseComponent, Spritable) {
+        'use strict';
+        var Sugar = Glue.sugar;
+
         return function (object) {
-            var Sugar = Glue.sugar,
+            var baseComponent = BaseComponent('animatable', object),
                 spritable = Spritable(object).spritable,
                 animationSettings,
                 animations = {},
@@ -49,8 +53,7 @@ glue.module.create(
                 successCallback,
                 errorCallback;
 
-            object = object || {};
-            object.animatable = {
+            baseComponent.set({
                 setup: function (settings) {
                     var animation;
                     if (settings) {
@@ -125,10 +128,11 @@ glue.module.create(
                 getFrameWidth: function () {
                     return frameWidth;
                 }
-            };
+            });
 
-            object.register('draw', object.animatable.draw);
-            object.register('update', object.animatable.update);
+            // Register the methods we want to update in the game cycle
+            baseComponent.register('draw');
+            baseComponent.register('update');
 
             return object;
         };

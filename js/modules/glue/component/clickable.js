@@ -9,11 +9,15 @@
 glue.module.create(
     'glue/component/clickable',
     [
-        'glue'
+        'glue',
+        'glue/basecomponent'
     ],
-    function (Glue) {
+    function (Glue, BaseComponent) {
+        'use strict';
+
         return function (object) {
-            var isClicked = function (e) {
+            var baseComponent = BaseComponent('clickable', object),
+                isClicked = function (e) {
                     return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
@@ -27,8 +31,7 @@ glue.module.create(
                     }
                 };
 
-            object = object || {};
-            object.clickable = {
+            baseComponent.set({
                 setup: function (settings) {
 
                 },
@@ -44,9 +47,10 @@ glue.module.create(
                 pointerUp: function (e) {
                     pointerUpHandler(e);
                 }
-            };
+            });
 
-            object.register('pointerDown', object.clickable.pointerDown);
+            // Register the methods we want to update in the game cycle
+            baseComponent.register('pointerDown');
 
             return object;
         };

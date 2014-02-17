@@ -11,14 +11,17 @@ glue.module.create(
     [
         'glue',
         'glue/math/vector',
-        'glue/event/system'
+        'glue/event/system',
+        'glue/basecomponent'
     ],
-    function (Glue, Vector, Event) {
+    function (Glue, Vector, Event, BaseComponent) {
+        'use strict';
         var draggables = [],
             dragStartTimeout = 30;
 
         return function (object) {
-            var dragging = false,
+            var baseComponent = BaseComponent('draggable', object),
+                dragging = false,
                 dragId,
                 grabOffset = Vector(0, 0),
                 isHeighestDraggable = function (object) {
@@ -99,8 +102,7 @@ glue.module.create(
                     }
                 };
 
-            object = object || {};
-            object.draggable = {
+            baseComponent.set({
                 setup: function (settings) {
 
                 },
@@ -119,12 +121,11 @@ glue.module.create(
                 dragStartTimeout: function (value) {
                     dragStartTimeout = value;
                 }
-            };
+            });
 
-            // Register methods to base object
-            object.register('pointerDown', object.draggable.pointerDown, 'draggable');
-            object.register('pointerMove', object.draggable.pointerMove, 'draggable');
-            object.register('pointerUp', object.draggable.pointerUp, 'draggable');
+            baseComponent.register('pointerDown');
+            baseComponent.register('pointerMove');
+            baseComponent.register('pointerUp');
 
             return object;
         };

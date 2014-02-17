@@ -9,12 +9,16 @@
 glue.module.create(
     'glue/component/hoverable',
     [
-        'glue'
+        'glue',
+        'glue/basecomponent'
     ],
-    function (Glue) {
+    function (Glue, BaseComponent) {
+        'use strict';
+
         return function (object) {
             // TODO: add state constants
-            var state = 'not hovered',
+            var baseComponent = BaseComponent('hoverable', object),
+                state = 'not hovered',
                 isHovered = function (e) {
                     return object.getBoundingBox().hasPosition(e.position);
                 },
@@ -36,14 +40,13 @@ glue.module.create(
                     }
                 };
 
-            object = object || {};
-            object.hoverable = {
+            baseComponent.set({
                 pointerMove: function (e) {
                     pointerMoveHandler(e);
                 }
-            };
+            });
 
-            object.register('pointerMove', object.hoverable.pointerMove);
+            baseComponent.register('pointerMove');
 
             return object;
         };
