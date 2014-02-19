@@ -7757,7 +7757,7 @@ glue.module.create(
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
                     } else if (Sugar.isDefined(object.spritable)) {
-                        dimension = object.spritable.getDimension();
+                        dimension = object.getDimension();
                     } else {
                         dimension = Dimension(1, 1);
                     }
@@ -8520,7 +8520,7 @@ glue.module.create(
                         debugBar.id = 'debugBar';
                         document.body.appendChild(debugBar);
                     }
-                    if (config.sort && config.sort === false) {
+                    if (Sugar.isDefined(config.sort) && config.sort === false) {
                         useSort = false;
                     }
                     /*

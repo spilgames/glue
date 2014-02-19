@@ -330,7 +330,7 @@ glue.module.create(
                         debugBar.id = 'debugBar';
                         document.body.appendChild(debugBar);
                     }
-                    if (config.sort && config.sort === false) {
+                    if (Sugar.isDefined(config.sort) && config.sort === false) {
                         useSort = false;
                     }
                     /*

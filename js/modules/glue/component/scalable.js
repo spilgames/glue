@@ -95,7 +95,7 @@ glue.module.create(
                     if (Sugar.isDefined(object.animatable)) {
                         dimension = object.animatable.getDimension();
                     } else if (Sugar.isDefined(object.spritable)) {
-                        dimension = object.spritable.getDimension();
+                        dimension = object.getDimension();
                     } else {
                         dimension = Dimension(1, 1);
                     }
