@@ -8753,6 +8753,9 @@ glue.module.create(
                     case module.ASSET_TYPE_BINARY:
                         loadBinary(name, source, assetLoadedHandler, assetErrorHandler);
                     break;
+                    case module.ASSET_TYPE_AUDIOSPRITE:
+                        loadAudioSprite(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
                 }
             },
             module = {
@@ -8760,6 +8763,7 @@ glue.module.create(
                 ASSET_TYPE_AUDIO: 'audio',
                 ASSET_TYPE_JSON: 'json',
                 ASSET_TYPE_BINARY: 'binary',
+                ASSET_TYPE_AUDIOSPRITE: 'audiosprite',
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
