@@ -1,3 +1,10 @@
+version 0.0.9 
+February 19, 2014
+
+- Added register and deregister functionality to BaseObject, so components can register themselves automatically and you can overwrite these if needed
+- Added the BaseComponent which contains base logic like registering
+- Added support for loading audio sprites to the loader
+
 version 0.0.8 
 February 10, 2014
 

@@ -8339,7 +8339,7 @@ glue.module.create(
                             fpsAccumulator = fpsTicks = 0;
                         }
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
-                        debugBar.innerHTML += '<br />version: 0.0.8';
+                        debugBar.innerHTML += '<br />version: 0.0.9';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
                         debugBar.innerHTML += '<br />objects: ' + objects.length;
@@ -8536,7 +8536,11 @@ glue.module.create(
                             Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image);
                         }
                         if (config.asset.audio) {
-                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
+                            if (config.asset.audio.sprite) {
+                                Loader.setAssets(Loader.ASSET_TYPE_AUDIOSPRITE, config.asset.audio.sprite);
+                            } else {
+                                Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
+                            }
                         }
                         if (config.asset.json) {
                             Loader.setAssets(Loader.ASSET_TYPE_JSON, config.asset.json);
@@ -8718,6 +8722,21 @@ glue.module.create(
                     }
                 };
                 xhr.send();
+            },
+            loadAudioSprite = function (name, source, success, failure) {
+                var asset,
+                    object,
+                    onJSONLoaded = function () {
+                        object = loadedAssets[name + '_json'];
+                        object.onload = function () {
+                            loadedAssets[name] = asset;
+                            success();
+                        };
+                        asset = new Audio(object);
+                        success();
+                    };
+
+                loadJSON(name + '_json', source, onJSONLoaded, failure);
             },
             loadAsset = function (name, type, source) {
                 var asset;
