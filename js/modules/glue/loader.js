@@ -115,6 +115,21 @@ glue.module.create(
                 };
                 xhr.send();
             },
+            loadAudioSprite = function (name, source, success, failure) {
+                var asset,
+                    object,
+                    onJSONLoaded = function () {
+                        object = loadedAssets[name + '_json'];
+                        object.onload = function () {
+                            loadedAssets[name] = asset;
+                            success();
+                        };
+                        asset = new Audio(object);
+                        success();
+                    };
+
+                loadJSON(name + '_json', source, onJSONLoaded, failure);
+            },
             loadAsset = function (name, type, source) {
                 var asset;
                 switch (type) {
