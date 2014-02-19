@@ -119,9 +119,9 @@ glue.module.create(
                 var asset,
                     object,
                     onJSONLoaded = function () {
-                        object = loadedAssets[name + '_json'];
+                        object = loadedAssets.json[name + '_json'];
                         object.onload = function () {
-                            loadedAssets[name] = asset;
+                            loadedAssets.audio[name] = asset;
                             success();
                         };
                         asset = new Audio(object);

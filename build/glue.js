@@ -8538,9 +8538,8 @@ glue.module.create(
                         if (config.asset.audio) {
                             if (config.asset.audio.sprite) {
                                 Loader.setAssets(Loader.ASSET_TYPE_AUDIOSPRITE, config.asset.audio.sprite);
-                            } else {
-                                Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
                             }
+                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
                         }
                         if (config.asset.json) {
                             Loader.setAssets(Loader.ASSET_TYPE_JSON, config.asset.json);
@@ -8727,9 +8726,9 @@ glue.module.create(
                 var asset,
                     object,
                     onJSONLoaded = function () {
-                        object = loadedAssets[name + '_json'];
+                        object = loadedAssets.json[name + '_json'];
                         object.onload = function () {
-                            loadedAssets[name] = asset;
+                            loadedAssets.audio[name] = asset;
                             success();
                         };
                         asset = new Audio(object);
