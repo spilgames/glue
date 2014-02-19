@@ -346,7 +346,11 @@ glue.module.create(
                             Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image);
                         }
                         if (config.asset.audio) {
-                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
+                            if (config.asset.audio.sprite) {
+                                Loader.setAssets(Loader.ASSET_TYPE_AUDIOSPRITE, config.asset.audio.sprite);
+                            } else {
+                                Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
+                            }
                         }
                         if (config.asset.json) {
                             Loader.setAssets(Loader.ASSET_TYPE_JSON, config.asset.json);
