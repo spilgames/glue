@@ -1,11 +1,17 @@
-version 0.0.9 
+version 0.9.1
+February 19, 2014
+
+- Patch for calling this.getDimension in scalable
+- Patch for checking config.sort settings
+
+version 0.9.0 
 February 19, 2014
 
 - Added register and deregister functionality to BaseObject, so components can register themselves automatically and you can overwrite these if needed
 - Added the BaseComponent which contains base logic like registering
 - Added support for loading audio sprites to the loader
 
-version 0.0.8 
+version 0.8.0  
 February 10, 2014
 
 - Added SAT
@@ -18,7 +24,7 @@ February 10, 2014
 - Added Tweenable component (Robbert Penner's easing equations)
 - Updated documentation
 
-version 0.0.7 
+version 0.7.0  
 January 6, 2014
 
 - Added Screen module to be able to manage game screens which can contain game objects
@@ -31,7 +37,7 @@ January 6, 2014
 - Fixed returning the scaled bounding boxes when an object is scaled using the Scalable component
 - Fixed the hit detection in DropTarget component to be compatible with Animatable components
 
-version 0.0.6 
+version 0.6.0  
 December 31, 2013
 
 - Support added for alpha fading.
@@ -43,28 +49,28 @@ December 31, 2013
 - Added a math module for defining Polygons.
 - Added fadable component.
 
-version 0.0.5 
+version 0.5.0  
 December 29, 2013
 
 - Fix for zindex of visibles so they are sorted correctly in all cases
 - Fixed start frame for animatables so it starts at one (more intuitive)
 - Using Sugar removeObject for removing objects from game loop
 
-version 0.0.4 
+version 0.4.0  
 December 20, 2013
 
 - Added support for position animations (Movable component)
 - Created average framerate counter
 - Added a maximum time to deltaT, fixes position issues
 
-version 0.0.3 
+version 0.3.0  
 December 18, 2013
 
 - Debugbar style should come with glue stylesheet
 - Made visible required for animatables
 - Added pointerUp support for clickables
 
-version 0.0.2 
+version 0.2.0  
 December 17, 2013
 
 - Glue Math
@@ -72,7 +78,7 @@ December 17, 2013
 
 - Fixed animationframe fallback bug for stock Android browsers
 
-version 0.0.1   
+version 0.1.0    
 December 6, 2013 - Inception
 
 - Glue Game
