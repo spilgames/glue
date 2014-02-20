@@ -8554,6 +8554,7 @@ glue.module.create(
                             }
                         });
                     } else {
+                        startup();
                         if (onReady) {
                             onReady();
                         }
