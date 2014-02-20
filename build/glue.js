@@ -8521,7 +8521,10 @@ glue.module.create(
                     }
                     if (config.develop && config.develop.debug) {
                         debug = true;
-                        debugBar = document.createElement('div');
+                        debugBar = document.getElementById('debugBar');
+                        if (debugBar === null) {
+                            debugBar = document.createElement('div');
+                        }
                         debugBar.id = 'debugBar';
                         document.body.appendChild(debugBar);
                     }
@@ -8555,20 +8558,20 @@ glue.module.create(
                         Loader.load(function () {
                             startup();
                             if (onReady) {
-                                onReady();
+                                onReady(this);
                             }
                         });
                     } else {
                         startup();
                         if (onReady) {
-                            onReady();
+                            onReady(this);
                         }
                     }
                 });
             },
             shutdown: function () {
-                shutdown();
                 isRunning = false;
+                shutdown();
             },
             add: function (component) {
                 addedObjects.push(component);

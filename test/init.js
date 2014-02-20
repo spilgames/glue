@@ -33,12 +33,12 @@
         specs = [
             'spec/modules/glue/baseobject.js',
             'spec/modules/glue/component/spritable.js',
+            'spec/modules/glue/component/animatable.js',
             'spec/modules/glue/sugar.js'
         ],
         // enable game canvas below for debugging
         showCanvas = false,
         loadCount = 0,
-        game = {},
         // loads the Jasmine environment, runs tests
         loadJasmine = function () {
             // get the environment
@@ -65,32 +65,12 @@
                 });
                 // load non spec module dependencies
                 specs.unshift('glue');
-                specs.unshift('glue/game');
-                specs.unshift('glue/math/dimension');
                 // load spec modules
                 glue.module.get(
                     specs,
-                    function (Dimension, Game, Glue) {
-                        Game.setup({
-                            game: {
-                                name: 'Director'
-                            },
-                            canvas: {
-                                id: 'canvas',
-                                dimension: Dimension(800, 600)
-                            },
-                            asset: {
-                                path: '../example/',
-                                image: {
-                                    glue: 'glue-logo.png',
-                                    spil: 'spil-logo.png',
-                                    dog: 'dog-sit.png'
-                                }
-                            }
-                        }, function () {
-                            document.getElementById('canvas').style.display = 'none';
-                            loadJasmine();
-                        });
+                    function (yGlue) {
+                        //document.getElementById('canvas').style.display = 'none';
+                        loadJasmine();
                     }
                 );
             }
