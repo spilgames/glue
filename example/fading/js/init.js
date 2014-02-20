@@ -57,10 +57,6 @@ glue.module.get(
                         this.fadable.fadeOut();
                         wasAtTarget = true;
                     }
-                },
-                draw: function (deltaT, context) {
-                    this.base.draw(deltaT, context);
-                    this.fadable.draw(deltaT, context);
                 }
             });
 

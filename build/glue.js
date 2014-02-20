@@ -6135,8 +6135,10 @@ glue.module.create(
                     parameters = Array.prototype.slice.call(parameters);
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
-                        if (type === 'draw' && registrant === 'spritable') {
-                            continue;
+                        if (type === 'draw') {
+                            if (registrant === 'spritable' || registrant === 'fadable') {
+                                continue;
+                            }
                         }
                         typeRegistrants[registrant].apply(module, parameters);
                     }
@@ -6182,6 +6184,9 @@ glue.module.create(
                             registrants.draw.spritable(deltaT, context, scroll);
                         }
                         context.restore();
+                        if (registrants.draw.fadable) {
+                            registrants.draw.fadable(deltaT, context, scroll);
+                        }
                     },
                     pointerDown: function (e) {
                         callRegistrants('pointerDown', arguments);
@@ -6679,7 +6684,7 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
+                draw: function (deltaT, context, scroll) {
                     context.globalAlpha = alpha;
                 },
                 fade: function (callback, startAlpha, endAlpha) {
