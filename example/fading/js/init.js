@@ -38,7 +38,8 @@ glue.module.get(
                 }
             }
         }, function () {
-            var object = BaseObject(Spritable, Movable, Fadable).add({
+            var wasAtTarget = false,
+                object = BaseObject(Spritable, Movable, Fadable).add({
                 init: function () {
                     this.spritable.setup({
                         position: Vector(320, 300),
@@ -50,10 +51,16 @@ glue.module.get(
                     this.fadable.fadeIn();
                 },
                 update: function (deltaT) {
-                    this.base.update(deltaT);
+                    this.movable.update(deltaT);
+                    this.fadable.update(deltaT);
+                    if (this.movable.atTarget() && !wasAtTarget) {
+                        this.fadable.fadeOut();
+                        wasAtTarget = true;
+                    }
                 },
-                draw: function (deltaT, context, scroll) {
-                    this.base.draw(deltaT, context, scroll);
+                draw: function (deltaT, context) {
+                    this.base.draw(deltaT, context);
+                    this.fadable.draw(deltaT, context);
                 }
             });
 
