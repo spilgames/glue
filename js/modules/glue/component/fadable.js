@@ -50,7 +50,7 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
+                draw: function (deltaT, context, scroll) {
                     context.globalAlpha = alpha;
                 },
                 fade: function (callback, startAlpha, endAlpha) {
