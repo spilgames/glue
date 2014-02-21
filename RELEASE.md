@@ -1,3 +1,10 @@
+version 0.9.2
+February 21, 2014
+
+- Fixed blinking up to an alpha of 1 in fadable component
+- Fixed being able to load a Glue game without any assets
+- Added the Glue logo in base64 format
+
 version 0.9.1
 February 19, 2014
 
