@@ -87,13 +87,13 @@ glue.module.create(
                         );
                         callRegistrants('draw', arguments);
                         context.translate(-origin.x, -origin.y);
+                        if (registrants.draw.fadable) {
+                            registrants.draw.fadable(deltaT, context, scroll);
+                        }
                         if (registrants.draw.spritable) {
                             registrants.draw.spritable(deltaT, context, scroll);
                         }
                         context.restore();
-                        if (registrants.draw.fadable) {
-                            registrants.draw.fadable(deltaT, context, scroll);
-                        }
                     },
                     pointerDown: function (e) {
                         callRegistrants('pointerDown', arguments);

@@ -28,7 +28,7 @@ glue.module.create(
             baseComponent.set({
                 update: function (deltaT) {
                     if (fadingIn === true) {
-                        if (alpha < targetAlpha + (deltaT * fadeSpeed)) {
+                        if (alpha < targetAlpha - (deltaT * fadeSpeed)) {
                             alpha += fadeSpeed * deltaT;
                         } else {
                             alpha = targetAlpha;
@@ -39,7 +39,7 @@ glue.module.create(
                         }
                     }
                     else if (fadingOut === true) {
-                        if (alpha > targetAlpha - (deltaT * fadeSpeed)) {
+                        if (alpha > targetAlpha + (deltaT * fadeSpeed)) {
                             alpha -= fadeSpeed * deltaT;
                         } else {
                             alpha = targetAlpha;

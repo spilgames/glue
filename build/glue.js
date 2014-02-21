@@ -6180,13 +6180,13 @@ glue.module.create(
                         );
                         callRegistrants('draw', arguments);
                         context.translate(-origin.x, -origin.y);
+                        if (registrants.draw.fadable) {
+                            registrants.draw.fadable(deltaT, context, scroll);
+                        }
                         if (registrants.draw.spritable) {
                             registrants.draw.spritable(deltaT, context, scroll);
                         }
                         context.restore();
-                        if (registrants.draw.fadable) {
-                            registrants.draw.fadable(deltaT, context, scroll);
-                        }
                     },
                     pointerDown: function (e) {
                         callRegistrants('pointerDown', arguments);
@@ -6662,7 +6662,7 @@ glue.module.create(
             baseComponent.set({
                 update: function (deltaT) {
                     if (fadingIn === true) {
-                        if (alpha < targetAlpha + (deltaT * fadeSpeed)) {
+                        if (alpha < targetAlpha - (deltaT * fadeSpeed)) {
                             alpha += fadeSpeed * deltaT;
                         } else {
                             alpha = targetAlpha;
@@ -6673,7 +6673,7 @@ glue.module.create(
                         }
                     }
                     else if (fadingOut === true) {
-                        if (alpha > targetAlpha - (deltaT * fadeSpeed)) {
+                        if (alpha > targetAlpha + (deltaT * fadeSpeed)) {
                             alpha -= fadeSpeed * deltaT;
                         } else {
                             alpha = targetAlpha;
@@ -8344,7 +8344,7 @@ glue.module.create(
                             fpsAccumulator = fpsTicks = 0;
                         }
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
-                        debugBar.innerHTML += '<br />version: 0.9.1';
+                        debugBar.innerHTML += '<br />version: 0.9.2';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
                         debugBar.innerHTML += '<br />objects: ' + objects.length;
