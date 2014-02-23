@@ -6286,10 +6286,16 @@ glue.module.create(
                 fps = 60,
                 timeBetweenFrames = 1 / fps,
                 timeSinceLastFrame = timeBetweenFrames,
+                successCallback,
+                errorCallback,
                 frameWidth,
                 startFrame,
                 endFrame,
                 image,
+                loopCount,
+                currentLoop,
+                looping,
+                onCompleteCallback,
                 setAnimation = function () {
                     if (!image) {
                         spritable.setImage(currentAnimation.image);
@@ -6300,15 +6306,15 @@ glue.module.create(
                         1 / currentAnimation.fps :
                         1 / animationSettings.fps;
                     timeSinceLastFrame = timeBetweenFrames;
-                    frameWidth = currentAnimation.frameCount ?
-                        image.width / currentAnimation.frameCount :
-                        image.width / animationSettings.frameCount;
+                    frameWidth = image.width / animationSettings.frameCount;
                     startFrame = currentAnimation.startFrame - 1;
                     endFrame = currentAnimation.endFrame;
                     currentFrame = startFrame;
-                },
-                successCallback,
-                errorCallback;
+                    loopCount = currentAnimation.loopCount || undefined;
+                    onCompleteCallback = currentAnimation.onComplete || undefined;
+                    currentLoop = 0;
+                    looping = true;
+                };
 
             baseComponent.set({
                 setup: function (settings) {
@@ -6327,11 +6333,23 @@ glue.module.create(
                     }
                 },
                 update: function (deltaT) {
+                    if (!looping) {
+                        return;
+                    }
                     timeSinceLastFrame -= deltaT;
                     if (timeSinceLastFrame <= 0) {
                         timeSinceLastFrame = timeBetweenFrames;
                         ++currentFrame;
                         if (currentFrame === endFrame) {
+                            if (Sugar.isDefined(loopCount)) {
+                                ++currentLoop;
+                                if (currentLoop === loopCount) {
+                                    looping = false;
+                                    if (Sugar.isDefined(onCompleteCallback)) {
+                                        onCompleteCallback.call(this.animatable);
+                                    }
+                                }
+                            }
                             currentFrame = startFrame;
                         }
                     }
@@ -6395,7 +6413,6 @@ glue.module.create(
         };
     }
 );
-
 /*
  *  @module Clickable
  *  @namespace component
