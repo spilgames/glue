@@ -1,3 +1,9 @@
+version 0.9.3
+February 23, 2014
+
+- Added loopcount to Animatable component
+- Added loop finished callback function to Animatable component
+
 version 0.9.2
 February 21, 2014
 
