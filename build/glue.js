@@ -6123,7 +6123,7 @@ glue.module.create(
                 typeRegistrantsLength,
                 typeRegistrant,
                 acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
-                drawLast = ['animatable', 'spritable'],
+                drawLast = ['animatable', 'spritable', 'spineable'],
                 d,
                 dLength = drawLast.length,
                 drawRegistrant,
@@ -6180,9 +6180,11 @@ glue.module.create(
                             position.x - scroll.x,
                             position.y - scroll.y
                         );
-                        
+
                         // draws rotatable, scalable etc.
                         callRegistrants('draw', arguments);
+
+                        // translate to origin
                         context.translate(-origin.x, -origin.y);
 
                         // draws animatable and spritable
@@ -7347,19 +7349,14 @@ glue.module.create(
                         origin = origins[currentSkeleton],
                         vOrigin = Vector(0, 0),
                         position = Vector(0, 0),
-                        offset;
-                    context.save();
+                        offset,
+                        currentAngle = 0;
+                
                     if (object) {
                         vOrigin = object.getOrigin();
                         position = object.getPosition();
                     }
                     offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));
-                    if (object.scalable) {
-                        object.scalable.draw(deltaT, context);
-                    }
-                    if (object.rotatable) {
-                        object.rotatable.draw(deltaT, context);
-                    }
                     for (i; i < l; ++i) {
                         slot = skeleton.drawOrder[i];
                         attachment = slot.attachment;
@@ -7379,16 +7376,17 @@ glue.module.create(
                         boneScaleY = slot.bone.scaleY;
                         angle = -(slot.bone.worldRotation + attachment.rotation) * Math.PI / 180;
 
-                        context.save();
                         context.translate(Math.round(x), Math.round(y));
                         context.rotate(angle);
                         context.globalAlpha = slot.a;
                         context.scale(boneScaleX * scaleX, boneScaleY * scaleY);
 
                         context.drawImage(attachment.rendererObject.page.image, px, py, w, h, 0, 0, w, h);
-                        context.restore();
+
+                        context.translate(-Math.round(x), -Math.round(y));
+                        //context.rotate(-angle);
+                        //context.scale(-(boneScaleX * scaleX), -(boneScaleY * scaleY));
                     }
-                    context.restore();
 
                     // draw boundingbox
                     // var b = object.getBoundingBox();

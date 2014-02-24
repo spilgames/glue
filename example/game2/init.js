@@ -191,9 +191,6 @@ glue.module.get(
                             }
                         });
                         playerDimension = this.animatable.getDimension();
-                        this.setOrigin(Vector(200, 200));
-                        this.rotatable.setAngleDegree(45);
-                        this.scalable.setScale(Vector(2, 2));
                     },
                     update: function (deltaT) {
                         this.rotatable.update(deltaT);

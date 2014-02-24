@@ -64,7 +64,10 @@ glue.module.get(
                                 // useful for using differently sized assets
                                 skeletonResolution: 1
                             });
-                            this.spineable.setAnimation('walk');
+                            this.spineable.setAnimation('walk', true, 0.1);
+                        },
+                        update: function (deltaT) {
+                            this.spineable.update(deltaT);
                         }
                     });
 
@@ -72,7 +75,7 @@ glue.module.get(
                 // set origin
                 capivara.setOrigin(Vector(150, 150));
                 // set an angle
-                // capivara.rotatable.setAngleDegree(45);
+                //capivara.rotatable.setAngleDegree(45);
                 // scale
                 // capivara.scalable.setScale(Vector(2, 2));
                 // flip

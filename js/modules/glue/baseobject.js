@@ -30,7 +30,7 @@ glue.module.create(
                 typeRegistrantsLength,
                 typeRegistrant,
                 acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
-                drawLast = ['animatable', 'spritable'],
+                drawLast = ['animatable', 'spritable', 'spineable'],
                 d,
                 dLength = drawLast.length,
                 drawRegistrant,
@@ -87,9 +87,11 @@ glue.module.create(
                             position.x - scroll.x,
                             position.y - scroll.y
                         );
-                        
+
                         // draws rotatable, scalable etc.
                         callRegistrants('draw', arguments);
+
+                        // translate to origin
                         context.translate(-origin.x, -origin.y);
 
                         // draws animatable and spritable

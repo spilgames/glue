@@ -19,7 +19,7 @@ glue.module.create(
         Draggable
     ) {
         return function () {
-            var object = BaseObject(Spritable, Animatable, Draggable).add({
+            var object = BaseObject(Animatable, Draggable).add({
                     init: function () {
                         this.setName('dog');
                         this.animatable.setup({
@@ -39,7 +39,7 @@ glue.module.create(
                         this.animatable.setAnimation('wiggleTail');
                     },
                     draw: function (deltaT, context, scroll) {
-                        this.animatable.draw(deltaT, context, scroll);
+                        this.base.draw(deltaT, context, scroll);
                     }
                 });
             return object;
