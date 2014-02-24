@@ -6123,6 +6123,10 @@ glue.module.create(
                 typeRegistrantsLength,
                 typeRegistrant,
                 acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
+                drawLast = ['animatable', 'spritable'],
+                d,
+                dLength = drawLast.length,
+                drawRegistrant,
                 registrants = {
                     init: {},
                     draw: {},
@@ -6135,10 +6139,8 @@ glue.module.create(
                     parameters = Array.prototype.slice.call(parameters);
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
-                        if (type === 'draw') {
-                            if (registrant === 'spritable' || registrant === 'fadable') {
-                                continue;
-                            }
+                        if (type === 'draw' && Sugar.contains(drawLast, registrant)) {
+                            continue;
                         }
                         typeRegistrants[registrant].apply(module, parameters);
                     }
@@ -6180,11 +6182,12 @@ glue.module.create(
                         );
                         callRegistrants('draw', arguments);
                         context.translate(-origin.x, -origin.y);
-                        if (registrants.draw.fadable) {
-                            registrants.draw.fadable(deltaT, context, scroll);
-                        }
-                        if (registrants.draw.spritable) {
-                            registrants.draw.spritable(deltaT, context, scroll);
+
+                        for (d = 0; d < dLength; ++d) {
+                            drawRegistrant = registrants.draw[drawLast[d]];
+                            if (drawRegistrant) {
+                                drawRegistrant(deltaT, context, scroll);
+                            }
                         }
                         context.restore();
                     },
@@ -6228,9 +6231,7 @@ glue.module.create(
                         }
                     },
                     getBoundingBox: function () {
-                        return module.animatable ?
-                            module.animatable.getBoundingBox(rectangle) :
-                            rectangle;
+                        return rectangle;
                     },
                     setBoundingBox: function (value) {
                         rectangle = value;
@@ -6396,7 +6397,8 @@ glue.module.create(
                     dimension.width = frameWidth;
                     return dimension;
                 },
-                getBoundingBox: function (rectangle) {
+                getBoundingBox: function () {
+                    var rectangle = object.getBoundingBox();
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
@@ -8227,6 +8229,7 @@ glue.module.create(
         'glue/loader'
     ],
     function (Glue, DomReady, Vector, Event, Loader) {
+        'use strict';
         var Sugar = Glue.sugar,
             win = null,
             doc = null,
@@ -8333,7 +8336,7 @@ glue.module.create(
             redraw = function () {
                 backBufferContext2D.clear(true);
                 context2D.clear(true);
-            }
+            },
             cycle = function (time) {
                 var deltaT,
                     fps,
