@@ -6177,11 +6177,14 @@ glue.module.create(
                         scroll = scroll || Vector(0, 0);
                         context.save();
                         context.translate(
-                            position.x - origin.x - scroll.x,
-                            position.y - origin.y - scroll.y
+                            position.x - scroll.x,
+                            position.y - scroll.y
                         );
+                        
                         // draws rotatable, scalable etc.
                         callRegistrants('draw', arguments);
+                        context.translate(-origin.x, -origin.y);
+
                         // draws animatable and spritable
                         for (d = 0; d < dLength; ++d) {
                             drawRegistrant = registrants.draw[drawLast[d]];
