@@ -25,8 +25,7 @@ glue.module.create(
                 rotationDirection = 1,
                 toDegree = 180 / Math.PI,
                 atTarget = true,
-                toRadian = Math.PI / 180,
-                origin = Vector(0, 0);
+                toRadian = Math.PI / 180;
 
             baseComponent.set({
                 update: function (deltaT) {
@@ -58,7 +57,6 @@ glue.module.create(
                 },
                 draw: function (deltaT, context) {
                     context.rotate(angle);
-                    context.translate(-origin.x, -origin.y);
                 },
                 setAngleDegree: function (value) {
                     angle = Sugar.isNumber(value) ? value : angle;
@@ -108,13 +106,6 @@ glue.module.create(
                 },
                 atTarget: function () {
                     return atTarget;
-                },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
-                },
-                getOrigin: function () {
-                    return origin;
                 }
             });
 

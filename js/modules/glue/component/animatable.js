@@ -101,6 +101,8 @@ glue.module.create(
                     var position = object.getPosition(),
                         sourceX = frameWidth * currentFrame,
                         origin = object.getOrigin();
+
+                    /*    
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -114,6 +116,7 @@ glue.module.create(
                         object.scalable.draw(deltaT, context);
                     }    
                     context.translate(-origin.x, -origin.y);
+                    */
                     context.drawImage
                     (
                         image,
@@ -126,7 +129,7 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
-                    context.restore();
+                    //context.restore();
                 },
                 setAnimation: function(name) {
                     if (animations[name]) {

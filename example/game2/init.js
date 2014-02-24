@@ -10,6 +10,8 @@ glue.module.get(
         'glue/component/droptarget',
         'glue/component/hoverable',
         'glue/component/clickable',
+        'glue/component/scalable',
+        'glue/component/rotatable',
         'glue/loader'
     ],
     function (
@@ -23,6 +25,8 @@ glue.module.get(
         Droptarget,
         Hoverable,
         Clickable,
+        Scalable,
+        Rotatable,
         Loader) {
         'use strict';
 
@@ -162,7 +166,7 @@ glue.module.get(
                 playerPosition,
                 playerDimension,
                 walkSpeed = 80,
-                player = BaseObject(Spritable, Animatable).add({
+                player = BaseObject(Spritable, Animatable, Scalable, Rotatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -186,8 +190,13 @@ glue.module.get(
                                 }
                             }
                         });
+                        playerDimension = this.animatable.getDimension();
+                        this.setOrigin(Vector(200, 200));
+                        this.rotatable.setAngleDegree(45);
+                        this.scalable.setScale(Vector(2, 2));
                     },
                     update: function (deltaT) {
+                        this.rotatable.update(deltaT);
                         this.animatable.update(deltaT);
                         playerDimension = this.animatable.getDimension();
                         playerPosition = this.getPosition();
@@ -210,7 +219,7 @@ glue.module.get(
                         }
                     },
                     draw: function (deltaT, context) {
-                        this.animatable.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                     }
                 });
 

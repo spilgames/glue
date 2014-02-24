@@ -51,11 +51,13 @@ glue.module.create(
                     }
                 },
                 draw: function (deltaT, context, scroll) {
-                    context.drawImage(
-                        image,
-                        0,
-                        0
-                    );
+                    if (!object.animatable) {
+                        context.drawImage(
+                            image,
+                            0,
+                            0
+                        );
+                    }
                 },
                 setImage: function (value) {
                     image = value;
