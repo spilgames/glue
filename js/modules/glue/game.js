@@ -15,6 +15,7 @@ glue.module.create(
         'glue/loader'
     ],
     function (Glue, DomReady, Vector, Event, Loader) {
+        'use strict';
         var Sugar = Glue.sugar,
             win = null,
             doc = null,
@@ -121,7 +122,7 @@ glue.module.create(
             redraw = function () {
                 backBufferContext2D.clear(true);
                 context2D.clear(true);
-            }
+            },
             cycle = function (time) {
                 var deltaT,
                     fps,
