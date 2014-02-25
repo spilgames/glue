@@ -7349,9 +7349,8 @@ glue.module.create(
                         origin = origins[currentSkeleton],
                         vOrigin = Vector(0, 0),
                         position = Vector(0, 0),
-                        offset,
-                        currentAngle = 0;
-                
+                        offset;
+
                     if (object) {
                         vOrigin = object.getOrigin();
                         position = object.getPosition();
@@ -7376,16 +7375,14 @@ glue.module.create(
                         boneScaleY = slot.bone.scaleY;
                         angle = -(slot.bone.worldRotation + attachment.rotation) * Math.PI / 180;
 
+                        context.save();
                         context.translate(Math.round(x), Math.round(y));
                         context.rotate(angle);
                         context.globalAlpha = slot.a;
                         context.scale(boneScaleX * scaleX, boneScaleY * scaleY);
 
                         context.drawImage(attachment.rendererObject.page.image, px, py, w, h, 0, 0, w, h);
-
-                        context.translate(-Math.round(x), -Math.round(y));
-                        //context.rotate(-angle);
-                        //context.scale(-(boneScaleX * scaleX), -(boneScaleY * scaleY));
+                        context.restore();
                     }
 
                     // draw boundingbox

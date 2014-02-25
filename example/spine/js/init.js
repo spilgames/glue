@@ -64,7 +64,7 @@ glue.module.get(
                                 // useful for using differently sized assets
                                 skeletonResolution: 1
                             });
-                            this.spineable.setAnimation('walk', true, 0.1);
+                            this.spineable.setAnimation('walk');
                         },
                         update: function (deltaT) {
                             this.spineable.update(deltaT);
@@ -73,7 +73,7 @@ glue.module.get(
 
                 Game.add(capivara);
                 // set origin
-                capivara.setOrigin(Vector(150, 150));
+                //capivara.setOrigin(Vector(150, 150));
                 // set an angle
                 //capivara.rotatable.setAngleDegree(45);
                 // scale
