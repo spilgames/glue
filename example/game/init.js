@@ -128,36 +128,36 @@ glue.module.get(
                                 fps: 8,
                                 animations: {
                                     standUp: {
-                                        startFrame: 1,
-                                        endFrame: 1
+                                        startFrame: 0,
+                                        endFrame: 0
                                     },
                                     standDown: {
-                                        startFrame: 9,
-                                        endFrame: 9
+                                        startFrame: 8,
+                                        endFrame: 8
                                     },
                                     standLeft: {
-                                        startFrame: 17,
-                                        endFrame: 17
+                                        startFrame: 16,
+                                        endFrame: 16
                                     },
                                     standRight: {
-                                        startFrame: 25,
-                                        endFrame: 25
+                                        startFrame: 24,
+                                        endFrame: 24
                                     },
                                     walkUp: {
-                                        startFrame: 1,
-                                        endFrame: 7
+                                        startFrame: 0,
+                                        endFrame: 6
                                     },
                                     walkDown: {
-                                        startFrame: 9,
-                                        endFrame: 15
+                                        startFrame: 0,
+                                        endFrame: 14
                                     },
                                     walkLeft: {
-                                        startFrame: 17,
-                                        endFrame: 23
+                                        startFrame: 16,
+                                        endFrame: 22
                                     },
                                     walkRight: {
-                                        startFrame: 25,
-                                        endFrame: 31
+                                        startFrame: 24,
+                                        endFrame: 30
                                     }
                                 }
                             },

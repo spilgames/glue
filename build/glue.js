@@ -6313,7 +6313,7 @@ glue.module.create(
                         1 / animationSettings.fps;
                     timeSinceLastFrame = timeBetweenFrames;
                     frameWidth = image.width / animationSettings.frameCount;
-                    startFrame = currentAnimation.startFrame - 1;
+                    startFrame = currentAnimation.startFrame;
                     endFrame = currentAnimation.endFrame;
                     currentFrame = startFrame;
                     loopCount = currentAnimation.loopCount || undefined;
@@ -6346,7 +6346,7 @@ glue.module.create(
                     if (timeSinceLastFrame <= 0) {
                         timeSinceLastFrame = timeBetweenFrames;
                         ++currentFrame;
-                        if (currentFrame === endFrame) {
+                        if (currentFrame > endFrame) {
                             if (Sugar.isDefined(loopCount)) {
                                 ++currentLoop;
                                 if (currentLoop === loopCount) {
