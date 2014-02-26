@@ -30,8 +30,8 @@ glue.module.create(
                                 fps: 8,
                                 animations: {
                                     wiggleTail: {
-                                        startFrame: 1,
-                                        endFrame: 8
+                                        startFrame: 0,
+                                        endFrame: 7
                                     }
                                 }
                             }

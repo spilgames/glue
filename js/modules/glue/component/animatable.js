@@ -83,7 +83,7 @@ glue.module.create(
                     if (timeSinceLastFrame <= 0) {
                         timeSinceLastFrame = timeBetweenFrames;
                         ++currentFrame;
-                        if (currentFrame < endFrame) {
+                        if (currentFrame > endFrame) {
                             if (Sugar.isDefined(loopCount)) {
                                 ++currentLoop;
                                 if (currentLoop === loopCount) {
