@@ -1,3 +1,8 @@
+version 0.9.4
+February 26, 2014
+
+- Refactored BaseObject and multiple Components to work together
+
 version 0.9.3
 February 23, 2014
 

@@ -8349,7 +8349,7 @@ glue.module.create(
                             fpsAccumulator = fpsTicks = 0;
                         }
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
-                        debugBar.innerHTML += '<br />version: 0.9.3';
+                        debugBar.innerHTML += '<br />version: 0.9.4';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
                         debugBar.innerHTML += '<br />objects: ' + objects.length;
