@@ -116,7 +116,7 @@ glue.module.get(
                 down = false,
                 radian,
                 rotation,
-                player = BaseObject(Spritable, Animatable, Movable).add({
+                player = BaseObject(Animatable, Movable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -221,7 +221,7 @@ glue.module.get(
                     },
                     draw: function (deltaT, context) {
                         context.imageSmoothingEnabled = false;
-                        this.animatable.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                     }
                 }),
                 enemyPosition,
@@ -229,7 +229,7 @@ glue.module.get(
                 walkSpeed = 80,
                 direction = 'left',
                 canvasDimension = Game.canvas.getDimension(),
-                enemy = BaseObject(Spritable, Animatable).add({
+                enemy = BaseObject(Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -285,7 +285,7 @@ glue.module.get(
                         }
                     },
                     draw: function (deltaT, context) {
-                        this.animatable.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                     }
                 });
 

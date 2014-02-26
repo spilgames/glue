@@ -89,7 +89,7 @@ glue.module.get(
                         cloudsPosition.x += moveSpeed * deltaT;
                     }
                 }),
-                dog = BaseObject(Spritable, Animatable).add({
+                dog = BaseObject(Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -111,7 +111,7 @@ glue.module.get(
                         this.animatable.setAnimation('wiggleTail');
                     },
                     draw: function (deltaT, context) {
-                        this.animatable.draw(deltaT, context);
+                        this.base.draw(deltaT, context);
                     }
                 }),
                 hills = BaseObject(Spritable).add({
@@ -166,7 +166,7 @@ glue.module.get(
                 playerPosition,
                 playerDimension,
                 walkSpeed = 80,
-                player = BaseObject(Spritable, Animatable, Scalable, Rotatable).add({
+                player = BaseObject(Animatable, Scalable, Rotatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
