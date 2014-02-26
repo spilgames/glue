@@ -64,7 +64,7 @@ glue.module.get(
                         });
                     }
                 }),
-                dog = BaseObject(Spritable, Animatable).add({
+                dog = BaseObject(Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -89,7 +89,7 @@ glue.module.get(
                         this.animatable.update(deltaT);
                     },
                     draw: function (deltaT, context, scroll) {
-                        this.animatable.draw(deltaT, context, scroll);
+                        this.base.draw(deltaT, context, scroll);
                     }
                 });
 

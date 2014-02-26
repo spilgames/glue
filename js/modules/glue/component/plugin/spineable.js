@@ -215,18 +215,12 @@ glue.module.create(
                         vOrigin = Vector(0, 0),
                         position = Vector(0, 0),
                         offset;
-                    context.save();
+
                     if (object) {
                         vOrigin = object.getOrigin();
                         position = object.getPosition();
                     }
                     offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));
-                    if (object.scalable) {
-                        object.scalable.draw(deltaT, context);
-                    }
-                    if (object.rotatable) {
-                        object.rotatable.draw(deltaT, context);
-                    }
                     for (i; i < l; ++i) {
                         slot = skeleton.drawOrder[i];
                         attachment = slot.attachment;
@@ -255,7 +249,6 @@ glue.module.create(
                         context.drawImage(attachment.rendererObject.page.image, px, py, w, h, 0, 0, w, h);
                         context.restore();
                     }
-                    context.restore();
 
                     // draw boundingbox
                     // var b = object.getBoundingBox();

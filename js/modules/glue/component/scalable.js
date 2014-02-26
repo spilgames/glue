@@ -22,7 +22,6 @@ glue.module.create(
             var baseComponent = BaseComponent('scalable', object),
                 currentScale = Vector(1, 1),
                 targetScale = Vector(1, 1),
-                origin = Vector(0, 0),
                 scaleSpeed = 1,
                 atTarget = true;
 
@@ -54,7 +53,6 @@ glue.module.create(
                 },
                 draw: function (deltaT, context) {
                     context.scale(currentScale.x, currentScale.y);
-                    context.translate(-origin.x, -origin.y);
                 },
                 setScale: function (vec) {
                     currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;
@@ -82,13 +80,6 @@ glue.module.create(
                 },
                 atTarget: function () {
                     return atTarget;
-                },
-                setOrigin: function (vec) {
-                    origin.x = Sugar.isNumber(vec.x) ? vec.x : origin.x;
-                    origin.y = Sugar.isNumber(vec.y) ? vec.y : origin.y;
-                },
-                getOrigin: function () {
-                    return origin;
                 },
                 getDimension: function () {
                     var dimension;

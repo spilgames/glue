@@ -65,14 +65,17 @@ glue.module.get(
                                 skeletonResolution: 1
                             });
                             this.spineable.setAnimation('walk');
+                        },
+                        update: function (deltaT) {
+                            this.spineable.update(deltaT);
                         }
                     });
 
                 Game.add(capivara);
                 // set origin
-                capivara.setOrigin(Vector(150, 150));
+                //capivara.setOrigin(Vector(150, 150));
                 // set an angle
-                // capivara.rotatable.setAngleDegree(45);
+                //capivara.rotatable.setAngleDegree(45);
                 // scale
                 // capivara.scalable.setScale(Vector(2, 2));
                 // flip

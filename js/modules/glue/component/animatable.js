@@ -101,6 +101,8 @@ glue.module.create(
                     var position = object.getPosition(),
                         sourceX = frameWidth * currentFrame,
                         origin = object.getOrigin();
+
+                    /*    
                     scroll = scroll || Vector(0, 0);
                     context.save();
                     context.translate(
@@ -114,6 +116,7 @@ glue.module.create(
                         object.scalable.draw(deltaT, context);
                     }    
                     context.translate(-origin.x, -origin.y);
+                    */
                     context.drawImage
                     (
                         image,
@@ -126,7 +129,7 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
-                    context.restore();
+                    //context.restore();
                 },
                 setAnimation: function(name) {
                     if (animations[name]) {
@@ -139,7 +142,8 @@ glue.module.create(
                     dimension.width = frameWidth;
                     return dimension;
                 },
-                getBoundingBox: function (rectangle) {
+                getBoundingBox: function () {
+                    var rectangle = object.getBoundingBox();
                     rectangle.x2 = rectangle.x1 + frameWidth;
                     return rectangle;
                 },
