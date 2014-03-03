@@ -74,8 +74,7 @@ glue.module.get(
                         this.scalable.setTarget(Vector(0.5, 0.5));
                     },
                     update: function (deltaT) {
-                        // cannot use 'this' keyword here!
-                        // 'this' refers to object1
+                        // 'this' refers to object1 (the parent of object2)
                         object2.base.update(deltaT);
                         if (object2.rotatable.atTarget()) {
                             object2.rotatable.setTargetDegree(0, false);
@@ -96,8 +95,7 @@ glue.module.get(
                         this.scalable.setTarget(Vector(0.5, 0.5));
                     },
                     update: function (deltaT) {
-                        // cannot use 'this' keyword here!
-                        // 'this' refers to object1
+                        // 'this' refers to object2 (the parent of object3)
                         object3.base.update(deltaT);
                         if (object3.rotatable.atTarget()) {
                             object3.rotatable.setTargetDegree(0, false);
