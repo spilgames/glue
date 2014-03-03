@@ -152,6 +152,7 @@ glue.module.create(
                         if (Sugar.isVector(value)) {
                             origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
                             origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
+                            updateRectangle();
                         }
                     },
                     getOrigin: function () {
