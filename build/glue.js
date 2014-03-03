@@ -6249,6 +6249,7 @@ glue.module.create(
                         if (Sugar.isVector(value)) {
                             origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
                             origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
+                            updateRectangle();
                         }
                     },
                     getOrigin: function () {
@@ -7630,11 +7631,6 @@ glue.module.create(
                         distance,
                         self = object.rotatable;
                     
-                    if (self.getAngleDegree() < 0) {
-                        self.setAngleDegree(359);
-                    } else if (self.getAngleDegree() > 360) {
-                        self.setAngleDegree(1);
-                    }
                     if (angle !== targetAngle) {
                         tarDeg = self.getTargetDegree(),
                         curDeg = self.getAngleDegree(),
