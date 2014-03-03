@@ -35,11 +35,6 @@ glue.module.create(
                         distance,
                         self = object.rotatable;
                     
-                    if (self.getAngleDegree() < 0) {
-                        self.setAngleDegree(359);
-                    } else if (self.getAngleDegree() > 360) {
-                        self.setAngleDegree(1);
-                    }
                     if (angle !== targetAngle) {
                         tarDeg = self.getTargetDegree(),
                         curDeg = self.getAngleDegree(),
