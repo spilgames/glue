@@ -14,7 +14,8 @@ glue.module.create(
         'glue/math/dimension'
     ],
     function (Glue, Vector, Rectangle, Dimension) {
-        var Sugar = Glue.sugar;
+        var Sugar = Glue.sugar,
+            crossInstanceID = 0;
         return function () {
             var name,
                 mixins = Array.prototype.slice.call(arguments),
@@ -30,7 +31,7 @@ glue.module.create(
                 typeRegistrantsLength,
                 typeRegistrant,
                 acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
-                drawLast = ['animatable', 'spritable', 'spineable'],
+                drawLast = ['animatable', 'spritable', 'spineable', 'base'],
                 d,
                 dLength = drawLast.length,
                 drawRegistrant,
@@ -42,6 +43,9 @@ glue.module.create(
                     pointerMove: {},
                     pointerUp: {}
                 },
+                children = {},
+                parent = null,
+                uniqueID = ++crossInstanceID,
                 callRegistrants = function (type, parameters) {
                     parameters = Array.prototype.slice.call(parameters);
                     typeRegistrants = registrants[type];
@@ -157,6 +161,38 @@ glue.module.create(
                     },
                     getOrigin: function () {
                         return origin;
+                    },
+                    addChild: function (baseObject, id) {
+                        if (Sugar.isDefined(id)) {
+                            children[id] = baseObject;
+                        } else if (Sugar.isDefined(baseObject.getName())) {
+                            children[baseObject.getName()] = baseObject;
+                        } else {
+                            children[baseObject.getID()] = baseObject;
+                        }
+                        baseObject.setParent(this);
+
+                        if (baseObject.init) {
+                            baseObject.init();
+                        }
+                        if (baseObject.draw) {
+                            module.register('draw', baseObject.draw, 'base');
+                        }
+                        if (baseObject.update) {
+                            module.register('update', baseObject.update, 'base');
+                        }
+                    },
+                    getChild: function (id) {
+                        return children[id];
+                    },
+                    setParent: function (obj) {
+                        parent = obj;
+                    },
+                    getParent: function (obj) {
+                        return parent = obj;
+                    },
+                    getID: function () {
+                        return uniqueID;
                     }
                 };
 
