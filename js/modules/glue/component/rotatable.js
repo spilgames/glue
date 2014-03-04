@@ -24,7 +24,6 @@ glue.module.create(
                 angle = 0,
                 rotationSpeed = 0.01, // Speed should be between 0 and 1
                 targetAngle = 0,
-                rotationDirection = 1,
                 toDegree = 180 / Math.PI,
                 atTarget = true,
                 toRadian = Math.PI / 180,
