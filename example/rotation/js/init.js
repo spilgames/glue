@@ -46,13 +46,12 @@ glue.module.get(
                         });
                         dimension = this.getDimension();
                         this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
-                        this.rotatable.setTargetDegree(360, true);
-                        this.rotatable.setSpeed(100);
+                        this.rotatable.setTargetDegree(360);
                     },
                     update: function (deltaT) {
                         this.base.update(deltaT);
                         if (this.rotatable.atTarget()) {
-                            this.rotatable.setTargetDegree(0, false);
+                            this.rotatable.setTargetDegree(0);
                         }
                     },
                     draw: function (deltaT, context) {
