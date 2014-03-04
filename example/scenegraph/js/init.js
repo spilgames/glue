@@ -49,7 +49,7 @@ glue.module.get(
                         dimension = this.getDimension();
                         this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.rotatable.setTargetDegree(360, true);
-                        this.rotatable.setSpeed(100);
+                        this.rotatable.setSpeed(0.01);
                         this.scalable.setTarget(Vector(0.5, 0.5));
                     },
                     update: function (deltaT) {
@@ -70,7 +70,7 @@ glue.module.get(
                         dimension = this.getDimension();
                         this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.rotatable.setTargetDegree(360, true);
-                        this.rotatable.setSpeed(100);
+                        this.rotatable.setSpeed(0.01);
                         this.scalable.setTarget(Vector(0.5, 0.5));
                     },
                     update: function (deltaT) {
@@ -91,7 +91,7 @@ glue.module.get(
                         dimension = this.getDimension();
                         this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.rotatable.setTargetDegree(360, true);
-                        this.rotatable.setSpeed(100);
+                        this.rotatable.setSpeed(0.01);
                         this.scalable.setTarget(Vector(0.5, 0.5));
                     },
                     update: function (deltaT) {

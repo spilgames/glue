@@ -11,43 +11,35 @@ glue.module.create(
     [
         'glue',
         'glue/basecomponent',
-        'glue/math/vector'
+        'glue/math/vector',
+        'glue/math'
     ],
-    function (Glue, BaseComponent, Vector) {
+    function (Glue, BaseComponent, Vector, Mathematics) {
         'use strict';
-        var Sugar = Glue.sugar;
+        var Sugar = Glue.sugar,
+            math = Mathematics();
 
         return function (object) {
             var baseComponent = BaseComponent('rotatable', object),
                 angle = 0,
-                rotationSpeed = 100,
+                rotationSpeed = 0.01, // Speed should be between 0 and 1
                 targetAngle = 0,
                 rotationDirection = 1,
                 toDegree = 180 / Math.PI,
                 atTarget = true,
-                toRadian = Math.PI / 180;
+                toRadian = Math.PI / 180,
+                lastAngle = 0,
+                angleValue = 1;
 
             baseComponent.set({
                 update: function (deltaT) {
-                    var tarDeg,
-                        curDeg,
-                        finalSpeed,
-                        distance,
-                        self = object.rotatable;
-                    
-                    if (angle !== targetAngle) {
-                        tarDeg = self.getTargetDegree(),
-                        curDeg = self.getAngleDegree(),
-                        finalSpeed = rotationSpeed * rotationDirection,
-                        distance = (tarDeg > curDeg) ? (tarDeg - curDeg) : (curDeg - tarDeg);
-
-                        if (Math.floor(Math.abs(distance)) < Math.abs(finalSpeed * deltaT)) {
-                            angle = targetAngle;
+                    if (!atTarget) {
+                        angle = math.lerp(angleValue, lastAngle, targetAngle);
+                        if (angleValue >= 1) {
                             atTarget = true;
-                        } else {
-                            curDeg += finalSpeed * deltaT;
-                            self.setAngleDegree(curDeg);
+                            this.rotatable.setAngleRadian(angle);
                         }
+                        angleValue += rotationSpeed;
                     }
                 },
                 draw: function (deltaT, context) {
@@ -56,36 +48,27 @@ glue.module.create(
                 setAngleDegree: function (value) {
                     angle = Sugar.isNumber(value) ? value : angle;
                     angle *= toRadian;
+                    lastAngle = angle;
+                    angleValue = 1;
                 },
                 setAngleRadian: function (value) {
                     angle = Sugar.isNumber(value) ? value : angle;
+                    lastAngle = angle;
+                    angleValue = 1;
                 },
-                setTargetDegree: function (value, clockwise) {
+                setTargetDegree: function (value) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
                     targetAngle *= toRadian;
-                    if (Sugar.isDefined(clockwise)) {
-                        if (clockwise) {
-                            rotationDirection = 1;
-                        } else {
-                            rotationDirection = -1;
-                        }
-                    }
                     atTarget = false;
+                    angleValue = 0;
                 },
-                setTargetRadian: function (value, clockwise) {
+                setTargetRadian: function (value) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
-                    if (Sugar.isDefined(clockwise)) {
-                        if (clockwise) {
-                            rotationDirection = 1;
-                        } else {
-                            rotationDirection = -1;
-                        }
-                    }
                     atTarget = false;
+                    angleValue = 0;
                 },
                 setSpeed: function (value) {
                     rotationSpeed = Sugar.isNumber(value) ? value : rotationSpeed;
-                    rotationSpeed = Math.floor(rotationSpeed);
                 },
                 getAngleDegree: function () {
                     return angle * toDegree;

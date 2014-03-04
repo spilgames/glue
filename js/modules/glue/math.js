@@ -23,7 +23,7 @@ glue.module.create(
                 Matrix: Matrix,
                 Vector: Vector,
                 random: function (min, max) {
-                    return ~~(Math.random() * (max - min + 1)) + min;
+                    return min + Math.floor(Math.random() * (max - min + 1));
                 },
                 square: function (x) {
                     return x * x;
@@ -47,6 +47,12 @@ glue.module.create(
                             rectangle.y2 / 2
                         );
                     return tempRect;
+                },
+                lerp: function (normal, min, max) {
+                    return (max - min) * normal + min;
+                },
+                normalize: function (value, min, max) {
+                    return (value - min) / (max + min);
                 }
             };
         };
