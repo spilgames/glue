@@ -181,9 +181,24 @@ glue.module.create(
                 ASSET_TYPE_BINARY: 'binary',
                 ASSET_TYPE_AUDIOSPRITE: 'audiosprite',
                 ASSET_TYPE_SPINE: 'spine',
+                /**
+                 * Sets the root folder for assets
+                 * @name setAssetPath
+                 * @memberOf loader
+                 * @function
+                 * @param {String} value: path to the root of the asset folder
+                 */
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
+                /**
+                 * Assign assets to load for the loader
+                 * @name setAssets
+                 * @memberOf loader
+                 * @function
+                 * @param {String} type: asset type name (enumerations available)
+                 * @param {Object} value: object containing key/value pairs for assets (key: asset name, value: asset path)
+                 */
                 setAssets: function (type, value) {
                     assets[type] = value;
                     for (asset in value) {
@@ -192,6 +207,13 @@ glue.module.create(
                         }
                     }
                 },
+                /**
+                 * Load all the assets assigned by setAssets
+                 * @name load
+                 * @memberOf loader
+                 * @function
+                 * @param {Function} onReady: Callback function for completion
+                 */
                 load: function (onReady) {
                     var typeList;
                     if (percentageBar !== null) {
@@ -209,33 +231,84 @@ glue.module.create(
                         }
                     }
                 },
+                /**
+                 * Are the assets loaded
+                 * @name isLoaded
+                 * @memberOf loader
+                 * @function
+                 * @return Boolean whether asset loading is done or not 
+                 */
                 isLoaded: function () {
                     return loaded;
                 },
+                /**
+                 * Gets all assets
+                 * @name getAssets
+                 * @memberOf loader
+                 * @function
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return Object containing references to all assets 
+                 */
                 getAssets: function () {
                     if (!loaded) {
                         throw('Assets are not loaded yet');
                     }
                     return loadedAssets;
                 },
+                /**
+                 * Gets the image asset
+                 * @name getimage
+                 * @memberOf loader
+                 * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return Image object 
+                 */
                 getImage: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
                     }
                     return loadedAssets.image[name];
                 },
+                /**
+                 * Gets the audio asset
+                 * @name getAudio
+                 * @memberOf loader
+                 * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return Audio object (depends on adapter set for audio) 
+                 */
                 getAudio: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
                     }
                     return loadedAssets.audio[name];
                 },
+                /**
+                 * Gets the json asset
+                 * @name getJSON
+                 * @memberOf loader
+                 * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return JSON parsed object  
+                 */
                 getJSON: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
                     }
                     return loadedAssets.json[name];
                 },
+                /**
+                 * Gets the binary asset
+                 * @name getBinary
+                 * @memberOf loader
+                 * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return Binary object 
+                 */
                 getBinary: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
@@ -247,6 +320,8 @@ glue.module.create(
                  * @name getAsset
                  * @memberOf loader
                  * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
                  */
                 getAsset: function (name) {
                     if (!loaded) {
