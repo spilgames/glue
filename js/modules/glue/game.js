@@ -358,6 +358,9 @@ glue.module.create(
                         if (config.asset.binary) {
                             Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
                         }
+                        if (config.asset.spine) {
+                            Loader.setAssets(Loader.ASSET_TYPE_SPINE, config.asset.spine);
+                        }
                         Loader.load(function () {
                             startup();
                             if (onReady) {

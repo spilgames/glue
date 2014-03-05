@@ -53,14 +53,14 @@ glue.module.create(
             loadImage = function (name, source, success, failure) {
                 // TODO: Implement failure
                 var asset = new Image();
-                asset.src = assetPath + 'image/' + source;
+                asset.src = source;
                 asset.addEventListener('load', success, false);
                 loadedAssets.image[name] = asset;
             },
             loadAudio = function (name, source, success, failure) {
                 // TODO: Implement failure
                 var asset = new Audio({
-                    urls: [assetPath + 'audio/' + source],
+                    urls: [source],
                     onload: success
                 });
                 loadedAssets.audio[name] = asset;
@@ -128,25 +128,49 @@ glue.module.create(
                         success();
                     };
 
-                loadJSON(name + '_json', source, onJSONLoaded, failure);
+                loadJSON(name + '_json', assetPath + 'json/' + source, onJSONLoaded, failure);
+            },
+            loadSpine = function (name, source, success, failure) {
+                var imageLoaded = false,
+                    jsonLoaded = false,
+                    atlasLoaded = false,
+                    checkReady = function () {
+                        if (imageLoaded && jsonLoaded && atlasLoaded)
+                        success();
+                    };
+                loadImage(name, source + '.png', function () {
+                    imageLoaded = true;
+                    checkReady();
+                }, failure);
+                loadBinary(name, source + '.atlas', function () {
+                    atlasLoaded = true;
+                    checkReady();
+                }, failure);
+                loadJSON(name, source + '.json', function () {
+                    jsonLoaded = true;
+                    checkReady();
+                }, failure);
             },
             loadAsset = function (name, type, source) {
                 var asset;
                 switch (type) {
                     case module.ASSET_TYPE_IMAGE:
-                        loadImage(name, source, assetLoadedHandler, assetErrorHandler);
+                        loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                     case module.ASSET_TYPE_AUDIO:
-                        loadAudio(name, source, assetLoadedHandler, assetErrorHandler);
+                        loadAudio(name, assetPath + 'audio/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                     case module.ASSET_TYPE_JSON:
-                        loadJSON(name, source, assetLoadedHandler, assetErrorHandler);
+                        loadJSON(name, assetPath + 'json/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                     case module.ASSET_TYPE_BINARY:
-                        loadBinary(name, source, assetLoadedHandler, assetErrorHandler);
+                        loadBinary(name, assetPath + 'binary/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                     case module.ASSET_TYPE_AUDIOSPRITE:
                         loadAudioSprite(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
+                    case module.ASSET_TYPE_SPINE:
+                        loadSpine(name, assetPath + 'spine/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                 }
             },
@@ -156,6 +180,7 @@ glue.module.create(
                 ASSET_TYPE_JSON: 'json',
                 ASSET_TYPE_BINARY: 'binary',
                 ASSET_TYPE_AUDIOSPRITE: 'audiosprite',
+                ASSET_TYPE_SPINE: 'spine',
                 setAssetPath: function (value) {
                     assetPath = value;
                 },

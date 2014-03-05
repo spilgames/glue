@@ -40,17 +40,9 @@ glue.module.get(
                 },
                 asset: {
                     path: 'asset/',
-                    image: {
-                        capivara: 'capivara.png',
-                        capivara_sideview: 'capivara_sideview.png'
-                    },
-                    json: {
-                        capivara: 'asset/capivara.json',
-                        capivara_sideview: 'asset/capivara_sideview.json'
-                    },
-                    binary: {
-                        capivara: 'asset/capivara.atlas',
-                        capivara_sideview: 'asset/capivara_sideview.atlas'
+                    spine: {
+                        capivara: 'capivara',
+                        capivara_sideview: 'capivara_sideview'
                     }
                 }
             }, function () {
@@ -59,7 +51,8 @@ glue.module.get(
                         init: function () {
                             this.spineable.setup({
                                 position: Vector(200, 150),
-                                assets: ['capivara', 'capivara_sideview'],
+                                // animation property is a string or array of strings
+                                animation: ['capivara', 'capivara_sideview'],
                                 // optional setting: you can rescale the bones
                                 // useful for using differently sized assets
                                 skeletonResolution: 1
