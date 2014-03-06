@@ -59,6 +59,7 @@ glue.module.create(
                     currentScale.y = Sugar.isNumber(vec.y) ? vec.y : currentScale.y;
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
                     targetScale.y = Sugar.isNumber(vec.y) ? vec.y : targetScale.y;
+                    object.updateBoundingBox();
                 },
                 setTarget: function (vec) {
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
