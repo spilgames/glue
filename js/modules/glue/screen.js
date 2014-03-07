@@ -17,14 +17,49 @@ glue.module.create(
         return function (name) {
             var objects = [],
                 module = {
+                    /**
+                     * Add object to screen
+                     * @name addObject
+                     * @memberOf screen
+                     * @function
+                     */
                     addObject: function (object) {
                         if (Sugar.isObject(object)) {
                             objects.push(object);
                         }
                     },
+                    /**
+                     * Removes object from screen
+                     * @name removeObject
+                     * @memberOf screen
+                     * @function
+                     */
+                    removeObject: function (object) {
+                        var index;
+                        if (Sugar.isObject(object)) {
+                            index = objects.indexOf(object);
+                            if (index >= 0) {
+                                objects.splice(index, 1);
+                            }
+                        }
+                    },
+                    /**
+                     * Gets the object array
+                     * @name getObjects
+                     * @memberOf screen
+                     * @function
+                     * @return Array of added objects
+                     */
                     getObjects: function () {
                         return objects;
                     },
+                    /**
+                     * Get the name of the screen
+                     * @name getName
+                     * @memberOf screen
+                     * @function
+                     * @return Screen name as string
+                     */
                     getName: function () {
                         return name;
                     }

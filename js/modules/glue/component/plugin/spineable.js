@@ -51,17 +51,17 @@ glue.module.create(
                     if (!Sugar.isDefined(spineSettings)) {
                         throw 'Specify settings object to Spine';
                     }
-                    if (!Sugar.isDefined(spineSettings.assets)) {
-                        throw 'Specify assets to Spine';
+                    if (!Sugar.isDefined(spineSettings.animation)) {
+                        throw 'Specify animation to Spine';
                     }
                     // convert to array of strings
-                    if (typeof spineSettings.assets === 'string') {
-                        spineSettings.assets = [spineSettings.assets];
+                    if (typeof spineSettings.animation === 'string') {
+                        spineSettings.animation = [spineSettings.animation];
                     }
-                    for (i; i < spineSettings.assets.length; ++i) {
-                        currentSkeleton = spineSettings.assets[i];
-                        addAtlas(spineSettings.assets[i]);
-                        addSkeletonData(spineSettings.assets[i]);
+                    for (i; i < spineSettings.animation.length; ++i) {
+                        currentSkeleton = spineSettings.animation[i];
+                        addAtlas(spineSettings.animation[i]);
+                        addSkeletonData(spineSettings.animation[i]);
                     }
                     if (spineSettings.position && object) {
                         object.setPosition(spineSettings.position);
