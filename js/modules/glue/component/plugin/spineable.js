@@ -176,17 +176,11 @@ glue.module.create(
                  * @function
                  */
                 updateVisible = function () {
-                    var scale = Vector(1, 1),
-                        skeletonRectangle = skeletonRectangles[currentSkeleton],
-                        width,
-                        height;
+                    var skeletonRectangle = skeletonRectangles[currentSkeleton],
+                        width = skeletonRectangle.getWidth(),
+                        height = skeletonRectangle.getHeight();
                     if (object) {
-                        if (object.scalable) {
-                            scale = object.scalable.getScale();
-                        }
                         // update visible dimension
-                        width = skeletonRectangle.getWidth() * Math.abs(scale.x);
-                        height = skeletonRectangle.getHeight() * Math.abs(scale.y);
                         object.setDimension(Dimension(width, height));
                     }
                 };
@@ -212,15 +206,13 @@ glue.module.create(
                         angle,
                         corner = cornerPoints[currentSkeleton],
                         origin = origins[currentSkeleton],
-                        vOrigin = Vector(0, 0),
                         position = Vector(0, 0),
                         offset;
 
                     if (object) {
-                        vOrigin = object.getOrigin();
                         position = object.getPosition();
                     }
-                    offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));
+                    offset = Vector((corner.x + origin.x), (corner.y + origin.y));
                     for (i; i < l; ++i) {
                         slot = skeleton.drawOrder[i];
                         attachment = slot.attachment;

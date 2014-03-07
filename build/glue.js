@@ -6149,18 +6149,6 @@ glue.module.create(
                         typeRegistrants[registrant].apply(module, parameters);
                     }
                 },
-                updateRectangle = function () {
-                    var scale = Vector(1, 1);
-                    if (module.scalable) {
-                        scale = module.scalable.getScale();
-                    }
-                    rectangle = Rectangle(
-                        position.x - origin.x * Math.abs(scale.x),
-                        position.y - origin.y * Math.abs(scale.y),
-                        position.x - origin.x * Math.abs(scale.x) + dimension.width,
-                        position.y - origin.y * Math.abs(scale.y) + dimension.height
-                    );
-                },
                 module = {
                     add: function (object) {
                         return Sugar.combine(this, object);
@@ -6227,7 +6215,7 @@ glue.module.create(
                         if (Sugar.isVector(value)) {
                             position.x = value.x;
                             position.y = value.y;
-                            updateRectangle();
+                            this.updateBoundingBox();
                         }
                     },
                     getDimension: function () {
@@ -6236,7 +6224,7 @@ glue.module.create(
                     setDimension: function (value) {
                         if (Sugar.isDimension(value)) {
                             dimension = value;
-                            updateRectangle();
+                            this.updateBoundingBox();
                         }
                     },
                     getBoundingBox: function () {
@@ -6245,11 +6233,27 @@ glue.module.create(
                     setBoundingBox: function (value) {
                         rectangle = value;
                     },
+                    updateBoundingBox: function () {
+                        var scale = module.scalable ? module.scalable.getScale() : Vector(1, 1),
+                            x1 = position.x - origin.x * scale.x,
+                            y1 = position.y - origin.y * scale.y,
+                            x2 = position.x + (dimension.width - origin.x) * scale.x,
+                            y2 = position.y + (dimension.height - origin.y) * scale.y;
+
+                        // swap variables if scale is negative
+                        if (scale.x < 0) {
+                            x2 = [x1, x1 = x2][0];
+                        }
+                        if (scale.y < 0) {
+                            y2 = [y1, y1 = y2][0];
+                        }
+                        rectangle = Rectangle(x1, y1, x2, y2);
+                    },
                     setOrigin: function (value) {
                         if (Sugar.isVector(value)) {
                             origin.x = Sugar.isNumber(value.x) ? value.x : origin.x;
                             origin.y = Sugar.isNumber(value.y) ? value.y : origin.y;
-                            updateRectangle();
+                            this.updateBoundingBox();
                         }
                     },
                     getOrigin: function () {
@@ -7348,17 +7352,11 @@ glue.module.create(
                  * @function
                  */
                 updateVisible = function () {
-                    var scale = Vector(1, 1),
-                        skeletonRectangle = skeletonRectangles[currentSkeleton],
-                        width,
-                        height;
+                    var skeletonRectangle = skeletonRectangles[currentSkeleton],
+                        width = skeletonRectangle.getWidth(),
+                        height = skeletonRectangle.getHeight();
                     if (object) {
-                        if (object.scalable) {
-                            scale = object.scalable.getScale();
-                        }
                         // update visible dimension
-                        width = skeletonRectangle.getWidth() * Math.abs(scale.x);
-                        height = skeletonRectangle.getHeight() * Math.abs(scale.y);
                         object.setDimension(Dimension(width, height));
                     }
                 };
@@ -7384,15 +7382,13 @@ glue.module.create(
                         angle,
                         corner = cornerPoints[currentSkeleton],
                         origin = origins[currentSkeleton],
-                        vOrigin = Vector(0, 0),
                         position = Vector(0, 0),
                         offset;
 
                     if (object) {
-                        vOrigin = object.getOrigin();
                         position = object.getPosition();
                     }
-                    offset = Vector((corner.x + origin.x + vOrigin.x), (corner.y + origin.y + vOrigin.y));
+                    offset = Vector((corner.x + origin.x), (corner.y + origin.y));
                     for (i; i < l; ++i) {
                         slot = skeleton.drawOrder[i];
                         attachment = slot.attachment;
@@ -7769,6 +7765,7 @@ glue.module.create(
                     currentScale.y = Sugar.isNumber(vec.y) ? vec.y : currentScale.y;
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
                     targetScale.y = Sugar.isNumber(vec.y) ? vec.y : targetScale.y;
+                    object.updateBoundingBox();
                 },
                 setTarget: function (vec) {
                     targetScale.x = Sugar.isNumber(vec.x) ? vec.x : targetScale.x;
