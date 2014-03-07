@@ -1,3 +1,15 @@
+version 0.9.5
+March 7, 2014
+
+- Animatable: animations now start at frame one instead of zero
+- Added Scenegraph functionality by adding child objects to BaseObject
+- Fixed: Updating rectangle after the origin is changed
+- Fixed: Capping angles on rotations
+- Fixed: Boundingbox is also updated when scalable is used
+- Added special asset type for loading Spinable plugin assets
+- Added functionality to delete objects from game screens
+- Optimized game drawing order for better sorting results
+
 version 0.9.4
 February 26, 2014
 
