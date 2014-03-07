@@ -101,9 +101,6 @@ glue.module.create(
                         objects.push(addedObjects[i]);
                     };
                     addedObjects = [];
-                    if (useSort) {
-                        sort();
-                    }
                 }
             },
             removeObjects = function () {
@@ -132,9 +129,6 @@ glue.module.create(
                 if (isRunning) {
                     requestAnimationFrame(cycle);
                 }
-                if (useSort) {
-                    sort();
-                }
                 if (canvasSupported) {
                     redraw();
                     removeObjects();
@@ -157,6 +151,9 @@ glue.module.create(
                         if (gameInfo && gameInfo.name) {
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
                         }
+                    }
+                    if (useSort) {
+                        sort();
                     }
                     if (deltaT < 1) {
                         for (var i = 0; i < objects.length; ++i) {
@@ -357,9 +354,6 @@ glue.module.create(
                         }
                         if (config.asset.binary) {
                             Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
-                        }
-                        if (config.asset.spine) {
-                            Loader.setAssets(Loader.ASSET_TYPE_SPINE, config.asset.spine);
                         }
                         Loader.load(function () {
                             startup();
