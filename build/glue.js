@@ -7223,17 +7223,17 @@ glue.module.create(
                     if (!Sugar.isDefined(spineSettings)) {
                         throw 'Specify settings object to Spine';
                     }
-                    if (!Sugar.isDefined(spineSettings.assets)) {
-                        throw 'Specify assets to Spine';
+                    if (!Sugar.isDefined(spineSettings.animation)) {
+                        throw 'Specify animation to Spine';
                     }
                     // convert to array of strings
-                    if (typeof spineSettings.assets === 'string') {
-                        spineSettings.assets = [spineSettings.assets];
+                    if (typeof spineSettings.animation === 'string') {
+                        spineSettings.animation = [spineSettings.animation];
                     }
-                    for (i; i < spineSettings.assets.length; ++i) {
-                        currentSkeleton = spineSettings.assets[i];
-                        addAtlas(spineSettings.assets[i]);
-                        addSkeletonData(spineSettings.assets[i]);
+                    for (i; i < spineSettings.animation.length; ++i) {
+                        currentSkeleton = spineSettings.animation[i];
+                        addAtlas(spineSettings.animation[i]);
+                        addSkeletonData(spineSettings.animation[i]);
                     }
                     if (spineSettings.position && object) {
                         object.setPosition(spineSettings.position);
@@ -8589,6 +8589,9 @@ glue.module.create(
                         if (config.asset.binary) {
                             Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
                         }
+                        if (config.asset.spine) {
+                            Loader.setAssets(Loader.ASSET_TYPE_SPINE, config.asset.spine);
+                        }
                         Loader.load(function () {
                             startup();
                             if (onReady) {
@@ -8703,14 +8706,14 @@ glue.module.create(
             loadImage = function (name, source, success, failure) {
                 // TODO: Implement failure
                 var asset = new Image();
-                asset.src = assetPath + 'image/' + source;
+                asset.src = source;
                 asset.addEventListener('load', success, false);
                 loadedAssets.image[name] = asset;
             },
             loadAudio = function (name, source, success, failure) {
                 // TODO: Implement failure
                 var asset = new Audio({
-                    urls: [assetPath + 'audio/' + source],
+                    urls: [source],
                     onload: success
                 });
                 loadedAssets.audio[name] = asset;
@@ -8778,25 +8781,49 @@ glue.module.create(
                         success();
                     };
 
-                loadJSON(name + '_json', source, onJSONLoaded, failure);
+                loadJSON(name + '_json', assetPath + 'json/' + source, onJSONLoaded, failure);
+            },
+            loadSpine = function (name, source, success, failure) {
+                var imageLoaded = false,
+                    jsonLoaded = false,
+                    atlasLoaded = false,
+                    checkReady = function () {
+                        if (imageLoaded && jsonLoaded && atlasLoaded)
+                        success();
+                    };
+                loadImage(name, source + '.png', function () {
+                    imageLoaded = true;
+                    checkReady();
+                }, failure);
+                loadBinary(name, source + '.atlas', function () {
+                    atlasLoaded = true;
+                    checkReady();
+                }, failure);
+                loadJSON(name, source + '.json', function () {
+                    jsonLoaded = true;
+                    checkReady();
+                }, failure);
             },
             loadAsset = function (name, type, source) {
                 var asset;
                 switch (type) {
                     case module.ASSET_TYPE_IMAGE:
-                        loadImage(name, source, assetLoadedHandler, assetErrorHandler);
+                        loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                     case module.ASSET_TYPE_AUDIO:
-                        loadAudio(name, source, assetLoadedHandler, assetErrorHandler);
+                        loadAudio(name, assetPath + 'audio/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                     case module.ASSET_TYPE_JSON:
-                        loadJSON(name, source, assetLoadedHandler, assetErrorHandler);
+                        loadJSON(name, assetPath + 'json/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                     case module.ASSET_TYPE_BINARY:
-                        loadBinary(name, source, assetLoadedHandler, assetErrorHandler);
+                        loadBinary(name, assetPath + 'binary/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                     case module.ASSET_TYPE_AUDIOSPRITE:
                         loadAudioSprite(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
+                    case module.ASSET_TYPE_SPINE:
+                        loadSpine(name, assetPath + 'spine/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                 }
             },
@@ -8806,6 +8833,7 @@ glue.module.create(
                 ASSET_TYPE_JSON: 'json',
                 ASSET_TYPE_BINARY: 'binary',
                 ASSET_TYPE_AUDIOSPRITE: 'audiosprite',
+                ASSET_TYPE_SPINE: 'spine',
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
