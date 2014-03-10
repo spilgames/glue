@@ -210,10 +210,10 @@ glue.module.create(
                 if (addedObjects.length) {
                     for (var i = 0; i < addedObjects.length; ++i) {
                         object = addedObjects[i];
+                        objects.push(addedObjects[i]);
                         if (object.init) {
                             object.init();
                         }
-                        objects.push(addedObjects[i]);
                     };
                     addedObjects = [];
                 }

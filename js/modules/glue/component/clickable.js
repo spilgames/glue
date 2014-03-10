@@ -36,7 +36,9 @@ glue.module.create(
 
                 },
                 destroy: function () {
-
+                    baseComponent.unregister('pointerDown');
+                    baseComponent.unregister('pointerUp');
+                    baseComponent.unregister('destroy');
                 },
                 update: function (deltaT) {
 
@@ -51,6 +53,8 @@ glue.module.create(
 
             // Register the methods we want to update in the game cycle
             baseComponent.register('pointerDown');
+            baseComponent.register('pointerUp');
+            baseComponent.register('destroy');
 
             return object;
         };

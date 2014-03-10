@@ -106,6 +106,12 @@ glue.module.create(
                 setup: function (settings) {
 
                 },
+                destroy: function () {
+                    baseComponent.unregister('pointerDown');
+                    baseComponent.unregister('pointerMove');
+                    baseComponent.unregister('pointerUp');
+                    baseComponent.unregister('destroy');
+                },
                 update: function (deltaT) {
 
                 },
@@ -126,6 +132,7 @@ glue.module.create(
             baseComponent.register('pointerDown');
             baseComponent.register('pointerMove');
             baseComponent.register('pointerUp');
+            baseComponent.register('destroy');
 
             return object;
         };
