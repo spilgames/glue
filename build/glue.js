@@ -6406,21 +6406,6 @@ glue.module.create(
                         sourceX = frameWidth * currentFrame,
                         origin = object.getOrigin();
 
-                    /*    
-                    scroll = scroll || Vector(0, 0);
-                    context.save();
-                    context.translate(
-                        position.x - scroll.x,
-                        position.y - scroll.y
-                    );
-                    if (Sugar.isDefined(object.rotatable)) {
-                        object.rotatable.draw(deltaT, context);
-                    }
-                    if (Sugar.isDefined(object.scalable)) {
-                        object.scalable.draw(deltaT, context);
-                    }    
-                    context.translate(-origin.x, -origin.y);
-                    */
                     context.drawImage
                     (
                         image,
@@ -6433,7 +6418,6 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
-                    //context.restore();
                 },
                 setAnimation: function(name) {
                     if (animations[name]) {
@@ -8487,7 +8471,7 @@ glue.module.create(
                             fpsAccumulator = fpsTicks = 0;
                         }
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
-                        debugBar.innerHTML += '<br />version: 0.9.5';
+                        debugBar.innerHTML += '<br />version: 0.9.6';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
                         debugBar.innerHTML += '<br />objects: ' + objects.length;

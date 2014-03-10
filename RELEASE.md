@@ -1,3 +1,8 @@
+version 0.9.6
+March 10, 2014
+
+- Added stable sort function to fix Chrome sorting issue
+
 version 0.9.5
 March 7, 2014
 
