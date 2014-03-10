@@ -8269,6 +8269,114 @@ glue.module.create(
             fpsTicks = 0,
             fpsMaxAverage = 500000,
             useSort = true,
+            sortType = 0,
+            stable = (function() {
+                // https://github.com/Two-Screen/stable
+                // A stable array sort, because `Array#sort()` is not guaranteed stable.
+                // This is an implementation of merge sort, without recursion.
+                var stable = function(arr, comp) {
+                    return exec(arr.slice(), comp);
+                };
+
+                stable.inplace = function(arr, comp) {
+                    var result = exec(arr, comp);
+
+                    // This simply copies back if the result isn't in the original array,
+                    // which happens on an odd number of passes.
+                    if (result !== arr) {
+                        pass(result, null, arr.length, arr);
+                    }
+
+                    return arr;
+                };
+
+                // Execute the sort using the input array and a second buffer as work space.
+                // Returns one of those two, containing the final result.
+                function exec(arr, comp) {
+                    if (typeof(comp) !== 'function') {
+                        comp = function(a, b) {
+                            return String(a).localeCompare(b);
+                        };
+                    }
+
+                    // Short-circuit when there's nothing to sort.
+                    var len = arr.length;
+                    if (len <= 1) {
+                        return arr;
+                    }
+
+                    // Rather than dividing input, simply iterate chunks of 1, 2, 4, 8, etc.
+                    // Chunks are the size of the left or right hand in merge sort.
+                    // Stop when the left-hand covers all of the array.
+                    var buffer = new Array(len);
+                    for (var chk = 1; chk < len; chk *= 2) {
+                        pass(arr, comp, chk, buffer);
+
+                        var tmp = arr;
+                        arr = buffer;
+                        buffer = tmp;
+                    }
+
+                    return arr;
+                }
+
+                // Run a single pass with the given chunk size.
+                var pass = function(arr, comp, chk, result) {
+                    var len = arr.length;
+                    var i = 0;
+                    // Step size / double chunk size.
+                    var dbl = chk * 2;
+                    // Bounds of the left and right chunks.
+                    var l, r, e;
+                    // Iterators over the left and right chunk.
+                    var li, ri;
+
+                    // Iterate over pairs of chunks.
+                    for (l = 0; l < len; l += dbl) {
+                        r = l + chk;
+                        e = r + chk;
+                        if (r > len) r = len;
+                        if (e > len) e = len;
+
+                        // Iterate both chunks in parallel.
+                        li = l;
+                        ri = r;
+                        while (true) {
+                            // Compare the chunks.
+                            if (li < r && ri < e) {
+                                // This works for a regular `sort()` compatible comparator,
+                                // but also for a simple comparator like: `a > b`
+                                if (comp(arr[li], arr[ri]) <= 0) {
+                                    result[i++] = arr[li++];
+                                }
+                                else {
+                                    result[i++] = arr[ri++];
+                                }
+                            }
+                            // Nothing to compare, just flush what's left.
+                            else if (li < r) {
+                                result[i++] = arr[li++];
+                            }
+                            else if (ri < e) {
+                                result[i++] = arr[ri++];
+                            }
+                            // Both iterators are at the chunk ends.
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                };
+                // Export using CommonJS or to the window.
+                /*if (typeof(module) !== 'undefined') {
+                    module.exports = stable;
+                }
+                else {
+                    window.stable = stable;
+                }*/
+                // return it instead and keep the method local to this scope
+                return stable;
+            })(),
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -8314,9 +8422,16 @@ glue.module.create(
                 canvas.style.height = height + 'px';
             },
             sort = function () {
-                objects.sort(function(a, b) {
-                    return a.z - b.z;
-                });
+                if (sortType === game.SORT_TYPE_STABLE) {
+                    stable.inplace(objects, function (a, b) {
+                        return a.z > b.z;
+                    });
+                } else {
+                    // default behavior
+                    objects.sort(function (a, b) {
+                        return a.z - b.z;
+                    });
+                }
             },
             addObjects = function () {
                 var object;
@@ -8329,9 +8444,6 @@ glue.module.create(
                         objects.push(addedObjects[i]);
                     };
                     addedObjects = [];
-                    if (useSort) {
-                        sort();
-                    }
                 }
             },
             removeObjects = function () {
@@ -8360,9 +8472,6 @@ glue.module.create(
                 if (isRunning) {
                     requestAnimationFrame(cycle);
                 }
-                if (useSort) {
-                    sort();
-                }
                 if (canvasSupported) {
                     redraw();
                     removeObjects();
@@ -8378,13 +8487,16 @@ glue.module.create(
                             fpsAccumulator = fpsTicks = 0;
                         }
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
-                        debugBar.innerHTML += '<br />version: 0.9.4';
+                        debugBar.innerHTML += '<br />version: 0.9.5';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
                         debugBar.innerHTML += '<br />objects: ' + objects.length;
                         if (gameInfo && gameInfo.name) {
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
                         }
+                    }
+                    if (useSort) {
+                        sort();
                     }
                     if (deltaT < 1) {
                         for (var i = 0; i < objects.length; ++i) {
@@ -8536,115 +8648,117 @@ glue.module.create(
                 Event.off('glue.pointer.down', pointerDown);
                 Event.off('glue.pointer.move', pointerMove);
                 Event.off('glue.pointer.up', pointerUp);
-            };
-
-        return {
-            setup: function (config, onReady) {
-                DomReady(function () {
-                    if (isRunning) {
-                        throw('Glue: The main game is already running');
-                    }
-                    isRunning = true;
-                    win = window;
-                    doc = win.document;
-                    // config.canvas is mandatory
-                    canvasId = config.canvas.id;
-                    canvasDimension = config.canvas.dimension;
-                    if (config.game) {
-                        gameInfo = config.game;
-                    }
-                    if (config.develop && config.develop.debug) {
-                        debug = true;
-                        debugBar = document.createElement('div');
-                        debugBar.id = 'debugBar';
-                        document.body.appendChild(debugBar);
-                    }
-                    if (Sugar.isDefined(config.sort) && config.sort === false) {
-                        useSort = false;
-                    }
-                    /*
-                    // save color in variable and move code before calling other draw functions
-                    if (config.canvas.color) {
-                        backBufferContext2D.fillStyle = config.canvas.color;
-                        backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
-                    }
-                    */
-                    if (config.asset && config.asset.path) {
-                        Loader.setAssetPath(config.asset.path);
-                        if (config.asset.image) {
-                            Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image);
+            },
+            game = {
+                SORT_TYPE_DEFAULT: 0,
+                SORT_TYPE_STABLE: 1,
+                setup: function (config, onReady) {
+                    DomReady(function () {
+                        if (isRunning) {
+                            throw('Glue: The main game is already running');
                         }
-                        if (config.asset.audio) {
-                            if (config.asset.audio.sprite) {
-                                Loader.setAssets(Loader.ASSET_TYPE_AUDIOSPRITE, config.asset.audio.sprite);
+                        isRunning = true;
+                        win = window;
+                        doc = win.document;
+                        // config.canvas is mandatory
+                        canvasId = config.canvas.id;
+                        canvasDimension = config.canvas.dimension;
+                        if (config.game) {
+                            gameInfo = config.game;
+                        }
+                        if (config.develop && config.develop.debug) {
+                            debug = true;
+                            debugBar = document.createElement('div');
+                            debugBar.id = 'debugBar';
+                            document.body.appendChild(debugBar);
+                        }
+                        if (Sugar.isDefined(config.sort)) {
+                            useSort = config.sort;
+                        }
+                        if (Sugar.isDefined(config.sortType)) {
+                            sortType = config.sortType;
+                        }
+                        /*
+                        // save color in variable and move code before calling other draw functions
+                        if (config.canvas.color) {
+                            backBufferContext2D.fillStyle = config.canvas.color;
+                            backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        */
+                        if (config.asset && config.asset.path) {
+                            Loader.setAssetPath(config.asset.path);
+                            if (config.asset.image) {
+                                Loader.setAssets(Loader.ASSET_TYPE_IMAGE, config.asset.image);
                             }
-                            Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
-                        }
-                        if (config.asset.json) {
-                            Loader.setAssets(Loader.ASSET_TYPE_JSON, config.asset.json);
-                        }
-                        if (config.asset.binary) {
-                            Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
-                        }
-                        if (config.asset.spine) {
-                            Loader.setAssets(Loader.ASSET_TYPE_SPINE, config.asset.spine);
-                        }
-                        Loader.load(function () {
+                            if (config.asset.audio) {
+                                if (config.asset.audio.sprite) {
+                                    Loader.setAssets(Loader.ASSET_TYPE_AUDIOSPRITE, config.asset.audio.sprite);
+                                }
+                                Loader.setAssets(Loader.ASSET_TYPE_AUDIO, config.asset.audio);
+                            }
+                            if (config.asset.json) {
+                                Loader.setAssets(Loader.ASSET_TYPE_JSON, config.asset.json);
+                            }
+                            if (config.asset.binary) {
+                                Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
+                            }
+                            Loader.load(function () {
+                                startup();
+                                if (onReady) {
+                                    onReady();
+                                }
+                            });
+                        } else {
                             startup();
                             if (onReady) {
                                 onReady();
                             }
-                        });
-                    } else {
-                        startup();
-                        if (onReady) {
-                            onReady();
+                        }
+                    });
+                },
+                shutdown: function () {
+                    shutdown();
+                    isRunning = false;
+                },
+                add: function (component) {
+                    addedObjects.push(component);
+                },
+                remove: function (component) {
+                    removedObjects.push(component);
+                },
+                get: function (componentName) {
+                    var i,
+                        l,
+                        component,
+                        name;
+
+                    for (i = 0, l = objects.length; i < l; ++i) {
+                        component = objects[i];
+                        name = component.getName();
+                        if (!Sugar.isEmpty(name) && name === componentName) {
+                            return component;
                         }
                     }
-                });
-            },
-            shutdown: function () {
-                shutdown();
-                isRunning = false;
-            },
-            add: function (component) {
-                addedObjects.push(component);
-            },
-            remove: function (component) {
-                removedObjects.push(component);
-            },
-            get: function (componentName) {
-                var i,
-                    l,
-                    component,
-                    name;
-
-                for (i = 0, l = objects.length; i < l; ++i) {
-                    component = objects[i];
-                    name = component.getName();
-                    if (!Sugar.isEmpty(name) && name === componentName) {
-                        return component;
+                },
+                canvas: {
+                    getDimension: function () {
+                        return canvasDimension;
+                    },
+                    getScale: function () {
+                        return canvasScale;
+                    },
+                    getContext: function () {
+                        return backBufferContext2D;
                     }
-                }
-            },
-            canvas: {
-                getDimension: function () {
-                    return canvasDimension;
                 },
-                getScale: function () {
-                    return canvasScale;
+                getObjectCount: function () {
+                    return objects.length;
                 },
-                getContext: function () {
-                    return backBufferContext2D;
+                getScroll: function () {
+                    return scroll;
                 }
-            },
-            getObjectCount: function () {
-                return objects.length;
-            },
-            getScroll: function () {
-                return scroll;
-            }
-        };
+            };
+        return game;
     }
 );
 
@@ -8831,9 +8945,24 @@ glue.module.create(
                 ASSET_TYPE_BINARY: 'binary',
                 ASSET_TYPE_AUDIOSPRITE: 'audiosprite',
                 ASSET_TYPE_SPINE: 'spine',
+                /**
+                 * Sets the root folder for assets
+                 * @name setAssetPath
+                 * @memberOf loader
+                 * @function
+                 * @param {String} value: path to the root of the asset folder
+                 */
                 setAssetPath: function (value) {
                     assetPath = value;
                 },
+                /**
+                 * Assign assets to load for the loader
+                 * @name setAssets
+                 * @memberOf loader
+                 * @function
+                 * @param {String} type: asset type name (enumerations available)
+                 * @param {Object} value: object containing key/value pairs for assets (key: asset name, value: asset path)
+                 */
                 setAssets: function (type, value) {
                     assets[type] = value;
                     for (asset in value) {
@@ -8842,6 +8971,13 @@ glue.module.create(
                         }
                     }
                 },
+                /**
+                 * Load all the assets assigned by setAssets
+                 * @name load
+                 * @memberOf loader
+                 * @function
+                 * @param {Function} onReady: Callback function for completion
+                 */
                 load: function (onReady) {
                     var typeList;
                     if (percentageBar !== null) {
@@ -8859,33 +8995,84 @@ glue.module.create(
                         }
                     }
                 },
+                /**
+                 * Are the assets loaded
+                 * @name isLoaded
+                 * @memberOf loader
+                 * @function
+                 * @return Boolean whether asset loading is done or not 
+                 */
                 isLoaded: function () {
                     return loaded;
                 },
+                /**
+                 * Gets all assets
+                 * @name getAssets
+                 * @memberOf loader
+                 * @function
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return Object containing references to all assets 
+                 */
                 getAssets: function () {
                     if (!loaded) {
                         throw('Assets are not loaded yet');
                     }
                     return loadedAssets;
                 },
+                /**
+                 * Gets the image asset
+                 * @name getimage
+                 * @memberOf loader
+                 * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return Image object 
+                 */
                 getImage: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
                     }
                     return loadedAssets.image[name];
                 },
+                /**
+                 * Gets the audio asset
+                 * @name getAudio
+                 * @memberOf loader
+                 * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return Audio object (depends on adapter set for audio) 
+                 */
                 getAudio: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
                     }
                     return loadedAssets.audio[name];
                 },
+                /**
+                 * Gets the json asset
+                 * @name getJSON
+                 * @memberOf loader
+                 * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return JSON parsed object  
+                 */
                 getJSON: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
                     }
                     return loadedAssets.json[name];
                 },
+                /**
+                 * Gets the binary asset
+                 * @name getBinary
+                 * @memberOf loader
+                 * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
+                 * @return Binary object 
+                 */
                 getBinary: function (name) {
                     if (!loaded) {
                         throw('Asset ' + name + ' is not loaded yet');
@@ -8897,6 +9084,8 @@ glue.module.create(
                  * @name getAsset
                  * @memberOf loader
                  * @function
+                 * @param {String} name: asset name
+                 * @throws Throws an exception when assets haven't been loaded yet
                  */
                 getAsset: function (name) {
                     if (!loaded) {
@@ -9650,14 +9839,49 @@ glue.module.create(
         return function (name) {
             var objects = [],
                 module = {
+                    /**
+                     * Add object to screen
+                     * @name addObject
+                     * @memberOf screen
+                     * @function
+                     */
                     addObject: function (object) {
                         if (Sugar.isObject(object)) {
                             objects.push(object);
                         }
                     },
+                    /**
+                     * Removes object from screen
+                     * @name removeObject
+                     * @memberOf screen
+                     * @function
+                     */
+                    removeObject: function (object) {
+                        var index;
+                        if (Sugar.isObject(object)) {
+                            index = objects.indexOf(object);
+                            if (index >= 0) {
+                                objects.splice(index, 1);
+                            }
+                        }
+                    },
+                    /**
+                     * Gets the object array
+                     * @name getObjects
+                     * @memberOf screen
+                     * @function
+                     * @return Array of added objects
+                     */
                     getObjects: function () {
                         return objects;
                     },
+                    /**
+                     * Get the name of the screen
+                     * @name getName
+                     * @memberOf screen
+                     * @function
+                     * @return Screen name as string
+                     */
                     getName: function () {
                         return name;
                     }
