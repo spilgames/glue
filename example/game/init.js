@@ -148,7 +148,7 @@ glue.module.get(
                                         endFrame: 6
                                     },
                                     walkDown: {
-                                        startFrame: 0,
+                                        startFrame: 8,
                                         endFrame: 14
                                     },
                                     walkLeft: {
