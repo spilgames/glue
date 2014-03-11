@@ -32,8 +32,8 @@ glue.module.create(
                                 image: Loader.getAsset('glue')
                             });
                             this.movable.setMoveSpeed(200);
+                            this.droptarget.setup();
                         }
-                        this.droptarget.setup();
                     },
                     update: function (deltaT) {
                         this.base.update(deltaT);

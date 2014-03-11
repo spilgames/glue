@@ -196,7 +196,7 @@ glue.module.create(
             sort = function () {
                 if (sortType === game.SORT_TYPE_STABLE) {
                     stable.inplace(objects, function (a, b) {
-                        return a.z > b.z;
+                        return a.z - b.z;
                     });
                 } else {
                     // default behavior
@@ -210,10 +210,10 @@ glue.module.create(
                 if (addedObjects.length) {
                     for (var i = 0; i < addedObjects.length; ++i) {
                         object = addedObjects[i];
+                        objects.push(addedObjects[i]);
                         if (object.init) {
                             object.init();
                         }
-                        objects.push(addedObjects[i]);
                     };
                     addedObjects = [];
                 }
@@ -473,6 +473,9 @@ glue.module.create(
                             }
                             if (config.asset.binary) {
                                 Loader.setAssets(Loader.ASSET_TYPE_BINARY, config.asset.binary);
+                            }
+                            if (config.asset.spine) {
+                                Loader.setAssets(Loader.ASSET_TYPE_SPINE, config.asset.spine);
                             }
                             Loader.load(function () {
                                 startup();

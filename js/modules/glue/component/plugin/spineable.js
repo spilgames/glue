@@ -404,11 +404,16 @@ glue.module.create(
                         y: -cornerPoints[currentSkeleton].y
                     };
                     updateVisible();
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
-            baseComponent.register('draw');
 
             return object;
         };

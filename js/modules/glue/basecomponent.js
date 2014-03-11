@@ -29,6 +29,10 @@ glue.module.create(
                     if (Sugar.isObject(componentObject)) {
                         component = componentObject;
                         object[componentName] = componentObject;
+                        if (Sugar.isFunction(componentObject.register)) {
+                            componentObject.register();
+                        }
+                        return object;
                     }
                 },
                 getName: function () {

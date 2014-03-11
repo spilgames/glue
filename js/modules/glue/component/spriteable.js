@@ -65,11 +65,14 @@ glue.module.create(
                 },
                 getImage: function () {
                     return image;
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
                 }
             });
-
-            // Register the methods we want to update in the game cycle
-            baseComponent.register('draw');
 
             return object;
         };

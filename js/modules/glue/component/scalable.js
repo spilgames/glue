@@ -95,11 +95,16 @@ glue.module.create(
                             dimension.width * currentScale.x,
                             dimension.height * currentScale.y
                         ); 
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
-            baseComponent.register('draw');
 
             return object;
         };

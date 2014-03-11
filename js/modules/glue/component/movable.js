@@ -76,10 +76,14 @@ glue.module.create(
                         throw 'Invalid speed supplied';
                     }
                     moveSpeed = speed;
+                },
+                register: function () {
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
 
             return object;
         };

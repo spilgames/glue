@@ -133,12 +133,16 @@ glue.module.create(
                 },
                 getFrameWidth: function () {
                     return frameWidth;
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            // Register the methods we want to update in the game cycle
-            baseComponent.register('draw');
-            baseComponent.register('update');
 
             return object;
         };
