@@ -6127,8 +6127,8 @@ glue.module.create(
                 typeRegistrants,
                 typeRegistrantsLength,
                 typeRegistrant,
-                acceptedTypes = ['destroy', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
-                drawLast = ['animatable', 'spritable', 'spineable', 'base'],
+                acceptedTypes = ['update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
+                drawLast = ['animatable', 'spritable', 'spineable'],
                 d,
                 dLength = drawLast.length,
                 drawRegistrant,
@@ -6162,9 +6162,6 @@ glue.module.create(
                     },
                     getName: function (value) {
                         return name;
-                    },
-                    destroy: function () {
-                        callRegistrants('destroy', arguments);
                     },
                     update: function (deltaT) {
                         callRegistrants('update', arguments);
