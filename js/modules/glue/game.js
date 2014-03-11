@@ -196,7 +196,7 @@ glue.module.create(
             sort = function () {
                 if (sortType === game.SORT_TYPE_STABLE) {
                     stable.inplace(objects, function (a, b) {
-                        return a.z > b.z;
+                        return a.z - b.z;
                     });
                 } else {
                     // default behavior
