@@ -2,6 +2,8 @@ version 0.9.6
 March 11, 2014
 
 - Added sorting type stable to prevent sorting issues in Google Chrome
+- Added pubic methods for registering and deregistering in all components
+- Fixed: Animatable frameWith is now calculated on setup
 
 version 0.9.5
 March 7, 2014

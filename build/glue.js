@@ -6354,7 +6354,6 @@ glue.module.create(
                         1 / currentAnimation.fps :
                         1 / animationSettings.fps;
                     timeSinceLastFrame = timeBetweenFrames;
-                    frameWidth = image.width / animationSettings.frameCount;
                     startFrame = currentAnimation.startFrame;
                     endFrame = currentAnimation.endFrame;
                     currentFrame = startFrame;
@@ -6373,11 +6372,17 @@ glue.module.create(
                             if (settings.animation.animations) {
                                 animations = settings.animation.animations;
                             }
+                            if (!Sugar.isDefined(settings.animation.frameCount)) {
+                                throw 'Specify settings.animation.frameCount';
+                            }
+                        } else {
+                            throw 'Specify settings.animation';
                         }
                     }
                     spritable.setup(settings);
                     if (settings.image) {
                         image = settings.image;
+                        frameWidth = settings.image.width / settings.animation.frameCount;
                     }
                 },
                 update: function (deltaT) {
