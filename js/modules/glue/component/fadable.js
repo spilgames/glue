@@ -104,11 +104,16 @@ glue.module.create(
                 },
                 atTarget: function () {
                     return !fadingIn && !fadingOut;
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('draw');
-            baseComponent.register('update');
 
             return object;
         };

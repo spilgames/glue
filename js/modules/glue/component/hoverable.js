@@ -44,14 +44,13 @@ glue.module.create(
                 pointerMove: function (e) {
                     pointerMoveHandler(e);
                 },
-                destroy: function () {
+                register: function () {
+                    baseComponent.register('pointerMove');
+                },
+                unregister: function () {
                     baseComponent.unregister('pointerMove');
-                    baseComponent.unregister('destroy');
                 }
             });
-
-            baseComponent.register('pointerMove');
-            baseComponent.register('destroy');
 
             return object;
         };

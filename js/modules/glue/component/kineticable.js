@@ -203,10 +203,14 @@ glue.module.create(
                 },
                 getSide: function () {
                     return side;
+                },
+                register: function () {
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
 
             return object;
         }

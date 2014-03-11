@@ -28,7 +28,7 @@ glue.module.create(
                 };
 
             baseComponent.set({
-                setup: function (settings) {
+                setup: function () {
                     Event.on('draggable.drop', draggableDropHandler);
                 },
                 destroy: function () {

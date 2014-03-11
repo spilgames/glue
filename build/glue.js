@@ -6069,6 +6069,10 @@ glue.module.create(
                     if (Sugar.isObject(componentObject)) {
                         component = componentObject;
                         object[componentName] = componentObject;
+                        if (Sugar.isFunction(componentObject.register)) {
+                            componentObject.register();
+                        }
+                        return object;
                     }
                 },
                 getName: function () {
@@ -6123,13 +6127,13 @@ glue.module.create(
                 typeRegistrants,
                 typeRegistrantsLength,
                 typeRegistrant,
-                acceptedTypes = ['init', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
+                acceptedTypes = ['destroy', 'update', 'draw', 'pointerDown', 'pointerMove', 'pointerUp'],
                 drawLast = ['animatable', 'spritable', 'spineable', 'base'],
                 d,
                 dLength = drawLast.length,
                 drawRegistrant,
                 registrants = {
-                    init: {},
+                    destroy: {},
                     draw: {},
                     update: {},
                     pointerDown: {},
@@ -6159,8 +6163,8 @@ glue.module.create(
                     getName: function (value) {
                         return name;
                     },
-                    init: function () {
-                        callRegistrants('init', arguments);
+                    destroy: function () {
+                        callRegistrants('destroy', arguments);
                     },
                     update: function (deltaT) {
                         callRegistrants('update', arguments);
@@ -6406,21 +6410,6 @@ glue.module.create(
                         sourceX = frameWidth * currentFrame,
                         origin = object.getOrigin();
 
-                    /*    
-                    scroll = scroll || Vector(0, 0);
-                    context.save();
-                    context.translate(
-                        position.x - scroll.x,
-                        position.y - scroll.y
-                    );
-                    if (Sugar.isDefined(object.rotatable)) {
-                        object.rotatable.draw(deltaT, context);
-                    }
-                    if (Sugar.isDefined(object.scalable)) {
-                        object.scalable.draw(deltaT, context);
-                    }    
-                    context.translate(-origin.x, -origin.y);
-                    */
                     context.drawImage
                     (
                         image,
@@ -6433,7 +6422,6 @@ glue.module.create(
                         frameWidth,
                         image.height
                     );
-                    //context.restore();
                 },
                 setAnimation: function(name) {
                     if (animations[name]) {
@@ -6453,12 +6441,16 @@ glue.module.create(
                 },
                 getFrameWidth: function () {
                     return frameWidth;
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            // Register the methods we want to update in the game cycle
-            baseComponent.register('draw');
-            baseComponent.register('update');
 
             return object;
         };
@@ -6501,9 +6493,6 @@ glue.module.create(
                 setup: function (settings) {
 
                 },
-                destroy: function () {
-
-                },
                 update: function (deltaT) {
 
                 },
@@ -6512,11 +6501,14 @@ glue.module.create(
                 },
                 pointerUp: function (e) {
                     pointerUpHandler(e);
+                },
+                register: function () {
+                    baseComponent.register('pointerDown');
+                },
+                unregister: function () {
+                    baseComponent.unregister('pointerDown');
                 }
             });
-
-            // Register the methods we want to update in the game cycle
-            baseComponent.register('pointerDown');
 
             return object;
         };
@@ -6645,12 +6637,18 @@ glue.module.create(
                 },
                 dragStartTimeout: function (value) {
                     dragStartTimeout = value;
+                },
+                register: function () {
+                    baseComponent.register('pointerDown');
+                    baseComponent.register('pointerMove');
+                    baseComponent.register('pointerUp');
+                },
+                unregister: function () {
+                    baseComponent.unregister('pointerDown');
+                    baseComponent.unregister('pointerMove');
+                    baseComponent.unregister('pointerUp');
                 }
             });
-
-            baseComponent.register('pointerDown');
-            baseComponent.register('pointerMove');
-            baseComponent.register('pointerUp');
 
             return object;
         };
@@ -6687,7 +6685,7 @@ glue.module.create(
                 };
 
             baseComponent.set({
-                setup: function (settings) {
+                setup: function () {
                     Event.on('draggable.drop', draggableDropHandler);
                 },
                 destroy: function () {
@@ -6806,11 +6804,16 @@ glue.module.create(
                 },
                 atTarget: function () {
                     return !fadingIn && !fadingOut;
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('draw');
-            baseComponent.register('update');
 
             return object;
         };
@@ -6862,10 +6865,14 @@ glue.module.create(
             baseComponent.set({
                 pointerMove: function (e) {
                     pointerMoveHandler(e);
+                },
+                register: function () {
+                    baseComponent.register('pointerMove');
+                },
+                unregister: function () {
+                    baseComponent.unregister('pointerMove');
                 }
             });
-
-            baseComponent.register('pointerMove');
 
             return object;
         };
@@ -7077,10 +7084,14 @@ glue.module.create(
                 },
                 getSide: function () {
                     return side;
+                },
+                register: function () {
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
 
             return object;
         }
@@ -7164,10 +7175,14 @@ glue.module.create(
                         throw 'Invalid speed supplied';
                     }
                     moveSpeed = speed;
+                },
+                register: function () {
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
 
             return object;
         };
@@ -7580,11 +7595,16 @@ glue.module.create(
                         y: -cornerPoints[currentSkeleton].y
                     };
                     updateVisible();
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
-            baseComponent.register('draw');
 
             return object;
         };
@@ -7693,11 +7713,16 @@ glue.module.create(
                 },
                 atTarget: function () {
                     return atTarget;
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
-            baseComponent.register('draw');
 
             return object;
         };
@@ -7801,11 +7826,16 @@ glue.module.create(
                             dimension.width * currentScale.x,
                             dimension.height * currentScale.y
                         ); 
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                    baseComponent.register('update');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
+                    baseComponent.unregister('update');
                 }
             });
-
-            baseComponent.register('update');
-            baseComponent.register('draw');
 
             return object;
         };
@@ -7879,11 +7909,14 @@ glue.module.create(
                 },
                 getImage: function () {
                     return image;
+                },
+                register: function () {
+                    baseComponent.register('draw');
+                },
+                unregister: function () {
+                    baseComponent.unregister('draw');
                 }
             });
-
-            // Register the methods we want to update in the game cycle
-            baseComponent.register('draw');
 
             return object;
         };
@@ -8438,10 +8471,10 @@ glue.module.create(
                 if (addedObjects.length) {
                     for (var i = 0; i < addedObjects.length; ++i) {
                         object = addedObjects[i];
+                        objects.push(addedObjects[i]);
                         if (object.init) {
                             object.init();
                         }
-                        objects.push(addedObjects[i]);
                     };
                     addedObjects = [];
                 }
