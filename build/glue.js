@@ -8454,7 +8454,7 @@ glue.module.create(
             sort = function () {
                 if (sortType === game.SORT_TYPE_STABLE) {
                     stable.inplace(objects, function (a, b) {
-                        return a.z > b.z;
+                        return a.z - b.z;
                     });
                 } else {
                     // default behavior
@@ -8517,7 +8517,7 @@ glue.module.create(
                             fpsAccumulator = fpsTicks = 0;
                         }
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
-                        debugBar.innerHTML += '<br />version: 0.9.5';
+                        debugBar.innerHTML += '<br />version: 0.9.6';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
                         debugBar.innerHTML += '<br />objects: ' + objects.length;
