@@ -8287,6 +8287,8 @@ glue.module.create(
             objects = [],
             addedObjects = [],
             removedObjects = [],
+            addCallbacks = [],
+            removeCallbacks = [],
             lastFrameTime = new Date().getTime(),
             canvas = null,
             canvasId,
@@ -8469,9 +8471,13 @@ glue.module.create(
                 }
             },
             addObjects = function () {
-                var object;
+                var object,
+                    callbackObject,
+                    i,
+                    j;
+
                 if (addedObjects.length) {
-                    for (var i = 0; i < addedObjects.length; ++i) {
+                    for (i = 0; i < addedObjects.length; ++i) {
                         object = addedObjects[i];
                         objects.push(addedObjects[i]);
                         if (object.init) {
@@ -8479,12 +8485,25 @@ glue.module.create(
                         }
                     };
                     addedObjects = [];
+                    if (addCallbacks.length) {
+                        for (j = 0; j < addCallbacks.length; ++j) {
+                            callbackObject = addCallbacks[j];
+                            if (callbackObject) {
+                                callbackObject.callback(callbackObject.object);
+                            }
+                        };
+                        addCallbacks = [];
+                    }
                 }
             },
             removeObjects = function () {
-                var object;
+                var object,
+                    callbackObject,
+                    i,
+                    j;
+
                 if (removedObjects.length) {
-                    for (var i = 0; i < removedObjects.length; ++i) {
+                    for (i = 0; i < removedObjects.length; ++i) {
                         object = removedObjects[i];
                         if (object.destroy) {
                             object.destroy();
@@ -8492,6 +8511,15 @@ glue.module.create(
                         Sugar.removeObject(objects, object);
                     };
                     removedObjects = [];
+                    if (removeCallbacks.length) {
+                        for (j = 0; j < removeCallbacks.length; ++j) {
+                            callbackObject = removeCallbacks[j];
+                            if (callbackObject) {
+                                callbackObject.callback(callbackObject.object);
+                            }
+                        };
+                        removeCallbacks = [];
+                    }
                 }
             },
             redraw = function () {
@@ -8758,11 +8786,23 @@ glue.module.create(
                     shutdown();
                     isRunning = false;
                 },
-                add: function (component) {
-                    addedObjects.push(component);
+                add: function (object, callback) {
+                    if (callback) {
+                        addCallbacks.push({
+                            object: object,
+                            callback: callback
+                        });
+                    }
+                    addedObjects.push(object);
                 },
-                remove: function (component) {
-                    removedObjects.push(component);
+                remove: function (object, callback) {
+                    if (callback) {
+                        removeCallbacks.push({
+                            object: object,
+                            callback: callback
+                        });
+                    }
+                    removedObjects.push(object);
                 },
                 get: function (componentName) {
                     var i,
@@ -8799,7 +8839,6 @@ glue.module.create(
         return game;
     }
 );
-
 /*
  *  @module Loader
  *  @desc Used to load assets in the beginning of the game, shows a progress bar
