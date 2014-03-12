@@ -8472,7 +8472,7 @@ glue.module.create(
             },
             addObjects = function () {
                 var object,
-                    callback,
+                    callbackObject,
                     i,
                     j;
 
@@ -8487,9 +8487,9 @@ glue.module.create(
                     addedObjects = [];
                     if (addCallbacks.length) {
                         for (j = 0; j < addCallbacks.length; ++j) {
-                            callback = addCallbacks[j];
-                            if (callback) {
-                                callback();
+                            callbackObject = addCallbacks[j];
+                            if (callbackObject) {
+                                callbackObject.callback(callbackObject.object);
                             }
                         };
                         addCallbacks = [];
@@ -8498,7 +8498,7 @@ glue.module.create(
             },
             removeObjects = function () {
                 var object,
-                    callback,
+                    callbackObject,
                     i,
                     j;
 
@@ -8513,9 +8513,9 @@ glue.module.create(
                     removedObjects = [];
                     if (removeCallbacks.length) {
                         for (j = 0; j < removeCallbacks.length; ++j) {
-                            callback = removeCallbacks[j];
-                            if (callback) {
-                                callback();
+                            callbackObject = removeCallbacks[j];
+                            if (callbackObject) {
+                                callbackObject.callback(callbackObject.object);
                             }
                         };
                         removeCallbacks = [];
@@ -8786,17 +8786,23 @@ glue.module.create(
                     shutdown();
                     isRunning = false;
                 },
-                add: function (component, callback) {
+                add: function (object, callback) {
                     if (callback) {
-                        addCallbacks.push(callback);
+                        addCallbacks.push({
+                            object: object,
+                            callback: callback
+                        });
                     }
-                    addedObjects.push(component);
+                    addedObjects.push(object);
                 },
-                remove: function (component, callback) {
+                remove: function (object, callback) {
                     if (callback) {
-                        removeCallbacks.push(callback);
+                        removeCallbacks.push({
+                            object: object,
+                            callback: callback
+                        });
                     }
-                    removedObjects.push(component);
+                    removedObjects.push(object);
                 },
                 get: function (componentName) {
                     var i,
