@@ -24,6 +24,8 @@ glue.module.create(
             objects = [],
             addedObjects = [],
             removedObjects = [],
+            addCallbacks = [],
+            removeCallbacks = [],
             lastFrameTime = new Date().getTime(),
             canvas = null,
             canvasId,
@@ -206,9 +208,13 @@ glue.module.create(
                 }
             },
             addObjects = function () {
-                var object;
+                var object,
+                    callback,
+                    i,
+                    j;
+
                 if (addedObjects.length) {
-                    for (var i = 0; i < addedObjects.length; ++i) {
+                    for (i = 0; i < addedObjects.length; ++i) {
                         object = addedObjects[i];
                         objects.push(addedObjects[i]);
                         if (object.init) {
@@ -216,12 +222,25 @@ glue.module.create(
                         }
                     };
                     addedObjects = [];
+                    if (addCallbacks.length) {
+                        for (j = 0; j < addCallbacks.length; ++j) {
+                            callback = addCallbacks[j];
+                            if (callback) {
+                                callback();
+                            }
+                        };
+                        addCallbacks = [];
+                    }
                 }
             },
             removeObjects = function () {
-                var object;
+                var object,
+                    callback,
+                    i,
+                    j;
+
                 if (removedObjects.length) {
-                    for (var i = 0; i < removedObjects.length; ++i) {
+                    for (i = 0; i < removedObjects.length; ++i) {
                         object = removedObjects[i];
                         if (object.destroy) {
                             object.destroy();
@@ -229,6 +248,15 @@ glue.module.create(
                         Sugar.removeObject(objects, object);
                     };
                     removedObjects = [];
+                    if (removeCallbacks.length) {
+                        for (j = 0; j < removeCallbacks.length; ++j) {
+                            callback = removeCallbacks[j];
+                            if (callback) {
+                                callback();
+                            }
+                        };
+                        removeCallbacks = [];
+                    }
                 }
             },
             redraw = function () {
@@ -495,10 +523,16 @@ glue.module.create(
                     shutdown();
                     isRunning = false;
                 },
-                add: function (component) {
+                add: function (component, callback) {
+                    if (callback) {
+                        addCallbacks.push(callback);
+                    }
                     addedObjects.push(component);
                 },
-                remove: function (component) {
+                remove: function (component, callback) {
+                    if (callback) {
+                        removeCallbacks.push(callback);
+                    }
                     removedObjects.push(component);
                 },
                 get: function (componentName) {
