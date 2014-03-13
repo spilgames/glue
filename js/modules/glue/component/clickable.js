@@ -21,8 +21,13 @@ glue.module.create(
                     return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
-                    if (isClicked(e) && object.onClickDown) {
-                        object.onClickDown(e);
+                    if (isClicked(e)) {
+                        if (object.onClickDown) {
+                            object.onClickDown(e);
+                        }
+                        if (object.onClick) {
+                            object.onClick(e);
+                        }
                     }
                 },
                 pointerUpHandler = function (e) {
