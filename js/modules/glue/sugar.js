@@ -320,7 +320,7 @@ modules.glue.sugar = (function (win, doc) {
                         obj1['base'][prop] = obj1[prop];
                     }
                     if (this.isObject(obj2[prop])) {
-                        obj1[prop] = clone(obj2[prop]);
+                        obj1[prop] = this.combine({}, obj2[prop]);
                     } else {
                         obj1[prop] = obj2[prop];
                     }
