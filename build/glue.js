@@ -5320,6 +5320,15 @@ modules.glue.sugar = (function (win, doc) {
                 '[object Arguments]';
         },
         /**
+         * Returns a random value within a given range
+         * @param {Number} min - The minimum value of the range
+         * @param {Number} max - The maximum value of the range
+         * @return {Number} A random whole number within the passed range
+         */
+        getRandom = function (min, max) {
+            return min + Math.floor(Math.random() * (max - min + 1));
+        },
+        /**
          * Will uppercase the first character of a given string
          * @param {String}
          * @return {String}
@@ -5971,6 +5980,7 @@ modules.glue.sugar = (function (win, doc) {
         isDefined: isDefined,
         isEmpty: isEmpty,
         isArgument: isArgument,
+        getRandom: getRandom,
         upperFirst: upperFirst,
         multiIs: multiIs,
         combine: combine,
@@ -10422,6 +10432,15 @@ modules.glue.sugar = (function (win, doc) {
                 '[object Arguments]';
         },
         /**
+         * Returns a random value within a given range
+         * @param {Number} min - The minimum value of the range
+         * @param {Number} max - The maximum value of the range
+         * @return {Number} A random whole number within the passed range
+         */
+        getRandom = function (min, max) {
+            return min + Math.floor(Math.random() * (max - min + 1));
+        },
+        /**
          * Will uppercase the first character of a given string
          * @param {String}
          * @return {String}
@@ -11073,6 +11092,7 @@ modules.glue.sugar = (function (win, doc) {
         isDefined: isDefined,
         isEmpty: isEmpty,
         isArgument: isArgument,
+        getRandom: getRandom,
         upperFirst: upperFirst,
         multiIs: multiIs,
         combine: combine,
