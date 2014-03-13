@@ -273,6 +273,9 @@ glue.module.create(
                     requestAnimationFrame(cycle);
                 }
                 if (canvasSupported) {
+                    if (useSort) {
+                        sort();
+                    }
                     redraw();
                     removeObjects();
                     addObjects();
@@ -294,9 +297,6 @@ glue.module.create(
                         if (gameInfo && gameInfo.name) {
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
                         }
-                    }
-                    if (useSort) {
-                        sort();
                     }
                     if (deltaT < 1) {
                         for (var i = 0; i < objects.length; ++i) {
