@@ -5089,6 +5089,20 @@ modules.glue.sugar = (function (win, doc) {
             return isNumber(value.x) && isNumber(value.y);
         },
         /**
+         * Is a given value a matrix?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isMatrix = function (obj) {
+            if (has(obj, 'get') && isFunction(obj.get) &&
+                has(obj, 'getValue') && Sugar.isFunction(obj.getValue) &&
+                has(obj, 'iterate') && isFunction(obj.iterate) &&
+                has(obj, 'set') && isFunction(obj.iterate) &&
+                has(obj, 'unset') && isFunction(obj.iterate)) {
+                    return true;
+            }
+        },
+        /**
          * Is a given value a string?
          * @param {Object}
          * @return {Boolean}
@@ -5942,6 +5956,7 @@ modules.glue.sugar = (function (win, doc) {
     return {
         isVector: isVector,
         isDimension: isDimension,
+        isMatrix: isMatrix,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
@@ -10176,6 +10191,20 @@ modules.glue.sugar = (function (win, doc) {
             return isNumber(value.x) && isNumber(value.y);
         },
         /**
+         * Is a given value a matrix?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isMatrix = function (obj) {
+            if (has(obj, 'get') && isFunction(obj.get) &&
+                has(obj, 'getValue') && Sugar.isFunction(obj.getValue) &&
+                has(obj, 'iterate') && isFunction(obj.iterate) &&
+                has(obj, 'set') && isFunction(obj.iterate) &&
+                has(obj, 'unset') && isFunction(obj.iterate)) {
+                    return true;
+            }
+        },
+        /**
          * Is a given value a string?
          * @param {Object}
          * @return {Boolean}
@@ -11029,6 +11058,7 @@ modules.glue.sugar = (function (win, doc) {
     return {
         isVector: isVector,
         isDimension: isDimension,
+        isMatrix: isMatrix,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
