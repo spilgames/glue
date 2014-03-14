@@ -62,7 +62,7 @@ glue.module.get(
                         this.setPosition(Vector(startValue, startValue));
                         tweenFunction = this.tweenable.getRandomTween();
                     },
-                    update: function (deltaT) {
+                    update: function (gameData) {
                         if (Sugar.isFunction(this.tweenable[tweenFunction])) {
                             easingValue = this.tweenable[tweenFunction](currentTime, startValue,
                                 changeInValue, duration);
@@ -79,8 +79,9 @@ glue.module.get(
                             ++currentTime;
                         }
                     },
-                    draw: function (deltaT, context) {
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        var context = gameData.context;
+                        this.base.draw(gameData);
                         context.fillStyle = 'green';
                         context.font = 'bold 16px Arial';
                         context.fillText(tweenFunction, 180, 20);           

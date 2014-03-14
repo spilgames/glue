@@ -50,9 +50,9 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context, scroll) {
+                draw: function (gameData) {
                     if (!object.animatable) {
-                        context.drawImage(
+                        gameData.context.drawImage(
                             image,
                             0,
                             0

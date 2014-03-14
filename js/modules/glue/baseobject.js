@@ -46,14 +46,13 @@ glue.module.create(
                 children = {},
                 parent = null,
                 uniqueID = ++crossInstanceID,
-                callRegistrants = function (type, parameters) {
-                    parameters = Array.prototype.slice.call(parameters);
+                callRegistrants = function (type, gameData) {
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
                         if (type === 'draw' && Sugar.contains(drawLast, registrant)) {
                             continue;
                         }
-                        typeRegistrants[registrant].apply(module, parameters);
+                        typeRegistrants[registrant].call(module, gameData);
                     }
                 },
                 module = {
@@ -66,11 +65,14 @@ glue.module.create(
                     getName: function (value) {
                         return name;
                     },
-                    update: function (deltaT) {
-                        callRegistrants('update', arguments);
+                    update: function (gameData) {
+                        callRegistrants('update', gameData);
                     },
-                    draw: function (deltaT, context, scroll) {
-                        scroll = scroll || Vector(0, 0);
+                    count: 0,
+                    draw: function (gameData) {
+                        var scroll = gameData.scroll || Vector(0, 0),
+                            context = gameData.context;
+
                         context.save();
                         context.translate(
                             position.x - scroll.x,
@@ -78,7 +80,7 @@ glue.module.create(
                         );
 
                         // draws rotatable, scalable etc.
-                        callRegistrants('draw', arguments);
+                        callRegistrants('draw', gameData);
 
                         // translate to origin
                         context.translate(-origin.x, -origin.y);
@@ -87,19 +89,19 @@ glue.module.create(
                         for (d = 0; d < dLength; ++d) {
                             drawRegistrant = registrants.draw[drawLast[d]];
                             if (drawRegistrant) {
-                                drawRegistrant(deltaT, context, scroll);
+                                drawRegistrant(gameData);
                             }
                         }
                         context.restore();
                     },
                     pointerDown: function (e) {
-                        callRegistrants('pointerDown', arguments);
+                        callRegistrants('pointerDown', e);
                     },
                     pointerMove: function (e) {
-                        callRegistrants('pointerMove', arguments);
+                        callRegistrants('pointerMove', e);
                     },
                     pointerUp: function (e) {
-                        callRegistrants('pointerUp', arguments);
+                        callRegistrants('pointerUp', e);
                     },
                     register: function (type, registrant, name) {
                         if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(registrant)) {

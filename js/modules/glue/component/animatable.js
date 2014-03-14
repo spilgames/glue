@@ -7,8 +7,7 @@
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
-    'glue/component/animatable',
-    [
+    'glue/component/animatable', [
         'glue',
         'glue/math/vector',
         'glue/basecomponent',
@@ -32,6 +31,8 @@ glue.module.create(
                 successCallback,
                 errorCallback,
                 frameWidth,
+                frameHeight,
+                columns,
                 startFrame,
                 endFrame,
                 image,
@@ -67,7 +68,9 @@ glue.module.create(
                             if (settings.animation.animations) {
                                 animations = settings.animation.animations;
                             }
-                            if (!Sugar.isDefined(settings.animation.frameCount)) {
+                            if (!Sugar.isDefined(settings.animation.frameCount) && 
+                                (!Sugar.isDefined(settings.animation.frameWidth) ||
+                                !Sugar.isDefined(settings.animation.frameHeight))) {
                                 throw 'Specify settings.animation.frameCount';
                             }
                         } else {
@@ -77,14 +80,18 @@ glue.module.create(
                     spritable.setup(settings);
                     if (settings.image) {
                         image = settings.image;
-                        frameWidth = settings.image.width / settings.animation.frameCount;
+                        frameWidth = settings.animation.frameWidth ||
+                            settings.image.width / settings.animation.frameCount;
+                        frameHeight = settings.animation.frameHeight ||
+                            settings.image.height;
+                        columns = settings.image.width / frameWidth;
                     }
                 },
-                update: function (deltaT) {
+                update: function (gameData) {
                     if (!looping) {
                         return;
                     }
-                    timeSinceLastFrame -= deltaT;
+                    timeSinceLastFrame -= gameData.deltaT;
                     if (timeSinceLastFrame <= 0) {
                         timeSinceLastFrame = timeBetweenFrames;
                         ++currentFrame;
@@ -102,25 +109,25 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context, scroll) {
+                draw: function (gameData) {
                     var position = object.getPosition(),
-                        sourceX = frameWidth * currentFrame,
+                        sourceY = Math.floor((currentFrame / columns)) * frameHeight,
+                        sourceX = (currentFrame % columns) * frameWidth,
                         origin = object.getOrigin();
 
-                    context.drawImage
-                    (
+                    gameData.context.drawImage(
                         image,
                         sourceX,
+                        sourceY,
+                        frameWidth,
+                        frameHeight,
+                        0,
                         0,
                         frameWidth,
-                        image.height,
-                        0,
-                        0,
-                        frameWidth,
-                        image.height
+                        frameHeight
                     );
                 },
-                setAnimation: function(name) {
+                setAnimation: function (name) {
                     if (animations[name]) {
                         currentAnimation = animations[name];
                         setAnimation();

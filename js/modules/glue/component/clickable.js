@@ -21,23 +21,22 @@ glue.module.create(
                     return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
-                    if (isClicked(e) && object.onClick) {
-                        object.onClick(e);
+                    if (isClicked(e)) {
+                        if (object.onClickDown) {
+                            object.onClickDown(e);
+                        }
+                        if (object.onClick) {
+                            object.onClick(e);
+                        }
                     }
                 },
                 pointerUpHandler = function (e) {
-                    if (isClicked(e) && object.onClick) {
-                        object.onClick(e);
+                    if (isClicked(e) && object.onClickUp) {
+                        object.onClickUp(e);
                     }
                 };
 
             baseComponent.set({
-                setup: function (settings) {
-
-                },
-                update: function (deltaT) {
-
-                },
                 pointerDown: function (e) {
                     pointerDownHandler(e);
                 },
@@ -46,9 +45,11 @@ glue.module.create(
                 },
                 register: function () {
                     baseComponent.register('pointerDown');
+                    baseComponent.register('pointerUp');
                 },
                 unregister: function () {
                     baseComponent.unregister('pointerDown');
+                    baseComponent.unregister('pointerUp');
                 }
             });
 

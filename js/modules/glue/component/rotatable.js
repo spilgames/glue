@@ -28,8 +28,9 @@ glue.module.create(
                 toRadian = Math.PI / 180;
 
             baseComponent.set({
-                update: function (deltaT) {
-                    var tarDeg,
+                update: function (gameData) {
+                    var deltaT = gameData.deltaT,
+                        tarDeg,
                         curDeg,
                         finalSpeed,
                         distance,
@@ -50,8 +51,8 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
-                    context.rotate(angle);
+                draw: function (gameData) {
+                    gameData.context.rotate(angle);
                 },
                 setAngleDegree: function (value) {
                     angle = Sugar.isNumber(value) ? value : angle;

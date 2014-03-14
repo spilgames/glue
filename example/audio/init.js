@@ -55,9 +55,11 @@ glue.module.get(
                         });
                         buttonPosition = this.getPosition();
                     },
-                    draw: function (deltaT, context) {
-                        var value = this.playing ? 'Stop' : 'Play';
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        var value = this.playing ? 'Stop' : 'Play',
+                            context = gameData.context;
+
+                        this.base.draw(gameData);
                         context.font = '20px Verdana';
                         context.fillText(value, buttonPosition.x + 30, buttonPosition.y + 30);
                     },

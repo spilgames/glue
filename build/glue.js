@@ -5089,6 +5089,20 @@ modules.glue.sugar = (function (win, doc) {
             return isNumber(value.x) && isNumber(value.y);
         },
         /**
+         * Is a given value a matrix?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isMatrix = function (obj) {
+            if (has(obj, 'get') && isFunction(obj.get) &&
+                has(obj, 'getValue') && Sugar.isFunction(obj.getValue) &&
+                has(obj, 'iterate') && isFunction(obj.iterate) &&
+                has(obj, 'set') && isFunction(obj.iterate) &&
+                has(obj, 'unset') && isFunction(obj.iterate)) {
+                    return true;
+            }
+        },
+        /**
          * Is a given value a string?
          * @param {Object}
          * @return {Boolean}
@@ -5306,6 +5320,15 @@ modules.glue.sugar = (function (win, doc) {
                 '[object Arguments]';
         },
         /**
+         * Returns a random value within a given range
+         * @param {Number} min - The minimum value of the range
+         * @param {Number} max - The maximum value of the range
+         * @return {Number} A random whole number within the passed range
+         */
+        getRandom = function (min, max) {
+            return min + Math.floor(Math.random() * (max - min + 1));
+        },
+        /**
          * Will uppercase the first character of a given string
          * @param {String}
          * @return {String}
@@ -5356,7 +5379,7 @@ modules.glue.sugar = (function (win, doc) {
                         obj1['base'][prop] = obj1[prop];
                     }
                     if (this.isObject(obj2[prop])) {
-                        obj1[prop] = clone(obj2[prop]);
+                        obj1[prop] = this.combine({}, obj2[prop]);
                     } else {
                         obj1[prop] = obj2[prop];
                     }
@@ -5874,7 +5897,103 @@ modules.glue.sugar = (function (win, doc) {
                     win.attachEvent('onload', callback);
                 }
             }
-        };
+        },
+        stable = (function() {
+            // https://github.com/Two-Screen/stable
+            // A stable array sort, because `Array#sort()` is not guaranteed stable.
+            // This is an implementation of merge sort, without recursion.
+            var stable = function(arr, comp) {
+                    return exec(arr.slice(), comp);
+                },
+                // Execute the sort using the input array and a second buffer as work space.
+                // Returns one of those two, containing the final result.
+                exec = function (arr, comp) {
+                    if (typeof(comp) !== 'function') {
+                        comp = function(a, b) {
+                            return String(a).localeCompare(b);
+                        };
+                    }
+
+                    // Short-circuit when there's nothing to sort.
+                    var len = arr.length;
+                    if (len <= 1) {
+                        return arr;
+                    }
+
+                    // Rather than dividing input, simply iterate chunks of 1, 2, 4, 8, etc.
+                    // Chunks are the size of the left or right hand in merge sort.
+                    // Stop when the left-hand covers all of the array.
+                    var buffer = new Array(len);
+                    for (var chk = 1; chk < len; chk *= 2) {
+                        pass(arr, comp, chk, buffer);
+
+                        var tmp = arr;
+                        arr = buffer;
+                        buffer = tmp;
+                    }
+                    return arr;
+                },
+                // Run a single pass with the given chunk size.
+                pass = function(arr, comp, chk, result) {
+                    var len = arr.length;
+                    var i = 0;
+                    // Step size / double chunk size.
+                    var dbl = chk * 2;
+                    // Bounds of the left and right chunks.
+                    var l, r, e;
+                    // Iterators over the left and right chunk.
+                    var li, ri;
+
+                    // Iterate over pairs of chunks.
+                    for (l = 0; l < len; l += dbl) {
+                        r = l + chk;
+                        e = r + chk;
+                        if (r > len) r = len;
+                        if (e > len) e = len;
+
+                        // Iterate both chunks in parallel.
+                        li = l;
+                        ri = r;
+                        while (true) {
+                            // Compare the chunks.
+                            if (li < r && ri < e) {
+                                // This works for a regular `sort()` compatible comparator,
+                                // but also for a simple comparator like: `a > b`
+                                if (comp(arr[li], arr[ri]) <= 0) {
+                                    result[i++] = arr[li++];
+                                }
+                                else {
+                                    result[i++] = arr[ri++];
+                                }
+                            }
+                            // Nothing to compare, just flush what's left.
+                            else if (li < r) {
+                                result[i++] = arr[li++];
+                            }
+                            else if (ri < e) {
+                                result[i++] = arr[ri++];
+                            }
+                            // Both iterators are at the chunk ends.
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                };
+            stable.inplace = function(arr, comp) {
+                var result = exec(arr, comp);
+
+                // This simply copies back if the result isn't in the original array,
+                // which happens on an odd number of passes.
+                if (result !== arr) {
+                    pass(result, null, arr.length, arr);
+                }
+
+                return arr;
+            };
+            // return it instead and keep the method local to this scope
+            return stable;
+        })();
 
         if (!Object.prototype.hasOwnProperty) {
             Object.prototype.hasOwnProperty = function(prop) {
@@ -5942,6 +6061,7 @@ modules.glue.sugar = (function (win, doc) {
     return {
         isVector: isVector,
         isDimension: isDimension,
+        isMatrix: isMatrix,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
@@ -5956,6 +6076,7 @@ modules.glue.sugar = (function (win, doc) {
         isDefined: isDefined,
         isEmpty: isEmpty,
         isArgument: isArgument,
+        getRandom: getRandom,
         upperFirst: upperFirst,
         multiIs: multiIs,
         combine: combine,
@@ -5988,7 +6109,10 @@ modules.glue.sugar = (function (win, doc) {
         setAnimationFrameTimeout: setAnimationFrameTimeout,
         animationEvent: animationEvent,
         domReady: domReady,
-        arrayMatch: arrayMatch
+        arrayMatch: arrayMatch,
+        sort: {
+            stable: stable
+        }
     };
 }(window, window.document));
 
@@ -6143,14 +6267,13 @@ glue.module.create(
                 children = {},
                 parent = null,
                 uniqueID = ++crossInstanceID,
-                callRegistrants = function (type, parameters) {
-                    parameters = Array.prototype.slice.call(parameters);
+                callRegistrants = function (type, gameData) {
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
                         if (type === 'draw' && Sugar.contains(drawLast, registrant)) {
                             continue;
                         }
-                        typeRegistrants[registrant].apply(module, parameters);
+                        typeRegistrants[registrant].call(module, gameData);
                     }
                 },
                 module = {
@@ -6163,11 +6286,14 @@ glue.module.create(
                     getName: function (value) {
                         return name;
                     },
-                    update: function (deltaT) {
-                        callRegistrants('update', arguments);
+                    update: function (gameData) {
+                        callRegistrants('update', gameData);
                     },
-                    draw: function (deltaT, context, scroll) {
-                        scroll = scroll || Vector(0, 0);
+                    count: 0,
+                    draw: function (gameData) {
+                        var scroll = gameData.scroll || Vector(0, 0),
+                            context = gameData.context;
+
                         context.save();
                         context.translate(
                             position.x - scroll.x,
@@ -6175,7 +6301,7 @@ glue.module.create(
                         );
 
                         // draws rotatable, scalable etc.
-                        callRegistrants('draw', arguments);
+                        callRegistrants('draw', gameData);
 
                         // translate to origin
                         context.translate(-origin.x, -origin.y);
@@ -6184,19 +6310,19 @@ glue.module.create(
                         for (d = 0; d < dLength; ++d) {
                             drawRegistrant = registrants.draw[drawLast[d]];
                             if (drawRegistrant) {
-                                drawRegistrant(deltaT, context, scroll);
+                                drawRegistrant(gameData);
                             }
                         }
                         context.restore();
                     },
                     pointerDown: function (e) {
-                        callRegistrants('pointerDown', arguments);
+                        callRegistrants('pointerDown', e);
                     },
                     pointerMove: function (e) {
-                        callRegistrants('pointerMove', arguments);
+                        callRegistrants('pointerMove', e);
                     },
                     pointerUp: function (e) {
-                        callRegistrants('pointerUp', arguments);
+                        callRegistrants('pointerUp', e);
                     },
                     register: function (type, registrant, name) {
                         if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(registrant)) {
@@ -6312,8 +6438,7 @@ glue.module.create(
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
-    'glue/component/animatable',
-    [
+    'glue/component/animatable', [
         'glue',
         'glue/math/vector',
         'glue/basecomponent',
@@ -6337,6 +6462,8 @@ glue.module.create(
                 successCallback,
                 errorCallback,
                 frameWidth,
+                frameHeight,
+                columns,
                 startFrame,
                 endFrame,
                 image,
@@ -6372,7 +6499,9 @@ glue.module.create(
                             if (settings.animation.animations) {
                                 animations = settings.animation.animations;
                             }
-                            if (!Sugar.isDefined(settings.animation.frameCount)) {
+                            if (!Sugar.isDefined(settings.animation.frameCount) && 
+                                (!Sugar.isDefined(settings.animation.frameWidth) ||
+                                !Sugar.isDefined(settings.animation.frameHeight))) {
                                 throw 'Specify settings.animation.frameCount';
                             }
                         } else {
@@ -6382,14 +6511,18 @@ glue.module.create(
                     spritable.setup(settings);
                     if (settings.image) {
                         image = settings.image;
-                        frameWidth = settings.image.width / settings.animation.frameCount;
+                        frameWidth = settings.animation.frameWidth ||
+                            settings.image.width / settings.animation.frameCount;
+                        frameHeight = settings.animation.frameHeight ||
+                            settings.image.height;
+                        columns = settings.image.width / frameWidth;
                     }
                 },
-                update: function (deltaT) {
+                update: function (gameData) {
                     if (!looping) {
                         return;
                     }
-                    timeSinceLastFrame -= deltaT;
+                    timeSinceLastFrame -= gameData.deltaT;
                     if (timeSinceLastFrame <= 0) {
                         timeSinceLastFrame = timeBetweenFrames;
                         ++currentFrame;
@@ -6407,25 +6540,25 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context, scroll) {
+                draw: function (gameData) {
                     var position = object.getPosition(),
-                        sourceX = frameWidth * currentFrame,
+                        sourceY = Math.floor((currentFrame / columns)) * frameHeight,
+                        sourceX = (currentFrame % columns) * frameWidth,
                         origin = object.getOrigin();
 
-                    context.drawImage
-                    (
+                    gameData.context.drawImage(
                         image,
                         sourceX,
+                        sourceY,
+                        frameWidth,
+                        frameHeight,
+                        0,
                         0,
                         frameWidth,
-                        image.height,
-                        0,
-                        0,
-                        frameWidth,
-                        image.height
+                        frameHeight
                     );
                 },
-                setAnimation: function(name) {
+                setAnimation: function (name) {
                     if (animations[name]) {
                         currentAnimation = animations[name];
                         setAnimation();
@@ -6481,23 +6614,22 @@ glue.module.create(
                     return object.getBoundingBox().hasPosition(e.position);
                 },
                 pointerDownHandler = function (e) {
-                    if (isClicked(e) && object.onClick) {
-                        object.onClick(e);
+                    if (isClicked(e)) {
+                        if (object.onClickDown) {
+                            object.onClickDown(e);
+                        }
+                        if (object.onClick) {
+                            object.onClick(e);
+                        }
                     }
                 },
                 pointerUpHandler = function (e) {
-                    if (isClicked(e) && object.onClick) {
-                        object.onClick(e);
+                    if (isClicked(e) && object.onClickUp) {
+                        object.onClickUp(e);
                     }
                 };
 
             baseComponent.set({
-                setup: function (settings) {
-
-                },
-                update: function (deltaT) {
-
-                },
                 pointerDown: function (e) {
                     pointerDownHandler(e);
                 },
@@ -6506,9 +6638,11 @@ glue.module.create(
                 },
                 register: function () {
                     baseComponent.register('pointerDown');
+                    baseComponent.register('pointerUp');
                 },
                 unregister: function () {
                     baseComponent.unregister('pointerDown');
+                    baseComponent.unregister('pointerUp');
                 }
             });
 
@@ -6622,12 +6756,6 @@ glue.module.create(
                 };
 
             baseComponent.set({
-                setup: function (settings) {
-
-                },
-                update: function (deltaT) {
-
-                },
                 pointerDown: function (e) {
                     dragStart(e);
                 },
@@ -6728,7 +6856,8 @@ glue.module.create(
                 atTargetCallback = null;
 
             baseComponent.set({
-                update: function (deltaT) {
+                update: function (gameData) {
+                    var deltaT = gameData.deltaT;
                     if (fadingIn === true) {
                         if (alpha < targetAlpha - (deltaT * fadeSpeed)) {
                             alpha += fadeSpeed * deltaT;
@@ -6752,8 +6881,8 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context, scroll) {
-                    context.globalAlpha = alpha;
+                draw: function (gameData) {
+                    gameData.context.globalAlpha = alpha;
                 },
                 fade: function (callback, startAlpha, endAlpha) {
                     alpha = startAlpha;
@@ -6964,7 +7093,7 @@ glue.module.create(
                         ));
                     }
                 },
-                update: function (deltaT) {
+                update: function (gameData) {
                     side.x = side.y = 0;
                     velocity.add(gravity);
                     if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {
@@ -7127,7 +7256,8 @@ glue.module.create(
                 rotation = 0;
 
             baseComponent.set({
-                update: function (deltaT) {
+                update: function (gameData) {
+                    var deltaT = gameData.deltaT;
                     if (targetPosition !== null) {
                         var radian,
                             deltaX,
@@ -7386,8 +7516,9 @@ glue.module.create(
                  * @memberOf Spineable
                  * @function
                  */
-                draw: function (deltaT, context, scroll) {
-                    var slot = {},
+                draw: function (gameData) {
+                    var context = gameData.context,
+                        slot = {},
                         attachment = {},
                         skeleton = skeletons[currentSkeleton],
                         i = 0,
@@ -7445,9 +7576,9 @@ glue.module.create(
                  * @memberOf Spineable
                  * @function
                  */
-                update: function (deltaT) {
+                update: function (gameData) {
                     var skeleton = skeletons[currentSkeleton];
-                    state[currentSkeleton].update(deltaT);
+                    state[currentSkeleton].update(gameData.deltaT);
                     state[currentSkeleton].apply(skeleton);
                     skeleton.updateWorldTransform();
                     return true;
@@ -7642,8 +7773,9 @@ glue.module.create(
                 toRadian = Math.PI / 180;
 
             baseComponent.set({
-                update: function (deltaT) {
-                    var tarDeg,
+                update: function (gameData) {
+                    var deltaT = gameData.deltaT,
+                        tarDeg,
                         curDeg,
                         finalSpeed,
                         distance,
@@ -7664,8 +7796,8 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
-                    context.rotate(angle);
+                draw: function (gameData) {
+                    gameData.context.rotate(angle);
                 },
                 setAngleDegree: function (value) {
                     angle = Sugar.isNumber(value) ? value : angle;
@@ -7759,9 +7891,10 @@ glue.module.create(
                 atTarget = true;
 
             baseComponent.set({
-                update: function (deltaT) {
+                update: function (gameData) {
                     if (!atTarget) {
-                        var radian,
+                        var deltaT = gameData.deltaT,
+                            radian,
                             deltaX,
                             deltaY,
                             self = this.scalable;
@@ -7784,8 +7917,8 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
-                    context.scale(currentScale.x, currentScale.y);
+                draw: function (gameData) {
+                    gameData.context.scale(currentScale.x, currentScale.y);
                 },
                 setScale: function (vec) {
                     currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;
@@ -7801,7 +7934,7 @@ glue.module.create(
                 },
                 setSpeed: function (value) {
                     scaleSpeed = Sugar.isNumber(value) ? value : scaleSpeed;
-                    scaleSpeed = Math.floor(scaleSpeed / 100);
+                    scaleSpeed = scaleSpeed / 100;
                 },
                 getScale: function () {
                     return currentScale;
@@ -7810,7 +7943,7 @@ glue.module.create(
                     return targetScale;
                 },
                 getSpeed: function () {
-                    return Math.floor(scaleSpeed * 100);
+                    return scaleSpeed * 100;
                 },
                 atTarget: function () {
                     return atTarget;
@@ -7896,9 +8029,9 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context, scroll) {
+                draw: function (gameData) {
                     if (!object.animatable) {
-                        context.drawImage(
+                        gameData.context.drawImage(
                             image,
                             0,
                             0
@@ -8287,6 +8420,8 @@ glue.module.create(
             objects = [],
             addedObjects = [],
             removedObjects = [],
+            addCallbacks = [],
+            removeCallbacks = [],
             lastFrameTime = new Date().getTime(),
             canvas = null,
             canvasId,
@@ -8305,113 +8440,7 @@ glue.module.create(
             fpsMaxAverage = 500000,
             useSort = true,
             sortType = 0,
-            stable = (function() {
-                // https://github.com/Two-Screen/stable
-                // A stable array sort, because `Array#sort()` is not guaranteed stable.
-                // This is an implementation of merge sort, without recursion.
-                var stable = function(arr, comp) {
-                    return exec(arr.slice(), comp);
-                };
-
-                stable.inplace = function(arr, comp) {
-                    var result = exec(arr, comp);
-
-                    // This simply copies back if the result isn't in the original array,
-                    // which happens on an odd number of passes.
-                    if (result !== arr) {
-                        pass(result, null, arr.length, arr);
-                    }
-
-                    return arr;
-                };
-
-                // Execute the sort using the input array and a second buffer as work space.
-                // Returns one of those two, containing the final result.
-                function exec(arr, comp) {
-                    if (typeof(comp) !== 'function') {
-                        comp = function(a, b) {
-                            return String(a).localeCompare(b);
-                        };
-                    }
-
-                    // Short-circuit when there's nothing to sort.
-                    var len = arr.length;
-                    if (len <= 1) {
-                        return arr;
-                    }
-
-                    // Rather than dividing input, simply iterate chunks of 1, 2, 4, 8, etc.
-                    // Chunks are the size of the left or right hand in merge sort.
-                    // Stop when the left-hand covers all of the array.
-                    var buffer = new Array(len);
-                    for (var chk = 1; chk < len; chk *= 2) {
-                        pass(arr, comp, chk, buffer);
-
-                        var tmp = arr;
-                        arr = buffer;
-                        buffer = tmp;
-                    }
-
-                    return arr;
-                }
-
-                // Run a single pass with the given chunk size.
-                var pass = function(arr, comp, chk, result) {
-                    var len = arr.length;
-                    var i = 0;
-                    // Step size / double chunk size.
-                    var dbl = chk * 2;
-                    // Bounds of the left and right chunks.
-                    var l, r, e;
-                    // Iterators over the left and right chunk.
-                    var li, ri;
-
-                    // Iterate over pairs of chunks.
-                    for (l = 0; l < len; l += dbl) {
-                        r = l + chk;
-                        e = r + chk;
-                        if (r > len) r = len;
-                        if (e > len) e = len;
-
-                        // Iterate both chunks in parallel.
-                        li = l;
-                        ri = r;
-                        while (true) {
-                            // Compare the chunks.
-                            if (li < r && ri < e) {
-                                // This works for a regular `sort()` compatible comparator,
-                                // but also for a simple comparator like: `a > b`
-                                if (comp(arr[li], arr[ri]) <= 0) {
-                                    result[i++] = arr[li++];
-                                }
-                                else {
-                                    result[i++] = arr[ri++];
-                                }
-                            }
-                            // Nothing to compare, just flush what's left.
-                            else if (li < r) {
-                                result[i++] = arr[li++];
-                            }
-                            else if (ri < e) {
-                                result[i++] = arr[ri++];
-                            }
-                            // Both iterators are at the chunk ends.
-                            else {
-                                break;
-                            }
-                        }
-                    }
-                };
-                // Export using CommonJS or to the window.
-                /*if (typeof(module) !== 'undefined') {
-                    module.exports = stable;
-                }
-                else {
-                    window.stable = stable;
-                }*/
-                // return it instead and keep the method local to this scope
-                return stable;
-            })(),
+            gameData = {},
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -8435,6 +8464,15 @@ glue.module.create(
                     backBuffer.height = canvas.height;
                     backBufferContext2D = backBuffer.getContext('2d');
                 }
+                gameData = {
+                    canvas: canvas,
+                    context: context2D,
+                    backBufferCanvas: backBuffer,
+                    backBufferContext2D: backBufferContext2D,
+                    canvasScale: canvasScale,
+                    canvasDimension: canvasDimension,
+                    scroll: scroll
+                };
             },
             resizeGame = function () {
                 var canvasRatio = canvas.height / canvas.width,
@@ -8458,7 +8496,7 @@ glue.module.create(
             },
             sort = function () {
                 if (sortType === game.SORT_TYPE_STABLE) {
-                    stable.inplace(objects, function (a, b) {
+                    Sugar.sort.stable.inplace(objects, function (a, b) {
                         return a.z - b.z;
                     });
                 } else {
@@ -8469,9 +8507,13 @@ glue.module.create(
                 }
             },
             addObjects = function () {
-                var object;
+                var object,
+                    callbackObject,
+                    i,
+                    j;
+
                 if (addedObjects.length) {
-                    for (var i = 0; i < addedObjects.length; ++i) {
+                    for (i = 0; i < addedObjects.length; ++i) {
                         object = addedObjects[i];
                         objects.push(addedObjects[i]);
                         if (object.init) {
@@ -8479,12 +8521,25 @@ glue.module.create(
                         }
                     };
                     addedObjects = [];
+                    if (addCallbacks.length) {
+                        for (j = 0; j < addCallbacks.length; ++j) {
+                            callbackObject = addCallbacks[j];
+                            if (callbackObject) {
+                                callbackObject.callback(callbackObject.object);
+                            }
+                        };
+                        addCallbacks = [];
+                    }
                 }
             },
             removeObjects = function () {
-                var object;
+                var object,
+                    callbackObject,
+                    i,
+                    j;
+
                 if (removedObjects.length) {
-                    for (var i = 0; i < removedObjects.length; ++i) {
+                    for (i = 0; i < removedObjects.length; ++i) {
                         object = removedObjects[i];
                         if (object.destroy) {
                             object.destroy();
@@ -8492,6 +8547,15 @@ glue.module.create(
                         Sugar.removeObject(objects, object);
                     };
                     removedObjects = [];
+                    if (removeCallbacks.length) {
+                        for (j = 0; j < removeCallbacks.length; ++j) {
+                            callbackObject = removeCallbacks[j];
+                            if (callbackObject) {
+                                callbackObject.callback(callbackObject.object);
+                            }
+                        };
+                        removeCallbacks = [];
+                    }
                 }
             },
             redraw = function () {
@@ -8508,6 +8572,9 @@ glue.module.create(
                     requestAnimationFrame(cycle);
                 }
                 if (canvasSupported) {
+                    if (useSort) {
+                        sort();
+                    }
                     redraw();
                     removeObjects();
                     addObjects();
@@ -8522,7 +8589,7 @@ glue.module.create(
                             fpsAccumulator = fpsTicks = 0;
                         }
                         debugBar.innerHTML = '<strong>Glue debug bar</strong>';
-                        debugBar.innerHTML += '<br />version: 0.9.6';
+                        debugBar.innerHTML += '<br />version: 0.9.7';
                         debugBar.innerHTML += '<br />frame rate: ' + fps + ' fps';
                         debugBar.innerHTML += '<br />average frame rate: ' + avg + 'fps';
                         debugBar.innerHTML += '<br />objects: ' + objects.length;
@@ -8530,17 +8597,18 @@ glue.module.create(
                             debugBar.innerHTML += '<br />game name: ' + gameInfo.name;    
                         }
                     }
-                    if (useSort) {
-                        sort();
-                    }
                     if (deltaT < 1) {
+                        gameData.deltaT = deltaT;
+                        gameData.fps = fps;
+                        gameData.avg = avg;
+                        gameData.objectLength = objects.length;
                         for (var i = 0; i < objects.length; ++i) {
                             component = objects[i];
                             if (component.update) {
-                                component.update(deltaT, scroll);
+                                component.update(gameData);
                             }
                             if (component.draw) {
-                                component.draw(deltaT, backBufferContext2D, scroll);
+                                component.draw(gameData);
                             }
                         };
                     }
@@ -8713,13 +8781,6 @@ glue.module.create(
                         if (Sugar.isDefined(config.sortType)) {
                             sortType = config.sortType;
                         }
-                        /*
-                        // save color in variable and move code before calling other draw functions
-                        if (config.canvas.color) {
-                            backBufferContext2D.fillStyle = config.canvas.color;
-                            backBufferContext2D.fillRect(0, 0, canvas.width, canvas.height);
-                        }
-                        */
                         if (config.asset && config.asset.path) {
                             Loader.setAssetPath(config.asset.path);
                             if (config.asset.image) {
@@ -8758,11 +8819,23 @@ glue.module.create(
                     shutdown();
                     isRunning = false;
                 },
-                add: function (component) {
-                    addedObjects.push(component);
+                add: function (object, callback) {
+                    if (callback) {
+                        addCallbacks.push({
+                            object: object,
+                            callback: callback
+                        });
+                    }
+                    addedObjects.push(object);
                 },
-                remove: function (component) {
-                    removedObjects.push(component);
+                remove: function (object, callback) {
+                    if (callback) {
+                        removeCallbacks.push({
+                            object: object,
+                            callback: callback
+                        });
+                    }
+                    removedObjects.push(object);
                 },
                 get: function (componentName) {
                     var i,
@@ -8799,7 +8872,6 @@ glue.module.create(
         return game;
     }
 );
-
 /*
  *  @module Loader
  *  @desc Used to load assets in the beginning of the game, shows a progress bar
@@ -10137,6 +10209,20 @@ modules.glue.sugar = (function (win, doc) {
             return isNumber(value.x) && isNumber(value.y);
         },
         /**
+         * Is a given value a matrix?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isMatrix = function (obj) {
+            if (has(obj, 'get') && isFunction(obj.get) &&
+                has(obj, 'getValue') && Sugar.isFunction(obj.getValue) &&
+                has(obj, 'iterate') && isFunction(obj.iterate) &&
+                has(obj, 'set') && isFunction(obj.iterate) &&
+                has(obj, 'unset') && isFunction(obj.iterate)) {
+                    return true;
+            }
+        },
+        /**
          * Is a given value a string?
          * @param {Object}
          * @return {Boolean}
@@ -10354,6 +10440,15 @@ modules.glue.sugar = (function (win, doc) {
                 '[object Arguments]';
         },
         /**
+         * Returns a random value within a given range
+         * @param {Number} min - The minimum value of the range
+         * @param {Number} max - The maximum value of the range
+         * @return {Number} A random whole number within the passed range
+         */
+        getRandom = function (min, max) {
+            return min + Math.floor(Math.random() * (max - min + 1));
+        },
+        /**
          * Will uppercase the first character of a given string
          * @param {String}
          * @return {String}
@@ -10404,7 +10499,7 @@ modules.glue.sugar = (function (win, doc) {
                         obj1['base'][prop] = obj1[prop];
                     }
                     if (this.isObject(obj2[prop])) {
-                        obj1[prop] = clone(obj2[prop]);
+                        obj1[prop] = this.combine({}, obj2[prop]);
                     } else {
                         obj1[prop] = obj2[prop];
                     }
@@ -10922,7 +11017,103 @@ modules.glue.sugar = (function (win, doc) {
                     win.attachEvent('onload', callback);
                 }
             }
-        };
+        },
+        stable = (function() {
+            // https://github.com/Two-Screen/stable
+            // A stable array sort, because `Array#sort()` is not guaranteed stable.
+            // This is an implementation of merge sort, without recursion.
+            var stable = function(arr, comp) {
+                    return exec(arr.slice(), comp);
+                },
+                // Execute the sort using the input array and a second buffer as work space.
+                // Returns one of those two, containing the final result.
+                exec = function (arr, comp) {
+                    if (typeof(comp) !== 'function') {
+                        comp = function(a, b) {
+                            return String(a).localeCompare(b);
+                        };
+                    }
+
+                    // Short-circuit when there's nothing to sort.
+                    var len = arr.length;
+                    if (len <= 1) {
+                        return arr;
+                    }
+
+                    // Rather than dividing input, simply iterate chunks of 1, 2, 4, 8, etc.
+                    // Chunks are the size of the left or right hand in merge sort.
+                    // Stop when the left-hand covers all of the array.
+                    var buffer = new Array(len);
+                    for (var chk = 1; chk < len; chk *= 2) {
+                        pass(arr, comp, chk, buffer);
+
+                        var tmp = arr;
+                        arr = buffer;
+                        buffer = tmp;
+                    }
+                    return arr;
+                },
+                // Run a single pass with the given chunk size.
+                pass = function(arr, comp, chk, result) {
+                    var len = arr.length;
+                    var i = 0;
+                    // Step size / double chunk size.
+                    var dbl = chk * 2;
+                    // Bounds of the left and right chunks.
+                    var l, r, e;
+                    // Iterators over the left and right chunk.
+                    var li, ri;
+
+                    // Iterate over pairs of chunks.
+                    for (l = 0; l < len; l += dbl) {
+                        r = l + chk;
+                        e = r + chk;
+                        if (r > len) r = len;
+                        if (e > len) e = len;
+
+                        // Iterate both chunks in parallel.
+                        li = l;
+                        ri = r;
+                        while (true) {
+                            // Compare the chunks.
+                            if (li < r && ri < e) {
+                                // This works for a regular `sort()` compatible comparator,
+                                // but also for a simple comparator like: `a > b`
+                                if (comp(arr[li], arr[ri]) <= 0) {
+                                    result[i++] = arr[li++];
+                                }
+                                else {
+                                    result[i++] = arr[ri++];
+                                }
+                            }
+                            // Nothing to compare, just flush what's left.
+                            else if (li < r) {
+                                result[i++] = arr[li++];
+                            }
+                            else if (ri < e) {
+                                result[i++] = arr[ri++];
+                            }
+                            // Both iterators are at the chunk ends.
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                };
+            stable.inplace = function(arr, comp) {
+                var result = exec(arr, comp);
+
+                // This simply copies back if the result isn't in the original array,
+                // which happens on an odd number of passes.
+                if (result !== arr) {
+                    pass(result, null, arr.length, arr);
+                }
+
+                return arr;
+            };
+            // return it instead and keep the method local to this scope
+            return stable;
+        })();
 
         if (!Object.prototype.hasOwnProperty) {
             Object.prototype.hasOwnProperty = function(prop) {
@@ -10990,6 +11181,7 @@ modules.glue.sugar = (function (win, doc) {
     return {
         isVector: isVector,
         isDimension: isDimension,
+        isMatrix: isMatrix,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
@@ -11004,6 +11196,7 @@ modules.glue.sugar = (function (win, doc) {
         isDefined: isDefined,
         isEmpty: isEmpty,
         isArgument: isArgument,
+        getRandom: getRandom,
         upperFirst: upperFirst,
         multiIs: multiIs,
         combine: combine,
@@ -11036,7 +11229,10 @@ modules.glue.sugar = (function (win, doc) {
         setAnimationFrameTimeout: setAnimationFrameTimeout,
         animationEvent: animationEvent,
         domReady: domReady,
-        arrayMatch: arrayMatch
+        arrayMatch: arrayMatch,
+        sort: {
+            stable: stable
+        }
     };
 }(window, window.document));
 

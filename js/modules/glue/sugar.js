@@ -30,6 +30,20 @@ modules.glue.sugar = (function (win, doc) {
             return isNumber(value.x) && isNumber(value.y);
         },
         /**
+         * Is a given value a matrix?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isMatrix = function (obj) {
+            if (has(obj, 'get') && isFunction(obj.get) &&
+                has(obj, 'getValue') && Sugar.isFunction(obj.getValue) &&
+                has(obj, 'iterate') && isFunction(obj.iterate) &&
+                has(obj, 'set') && isFunction(obj.iterate) &&
+                has(obj, 'unset') && isFunction(obj.iterate)) {
+                    return true;
+            }
+        },
+        /**
          * Is a given value a string?
          * @param {Object}
          * @return {Boolean}
@@ -247,6 +261,15 @@ modules.glue.sugar = (function (win, doc) {
                 '[object Arguments]';
         },
         /**
+         * Returns a random value within a given range
+         * @param {Number} min - The minimum value of the range
+         * @param {Number} max - The maximum value of the range
+         * @return {Number} A random whole number within the passed range
+         */
+        getRandom = function (min, max) {
+            return min + Math.floor(Math.random() * (max - min + 1));
+        },
+        /**
          * Will uppercase the first character of a given string
          * @param {String}
          * @return {String}
@@ -297,7 +320,7 @@ modules.glue.sugar = (function (win, doc) {
                         obj1['base'][prop] = obj1[prop];
                     }
                     if (this.isObject(obj2[prop])) {
-                        obj1[prop] = clone(obj2[prop]);
+                        obj1[prop] = this.combine({}, obj2[prop]);
                     } else {
                         obj1[prop] = obj2[prop];
                     }
@@ -815,7 +838,103 @@ modules.glue.sugar = (function (win, doc) {
                     win.attachEvent('onload', callback);
                 }
             }
-        };
+        },
+        stable = (function() {
+            // https://github.com/Two-Screen/stable
+            // A stable array sort, because `Array#sort()` is not guaranteed stable.
+            // This is an implementation of merge sort, without recursion.
+            var stable = function(arr, comp) {
+                    return exec(arr.slice(), comp);
+                },
+                // Execute the sort using the input array and a second buffer as work space.
+                // Returns one of those two, containing the final result.
+                exec = function (arr, comp) {
+                    if (typeof(comp) !== 'function') {
+                        comp = function(a, b) {
+                            return String(a).localeCompare(b);
+                        };
+                    }
+
+                    // Short-circuit when there's nothing to sort.
+                    var len = arr.length;
+                    if (len <= 1) {
+                        return arr;
+                    }
+
+                    // Rather than dividing input, simply iterate chunks of 1, 2, 4, 8, etc.
+                    // Chunks are the size of the left or right hand in merge sort.
+                    // Stop when the left-hand covers all of the array.
+                    var buffer = new Array(len);
+                    for (var chk = 1; chk < len; chk *= 2) {
+                        pass(arr, comp, chk, buffer);
+
+                        var tmp = arr;
+                        arr = buffer;
+                        buffer = tmp;
+                    }
+                    return arr;
+                },
+                // Run a single pass with the given chunk size.
+                pass = function(arr, comp, chk, result) {
+                    var len = arr.length;
+                    var i = 0;
+                    // Step size / double chunk size.
+                    var dbl = chk * 2;
+                    // Bounds of the left and right chunks.
+                    var l, r, e;
+                    // Iterators over the left and right chunk.
+                    var li, ri;
+
+                    // Iterate over pairs of chunks.
+                    for (l = 0; l < len; l += dbl) {
+                        r = l + chk;
+                        e = r + chk;
+                        if (r > len) r = len;
+                        if (e > len) e = len;
+
+                        // Iterate both chunks in parallel.
+                        li = l;
+                        ri = r;
+                        while (true) {
+                            // Compare the chunks.
+                            if (li < r && ri < e) {
+                                // This works for a regular `sort()` compatible comparator,
+                                // but also for a simple comparator like: `a > b`
+                                if (comp(arr[li], arr[ri]) <= 0) {
+                                    result[i++] = arr[li++];
+                                }
+                                else {
+                                    result[i++] = arr[ri++];
+                                }
+                            }
+                            // Nothing to compare, just flush what's left.
+                            else if (li < r) {
+                                result[i++] = arr[li++];
+                            }
+                            else if (ri < e) {
+                                result[i++] = arr[ri++];
+                            }
+                            // Both iterators are at the chunk ends.
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                };
+            stable.inplace = function(arr, comp) {
+                var result = exec(arr, comp);
+
+                // This simply copies back if the result isn't in the original array,
+                // which happens on an odd number of passes.
+                if (result !== arr) {
+                    pass(result, null, arr.length, arr);
+                }
+
+                return arr;
+            };
+            // return it instead and keep the method local to this scope
+            return stable;
+        })();
 
         if (!Object.prototype.hasOwnProperty) {
             Object.prototype.hasOwnProperty = function(prop) {
@@ -883,6 +1002,7 @@ modules.glue.sugar = (function (win, doc) {
     return {
         isVector: isVector,
         isDimension: isDimension,
+        isMatrix: isMatrix,
         isString: isString,
         isArray: isArray,
         isObject: isObject,
@@ -897,6 +1017,7 @@ modules.glue.sugar = (function (win, doc) {
         isDefined: isDefined,
         isEmpty: isEmpty,
         isArgument: isArgument,
+        getRandom: getRandom,
         upperFirst: upperFirst,
         multiIs: multiIs,
         combine: combine,
@@ -929,6 +1050,9 @@ modules.glue.sugar = (function (win, doc) {
         setAnimationFrameTimeout: setAnimationFrameTimeout,
         animationEvent: animationEvent,
         domReady: domReady,
-        arrayMatch: arrayMatch
+        arrayMatch: arrayMatch,
+        sort: {
+            stable: stable
+        }
     };
 }(window, window.document));

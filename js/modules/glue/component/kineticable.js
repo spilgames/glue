@@ -81,7 +81,7 @@ glue.module.create(
                         ));
                     }
                 },
-                update: function (deltaT) {
+                update: function (gameData) {
                     side.x = side.y = 0;
                     velocity.add(gravity);
                     if (maxVelocity.x !== 0 && Math.abs(velocity.x) > maxVelocity.x) {

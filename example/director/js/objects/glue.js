@@ -35,8 +35,8 @@ glue.module.create(
                             this.droptarget.setup();
                         }
                     },
-                    update: function (deltaT) {
-                        this.base.update(deltaT);
+                    update: function (gameData) {
+                        this.base.update(gameData);
                         if (dropped && this.movable.atTarget()) {
                             Director.showScreen('Screen2');
                             dropped = false;
