@@ -1,3 +1,10 @@
+version 0.9.7
+March 14, 2014
+
+- Passing gameData object to all update and draw methods instead of separate parameters
+- Fixed the issue for setting the speed of the Fadable component
+- The Animatable component now supports spritesheets that span multiple rows
+
 version 0.9.6
 March 11, 2014
 
