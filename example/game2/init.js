@@ -10,8 +10,6 @@ glue.module.get(
         'glue/component/droptarget',
         'glue/component/hoverable',
         'glue/component/clickable',
-        'glue/component/scalable',
-        'glue/component/rotatable',
         'glue/loader'
     ],
     function (
@@ -25,8 +23,6 @@ glue.module.get(
         Droptarget,
         Hoverable,
         Clickable,
-        Scalable,
-        Rotatable,
         Loader) {
         'use strict';
 
@@ -80,13 +76,13 @@ glue.module.get(
                             image: Loader.getAsset('clouds')
                         });
                     },
-                    update: function (deltaT, context) {
+                    update: function (gameData) {
                         cloudsDimension = this.getDimension();
                         cloudsPosition = this.getPosition();
                         if (cloudsPosition.x > canvasDimension.width - cloudsDimension.width) {
                             cloudsPosition.x = -cloudsDimension.width;
                         }
-                        cloudsPosition.x += moveSpeed * deltaT;
+                        cloudsPosition.x += moveSpeed * gameData.deltaT;
                     }
                 }),
                 dog = BaseObject(Animatable).add({
@@ -110,8 +106,8 @@ glue.module.get(
                         });
                         this.animatable.setAnimation('wiggleTail');
                     },
-                    draw: function (deltaT, context) {
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        this.base.draw(gameData);
                     }
                 }),
                 hills = BaseObject(Spritable).add({
@@ -166,7 +162,7 @@ glue.module.get(
                 playerPosition,
                 playerDimension,
                 walkSpeed = 80,
-                player = BaseObject(Animatable, Scalable, Rotatable).add({
+                player = BaseObject(Animatable).add({
                     init: function () {
                         this.animatable.setup({
                             position: {
@@ -192,9 +188,9 @@ glue.module.get(
                         });
                         playerDimension = this.animatable.getDimension();
                     },
-                    update: function (deltaT) {
-                        this.rotatable.update(deltaT);
-                        this.animatable.update(deltaT);
+                    update: function (gameData) {
+                        var deltaT = gameData.deltaT;
+                        this.animatable.update(gameData);
                         playerDimension = this.animatable.getDimension();
                         playerPosition = this.getPosition();
                         if (playerPosition.x > canvasDimension.width -
@@ -215,8 +211,8 @@ glue.module.get(
                             break;
                         }
                     },
-                    draw: function (deltaT, context) {
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        this.base.draw(gameData);
                     }
                 });
 

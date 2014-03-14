@@ -44,6 +44,7 @@ glue.module.create(
             fpsMaxAverage = 500000,
             useSort = true,
             sortType = 0,
+            gameData = {},
             initCanvas = function () {
                 canvas = document.querySelector('#' + canvasId);
                 // create canvas if it doesn't exist
@@ -67,6 +68,15 @@ glue.module.create(
                     backBuffer.height = canvas.height;
                     backBufferContext2D = backBuffer.getContext('2d');
                 }
+                gameData = {
+                    canvas: canvas,
+                    context: context2D,
+                    backBufferCanvas: backBuffer,
+                    backBufferContext2D: backBufferContext2D,
+                    canvasScale: canvasScale,
+                    canvasDimension: canvasDimension,
+                    scroll: scroll
+                };
             },
             resizeGame = function () {
                 var canvasRatio = canvas.height / canvas.width,
@@ -192,13 +202,17 @@ glue.module.create(
                         }
                     }
                     if (deltaT < 1) {
+                        gameData.deltaT = deltaT;
+                        gameData.fps = fps;
+                        gameData.avg = avg;
+                        gameData.objectLength = objects.length;
                         for (var i = 0; i < objects.length; ++i) {
                             component = objects[i];
                             if (component.update) {
-                                component.update(deltaT, scroll);
+                                component.update(gameData);
                             }
                             if (component.draw) {
-                                component.draw(deltaT, backBufferContext2D, scroll);
+                                component.draw(gameData);
                             }
                         };
                     }

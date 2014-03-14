@@ -26,9 +26,10 @@ glue.module.create(
                 atTarget = true;
 
             baseComponent.set({
-                update: function (deltaT) {
+                update: function (gameData) {
                     if (!atTarget) {
-                        var radian,
+                        var deltaT = gameData.deltaT,
+                            radian,
                             deltaX,
                             deltaY,
                             self = this.scalable;
@@ -51,8 +52,8 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context) {
-                    context.scale(currentScale.x, currentScale.y);
+                draw: function (gameData) {
+                    gameData.context.scale(currentScale.x, currentScale.y);
                 },
                 setScale: function (vec) {
                     currentScale.x = Sugar.isNumber(vec.x) ? vec.x : currentScale.x;

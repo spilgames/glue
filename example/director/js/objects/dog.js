@@ -37,9 +37,6 @@ glue.module.create(
                             }
                         });
                         this.animatable.setAnimation('wiggleTail');
-                    },
-                    draw: function (deltaT, context, scroll) {
-                        this.base.draw(deltaT, context, scroll);
                     }
                 });
             return object;

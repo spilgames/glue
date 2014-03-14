@@ -87,11 +87,11 @@ glue.module.create(
                         columns = settings.image.width / frameWidth;
                     }
                 },
-                update: function (deltaT) {
+                update: function (gameData) {
                     if (!looping) {
                         return;
                     }
-                    timeSinceLastFrame -= deltaT;
+                    timeSinceLastFrame -= gameData.deltaT;
                     if (timeSinceLastFrame <= 0) {
                         timeSinceLastFrame = timeBetweenFrames;
                         ++currentFrame;
@@ -109,13 +109,13 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context, scroll) {
+                draw: function (gameData) {
                     var position = object.getPosition(),
                         sourceY = Math.floor((currentFrame / columns)) * frameHeight,
                         sourceX = (currentFrame % columns) * frameWidth,
                         origin = object.getOrigin();
 
-                    context.drawImage(
+                    gameData.context.drawImage(
                         image,
                         sourceX,
                         sourceY,

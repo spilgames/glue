@@ -26,7 +26,8 @@ glue.module.create(
                 rotation = 0;
 
             baseComponent.set({
-                update: function (deltaT) {
+                update: function (gameData) {
+                    var deltaT = gameData.deltaT;
                     if (targetPosition !== null) {
                         var radian,
                             deltaX,
