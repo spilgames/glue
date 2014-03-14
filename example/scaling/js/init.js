@@ -50,6 +50,7 @@ glue.module.get(
                             x: 2,
                             y: 2
                         });
+                        this.scalable.setSpeed(100);
                     },
                     update: function (deltaT) {
                         this.base.update(deltaT);
@@ -58,6 +59,7 @@ glue.module.get(
                                 x: 1,
                                 y: 1
                             });
+                            this.scalable.setSpeed(400);
                         }
                     },
                     draw: function (deltaT, context) {

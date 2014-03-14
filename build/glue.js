@@ -7934,7 +7934,7 @@ glue.module.create(
                 },
                 setSpeed: function (value) {
                     scaleSpeed = Sugar.isNumber(value) ? value : scaleSpeed;
-                    scaleSpeed = Math.floor(scaleSpeed / 100);
+                    scaleSpeed = scaleSpeed / 100;
                 },
                 getScale: function () {
                     return currentScale;
@@ -7943,7 +7943,7 @@ glue.module.create(
                     return targetScale;
                 },
                 getSpeed: function () {
-                    return Math.floor(scaleSpeed * 100);
+                    return scaleSpeed * 100;
                 },
                 atTarget: function () {
                     return atTarget;
