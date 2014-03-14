@@ -84,8 +84,9 @@
                         init: function () {
                             this.z = this.getPosition().y;
                         },
-                        draw: function (deltaT, context) {
-                            this.base.draw(deltaT, context);
+                        draw: function (gameData) {
+                            var context = gameData.context;
+                            this.base.draw(gameData);
                             context.fillStyle = 'blue';
                             context.font = 'bold 16px Arial';
                             context.fillText(dropText, 255, 180);

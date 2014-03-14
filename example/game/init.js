@@ -6,9 +6,6 @@ glue.module.get(
         'glue/baseobject',
         'glue/component/spritable',
         'glue/component/animatable',
-        'glue/component/draggable',
-        'glue/component/droptarget',
-        'glue/component/hoverable',
         'glue/component/clickable',
         'glue/component/movable',
         'glue/loader'
@@ -20,9 +17,6 @@ glue.module.get(
         BaseObject,
         Spritable,
         Animatable,
-        Draggable,
-        Droptarget,
-        Hoverable,
         Clickable,
         Movable,
         Loader) {
@@ -166,9 +160,9 @@ glue.module.get(
                         this.animatable.setAnimation('standDown');
                         playerDimension = this.animatable.getDimension();
                     },
-                    update: function (deltaT) {
+                    update: function (gameData) {
                         var rotation;
-                        this.base.update(deltaT);
+                        this.base.update(gameData);
                         if (this.movable.atTarget()) {
                             if (down) {
                                 this.animatable.setAnimation('standDown');
@@ -219,9 +213,9 @@ glue.module.get(
                         ));
                         left = up = down = right = false;
                     },
-                    draw: function (deltaT, context) {
-                        context.imageSmoothingEnabled = false;
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        gameData.context.imageSmoothingEnabled = false;
+                        this.base.draw(gameData);
                     }
                 }),
                 enemyPosition,
@@ -264,8 +258,9 @@ glue.module.get(
                         enemyDimension = this.animatable.getDimension();
                         enemyPosition = this.getPosition();
                     },
-                    update: function (deltaT) {
-                        this.base.update(deltaT);
+                    update: function (gameData) {
+                        var deltaT = gameData.deltaT;
+                        this.base.update(gameData);
                         if (enemyPosition.x > canvasDimension.width -
                                 this.animatable.getFrameWidth()) {
                             this.animatable.setAnimation('walkLeft')
@@ -284,8 +279,8 @@ glue.module.get(
                             break;
                         }
                     },
-                    draw: function (deltaT, context) {
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        this.base.draw(gameData);
                     }
                 });
 

@@ -103,12 +103,6 @@ glue.module.create(
                 };
 
             baseComponent.set({
-                setup: function (settings) {
-
-                },
-                update: function (deltaT) {
-
-                },
                 pointerDown: function (e) {
                     dragStart(e);
                 },

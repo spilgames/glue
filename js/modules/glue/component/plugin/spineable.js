@@ -193,8 +193,9 @@ glue.module.create(
                  * @memberOf Spineable
                  * @function
                  */
-                draw: function (deltaT, context, scroll) {
-                    var slot = {},
+                draw: function (gameData) {
+                    var context = gameData.context,
+                        slot = {},
                         attachment = {},
                         skeleton = skeletons[currentSkeleton],
                         i = 0,
@@ -252,9 +253,9 @@ glue.module.create(
                  * @memberOf Spineable
                  * @function
                  */
-                update: function (deltaT) {
+                update: function (gameData) {
                     var skeleton = skeletons[currentSkeleton];
-                    state[currentSkeleton].update(deltaT);
+                    state[currentSkeleton].update(gameData.deltaT);
                     state[currentSkeleton].apply(skeleton);
                     skeleton.updateWorldTransform();
                     return true;

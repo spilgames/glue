@@ -49,14 +49,11 @@ glue.module.get(
                         this.rotatable.setTargetDegree(360, true);
                         this.rotatable.setSpeed(100);
                     },
-                    update: function (deltaT) {
-                        this.base.update(deltaT);
+                    update: function (gameData) {
+                        this.base.update(gameData);
                         if (this.rotatable.atTarget()) {
                             this.rotatable.setTargetDegree(0, false);
                         }
-                    },
-                    draw: function (deltaT, context) {
-                        this.base.draw(deltaT, context);
                     }
                 });
 

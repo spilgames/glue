@@ -63,9 +63,10 @@ glue.module.get(
                         });
                         buttonPosition = this.getPosition();
                     },
-                    draw: function (deltaT, context) {
-                        var value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        var context = gameData.context,
+                            value = collisionType === SAT.RECTANGLE_TO_RECTANGLE ? 'RECT Collision' : 'CIRCLE Collision';
+                        this.base.draw(gameData);
                         context.font = '20px Verdana';
                         context.fillText(value, buttonPosition.x + 30, buttonPosition.y + 30);
                     },
@@ -90,9 +91,11 @@ glue.module.get(
                             dynamic: false
                         });
                     },
-                    draw: function (deltaT, context) {
-                        var bound;
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        var bound,
+                            context = gameData.context;
+
+                        this.base.draw(gameData);
                         if (collisionType === SAT.CIRCLE_TO_CIRCLE) {
                             bound = this.kineticable.toCircle();
                             context.beginPath();
@@ -136,7 +139,7 @@ glue.module.get(
                         this.size = this.kineticable.getDimension();
                         this.canvasSize = Game.canvas.getDimension();
                     },
-                    update: function (deltaT) {
+                    update: function (gameData) {
                         if (this.position.y > this.canvasSize.height) {
                             this.position.y = -this.size.height;
                         }
@@ -146,12 +149,14 @@ glue.module.get(
                             this.position.x = this.canvasSize.width;
                         }
                         
-                        this.base.update(deltaT);
+                        this.base.update(gameData);
                         SAT.collide(obj1, this, collisionType);
                     },
-                    draw: function (deltaT, context) {
-                        var bound;
-                        this.base.draw(deltaT, context);
+                    draw: function (gameData) {
+                        var bound,
+                            context = gameData.context;
+
+                        this.base.draw(gameData);
                         if (collisionType === SAT.CIRCLE_TO_CIRCLE) {
                             bound = this.kineticable.toCircle();
                             context.beginPath();

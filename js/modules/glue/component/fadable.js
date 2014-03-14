@@ -26,7 +26,8 @@ glue.module.create(
                 atTargetCallback = null;
 
             baseComponent.set({
-                update: function (deltaT) {
+                update: function (gameData) {
+                    var deltaT = gameData.deltaT;
                     if (fadingIn === true) {
                         if (alpha < targetAlpha - (deltaT * fadeSpeed)) {
                             alpha += fadeSpeed * deltaT;
@@ -50,8 +51,8 @@ glue.module.create(
                         }
                     }
                 },
-                draw: function (deltaT, context, scroll) {
-                    context.globalAlpha = alpha;
+                draw: function (gameData) {
+                    gameData.context.globalAlpha = alpha;
                 },
                 fade: function (callback, startAlpha, endAlpha) {
                     alpha = startAlpha;
