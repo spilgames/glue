@@ -20,7 +20,7 @@ glue.module.create(
             getScreen = function (name) {
                 if (Sugar.isString(name)) {
                     if (Sugar.isObject(screens[name])) {
-                        return screens[name]
+                        return screens[name];
                     }
                 }
             },
@@ -33,9 +33,15 @@ glue.module.create(
                 if (Sugar.isString(name)) {
                     screen = getScreen(name);
                     if (action === 'show') {
+                        if(Sugar.isDefined(screen.onShow)) {
+                            screen.onShow();
+                        }
                         Game.add(screen);
                     }
                     if (action === 'hide') {
+                        if(Sugar.isDefined(screen.onHide)) {
+                            screen.onHide();
+                        }
                         Game.remove(screen);
                     }
                     objects = screen.getObjects();
