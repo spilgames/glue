@@ -355,6 +355,7 @@ glue.module.create(
                 Event.off('glue.pointer.down', pointerDown);
                 Event.off('glue.pointer.move', pointerMove);
                 Event.off('glue.pointer.up', pointerUp);
+                objects = [];
             },
             game = {
                 SORT_TYPE_DEFAULT: 0,
