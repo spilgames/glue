@@ -124,6 +124,12 @@ glue.module.create(
                             this.updateBoundingBox();
                         }
                     },
+                    setPositionObject: function (value) {
+                        if (Sugar.isVector(value)) {
+                            position = value;
+                            this.updateBoundingBox();
+                        }
+                    },
                     getDimension: function () {
                         return dimension;
                     },
