@@ -8,14 +8,16 @@
 glue.module.create(
     'glue/screen',
     [
-        'glue'
+        'glue',
+        'glue/game'
     ],
-    function (Glue) {
+    function (Glue, Game) {
         'use strict';
         var Sugar = Glue.sugar;
 
         return function (name) {
             var objects = [],
+                isShown = false,
                 module = {
                     /**
                      * Add object to screen
@@ -23,9 +25,16 @@ glue.module.create(
                      * @memberOf screen
                      * @function
                      */
-                    addObject: function (object) {
+                    addObject: function (object, callback) {
                         if (Sugar.isObject(object)) {
                             objects.push(object);
+                            if (isShown) {
+                                Game.add(object, function () {
+                                    if (Sugar.isFunction(callback)) {
+                                        callback();
+                                    }
+                                });
+                            }
                         }
                     },
                     /**
@@ -34,12 +43,19 @@ glue.module.create(
                      * @memberOf screen
                      * @function
                      */
-                    removeObject: function (object) {
+                    removeObject: function (object, callback) {
                         var index;
                         if (Sugar.isObject(object)) {
                             index = objects.indexOf(object);
                             if (index >= 0) {
                                 objects.splice(index, 1);
+                                if (isShown) {
+                                    Game.remove(object, function () {
+                                        if (Sugar.isFunction(callback)) {
+                                            callback();
+                                        }
+                                    });
+                                }
                             }
                         }
                     },
@@ -62,6 +78,19 @@ glue.module.create(
                      */
                     getName: function () {
                         return name;
+                    },
+                    /**
+                     * Set a boolean that defines if the screen is shown
+                     * @name setShown
+                     * @memberOf screen
+                     * @function
+                     */
+                    setShown: function (bool) {
+                        if (!Sugar.isBoolean(bool)) {
+                            throw 'Argument is not a boolean';
+                        } else {
+                            isShown = bool;
+                        }
                     }
                 };
 
