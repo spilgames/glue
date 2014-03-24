@@ -32,7 +32,7 @@ glue.module.create(
                     objectsHandled = 0,
                     objectHandled = function () {
                         objectsHandled++;
-                        if (objectsHandled >= screen.getObjects().length + 1) {
+                        if (objectsHandled >= screen.getObjects().length + 1 && Sugar.isFunction(callback)) {
                             callback();
                         }
                     };
