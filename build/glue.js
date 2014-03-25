@@ -8809,6 +8809,9 @@ glue.module.create(
                             if (config.asset.spine) {
                                 Loader.setAssets(Loader.ASSET_TYPE_SPINE, config.asset.spine);
                             }
+                            if (config.asset.remoteImage) {
+                                Loader.setAssets(Loader.ASSET_TYPE_IMAGE_REMOTE, config.asset.remoteImage);
+                            }
                             Loader.load(function () {
                                 startup();
                                 if (onReady) {
@@ -9036,6 +9039,9 @@ glue.module.create(
             loadAsset = function (name, type, source) {
                 var asset;
                 switch (type) {
+                    case module.ASSET_TYPE_IMAGE_REMOTE:
+                        loadImage(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
                     case module.ASSET_TYPE_IMAGE:
                         loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
@@ -9063,6 +9069,7 @@ glue.module.create(
                 ASSET_TYPE_BINARY: 'binary',
                 ASSET_TYPE_AUDIOSPRITE: 'audiosprite',
                 ASSET_TYPE_SPINE: 'spine',
+                ASSET_TYPE_IMAGE_REMOTE: 'remoteimage',
                 /**
                  * Sets the root folder for assets
                  * @name setAssetPath
@@ -9085,6 +9092,7 @@ glue.module.create(
                     assets[type] = value;
                     for (asset in value) {
                         if (value.hasOwnProperty(asset)) {
+                            console.log(asset);
                             ++assetCount;
                         }
                     }
