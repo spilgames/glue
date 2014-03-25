@@ -75,6 +75,7 @@ glue.module.create(
                         }
                     },
                     count: 0,
+                    updateWhenPaused: false,
                     draw: function (gameData) {
                         var scroll = gameData.scroll || Vector(0, 0),
                             context = gameData.context,
