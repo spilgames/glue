@@ -37,6 +37,7 @@ glue.module.create(
             canvasScale = {},
             scroll = Vector(0, 0),
             isRunning = false,
+            isPaused = false,
             debug = false,
             debugBar = null,
             fpsAccumulator = 0,
@@ -208,11 +209,13 @@ glue.module.create(
                         gameData.objectLength = objects.length;
                         for (var i = 0; i < objects.length; ++i) {
                             component = objects[i];
-                            if (component.update) {
-                                component.update(gameData);
-                            }
-                            if (component.draw) {
-                                component.draw(gameData);
+                            if ((isPaused && component.updateWhenPaused) || !isPaused) {
+                                if (component.update) {
+                                    component.update(gameData);
+                                }
+                                if (component.draw) {
+                                    component.draw(gameData);
+                                }
                             }
                         };
                     }
@@ -233,7 +236,7 @@ glue.module.create(
 
                 for (i = 0, l = objects.length; i < l; ++i) {
                     component = objects[i];
-                    if (component.pointerDown) {
+                    if (component.pointerDown && ((isPaused && component.updateWhenPaused) || !isPaused)) {
                         component.pointerDown(e);
                     }
                 }
@@ -246,7 +249,7 @@ glue.module.create(
 
                 for (i = 0, l = objects.length; i < l; ++i) {
                     component = objects[i];
-                    if (component.pointerMove) {
+                    if (component.pointerMove && ((isPaused && component.updateWhenPaused) || !isPaused)) {
                         component.pointerMove(e);
                     }
                 }
@@ -259,7 +262,7 @@ glue.module.create(
 
                 for (i = 0, l = objects.length; i < l; ++i) {
                     component = objects[i];
-                    if (component.pointerUp) {
+                    if (component.pointerUp && ((isPaused && component.updateWhenPaused) || !isPaused)) {
                         component.pointerUp(e);
                     }
                 }
@@ -472,6 +475,12 @@ glue.module.create(
                 },
                 getScroll: function () {
                     return scroll;
+                },
+                pause: function () {
+                    isPaused = true;
+                },
+                resume: function () {
+                    isPaused = false;
                 }
             };
         return game;
