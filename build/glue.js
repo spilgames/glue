@@ -8645,13 +8645,11 @@ glue.module.create(
                         gameData.objectLength = objects.length;
                         for (var i = 0; i < objects.length; ++i) {
                             component = objects[i];
-                            if ((isPaused && component.updateWhenPaused) || !isPaused) {
-                                if (component.update) {
-                                    component.update(gameData);
-                                }
-                                if (component.draw) {
-                                    component.draw(gameData);
-                                }
+                            if (component.update && ((isPaused && component.updateWhenPaused) || !isPaused)) {
+                                component.update(gameData);
+                            }
+                            if (component.draw) {
+                                component.draw(gameData);
                             }
                         };
                     }
