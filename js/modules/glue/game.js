@@ -415,6 +415,9 @@ glue.module.create(
                             if (config.asset.spine) {
                                 Loader.setAssets(Loader.ASSET_TYPE_SPINE, config.asset.spine);
                             }
+                            if (config.asset.remoteImage) {
+                                Loader.setAssets(Loader.ASSET_TYPE_IMAGE_REMOTE, config.asset.remoteImage);
+                            }
                             Loader.load(function () {
                                 startup();
                                 if (onReady) {
