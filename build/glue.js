@@ -6264,7 +6264,7 @@ glue.module.create(
                     pointerMove: {},
                     pointerUp: {}
                 },
-                children = {},
+                children = [],
                 parent = null,
                 uniqueID = ++crossInstanceID,
                 callRegistrants = function (type, gameData) {
@@ -6287,12 +6287,20 @@ glue.module.create(
                         return name;
                     },
                     update: function (gameData) {
+                        var i,
+                            l;
                         callRegistrants('update', gameData);
+                        // update children
+                        for (i = 0, l = children.length; i < l; ++i) {
+                            children[i].update(gameData);                            
+                        }
                     },
                     count: 0,
                     draw: function (gameData) {
                         var scroll = gameData.scroll || Vector(0, 0),
-                            context = gameData.context;
+                            context = gameData.context,
+                            i,
+                            l;
 
                         context.save();
                         context.translate(
@@ -6313,6 +6321,11 @@ glue.module.create(
                                 drawRegistrant(gameData);
                             }
                         }
+                        // draw children
+                        for (i = 0, l = children.length; i < l; ++i) {
+                            children[i].draw(gameData);                            
+                        }
+                        
                         context.restore();
                     },
                     pointerDown: function (e) {
@@ -6342,6 +6355,12 @@ glue.module.create(
                         if (Sugar.isVector(value)) {
                             position.x = value.x;
                             position.y = value.y;
+                            this.updateBoundingBox();
+                        }
+                    },
+                    setPositionObject: function (value) {
+                        if (Sugar.isVector(value)) {
+                            position = value;
                             this.updateBoundingBox();
                         }
                     },
@@ -6386,28 +6405,16 @@ glue.module.create(
                     getOrigin: function () {
                         return origin;
                     },
-                    addChild: function (baseObject, id) {
-                        if (Sugar.isDefined(id)) {
-                            children[id] = baseObject;
-                        } else if (Sugar.isDefined(baseObject.getName())) {
-                            children[baseObject.getName()] = baseObject;
-                        } else {
-                            children[baseObject.getID()] = baseObject;
-                        }
+                    addChild: function (baseObject) {
+                        children.push(baseObject);
                         baseObject.setParent(this);
 
                         if (baseObject.init) {
                             baseObject.init();
                         }
-                        if (baseObject.draw) {
-                            module.register('draw', baseObject.draw, 'base');
-                        }
-                        if (baseObject.update) {
-                            module.register('update', baseObject.update, 'base');
-                        }
                     },
-                    getChild: function (id) {
-                        return children[id];
+                    getChildren: function () {
+                        return children;
                     },
                     setParent: function (obj) {
                         parent = obj;
@@ -8751,6 +8758,7 @@ glue.module.create(
                 Event.off('glue.pointer.down', pointerDown);
                 Event.off('glue.pointer.move', pointerMove);
                 Event.off('glue.pointer.up', pointerUp);
+                objects = [];
             },
             game = {
                 SORT_TYPE_DEFAULT: 0,
