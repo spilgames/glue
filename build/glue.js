@@ -6322,6 +6322,9 @@ glue.module.create(
                                 drawRegistrant(gameData);
                             }
                         }
+
+                        // translate back from origin before drawing children
+                        context.translate(origin.x, origin.y);
                         // draw children
                         for (i = 0, l = children.length; i < l; ++i) {
                             children[i].draw(gameData);                            

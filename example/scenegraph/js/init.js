@@ -23,7 +23,7 @@ glue.module.get(
 
         Game.setup({
             game: {
-                name: 'Rotation'
+                name: 'Scene Graph'
             },
             canvas: {
                 id: 'canvas',
@@ -64,11 +64,10 @@ glue.module.get(
                     init: function () {
                         var dimension;
                         this.spritable.setup({
-                            position: Vector(200, 200),
+                            position: Vector(75, 75),
                             image: Loader.getAsset('logoLD')
                         });
                         dimension = this.getDimension();
-                        this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.rotatable.setTargetDegree(360, true);
                         this.rotatable.setSpeed(100);
                         this.scalable.setTarget(Vector(0.5, 0.5));
@@ -85,11 +84,10 @@ glue.module.get(
                     init: function () {
                         var dimension;
                         this.spritable.setup({
-                            position: Vector(200, 200),
+                            position: Vector(object2.getDimension().width, object2.getDimension().height),
                             image: Loader.getAsset('logoLD')
                         });
                         dimension = this.getDimension();
-                        this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
                         this.rotatable.setTargetDegree(360, true);
                         this.rotatable.setSpeed(100);
                         this.scalable.setTarget(Vector(0.5, 0.5));
@@ -102,7 +100,7 @@ glue.module.get(
                         }
                     }
                 });
-
+                
                 object1.addChild(object2);
                 object2.addChild(object3);
 
