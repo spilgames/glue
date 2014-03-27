@@ -8266,31 +8266,40 @@ glue.module.create(
             getScreen = function (name) {
                 if (Sugar.isString(name)) {
                     if (Sugar.isObject(screens[name])) {
-                        return screens[name]
+                        return screens[name];
                     }
                 }
             },
-            toggleScreen = function (name, action) {
+            toggleScreen = function (name, action, callback) {
                 var screen,
                     objects,
                     i = 0,
-                    l;
+                    l,
+                    objectsHandled = 0,
+                    objectHandled = function () {
+                        objectsHandled++;
+                        if (objectsHandled >= screen.getObjects().length + 1 && Sugar.isFunction(callback)) {
+                            callback();
+                        }
+                    };
 
                 if (Sugar.isString(name)) {
                     screen = getScreen(name);
                     if (action === 'show') {
-                        Game.add(screen);
+                        Game.add(screen, objectHandled);
+                        screen.setShown(true);
                     }
                     if (action === 'hide') {
-                        Game.remove(screen);
+                        Game.remove(screen, objectHandled);
+                        screen.setShown(false);
                     }
                     objects = screen.getObjects();
                     l = objects.length;
                     for (i; i < l; ++i) {
                         if (action === 'show') {
-                            Game.add(objects[i]);
+                            Game.add(objects[i], objectHandled);
                         } else if (action === 'hide') {
-                            Game.remove(objects[i]);
+                            Game.remove(objects[i], objectHandled);
                         }
                     }
                     if (action === 'show') {
@@ -8299,38 +8308,77 @@ glue.module.create(
                 }
             },
             module = {
+                /**
+                 * Add a screen to the Director
+                 * @name addScreen
+                 * @memberOf Director
+                 * @function
+                 */
                 addScreen: function (screen) {
                     if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
                         screens[screen.getName()] = screen;
                     }                    
                 },
-                removeScreen: function (screen) {
+                /**
+                 * Remove a screen from the Director
+                 * @name removeScreen
+                 * @memberOf Director
+                 * @function
+                 */
+                removeScreen: function (screen, callback) {
                     var screenName;
                     if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
                         screenName = screen.getName();
-                        toggleScreen(screenName, 'hide');
+                        toggleScreen(screenName, 'hide', callback);
                     }
                     if (Sugar.isObject(screens[screenName])) {
                         delete screens[screenName];
                     }
                 },
+                /**
+                 * Get all screens that are added to the Director
+                 * @name getScreens
+                 * @memberOf Director
+                 * @function
+                 */
                 getScreens: function () {
                     return screens;
                 },
-                showScreen: function (name) {
+                /**
+                 * Show a screen
+                 * @name showScreen
+                 * @memberOf Director
+                 * @function
+                 */
+                showScreen: function (name, callback) {
                     var activeScreenName;
                     if (Sugar.isString(name)) {
                         if (activeScreen !== null) {
                             activeScreenName = activeScreen.getName();
                             toggleScreen(activeScreenName, 'hide');    
                         }
-                        toggleScreen(name, 'show');
+                        toggleScreen(name, 'show', callback);
                     }
                 },
-                hideScreen: function (name) {
+                /**
+                 * Hide a screen
+                 * @name hideScreen
+                 * @memberOf Director
+                 * @function
+                 */
+                hideScreen: function (name, callback) {
                     if (Sugar.isString(name)) {
-                        toggleScreen(name, 'hide');
+                        toggleScreen(name, 'hide', callback);
                     }
+                },
+                /*
+                 * Get the active screen
+                 * @name getActiveScreen
+                 * @memberOf Director
+                 * @function
+                 */
+                getActiveScreen: function () {
+                    return activeScreen;
                 }
             };
 
@@ -9948,14 +9996,16 @@ glue.module.create(
 glue.module.create(
     'glue/screen',
     [
-        'glue'
+        'glue',
+        'glue/game'
     ],
-    function (Glue) {
+    function (Glue, Game) {
         'use strict';
         var Sugar = Glue.sugar;
 
         return function (name) {
             var objects = [],
+                isShown = false,
                 module = {
                     /**
                      * Add object to screen
@@ -9963,9 +10013,16 @@ glue.module.create(
                      * @memberOf screen
                      * @function
                      */
-                    addObject: function (object) {
+                    addObject: function (object, callback) {
                         if (Sugar.isObject(object)) {
                             objects.push(object);
+                            if (isShown) {
+                                Game.add(object, function () {
+                                    if (Sugar.isFunction(callback)) {
+                                        callback();
+                                    }
+                                });
+                            }
                         }
                     },
                     /**
@@ -9974,12 +10031,19 @@ glue.module.create(
                      * @memberOf screen
                      * @function
                      */
-                    removeObject: function (object) {
+                    removeObject: function (object, callback) {
                         var index;
                         if (Sugar.isObject(object)) {
                             index = objects.indexOf(object);
                             if (index >= 0) {
                                 objects.splice(index, 1);
+                                if (isShown) {
+                                    Game.remove(object, function () {
+                                        if (Sugar.isFunction(callback)) {
+                                            callback();
+                                        }
+                                    });
+                                }
                             }
                         }
                     },
@@ -10002,6 +10066,19 @@ glue.module.create(
                      */
                     getName: function () {
                         return name;
+                    },
+                    /**
+                     * Set a boolean that defines if the screen is shown
+                     * @name setShown
+                     * @memberOf screen
+                     * @function
+                     */
+                    setShown: function (bool) {
+                        if (!Sugar.isBoolean(bool)) {
+                            throw 'Argument is not a boolean';
+                        } else {
+                            isShown = bool;
+                        }
                     }
                 };
 

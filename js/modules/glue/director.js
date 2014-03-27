@@ -79,7 +79,7 @@ glue.module.create(
                  * @memberOf Director
                  * @function
                  */
-                removeScreen: function (screen) {
+                removeScreen: function (screen, callback) {
                     var screenName;
                     if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
                         screenName = screen.getName();
@@ -104,7 +104,7 @@ glue.module.create(
                  * @memberOf Director
                  * @function
                  */
-                showScreen: function (name) {
+                showScreen: function (name, callback) {
                     var activeScreenName;
                     if (Sugar.isString(name)) {
                         if (activeScreen !== null) {
@@ -120,11 +120,17 @@ glue.module.create(
                  * @memberOf Director
                  * @function
                  */
-                hideScreen: function (name) {
+                hideScreen: function (name, callback) {
                     if (Sugar.isString(name)) {
                         toggleScreen(name, 'hide', callback);
                     }
                 },
+                /*
+                 * Get the active screen
+                 * @name getActiveScreen
+                 * @memberOf Director
+                 * @function
+                 */
                 getActiveScreen: function () {
                     return activeScreen;
                 }
