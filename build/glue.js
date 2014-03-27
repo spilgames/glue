@@ -6333,13 +6333,73 @@ glue.module.create(
                         context.restore();
                     },
                     pointerDown: function (e) {
+                        var i,
+                            l = children.length,
+                            childEvent,
+                            pos;
+
                         callRegistrants('pointerDown', e);
+
+                        if (l) {
+                            childEvent = Sugar.clone(e);
+                            pos = childEvent.position;
+                            
+                            // reverse transformation
+                            // TODO: perform matrix transform to include rotation + scaling
+                            pos.x -= position.x;
+                            pos.y -= position.y;
+                            
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerDown(childEvent);
+                            }
+                        }
                     },
                     pointerMove: function (e) {
+                        var i,
+                            l = children.length,
+                            childEvent,
+                            pos;
+
                         callRegistrants('pointerMove', e);
+
+                        if (l) {
+                            childEvent = Sugar.clone(e);
+                            pos = childEvent.position;
+                            
+                            // reverse transformation
+                            // TODO: perform matrix transform to include rotation + scaling
+                            pos.x -= position.x;
+                            pos.y -= position.y;
+                            
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerMove(childEvent);
+                            }
+                        }
                     },
                     pointerUp: function (e) {
+                        var i,
+                            l = children.length,
+                            childEvent,
+                            pos;
+
                         callRegistrants('pointerUp', e);
+
+                        if (l) {
+                            childEvent = Sugar.clone(e);
+                            pos = childEvent.position;
+                            
+                            // reverse transformation
+                            // TODO: perform matrix transform to include rotation + scaling
+                            pos.x -= position.x;
+                            pos.y -= position.y;
+                            
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerUp(childEvent);
+                            }
+                        }
                     },
                     register: function (type, registrant, name) {
                         if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(registrant)) {
@@ -6423,8 +6483,8 @@ glue.module.create(
                     setParent: function (obj) {
                         parent = obj;
                     },
-                    getParent: function (obj) {
-                        return parent = obj;
+                    getParent: function () {
+                        return parent;
                     },
                     getID: function () {
                         return uniqueID;
