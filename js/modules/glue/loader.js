@@ -154,6 +154,9 @@ glue.module.create(
             loadAsset = function (name, type, source) {
                 var asset;
                 switch (type) {
+                    case module.ASSET_TYPE_IMAGE_REMOTE:
+                        loadImage(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
                     case module.ASSET_TYPE_IMAGE:
                         loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
@@ -181,6 +184,7 @@ glue.module.create(
                 ASSET_TYPE_BINARY: 'binary',
                 ASSET_TYPE_AUDIOSPRITE: 'audiosprite',
                 ASSET_TYPE_SPINE: 'spine',
+                ASSET_TYPE_IMAGE_REMOTE: 'remoteimage',
                 /**
                  * Sets the root folder for assets
                  * @name setAssetPath

@@ -6296,6 +6296,7 @@ glue.module.create(
                         }
                     },
                     count: 0,
+                    updateWhenPaused: false,
                     draw: function (gameData) {
                         var scroll = gameData.scroll || Vector(0, 0),
                             context = gameData.context,
@@ -6321,6 +6322,9 @@ glue.module.create(
                                 drawRegistrant(gameData);
                             }
                         }
+
+                        // translate back from origin before drawing children
+                        context.translate(origin.x, origin.y);
                         // draw children
                         for (i = 0, l = children.length; i < l; ++i) {
                             children[i].draw(gameData);                            
@@ -6329,13 +6333,73 @@ glue.module.create(
                         context.restore();
                     },
                     pointerDown: function (e) {
+                        var i,
+                            l = children.length,
+                            childEvent,
+                            pos;
+
                         callRegistrants('pointerDown', e);
+
+                        if (l) {
+                            childEvent = Sugar.clone(e);
+                            pos = childEvent.position;
+                            
+                            // reverse transformation
+                            // TODO: perform matrix transform to include rotation + scaling
+                            pos.x -= position.x;
+                            pos.y -= position.y;
+                            
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerDown(childEvent);
+                            }
+                        }
                     },
                     pointerMove: function (e) {
+                        var i,
+                            l = children.length,
+                            childEvent,
+                            pos;
+
                         callRegistrants('pointerMove', e);
+
+                        if (l) {
+                            childEvent = Sugar.clone(e);
+                            pos = childEvent.position;
+                            
+                            // reverse transformation
+                            // TODO: perform matrix transform to include rotation + scaling
+                            pos.x -= position.x;
+                            pos.y -= position.y;
+                            
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerMove(childEvent);
+                            }
+                        }
                     },
                     pointerUp: function (e) {
+                        var i,
+                            l = children.length,
+                            childEvent,
+                            pos;
+
                         callRegistrants('pointerUp', e);
+
+                        if (l) {
+                            childEvent = Sugar.clone(e);
+                            pos = childEvent.position;
+                            
+                            // reverse transformation
+                            // TODO: perform matrix transform to include rotation + scaling
+                            pos.x -= position.x;
+                            pos.y -= position.y;
+                            
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerUp(childEvent);
+                            }
+                        }
                     },
                     register: function (type, registrant, name) {
                         if (Sugar.contains(acceptedTypes, type) && Sugar.isFunction(registrant)) {
@@ -6419,8 +6483,8 @@ glue.module.create(
                     setParent: function (obj) {
                         parent = obj;
                     },
-                    getParent: function (obj) {
-                        return parent = obj;
+                    getParent: function () {
+                        return parent;
                     },
                     getID: function () {
                         return uniqueID;
@@ -8488,6 +8552,7 @@ glue.module.create(
             canvasScale = {},
             scroll = Vector(0, 0),
             isRunning = false,
+            isPaused = false,
             debug = false,
             debugBar = null,
             fpsAccumulator = 0,
@@ -8659,7 +8724,7 @@ glue.module.create(
                         gameData.objectLength = objects.length;
                         for (var i = 0; i < objects.length; ++i) {
                             component = objects[i];
-                            if (component.update) {
+                            if (component.update && ((isPaused && component.updateWhenPaused) || !isPaused)) {
                                 component.update(gameData);
                             }
                             if (component.draw) {
@@ -8682,10 +8747,12 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = objects.length; i < l; ++i) {
-                    component = objects[i];
-                    if (component.pointerDown) {
-                        component.pointerDown(e);
+                if (isRunning) {
+                    for (i = 0, l = objects.length; i < l; ++i) {
+                        component = objects[i];
+                        if (component.pointerDown && ((isPaused && component.updateWhenPaused) || !isPaused)) {
+                            component.pointerDown(e);
+                        }
                     }
                 }
             },
@@ -8695,10 +8762,12 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = objects.length; i < l; ++i) {
-                    component = objects[i];
-                    if (component.pointerMove) {
-                        component.pointerMove(e);
+                if (isRunning) {
+                    for (i = 0, l = objects.length; i < l; ++i) {
+                        component = objects[i];
+                        if (component.pointerMove && ((isPaused && component.updateWhenPaused) || !isPaused)) {
+                            component.pointerMove(e);
+                        }
                     }
                 }
             },
@@ -8708,10 +8777,12 @@ glue.module.create(
                     l,
                     component;
 
-                for (i = 0, l = objects.length; i < l; ++i) {
-                    component = objects[i];
-                    if (component.pointerUp) {
-                        component.pointerUp(e);
+                if (isRunning) {
+                    for (i = 0, l = objects.length; i < l; ++i) {
+                        component = objects[i];
+                        if (component.pointerUp && ((isPaused && component.updateWhenPaused) || !isPaused)) {
+                            component.pointerUp(e);
+                        }
                     }
                 }
             },
@@ -8857,6 +8928,9 @@ glue.module.create(
                             if (config.asset.spine) {
                                 Loader.setAssets(Loader.ASSET_TYPE_SPINE, config.asset.spine);
                             }
+                            if (config.asset.remoteImage) {
+                                Loader.setAssets(Loader.ASSET_TYPE_IMAGE_REMOTE, config.asset.remoteImage);
+                            }
                             Loader.load(function () {
                                 startup();
                                 if (onReady) {
@@ -8923,6 +8997,17 @@ glue.module.create(
                 },
                 getScroll: function () {
                     return scroll;
+                },
+                pause: function (force) {
+                    isPaused = true;
+                    isRunning = !force;
+                },
+                resume: function () {
+                    isPaused = false;
+                    if (!isRunning) {
+                        isRunning = true;
+                        startup();
+                    }
                 }
             };
         return game;
@@ -9084,6 +9169,9 @@ glue.module.create(
             loadAsset = function (name, type, source) {
                 var asset;
                 switch (type) {
+                    case module.ASSET_TYPE_IMAGE_REMOTE:
+                        loadImage(name, source, assetLoadedHandler, assetErrorHandler);
+                    break;
                     case module.ASSET_TYPE_IMAGE:
                         loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
@@ -9111,6 +9199,7 @@ glue.module.create(
                 ASSET_TYPE_BINARY: 'binary',
                 ASSET_TYPE_AUDIOSPRITE: 'audiosprite',
                 ASSET_TYPE_SPINE: 'spine',
+                ASSET_TYPE_IMAGE_REMOTE: 'remoteimage',
                 /**
                  * Sets the root folder for assets
                  * @name setAssetPath

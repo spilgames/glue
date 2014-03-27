@@ -27,7 +27,10 @@ glue.module.get(
                     asset1: 'asset1.jpg',
                     asset2: 'asset2.jpg',
                     asset3: 'asset3.jpg',
-                    asset4: 'asset4.jpg'
+                    asset4: 'asset4.jpg',
+                },
+                remoteImage: {
+                    remoteAsset: 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Pacman.svg/542px-Pacman.svg.png'
                 }
             }
         }, function () {
