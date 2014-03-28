@@ -73,6 +73,13 @@ glue.module.create('glue/math/vector', [
                 clone: function () {
                     return module(this.x, this.y);
                 },
+                toMatrix: function () {
+                        var matrix = math.Matrix(1, 3);
+                        matrix.set(0, 0, this.x);
+                        matrix.set(0, 1, this.y);
+                        matrix.set(0, 2, 1);
+                        return matrix;
+                },
                 static: {
                     add: function (vector1, vector2) {
                         var vector = vector1.clone();

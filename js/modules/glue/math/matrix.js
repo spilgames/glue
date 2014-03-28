@@ -185,6 +185,24 @@ glue.module.create('glue/math/matrix', [
                         var newMatrix = module(n, m);
                         newMatrix.setValues(mat);
                         return newMatrix;
+                    },
+                    static: {
+                        add: function (matrix1, matrix2) {
+                            var matrix = matrix1.clone();
+                            matrix.add(matrix2);
+                            return matrix;
+                        },
+                        /**
+                         * Multiply with 2 matrices
+                         * Returns matric C if the multiplication is A * B = C
+                         * @param {Matrix} matrix1 - matrix A
+                         * @param {Matrix} matrix2 - matrix B
+                         */
+                        multiply: function (matrix1, matrix2) {
+                            var matrix = matrix2.clone();
+                            matrix.multiply(matrix1);
+                            return matrix;
+                        }
                     }
                 };
             };

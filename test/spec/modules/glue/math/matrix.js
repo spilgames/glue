@@ -76,6 +76,26 @@ glue.module.create(
                 expect(B.get(1, 1)).toEqual(50);
             });
             
+            it('Should be able to multiply 2 matrices and return the result', function () {
+                var A = Matrix(2, 2),
+                    B = Matrix(2, 2),
+                    C;
+                A.setValues([1, 2, 3, 4]);
+                B.setValues([5, 6, 7, 8]);
+
+                // C = A * B
+                C = A.static.multiply(A, B);
+
+                expect(C.get(0, 0)).toEqual(19);
+                expect(C.get(1, 0)).toEqual(22);
+                expect(C.get(0, 1)).toEqual(43);
+                expect(C.get(1, 1)).toEqual(50);
+                expect(B.get(0, 0)).toEqual(5);
+                expect(B.get(1, 0)).toEqual(6);
+                expect(B.get(0, 1)).toEqual(7);
+                expect(B.get(1, 1)).toEqual(8);
+            });
+            
             it('Should be able to clone a matrix', function () {
                 var A = Matrix(2, 2),
                     B = Matrix(2, 2),

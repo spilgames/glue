@@ -6246,9 +6246,10 @@ glue.module.create(
         'glue',
         'glue/math/vector',
         'glue/math/rectangle',
-        'glue/math/dimension'
+        'glue/math/dimension',
+        'glue/math/matrix'
     ],
-    function (Glue, Vector, Rectangle, Dimension) {
+    function (Glue, Vector, Rectangle, Dimension, Matrix) {
         var Sugar = Glue.sugar,
             crossInstanceID = 0;
         return function () {
@@ -6289,6 +6290,43 @@ glue.module.create(
                         }
                         typeRegistrants[registrant].call(module, gameData);
                     }
+                },
+                transformEvent = function (evt) {
+                    var e = Sugar.clone(evt),
+                        positionVector = e.position.toMatrix(),
+                        translateMatrix = Matrix(3, 3),
+                        scaleMatrix = Matrix(3, 3),
+                        rotateMatrix = Matrix(3, 3),
+                        sin,
+                        cos;
+                    
+                    /** 
+                    * reverse transformation
+                    */
+                    // translation
+                    translateMatrix.set(2, 0, -position.x);
+                    translateMatrix.set(2, 1, -position.y);
+                    positionVector.multiply(translateMatrix);
+                    //rotate
+                    if (module.rotatable) {
+                        sin = Math.sin(-module.rotatable.getAngleRadian());
+                        cos = Math.cos(-module.rotatable.getAngleRadian());
+                        rotateMatrix.set(0, 0, cos);
+                        rotateMatrix.set(1, 0, -sin);
+                        rotateMatrix.set(0, 1, sin);
+                        rotateMatrix.set(1, 1, cos);
+                        positionVector.multiply(rotateMatrix);
+                    }
+                    // scale
+                    if (module.scalable) {
+                        scaleMatrix.set(0, 0, 1 / module.scalable.getScale().x);
+                        scaleMatrix.set(1, 1, 1 / module.scalable.getScale().y);
+                        positionVector.multiply(scaleMatrix);
+                    }
+
+                    e.position.x = positionVector.get(0, 0); 
+                    e.position.y = positionVector.get(0, 1); 
+                    return e;  
                 },
                 module = {
                     add: function (object) {
@@ -6355,14 +6393,7 @@ glue.module.create(
                         callRegistrants('pointerDown', e);
 
                         if (l) {
-                            childEvent = Sugar.clone(e);
-                            pos = childEvent.position;
-                            
-                            // reverse transformation
-                            // TODO: perform matrix transform to include rotation + scaling
-                            pos.x -= position.x;
-                            pos.y -= position.y;
-                            
+                            childEvent = transformEvent(e);
                             // pass through children
                             for (i = 0; i < l; ++i) {
                                 children[i].pointerDown(childEvent);
@@ -6378,14 +6409,7 @@ glue.module.create(
                         callRegistrants('pointerMove', e);
 
                         if (l) {
-                            childEvent = Sugar.clone(e);
-                            pos = childEvent.position;
-                            
-                            // reverse transformation
-                            // TODO: perform matrix transform to include rotation + scaling
-                            pos.x -= position.x;
-                            pos.y -= position.y;
-                            
+                            childEvent = transformEvent(e);
                             // pass through children
                             for (i = 0; i < l; ++i) {
                                 children[i].pointerMove(childEvent);
@@ -6401,14 +6425,7 @@ glue.module.create(
                         callRegistrants('pointerUp', e);
 
                         if (l) {
-                            childEvent = Sugar.clone(e);
-                            pos = childEvent.position;
-                            
-                            // reverse transformation
-                            // TODO: perform matrix transform to include rotation + scaling
-                            pos.x -= position.x;
-                            pos.y -= position.y;
-                            
+                            childEvent = transformEvent(e);
                             // pass through children
                             for (i = 0; i < l; ++i) {
                                 children[i].pointerUp(childEvent);
@@ -9742,6 +9759,24 @@ glue.module.create('glue/math/matrix', [
                         var newMatrix = module(n, m);
                         newMatrix.setValues(mat);
                         return newMatrix;
+                    },
+                    static: {
+                        add: function (matrix1, matrix2) {
+                            var matrix = matrix1.clone();
+                            matrix.add(matrix2);
+                            return matrix;
+                        },
+                        /**
+                         * Multiply with 2 matrices
+                         * Returns matric C if the multiplication is A * B = C
+                         * @param {Matrix} matrix1 - matrix A
+                         * @param {Matrix} matrix2 - matrix B
+                         */
+                        multiply: function (matrix1, matrix2) {
+                            var matrix = matrix2.clone();
+                            matrix.multiply(matrix1);
+                            return matrix;
+                        }
                     }
                 };
             };
@@ -9948,6 +9983,13 @@ glue.module.create('glue/math/vector', [
                 },
                 clone: function () {
                     return module(this.x, this.y);
+                },
+                toMatrix: function () {
+                        var matrix = math.Matrix(1, 3);
+                        matrix.set(0, 0, this.x);
+                        matrix.set(0, 1, this.y);
+                        matrix.set(0, 2, 1);
+                        return matrix;
                 },
                 static: {
                     add: function (vector1, vector2) {

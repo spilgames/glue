@@ -50,6 +50,7 @@ glue.module.get(
                         });
                         dimension = this.getDimension();
                         this.setOrigin(Vector(dimension.width / 2, dimension.height / 2));
+                        // this.rotatable.setAngleDegree(45);
                     },
                     update: function (deltaT) {
                     },
@@ -74,10 +75,12 @@ glue.module.get(
                     init: function () {
                         var dimension;
                         object2.spritable.setup({
-                            position: Vector(75, 75),
+                            position: Vector(75, 0),
                             image: Loader.getAsset('logoLD')
                         });
                         dimension = object2.getDimension();
+                        object2.initialAngle = Math.atan2(object2.getPosition().y, object2.getPosition().x);
+
                         // object2.scalable.setScale(Vector(0.5, 0.5));
                     },
                     update: function (deltaT) {
@@ -95,27 +98,37 @@ glue.module.get(
                     //     object2.base.pointerDown(e);
                     // },
                     pointerMove: function (e) {
-                        var angle = 0;
+                        var angle = 0,
+                            parent = object2.getParent();
                         if (object2.held && object2.getBoundingBox().hasPosition(e.position)) {
                             object2.base.pointerMove(e);
                             object2.setPosition(Vector(e.position.x + object2.offset.x, e.position.y + object2.offset.y));
-                            // TODO: transform parent
-                            /*
+
                             // rotate parent
                             angle = Math.atan2(object2.getPosition().y, object2.getPosition().x);
-                            object2.getParent().rotatable.setAngleRadian(angle);
-                            */
+                            parent.rotatable.setAngleRadian(angle);
+                            console.log(angle);
                         }
                         object2.relativePos = Vector(e.position.x, e.position.y); 
                         // propagate event
                         this.base.pointerMove(e);
                     },
                     draw: function (gameData) {
+                        var parent = object2.getParent(),
+                            rect = object2.getBoundingBox();
                         object2.base.draw(gameData);
                         // draw child event position for debugging purposes
-                        // if (object2.relativePos) {
-                        //     gameData.context.fillRect(object2.relativePos.x, object2.relativePos.y, 2, 2);
-                        // }
+                        if (object2.relativePos) {
+                            gameData.context.fillRect(object2.relativePos.x, object2.relativePos.y, 2, 2);
+                        }
+                        // draw parent to child
+                        gameData.context.beginPath();
+                        gameData.context.moveTo(0, 0);
+                        gameData.context.lineTo(object2.getPosition().x, object2.getPosition().y);
+                        gameData.context.closePath();
+                        gameData.context.stroke();
+                        // draw hitbox
+                        gameData.context.strokeRect(rect.x1, rect.y1, rect.getWidth(), rect.getHeight());
                     }
                 }),
                 object3 = BaseObject(Spritable, Rotatable, Scalable, Clickable).add({
