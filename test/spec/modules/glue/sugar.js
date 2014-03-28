@@ -133,10 +133,10 @@
                 var arr2 = [3,4]; 
                 expect(Sugar.combine(arr1, arr2)).toEqual([1,2,3,4]);
             });
-            it('returns an object with properties from obj2 added to obj1 if the parameters are objects, overwriting property in obj1', function() {
+            it('returns an object with properties from obj2 added to obj1 if the parameters are objects, same named properties are moved to obj2.base', function() {
                 var obj1 = {asd: 123, zxc: []};
                 var obj2 = {asd: 456, qwe: 'asd'};
-                var expected = {asd: 456, qwe: 'asd', zxc: []};
+                var expected = {asd: 456, qwe: 'asd', zxc: [], base: {asd: 123}};
                 
                 expect(Sugar.combine(obj1, obj2)).toEqual(expected);
             });
@@ -310,7 +310,7 @@
                             }
                         };
                     }());
-                    var mixin = module1.mix(module2);
+                    var mixin = Sugar.combine(module1, module2);
                     expect(mixin.test1()).toEqual('test1');
                     expect(mixin.test2()).toEqual('test2');
                     expect(mixin.test3()).toEqual('test3');
@@ -331,7 +331,7 @@
                     }());
                     var move = (function () {
                         return function (obj) {
-                            obj.mix({
+                            Sugar.combine(obj, {
                                 run: function () {
                                     return 'running';
                                 },
@@ -348,8 +348,8 @@
                                     y: y
                                 },
                                 base = Base(),
-                                move = base.mix(Move(base)),
-                                obj = base.mix({
+                                move = Sugar.combine(base, Move(base)),
+                                obj = Sugar.combine(base, {
                                     custom1: function () {
                                         return 'custom1';
                                     },

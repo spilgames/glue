@@ -32,7 +32,8 @@
         // glue specs
         specs = [
             'spec/modules/glue/baseobject.js',
-            'spec/modules/glue/component/visible.js',
+            'spec/modules/glue/component/spritable.js',
+            'spec/modules/glue/math/matrix.js',
             'spec/modules/glue/sugar.js'
         ],
         // enable game canvas below for debugging

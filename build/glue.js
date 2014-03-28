@@ -5095,6 +5095,20 @@ modules.glue.sugar = (function (win, doc) {
          */
         isMatrix = function (obj) {
             if (has(obj, 'get') && isFunction(obj.get) &&
+                has(obj, 'set') && isFunction(obj.set) &&
+                has(obj, 'transpose') && isFunction(obj.transpose) &&
+                has(obj, 'add') && isFunction(obj.add) &&
+                has(obj, 'multiply') && isFunction(obj.multiply)) {
+                    return true;
+            }
+        },
+        /**
+         * Is a given value an array2d?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isArray2D = function (obj) {
+            if (has(obj, 'get') && isFunction(obj.get) &&
                 has(obj, 'getValue') && isFunction(obj.getValue) &&
                 has(obj, 'iterate') && isFunction(obj.iterate) &&
                 has(obj, 'set') && isFunction(obj.iterate) &&
@@ -9402,6 +9416,70 @@ glue.module.create(
     }
 );
 
+/**
+ *  @module Array2D
+ *  @namespace math
+ *  @desc Represents a 2D array
+ *  @copyright (C) SpilGames
+ *  @author Jeroen Reurings
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create('glue/math/array2d', [
+        'glue'
+    ],
+    function (
+        Glue
+    ) {
+        'use strict';
+        var sugar = Glue.sugar;
+        return function (x, y, initial) {
+            var mat = [],
+                a,
+                col,
+                row;
+
+            for (col = 0; col < x; ++col) {
+                a = [];
+                for (row = 0; row < y; ++row) {
+                    a[row] = initial || null;
+                }
+                mat[col] = a;
+            }
+
+            return {
+                get: function () {
+                    return mat;
+                },
+                getValue: function (col, row) {
+                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
+                        return mat[col][row];
+                    }
+                },
+                iterate: function (callback) {
+                    for (col = 0; col < x; ++col) {
+                        for (row = 0; row < y; ++row) {
+                            if (!sugar.isFunction(callback)) {
+                                throw('Please supply a callback function');
+                            }
+                            callback(col, row, mat[col][row]);
+                        }
+                    }
+                },
+                set: function (col, row, value) {
+                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
+                        mat[col][row] = value;
+                    }
+                },
+                unset: function (col, row) {
+                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
+                        mat[col][row] = null;
+                    }
+                }
+            };
+        };
+    }
+);
+
 /*
  *  @module Circle
  *  @namespace math
@@ -9482,65 +9560,194 @@ glue.module.create(
  *  @namespace math
  *  @desc Represents a matrix
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
+ *  @author Hernan Zhou
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create('glue/math/matrix', [
         'glue'
     ],
-    function (
-        Glue
-    ) {
+    function (Glue) {
         'use strict';
-        var sugar = Glue.sugar;
-        return function (x, y, initial) {
-            var mat = [],
-                a,
-                col,
-                row;
+        var Sugar = Glue.sugar,
+            module = function (width, height) {
+                var mat = [],
+                    n = Sugar.isDefined(width) ? width : 0,
+                    m = Sugar.isDefined(height) ? height : 0,
+                    i,
+                    j,
+                    set = function (x, y, value) {
+                        mat[y * n + x] = value;
+                    },
+                    get = function (x, y) {
+                        return mat[y * n + x];
+                    };
 
-            for (col = 0; col < x; ++col) {
-                a = [];
-                for (row = 0; row < y; ++row) {
-                    a[row] = initial || null;
-                }
-                mat[col] = a;
-            }
-
-            return {
-                get: function () {
-                    return mat;
-                },
-                getValue: function (col, row) {
-                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
-                        return mat[col][row];
-                    }
-                },
-                iterate: function (callback) {
-                    for (col = 0; col < x; ++col) {
-                        for (row = 0; row < y; ++row) {
-                            if (!sugar.isFunction(callback)) {
-                                throw('Please supply a callback function');
-                            }
-                            callback(col, row, mat[col][row]);
+                // initialize as identity matrix
+                for (j = 0; j < m; ++j) {
+                    for (i = 0; i < n; ++i) {
+                        if (i === j) {
+                            set(i, j, 1);
+                        } else {
+                            set(i, j, 0);
                         }
                     }
-                },
-                set: function (col, row, value) {
-                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
-                        mat[col][row] = value;
-                    }
-                },
-                unset: function (col, row) {
-                    if (mat[col] !== undefined && mat[col][row] !== undefined) {
-                        mat[col][row] = null;
-                    }
                 }
+
+                return {
+                    /**
+                     * Returns a string representation of the matrix (useful for debugging purposes)
+                     */
+                    stringify: function () {
+                        var str = '',
+                            row = '';
+                        for (j = 0; j < m; ++j) {
+                            for (i = 0; i < n; ++i) {
+                                row += get(i, j) + '\t';
+                            }
+                            str += row + '\n';
+                            row = '';
+                        }
+                        return str;
+                    },
+                    /**
+                     * Get the value inside matrix
+                     * @param {Number} x - x index
+                     * @param {Number} y - y index
+                     */
+                    get: function (x, y) {
+                        return get(x, y);
+                    },
+                    /**
+                     * Set the value inside matrix
+                     * @param {Number} x - x index
+                     * @param {Number} y - y index
+                     * @param {Number} value - new value
+                     */
+                    set: function (x, y, value) {
+                        set(x, y, value);
+                    },
+                    /**
+                     * Set the values inside matrix using an array
+                     * If the matrix is 2x2 in size, then supplying an array with
+                     * values [1, 2, 3, 4] will result in a matrix
+                     * [1 2]
+                     * [3 4]
+                     * If the array has more elements than the matrix, the 
+                     * rest of the array is ignored.
+                     * @param {Array} array - array with Numbers
+                     */
+                    setValues: function (array) {
+                        var l = Math.min(mat.length, array.length);
+                        for (i = 0; i < l; ++i) {
+                            mat[i] = array[i];
+                        }
+                        return this;
+                    },
+                    /**
+                     * Get the matrix width
+                     */
+                    getWidth: function () {
+                        return n;
+                    },
+                    /**
+                     * Get the matrix height
+                     */
+                    getHeight: function () {
+                        return m;
+                    },
+                    /**
+                     * Iterate through matrix
+                     */
+                    iterate: function (callback) {
+                        for (j = 0; j < m; ++j) {
+                            for (i = 0; i < n; ++i) {
+                                if (!Sugar.isFunction(callback)) {
+                                    throw ('Please supply a callback function');
+                                }
+                                callback(i, j, get(i, j));
+                            }
+                        }
+                    },
+                    /**
+                     * Transposes the current matrix
+                     */
+                    transpose: function () {
+                        var newMat = [];
+                        // reverse loop so m becomes n
+                        for (i = 0; i < n; ++i) {
+                            for (j = 0; j < m; ++j) {
+                                newMat[i * m + j] = get(i, j);
+                            }
+                        }
+                        // set new matrix
+                        mat = newMat;
+                        // swap width and height
+                        m = [n, n = m][0];
+                        return this;
+                    },
+                    /**
+                     * Addition of another matrix
+                     * @param {Matrix} matrix - matrix to add
+                     */
+                    add: function (matrix) {
+                        if (m != matrix.getHeight() || n != matrix.getWidth()) {
+                            throw 'Matrix sizes incorrect';
+                        }
+                        for (j = 0; j < m; ++j) {
+                            for (i = 0; i < n; ++i) {
+                                set(i, j, get(i, j) + matrix.get(i, j));
+                            }
+                        }
+                        return this;
+                    },
+                    /**
+                     * Multiply with another matrix
+                     * If a new matrix C is the result of A * B = C
+                     * then B is the current matrix and becomes C, A is the input matrix
+                     * @param {Matrix} matrix - input matrix to multiply with
+                     */
+                    multiply: function (matrix) {
+                        var newMat = [],
+                            newWidth = n, // B.n
+                            oldHeight = m, // B.m
+                            newHeight = matrix.getHeight(), // A.m
+                            oldWidth = matrix.getWidth(), // A.n
+                            newValue = 0,
+                            k;
+                        if (oldHeight != oldWidth) {
+                            throw 'Matrix sizes incorrect';
+                        }
+
+                        for (j = 0; j < newHeight; ++j) {
+                            for (i = 0; i < newWidth; ++i) {
+                                newValue = 0;
+                                // loop through matrices
+                                for (k = 0; k < oldWidth; ++k) {
+                                    newValue += matrix.get(k, j) * get(i , k);
+                                }
+                                newMat[j * newWidth + i] = newValue;
+                            }
+                        }
+                        // set to new matrix
+                        mat = newMat;
+                        // update matrix size
+                        n = newWidth;
+                        m = newHeight;
+                        return this;
+                    },
+                    /**
+                     * Returns a clone of the current matrix
+                     */
+                    clone: function () {
+                        var newMatrix = module(n, m);
+                        newMatrix.setValues(mat);
+                        return newMatrix;
+                    }
+                };
             };
-        };
+        return module;
     }
 );
-
 /**
  *  @module Polygon
  *  @namespace math
@@ -9675,130 +9882,126 @@ glue.module.create(
  *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
-glue.module.create('glue/math/vector',
-    [
+glue.module.create('glue/math/vector', [
         'glue/math'
     ],
     function (Mathematics) {
-    'use strict';
-    var module =function (x, y, z) {
-        var math = Mathematics();
+        'use strict';
+        var module = function (x, y, z) {
+            var math = Mathematics();
 
-        return {
-            x: x,
-            y: y,
-            z: z || 0,
-            get: function () {
-                return {
-                    x: this.x,
-                    y: this.y,
-                    z: this.z
+            return {
+                x: x,
+                y: y,
+                get: function () {
+                    return {
+                        x: this.x,
+                        y: this.y
+                    }
+                },
+                add: function (vector) {
+                    this.x += vector.x;
+                    this.y += vector.y;
+                    return this;
+                },
+                substract: function (vector) {
+                    this.x -= vector.x;
+                    this.y -= vector.y;
+                    return this;
+                },
+                angle: function (vector) {
+                    return Math.atan2(
+                        (vector.y - this.y), (vector.x - this.x)
+                    );
+                },
+                dotProduct: function (vector) {
+                    return this.x * vector.x + this.y * vector.y;
+                },
+                distance: function (vector) {
+                    return Math.sqrt(
+                        (this.x - vector.x) * (this.x - vector.x) +
+                        (this.y - vector.y) * (this.y - vector.y)
+                    );
+                },
+                multiply: function (vector) {
+                    this.x *= vector.x;
+                    this.y *= vector.y;
+                    return this;
+                },
+                scale: function (value) {
+                    this.x *= value;
+                    this.y *= value;
+                    return this;
+                },
+                length: function () {
+                    return Math.sqrt(math.square(this.x) + math.square(this.y));
+                },
+                normalize: function (value) {
+                    this.x /= value > 0 ? value : 1;
+                    this.y /= value > 0 ? value : 1;
+                    return this;
+                },
+                copy: function (vector) {
+                    this.x = vector.x;
+                    this.y = vector.y;
+                    return this;
+                },
+                clone: function () {
+                    return module(this.x, this.y);
+                },
+                static: {
+                    add: function (vector1, vector2) {
+                        var vector = vector1.clone();
+                        vector.add(vector2);
+                        return vector;
+                    },
+                    substract: function (vector1, vector2) {
+                        var vector = vector1.clone();
+                        vector.substract(vector2);
+                        return vector;
+                    },
+                    angle: function (vector1, vector2) {
+                        return vector1.angle(vector2);
+                    },
+                    dotProduct: function (vector1, vector2) {
+                        return vector1.dotProduct(vector2);
+                    },
+                    distance: function (vector1, vector2) {
+                        return vector1.distance(vector2);
+                    },
+                    multiply: function (vector1, vector2) {
+                        var vector = vector1.clone();
+                        vector.multiply(vector2);
+                        return vector;
+                    },
+                    scale: function (vector1, value) {
+                        var vector = vector1.clone();
+                        vector.scale(value);
+                        return vector;
+                    },
+                    length: function (vector1) {
+                        var vector = vector1.clone();
+                        return vector.length();
+                    },
+                    normalize: function (vector1, value) {
+                        var vector = vector1.clone();
+                        vector.normalize(value);
+                        return vector;
+                    },
+                    copy: function (vector1, vector2) {
+                        var vector = vector1.clone();
+                        vector.copy(vector2);
+                        return vector;
+                    },
+                    clone: function (vector1) {
+                        return vector1.clone();
+                    }
                 }
-            },
-            add: function (vector) {
-                this.x += vector.x;
-                this.y += vector.y;
-                return this;
-            },
-            substract: function (vector) {
-                this.x -= vector.x;
-                this.y -= vector.y;
-                return this;
-            },
-            angle: function (vector) {
-                return Math.atan2(
-                    (vector.y - this.y),
-                    (vector.x - this.x)
-                );
-            },
-            dotProduct: function (vector) {
-                return this.x * vector.x + this.y * vector.y;
-            },        
-            distance : function (vector) {
-                return Math.sqrt(
-                    (this.x - vector.x) * (this.x - vector.x) +
-                    (this.y - vector.y) * (this.y - vector.y)
-                );
-            },
-            multiply: function (vector) {
-                this.x *= vector.x;
-                this.y *= vector.y;
-                return this;
-            },
-            scale: function (value) {
-                this.x *= value;
-                this.y *= value;
-                return this;
-            },
-            length: function () {
-                return Math.sqrt(math.square(this.x) + math.square(this.y));
-            },
-            normalize: function (value) {
-                this.x /= value > 0 ? value : 1;
-                this.y /= value > 0 ? value : 1;
-                return this;
-            },
-            copy: function (vector) {
-                this.x = vector.x;
-                this.y = vector.y;
-                return this;
-            },
-            clone: function () {
-                return module(this.x, this.y);
-            },
-            static: {
-                add: function (vector1, vector2) {
-                    var vector = vector1.clone();
-                    vector.add(vector2);
-                    return vector;
-                },
-                substract: function (vector1, vector2) {
-                    var vector = vector1.clone();
-                    vector.substract(vector2);
-                    return vector;
-                },
-                angle: function (vector1, vector2) {
-                    return vector1.angle(vector2);
-                },
-                dotProduct: function (vector1, vector2) {
-                    return vector1.dotProduct(vector2);
-                },
-                distance: function (vector1, vector2) {
-                    return vector1.distance(vector2);
-                },
-                multiply: function (vector1, vector2) {
-                    var vector = vector1.clone();
-                    vector.multiply(vector2);
-                    return vector;
-                },
-                scale: function (vector1, value) {
-                    var vector = vector1.clone();
-                    vector.scale(value);
-                    return vector;
-                },
-                length: function (vector1) {
-                    var vector = vector1.clone();
-                    return vector.length();
-                },
-                normalize: function (vector1, value) {
-                    var vector = vector1.clone();
-                    vector.normalize(value);
-                    return vector;
-                },
-                copy: function (vector1, vector2) {
-                    var vector = vector1.clone();
-                    vector.copy(vector2);
-                    return vector;
-                },
-                clone: function (vector1) {
-                    return vector1.clone();
-                }
-            }
+            };
         };
-    };
-    return module;
-});
-
+        return module;
+    }
+);
 /**
  *  @module SAT (Separating Axis Theorem)
  *  @desc Handles the collision between two rectangles.
@@ -10372,6 +10575,20 @@ modules.glue.sugar = (function (win, doc) {
          * @return {Boolean}
          */
         isMatrix = function (obj) {
+            if (has(obj, 'get') && isFunction(obj.get) &&
+                has(obj, 'set') && isFunction(obj.set) &&
+                has(obj, 'transpose') && isFunction(obj.transpose) &&
+                has(obj, 'add') && isFunction(obj.add) &&
+                has(obj, 'multiply') && isFunction(obj.multiply)) {
+                    return true;
+            }
+        },
+        /**
+         * Is a given value an array2d?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isArray2D = function (obj) {
             if (has(obj, 'get') && isFunction(obj.get) &&
                 has(obj, 'getValue') && isFunction(obj.getValue) &&
                 has(obj, 'iterate') && isFunction(obj.iterate) &&
