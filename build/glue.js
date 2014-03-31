@@ -8330,33 +8330,40 @@ glue.module.create(
             getScreen = function (name) {
                 if (Sugar.isString(name)) {
                     if (Sugar.isObject(screens[name])) {
-                        return screens[name]
+                        return screens[name];
                     }
                 }
             },
-            toggleScreen = function (name, action) {
+            toggleScreen = function (name, action, callback) {
                 var screen,
                     objects,
                     i = 0,
-                    l;
+                    l,
+                    objectsHandled = 0,
+                    objectHandled = function () {
+                        objectsHandled++;
+                        if (objectsHandled >= screen.getObjects().length + 1 && Sugar.isFunction(callback)) {
+                            callback();
+                        }
+                    };
 
                 if (Sugar.isString(name)) {
                     screen = getScreen(name);
                     if (action === 'show') {
-                        Game.add(screen);
+                        Game.add(screen, objectHandled);
                         screen.setShown(true);
                     }
                     if (action === 'hide') {
-                        Game.remove(screen);
+                        Game.remove(screen, objectHandled);
                         screen.setShown(false);
                     }
                     objects = screen.getObjects();
                     l = objects.length;
                     for (i; i < l; ++i) {
                         if (action === 'show') {
-                            Game.add(objects[i]);
+                            Game.add(objects[i], objectHandled);
                         } else if (action === 'hide') {
-                            Game.remove(objects[i]);
+                            Game.remove(objects[i], objectHandled);
                         }
                     }
                     if (action === 'show') {
@@ -8382,11 +8389,11 @@ glue.module.create(
                  * @memberOf Director
                  * @function
                  */
-                removeScreen: function (screen) {
+                removeScreen: function (screen, callback) {
                     var screenName;
                     if (Sugar.isFunction(screen.getName) && Sugar.isObject(screen)) {
                         screenName = screen.getName();
-                        toggleScreen(screenName, 'hide');
+                        toggleScreen(screenName, 'hide', callback);
                     }
                     if (Sugar.isObject(screens[screenName])) {
                         delete screens[screenName];
@@ -8407,14 +8414,14 @@ glue.module.create(
                  * @memberOf Director
                  * @function
                  */
-                showScreen: function (name) {
+                showScreen: function (name, callback) {
                     var activeScreenName;
                     if (Sugar.isString(name)) {
                         if (activeScreen !== null) {
                             activeScreenName = activeScreen.getName();
                             toggleScreen(activeScreenName, 'hide');    
                         }
-                        toggleScreen(name, 'show');
+                        toggleScreen(name, 'show', callback);
                     }
                 },
                 /**
@@ -8423,10 +8430,19 @@ glue.module.create(
                  * @memberOf Director
                  * @function
                  */
-                hideScreen: function (name) {
+                hideScreen: function (name, callback) {
                     if (Sugar.isString(name)) {
-                        toggleScreen(name, 'hide');
+                        toggleScreen(name, 'hide', callback);
                     }
+                },
+                /*
+                 * Get the active screen
+                 * @name getActiveScreen
+                 * @memberOf Director
+                 * @function
+                 */
+                getActiveScreen: function () {
+                    return activeScreen;
                 }
             };
 
