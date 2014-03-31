@@ -57,6 +57,7 @@ glue.module.create(
                     }
                 },
                 transformEvent = function (evt) {
+                    // consideration: it might be too expensive to clone the event object
                     var e = Sugar.clone(evt),
                         positionVector = e.position.toMatrix(),
                         translateMatrix = Matrix(3, 3),
@@ -68,29 +69,35 @@ glue.module.create(
                     /** 
                     * reverse transformation
                     */
-                    // translation
+                    // construct a translation matrix and apply to position vector
                     translateMatrix.set(2, 0, -position.x);
                     translateMatrix.set(2, 1, -position.y);
                     positionVector.multiply(translateMatrix);
-                    //rotate
-                    if (module.rotatable) {
-                        sin = Math.sin(-module.rotatable.getAngleRadian());
-                        cos = Math.cos(-module.rotatable.getAngleRadian());
-                        rotateMatrix.set(0, 0, cos);
-                        rotateMatrix.set(1, 0, -sin);
-                        rotateMatrix.set(0, 1, sin);
-                        rotateMatrix.set(1, 1, cos);
-                        positionVector.multiply(rotateMatrix);
-                    }
-                    // scale
-                    if (module.scalable) {
-                        scaleMatrix.set(0, 0, 1 / module.scalable.getScale().x);
-                        scaleMatrix.set(1, 1, 1 / module.scalable.getScale().y);
-                        positionVector.multiply(scaleMatrix);
+                    // only scale/rotatable if there is a component
+                    for (type in registrants.draw) {
+                        if (type === 'rotatable') {
+                            // construct a rotation matrix and apply to position vector
+                            sin = Math.sin(-module.rotatable.getAngleRadian());
+                            cos = Math.cos(-module.rotatable.getAngleRadian());
+                            rotateMatrix.set(0, 0, cos);
+                            rotateMatrix.set(1, 0, -sin);
+                            rotateMatrix.set(0, 1, sin);
+                            rotateMatrix.set(1, 1, cos);
+                            positionVector.multiply(rotateMatrix);
+                        }
+                        if (type === 'scalable') {
+                            // construct a scaling matrix and apply to position vector
+                            scaleMatrix.set(0, 0, 1 / module.scalable.getScale().x);
+                            scaleMatrix.set(1, 1, 1 / module.scalable.getScale().y);
+                            positionVector.multiply(scaleMatrix);
+                        }
                     }
 
                     e.position.x = positionVector.get(0, 0); 
-                    e.position.y = positionVector.get(0, 1); 
+                    e.position.y = positionVector.get(0, 1);
+
+                    // pass parent
+                    e.parent = evt;
                     return e;  
                 },
                 module = {

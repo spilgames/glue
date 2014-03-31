@@ -6307,25 +6307,29 @@ glue.module.create(
                     translateMatrix.set(2, 0, -position.x);
                     translateMatrix.set(2, 1, -position.y);
                     positionVector.multiply(translateMatrix);
-                    //rotate
-                    if (module.rotatable) {
-                        sin = Math.sin(-module.rotatable.getAngleRadian());
-                        cos = Math.cos(-module.rotatable.getAngleRadian());
-                        rotateMatrix.set(0, 0, cos);
-                        rotateMatrix.set(1, 0, -sin);
-                        rotateMatrix.set(0, 1, sin);
-                        rotateMatrix.set(1, 1, cos);
-                        positionVector.multiply(rotateMatrix);
-                    }
-                    // scale
-                    if (module.scalable) {
-                        scaleMatrix.set(0, 0, 1 / module.scalable.getScale().x);
-                        scaleMatrix.set(1, 1, 1 / module.scalable.getScale().y);
-                        positionVector.multiply(scaleMatrix);
+                    // only scale/rotatable if there is a component
+                    for (type in registrants.draw) {
+                        if (type === 'rotatable') {
+                            sin = Math.sin(-module.rotatable.getAngleRadian());
+                            cos = Math.cos(-module.rotatable.getAngleRadian());
+                            rotateMatrix.set(0, 0, cos);
+                            rotateMatrix.set(1, 0, -sin);
+                            rotateMatrix.set(0, 1, sin);
+                            rotateMatrix.set(1, 1, cos);
+                            positionVector.multiply(rotateMatrix);
+                        }
+                        if (type === 'scalable') {
+                            scaleMatrix.set(0, 0, 1 / module.scalable.getScale().x);
+                            scaleMatrix.set(1, 1, 1 / module.scalable.getScale().y);
+                            positionVector.multiply(scaleMatrix);
+                        }
                     }
 
                     e.position.x = positionVector.get(0, 0); 
-                    e.position.y = positionVector.get(0, 1); 
+                    e.position.y = positionVector.get(0, 1);
+
+                    // pass parent
+                    e.parent = evt;
                     return e;  
                 },
                 module = {
@@ -7872,7 +7876,8 @@ glue.module.create(
                 rotationDirection = 1,
                 toDegree = 180 / Math.PI,
                 atTarget = true,
-                toRadian = Math.PI / 180;
+                toRadian = Math.PI / 180,
+                moveToTarget = false;
 
             baseComponent.set({
                 update: function (gameData) {
@@ -7883,7 +7888,7 @@ glue.module.create(
                         distance,
                         self = object.rotatable;
                     
-                    if (angle !== targetAngle) {
+                    if (moveToTarget && angle !== targetAngle) {
                         tarDeg = self.getTargetDegree(),
                         curDeg = self.getAngleDegree(),
                         finalSpeed = rotationSpeed * rotationDirection,
@@ -7919,6 +7924,7 @@ glue.module.create(
                         }
                     }
                     atTarget = false;
+                    moveToTarget = true;
                 },
                 setTargetRadian: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
@@ -7930,6 +7936,7 @@ glue.module.create(
                         }
                     }
                     atTarget = false;
+                    moveToTarget = true;
                 },
                 setSpeed: function (value) {
                     rotationSpeed = Sugar.isNumber(value) ? value : rotationSpeed;
