@@ -11,7 +11,7 @@ glue.module.create('glue/math/vector', [
     ],
     function (Mathematics) {
         'use strict';
-        var module = function (x, y, z) {
+        var module = function (x, y) {
             var math = Mathematics();
 
             return {

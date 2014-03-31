@@ -6292,6 +6292,7 @@ glue.module.create(
                     }
                 },
                 transformEvent = function (evt) {
+                    // consideration: it might be too expensive to clone the event object
                     var e = Sugar.clone(evt),
                         positionVector = e.position.toMatrix(),
                         translateMatrix = Matrix(3, 3),
@@ -6303,13 +6304,14 @@ glue.module.create(
                     /** 
                     * reverse transformation
                     */
-                    // translation
+                    // construct a translation matrix and apply to position vector
                     translateMatrix.set(2, 0, -position.x);
                     translateMatrix.set(2, 1, -position.y);
                     positionVector.multiply(translateMatrix);
                     // only scale/rotatable if there is a component
                     for (type in registrants.draw) {
                         if (type === 'rotatable') {
+                            // construct a rotation matrix and apply to position vector
                             sin = Math.sin(-module.rotatable.getAngleRadian());
                             cos = Math.cos(-module.rotatable.getAngleRadian());
                             rotateMatrix.set(0, 0, cos);
@@ -6319,6 +6321,7 @@ glue.module.create(
                             positionVector.multiply(rotateMatrix);
                         }
                         if (type === 'scalable') {
+                            // construct a scaling matrix and apply to position vector
                             scaleMatrix.set(0, 0, 1 / module.scalable.getScale().x);
                             scaleMatrix.set(1, 1, 1 / module.scalable.getScale().y);
                             positionVector.multiply(scaleMatrix);
@@ -9929,7 +9932,7 @@ glue.module.create('glue/math/vector', [
     ],
     function (Mathematics) {
         'use strict';
-        var module = function (x, y, z) {
+        var module = function (x, y) {
             var math = Mathematics();
 
             return {
