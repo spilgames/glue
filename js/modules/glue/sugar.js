@@ -36,6 +36,20 @@ modules.glue.sugar = (function (win, doc) {
          */
         isMatrix = function (obj) {
             if (has(obj, 'get') && isFunction(obj.get) &&
+                has(obj, 'set') && isFunction(obj.set) &&
+                has(obj, 'transpose') && isFunction(obj.transpose) &&
+                has(obj, 'add') && isFunction(obj.add) &&
+                has(obj, 'multiply') && isFunction(obj.multiply)) {
+                    return true;
+            }
+        },
+        /**
+         * Is a given value an array2d?
+         * @param {Object}
+         * @return {Boolean}
+         */
+        isArray2D = function (obj) {
+            if (has(obj, 'get') && isFunction(obj.get) &&
                 has(obj, 'getValue') && isFunction(obj.getValue) &&
                 has(obj, 'iterate') && isFunction(obj.iterate) &&
                 has(obj, 'set') && isFunction(obj.iterate) &&

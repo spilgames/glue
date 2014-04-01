@@ -25,7 +25,8 @@ glue.module.create(
                 rotationDirection = 1,
                 toDegree = 180 / Math.PI,
                 atTarget = true,
-                toRadian = Math.PI / 180;
+                toRadian = Math.PI / 180,
+                moveToTarget = false;
 
             baseComponent.set({
                 update: function (gameData) {
@@ -36,7 +37,7 @@ glue.module.create(
                         distance,
                         self = object.rotatable;
                     
-                    if (angle !== targetAngle) {
+                    if (moveToTarget && angle !== targetAngle) {
                         tarDeg = self.getTargetDegree(),
                         curDeg = self.getAngleDegree(),
                         finalSpeed = rotationSpeed * rotationDirection,
@@ -72,6 +73,7 @@ glue.module.create(
                         }
                     }
                     atTarget = false;
+                    moveToTarget = true;
                 },
                 setTargetRadian: function (value, clockwise) {
                     targetAngle = Sugar.isNumber(value) ? value : targetAngle;
@@ -83,6 +85,7 @@ glue.module.create(
                         }
                     }
                     atTarget = false;
+                    moveToTarget = true;
                 },
                 setSpeed: function (value) {
                     rotationSpeed = Sugar.isNumber(value) ? value : rotationSpeed;
