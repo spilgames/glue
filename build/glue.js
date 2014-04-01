@@ -5061,9 +5061,7 @@ spine.SkeletonBounds.prototype = {
  *  @module Sugar
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
- *  @author Jeroen Reurings
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};
@@ -6135,7 +6133,6 @@ modules.glue.sugar = (function (win, doc) {
  *  @namespace adapters
  *  @desc Provides adapters to interface with native Glue functionality
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var adapters = adapters || {};
@@ -6180,7 +6177,6 @@ adapters.glue = (function (win, Glue) {
  *  @module BaseComponent
  *  @desc Represents the base for all components
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -6237,7 +6233,6 @@ glue.module.create(
  *  @module BaseObject
  *  @desc Represents a base object
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -6543,7 +6538,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Represents an animatable component
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -6705,7 +6699,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Used to make a game component perfom an action when she's clicked
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -6765,7 +6758,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Used to make a game entity draggable
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -6899,7 +6891,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Used to make a game entity behave as a droptarget
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -6942,7 +6933,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Represents an fadable component
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -7065,7 +7055,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Used to make a game component perfom an action when she's hovered over
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -7124,7 +7113,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Represents a kineticable component
  *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -7342,7 +7330,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Represents an movable component
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -7430,6 +7417,13 @@ glue.module.create(
     }
 );
 
+/*
+ *  @module Spineable
+ *  @namespace component/plugin
+ *  @desc Represents a spineable component (2d skeleton animations)
+ *  @copyright (C) SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
 glue.module.create(
     'glue/component/plugin/spineable', [
         'glue',
@@ -7857,7 +7851,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Represents a rotatable component
  *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -7980,7 +7973,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Represents a scalable component
  *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -8094,7 +8086,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Represents a spritable component consisting of a simple image
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -8175,7 +8166,6 @@ glue.module.create(
  *  @namespace component
  *  @desc Represents a tweenable component
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @credits Robbert Penner's easing equations
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
@@ -8353,7 +8343,6 @@ glue.module.create(
  *  @module Director
  *  @desc Directs a game
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -8496,7 +8485,6 @@ glue.module.create(
  *  @namespace event
  *  @desc This module offers a very basic pub/sub system event system
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -8558,7 +8546,6 @@ glue.module.create(
  *  @module Game
  *  @desc Represents a Glue game
  *  @copyright (C) 2013 SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -9058,7 +9045,6 @@ glue.module.create(
  *  @module Loader
  *  @desc Used to load assets in the beginning of the game, shows a progress bar
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -9408,7 +9394,6 @@ glue.module.create(
  *  @module Math
  *  @desc The math module
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -9464,7 +9449,6 @@ glue.module.create(
  *  @namespace math
  *  @desc Represents a 2D array
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create('glue/math/array2d', [
@@ -9528,7 +9512,6 @@ glue.module.create('glue/math/array2d', [
  *  @namespace math
  *  @desc Represents a Circle
  *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 
@@ -9573,7 +9556,6 @@ glue.module.create(
  *  @namespace math
  *  @desc Represents a dimension
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -9603,7 +9585,6 @@ glue.module.create(
  *  @namespace math
  *  @desc Represents a matrix
  *  @copyright (C) SpilGames
- *  @author Hernan Zhou
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create('glue/math/matrix', [
@@ -9814,7 +9795,6 @@ glue.module.create('glue/math/matrix', [
  *  @namespace math
  *  @desc Represents a polygon
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -9864,7 +9844,6 @@ glue.module.create(
  *  @namespace math
  *  @desc Represents a rectangle
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -9940,7 +9919,6 @@ glue.module.create(
  *  @namespace math
  *  @desc Represents a vector
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create('glue/math/vector', [
@@ -10074,7 +10052,6 @@ glue.module.create('glue/math/vector', [
  *  @module SAT (Separating Axis Theorem)
  *  @desc Handles the collision between two rectangles.
  *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -10334,7 +10311,6 @@ glue.module.create(
  *  @module Screen
  *  @desc Directs a game screen
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -10435,7 +10411,6 @@ glue.module.create(
  *  @module Spatial
  *  @desc Checks if collision is needed using a spatial matrix
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
@@ -10610,9 +10585,7 @@ glue.module.create(
  *  @module Sugar
  *  @namespace modules.glue
  *  @desc Provides javascript sugar functions
- *  @author Jeroen Reurings
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var modules = modules || {};
