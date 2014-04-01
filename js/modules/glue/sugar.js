@@ -1017,6 +1017,7 @@ modules.glue.sugar = (function (win, doc) {
         isMatrix: isMatrix,
         isString: isString,
         isArray: isArray,
+        isArray2D: isArray2D,
         isObject: isObject,
         isFunction: isFunction,
         emptyFn: emptyFn,
