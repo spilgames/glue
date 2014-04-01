@@ -3,7 +3,6 @@
  *  @namespace component
  *  @desc Used to make a game entity behave as a droptarget
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(

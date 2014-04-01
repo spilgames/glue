@@ -2,7 +2,6 @@
  *  @module Math
  *  @desc The math module
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(

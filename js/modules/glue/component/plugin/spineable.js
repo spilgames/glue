@@ -1,3 +1,10 @@
+/*
+ *  @module Spineable
+ *  @namespace component/plugin
+ *  @desc Represents a spineable component (2d skeleton animations)
+ *  @copyright (C) SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
 glue.module.create(
     'glue/component/plugin/spineable', [
         'glue',

@@ -3,7 +3,6 @@
  *  @namespace event
  *  @desc This module offers a very basic pub/sub system event system
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(

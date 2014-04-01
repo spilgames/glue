@@ -2,7 +2,6 @@
  *  @module Game
  *  @desc Represents a Glue game
  *  @copyright (C) 2013 SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(

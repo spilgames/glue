@@ -3,7 +3,6 @@
  *  @namespace adapters
  *  @desc Provides adapters to interface with native Glue functionality
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 var adapters = adapters || {};

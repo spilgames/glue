@@ -3,7 +3,6 @@
  *  @namespace component
  *  @desc Represents a tweenable component
  *  @copyright (C) SpilGames
- *  @author Jeroen Reurings
  *  @credits Robbert Penner's easing equations
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */

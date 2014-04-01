@@ -3,7 +3,6 @@
  *  @namespace math
  *  @desc Represents a Circle
  *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 

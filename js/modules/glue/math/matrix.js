@@ -3,7 +3,6 @@
  *  @namespace math
  *  @desc Represents a matrix
  *  @copyright (C) SpilGames
- *  @author Hernan Zhou
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create('glue/math/matrix', [

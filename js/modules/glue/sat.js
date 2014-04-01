@@ -2,7 +2,6 @@
  *  @module SAT (Separating Axis Theorem)
  *  @desc Handles the collision between two rectangles.
  *  @copyright (C) SpilGames
- *  @author Felipe Alfonso
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
