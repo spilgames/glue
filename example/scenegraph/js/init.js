@@ -76,33 +76,31 @@ glue.module.get(
                                 parentPos = parent ? parent.getPosition() : null,
                                 scale = 1;
                             if (this.getBoundingBox().hasPosition(e.position)) {
-                                this.hovering = true;
-                                if (this.held) {
-                                    this.base.pointerMove(e);
-
-                                    /* Method 1: rotate parent */
-                                    if (parent) {
-                                        angle = Math.atan2(e.parent.position.y - parentPos.y, e.parent.position.x - parentPos.x);
-                                        parent.rotatable.setAngleRadian(angle - this.offsetAngle);
-                                        // resize parent
-                                        scale = Vector(parentPos.x - e.parent.position.x, parentPos.y - e.parent.position.y).length() / 150;
-                                        parent.scalable.setScale(Vector(scale, scale));
-                                    } else {
-                                        // move self
-                                        this.setPosition(Vector(e.position.x + this.offset.x, e.position.y + this.offset.y));
-                                    }
-                                    /* Method 2: rotate parent */
-                                    // angle = Math.atan2(e.position.y - position.y, e.position.x - position.x);
-                                    // this.rotatable.setAngleRadian(angle - this.offsetAngle);
-                                    // // resize
-                                    // scale = Vector(position.x - e.position.x, position.y - e.position.y).length() / this.offset.length();
-                                    // this.scalable.setScale(Vector(scale, scale));
-                                    
-                                }
+                                this.hovering = true;                                    
                             } else {
                                 this.hovering = false;
                             }
                             this.relativePos = Vector(e.position.x, e.position.y);
+
+                            if (this.held) {
+                                /* Method 1: rotate parent */
+                                if (parent) {
+                                    angle = Math.atan2(e.parent.position.y - parentPos.y, e.parent.position.x - parentPos.x);
+                                    parent.rotatable.setAngleRadian(angle - this.offsetAngle);
+                                    // resize parent
+                                    scale = Vector(parentPos.x - e.parent.position.x, parentPos.y - e.parent.position.y).length() / 150;
+                                    parent.scalable.setScale(Vector(scale, scale));
+                                } else {
+                                    // move self
+                                    this.setPosition(Vector(e.position.x + this.offset.x, e.position.y + this.offset.y));
+                                }
+                                /* Method 2: rotate parent */
+                                // angle = Math.atan2(e.position.y - position.y, e.position.x - position.x);
+                                // this.rotatable.setAngleRadian(angle - this.offsetAngle);
+                                // // resize
+                                // scale = Vector(position.x - e.position.x, position.y - e.position.y).length() / this.offset.length();
+                                // this.scalable.setScale(Vector(scale, scale));
+                            }
 
                             // propagate event
                             this.base.pointerMove(e);
