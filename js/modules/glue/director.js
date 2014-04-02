@@ -31,8 +31,15 @@ glue.module.create(
                     objectsHandled = 0,
                     objectHandled = function () {
                         objectsHandled++;
-                        if (objectsHandled >= screen.getObjects().length + 1 && Sugar.isFunction(callback)) {
-                            callback();
+                        if (objectsHandled >= screen.getObjects().length + 1) {
+                            if (action === 'show' && Sugar.isFunction(screen.onShow)) {
+                                screen.onShow();
+                            } else if (action === 'hide' && Sugar.isFunction(screen.onHide)) {
+                                screen.onHide();
+                            }
+                            if (Sugar.isFunction(callback)) {
+                                callback();
+                            }
                         }
                     };
 

@@ -8373,8 +8373,15 @@ glue.module.create(
                     objectsHandled = 0,
                     objectHandled = function () {
                         objectsHandled++;
-                        if (objectsHandled >= screen.getObjects().length + 1 && Sugar.isFunction(callback)) {
-                            callback();
+                        if (objectsHandled >= screen.getObjects().length + 1) {
+                            if (action === 'show' && Sugar.isFunction(screen.onShow)) {
+                                screen.onShow();
+                            } else if (action === 'hide' && Sugar.isFunction(screen.onHide)) {
+                                screen.onHide();
+                            }
+                            if (Sugar.isFunction(callback)) {
+                                callback();
+                            }
                         }
                     };
 
@@ -10328,6 +10335,15 @@ glue.module.create(
             var objects = [],
                 isShown = false,
                 module = {
+                    /**
+                     * Mixin object with new functionality
+                     * @name add
+                     * @memberOf screen
+                     * @function
+                     */
+                    add: function (object) {
+                        return Sugar.combine(this, object);
+                    },
                     /**
                      * Add object to screen
                      * @name addObject

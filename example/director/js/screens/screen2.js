@@ -11,7 +11,15 @@ glue.module.create(
         DogObject
     ) {
         return function () {
-            var screen = Screen('Screen2');
+            var screen = Screen('Screen2').add({
+                onShow: function () {
+                    // adding onShow and onHide functions is optional
+                    console.log('Screen 2 shown');
+                },
+                onHide: function () {
+                    console.log('Screen 2 hidden');
+                }
+            });
             screen.addObject(SpilObject());
             screen.addObject(DogObject());
             screen.draw = function (gameData) {
