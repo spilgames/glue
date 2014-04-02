@@ -19,6 +19,15 @@ glue.module.create(
                 isShown = false,
                 module = {
                     /**
+                     * Mixin object with new functionality
+                     * @name add
+                     * @memberOf screen
+                     * @function
+                     */
+                    add: function (object) {
+                        return Sugar.combine(this, object);
+                    },
+                    /**
                      * Add object to screen
                      * @name addObject
                      * @memberOf screen
