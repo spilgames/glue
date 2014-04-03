@@ -8581,6 +8581,7 @@ glue.module.create(
             canvas = null,
             canvasId,
             context2D = null,
+            useDoubleBuffering = false,
             backBuffer = null,
             backBufferContext2D = null,
             canvasSupported = false,
@@ -8615,16 +8616,17 @@ glue.module.create(
                 if (canvas.getContext) {
                     canvasSupported = true;
                     context2D = canvas.getContext('2d');
-                    backBuffer = document.createElement('canvas');
-                    backBuffer.width = canvas.width;
-                    backBuffer.height = canvas.height;
-                    backBufferContext2D = backBuffer.getContext('2d');
+                    if (useDoubleBuffering) {
+                        backBuffer = document.createElement('canvas');
+                        backBuffer.width = canvas.width;
+                        backBuffer.height = canvas.height;
+                        backBufferContext2D = backBuffer.getContext('2d');
+                    }
                 }
                 gameData = {
                     canvas: canvas,
-                    context: context2D,
-                    backBufferCanvas: backBuffer,
-                    backBufferContext2D: backBufferContext2D,
+                    context: useDoubleBuffering ? backBufferContext2D : context2D,
+                    backBufferCanvas: useDoubleBuffering ? backBuffer : canvas,
                     canvasScale: canvasScale,
                     canvasDimension: canvasDimension,
                     scroll: scroll
@@ -8715,7 +8717,9 @@ glue.module.create(
                 }
             },
             redraw = function () {
-                backBufferContext2D.clear(true);
+                if (useDoubleBuffering) {
+                    backBufferContext2D.clear(true);
+                }
                 context2D.clear(true);
             },
             cycle = function (time) {
@@ -8768,7 +8772,9 @@ glue.module.create(
                             }
                         };
                     }
-                    context2D.drawImage(backBuffer, 0, 0);
+                    if (useDoubleBuffering) {
+                        context2D.drawImage(backBuffer, 0, 0);
+                    }
                     lastFrameTime = time;
                 }
             },
@@ -8938,6 +8944,9 @@ glue.module.create(
                             debugBar.id = 'debugBar';
                             document.body.appendChild(debugBar);
                         }
+                        if (Sugar.isDefined(config.doubleBuffering)) {
+                            useDoubleBuffering = config.doubleBuffering;
+                        }
                         if (Sugar.isDefined(config.sort)) {
                             useSort = config.sort;
                         }
@@ -9025,7 +9034,7 @@ glue.module.create(
                         return canvasScale;
                     },
                     getContext: function () {
-                        return backBufferContext2D;
+                        return useDoubleBuffering ? context : backBufferContext2D;
                     }
                 },
                 getObjectCount: function () {
