@@ -8581,6 +8581,8 @@ glue.module.create(
             canvas = null,
             canvasId,
             context2D = null,
+            backBuffer = null,
+            backBufferContext2D = null,
             canvasSupported = false,
             canvasDimension = null,
             canvasScale = {},
@@ -8613,10 +8615,16 @@ glue.module.create(
                 if (canvas.getContext) {
                     canvasSupported = true;
                     context2D = canvas.getContext('2d');
+                    backBuffer = document.createElement('canvas');
+                    backBuffer.width = canvas.width;
+                    backBuffer.height = canvas.height;
+                    backBufferContext2D = backBuffer.getContext('2d');
                 }
                 gameData = {
                     canvas: canvas,
                     context: context2D,
+                    backBufferCanvas: backBuffer,
+                    backBufferContext2D: backBufferContext2D,
                     canvasScale: canvasScale,
                     canvasDimension: canvasDimension,
                     scroll: scroll
@@ -8707,6 +8715,7 @@ glue.module.create(
                 }
             },
             redraw = function () {
+                backBufferContext2D.clear(true);
                 context2D.clear(true);
             },
             cycle = function (time) {
@@ -8759,6 +8768,7 @@ glue.module.create(
                             }
                         };
                     }
+                    context2D.drawImage(backBuffer, 0, 0);
                     lastFrameTime = time;
                 }
             },
@@ -9015,7 +9025,7 @@ glue.module.create(
                         return canvasScale;
                     },
                     getContext: function () {
-                        return context2D;
+                        return backBufferContext2D;
                     }
                 },
                 getObjectCount: function () {
