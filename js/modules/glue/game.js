@@ -460,6 +460,15 @@ glue.module.create(
                     }
                     removedObjects.push(object);
                 },
+                removeAll: function () {
+                    var i, l;
+                    // empty removed and added arrays before removing everything
+                    removedObjects.length = 0;
+                    addedObjects.length = 0;
+                    for (i = 0, l = objects.length; i < l; ++i) {
+                        removedObjects.push(objects[i]);
+                    }
+                },
                 get: function (componentName) {
                     var i,
                         l,

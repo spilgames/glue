@@ -6279,6 +6279,7 @@ glue.module.create(
                 parent = null,
                 uniqueID = ++crossInstanceID,
                 callRegistrants = function (type, gameData) {
+                    var registrant;
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
                         if (type === 'draw' && Sugar.contains(drawLast, registrant)) {
@@ -6295,7 +6296,8 @@ glue.module.create(
                         scaleMatrix = Matrix(3, 3),
                         rotateMatrix = Matrix(3, 3),
                         sin,
-                        cos;
+                        cos,
+                        type;
                     
                     /** 
                     * reverse transformation
@@ -6350,6 +6352,7 @@ glue.module.create(
                             children[i].update(gameData);                            
                         }
                     },
+                    z: 0,
                     count: 0,
                     updateWhenPaused: false,
                     draw: function (gameData) {
@@ -9012,6 +9015,15 @@ glue.module.create(
                     }
                     removedObjects.push(object);
                 },
+                removeAll: function () {
+                    var i, l;
+                    // empty removed and added arrays before removing everything
+                    removedObjects.length = 0;
+                    addedObjects.length = 0;
+                    for (i = 0, l = objects.length; i < l; ++i) {
+                        removedObjects.push(objects[i]);
+                    }
+                },
                 get: function (componentName) {
                     var i,
                         l,
@@ -9263,6 +9275,7 @@ glue.module.create(
                  * @param {Object} value: object containing key/value pairs for assets (key: asset name, value: asset path)
                  */
                 setAssets: function (type, value) {
+                    var asset;
                     assets[type] = value;
                     for (asset in value) {
                         if (value.hasOwnProperty(asset)) {
@@ -9278,7 +9291,7 @@ glue.module.create(
                  * @param {Function} onReady: Callback function for completion
                  */
                 load: function (onReady) {
-                    var typeList;
+                    var typeList, type;
                     if (percentageBar !== null) {
                         percentageBar.innerHTML = '0%';
                     }

@@ -203,6 +203,7 @@ glue.module.create(
                  * @param {Object} value: object containing key/value pairs for assets (key: asset name, value: asset path)
                  */
                 setAssets: function (type, value) {
+                    var asset;
                     assets[type] = value;
                     for (asset in value) {
                         if (value.hasOwnProperty(asset)) {
@@ -218,7 +219,7 @@ glue.module.create(
                  * @param {Function} onReady: Callback function for completion
                  */
                 load: function (onReady) {
-                    var typeList;
+                    var typeList, type;
                     if (percentageBar !== null) {
                         percentageBar.innerHTML = '0%';
                     }
