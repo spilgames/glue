@@ -58,11 +58,7 @@ glue.module.create(
                             if (index >= 0) {
                                 objects.splice(index, 1);
                                 if (isShown) {
-                                    Game.remove(object, function () {
-                                        if (Sugar.isFunction(callback)) {
-                                            callback();
-                                        }
-                                    });
+                                    Game.remove(object, callback);
                                 }
                             }
                         }

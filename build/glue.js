@@ -8395,7 +8395,8 @@ glue.module.create(
                         screen.setShown(true);
                     }
                     if (action === 'hide') {
-                        Game.remove(screen, objectHandled);
+                        Game.remove(screen);
+                        objectHandled();
                         screen.setShown(false);
                     }
                     objects = screen.getObjects();
@@ -8404,7 +8405,9 @@ glue.module.create(
                         if (action === 'show') {
                             Game.add(objects[i], objectHandled);
                         } else if (action === 'hide') {
-                            Game.remove(objects[i], objectHandled);
+                            Game.remove(objects[i]);
+                            // can call the callback because objects are removed immediately
+                            objectHandled();
                         }
                     }
                     if (action === 'show') {
@@ -8693,29 +8696,12 @@ glue.module.create(
                     }
                 }
             },
-            removeObjects = function () {
-                var object,
-                    callbackObject,
-                    i,
-                    j;
-
-                if (removedObjects.length) {
-                    for (i = 0; i < removedObjects.length; ++i) {
-                        object = removedObjects[i];
-                        if (object.destroy) {
-                            object.destroy();
-                        }
-                        Sugar.removeObject(objects, object);
-                    };
-                    removedObjects = [];
-                    if (removeCallbacks.length) {
-                        for (j = 0; j < removeCallbacks.length; ++j) {
-                            callbackObject = removeCallbacks[j];
-                            if (callbackObject) {
-                                callbackObject.callback(callbackObject.object);
-                            }
-                        };
-                        removeCallbacks = [];
+            cleanObjects = function () {
+                var i;
+                // loop objects array from end to start and remove null elements
+                for (i = objects.length - 1; i >= 0; --i) {
+                    if (objects[i] === null) {
+                        objects.splice(i, 1);
                     }
                 }
             },
@@ -8729,17 +8715,19 @@ glue.module.create(
                 var deltaT,
                     fps,
                     component,
-                    avg;
+                    avg,
+                    i;
 
                 if (isRunning) {
                     requestAnimationFrame(cycle);
                 }
                 if (canvasSupported) {
+                    // clean before sorting
+                    cleanObjects();
                     if (useSort) {
                         sort();
                     }
                     redraw();
-                    removeObjects();
                     addObjects();
 
                     deltaT = (time - lastFrameTime) / 1000;
@@ -8765,8 +8753,11 @@ glue.module.create(
                         gameData.fps = fps;
                         gameData.avg = avg;
                         gameData.objectLength = objects.length;
-                        for (var i = 0; i < objects.length; ++i) {
+                        for (i = 0; i < objects.length; ++i) {
                             component = objects[i];
+                            if (component === null) {
+                                continue;
+                            }
                             if (component.update && ((isPaused && component.updateWhenPaused) || !isPaused)) {
                                 component.update(gameData);
                             }
@@ -8795,7 +8786,7 @@ glue.module.create(
                 if (isRunning) {
                     for (i = 0, l = objects.length; i < l; ++i) {
                         component = objects[i];
-                        if (component.pointerDown && ((isPaused && component.updateWhenPaused) || !isPaused)) {
+                        if (component && component.pointerDown && ((isPaused && component.updateWhenPaused) || !isPaused)) {
                             component.pointerDown(e);
                         }
                     }
@@ -8810,7 +8801,7 @@ glue.module.create(
                 if (isRunning) {
                     for (i = 0, l = objects.length; i < l; ++i) {
                         component = objects[i];
-                        if (component.pointerMove && ((isPaused && component.updateWhenPaused) || !isPaused)) {
+                        if (component && component.pointerMove && ((isPaused && component.updateWhenPaused) || !isPaused)) {
                             component.pointerMove(e);
                         }
                     }
@@ -8825,7 +8816,7 @@ glue.module.create(
                 if (isRunning) {
                     for (i = 0, l = objects.length; i < l; ++i) {
                         component = objects[i];
-                        if (component.pointerUp && ((isPaused && component.updateWhenPaused) || !isPaused)) {
+                        if (component && component.pointerUp && ((isPaused && component.updateWhenPaused) || !isPaused)) {
                             component.pointerUp(e);
                         }
                     }
@@ -9007,21 +8998,26 @@ glue.module.create(
                     addedObjects.push(object);
                 },
                 remove: function (object, callback) {
-                    if (callback) {
-                        removeCallbacks.push({
-                            object: object,
-                            callback: callback
-                        });
+                    var index;
+                    if (object === null) {
+                        // already destroyed
+                        return;
                     }
-                    removedObjects.push(object);
+                    index = objects.indexOf(object);
+                    if (index >= 0) {
+                        objects[index] = null;
+                        if (Sugar.isFunction(object.destroy)) {
+                            object.destroy();
+                        }
+                        if (Sugar.isFunction(callback)) {
+                            callback(object);
+                        }
+                    }
                 },
                 removeAll: function () {
-                    var i, l;
-                    // empty removed and added arrays before removing everything
-                    removedObjects.length = 0;
-                    addedObjects.length = 0;
-                    for (i = 0, l = objects.length; i < l; ++i) {
-                        removedObjects.push(objects[i]);
+                    var i;
+                    for (i = 0; i < objects.length; ++i) {
+                        this.remove(objects[i]);
                     }
                 },
                 get: function (componentName) {
@@ -10397,11 +10393,7 @@ glue.module.create(
                             if (index >= 0) {
                                 objects.splice(index, 1);
                                 if (isShown) {
-                                    Game.remove(object, function () {
-                                        if (Sugar.isFunction(callback)) {
-                                            callback();
-                                        }
-                                    });
+                                    Game.remove(object, callback);
                                 }
                             }
                         }
