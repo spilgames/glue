@@ -6352,7 +6352,6 @@ glue.module.create(
                             children[i].update(gameData);                            
                         }
                     },
-                    z: 0,
                     count: 0,
                     updateWhenPaused: false,
                     draw: function (gameData) {
@@ -8679,7 +8678,8 @@ glue.module.create(
                 if (addedObjects.length) {
                     for (i = 0; i < addedObjects.length; ++i) {
                         object = addedObjects[i];
-                        objects.push(addedObjects[i]);
+                        object.z = object.z || 1;
+                        objects.push(object);
                         if (object.init) {
                             object.init();
                         }

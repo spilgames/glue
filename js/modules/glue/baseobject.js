@@ -120,7 +120,6 @@ glue.module.create(
                             children[i].update(gameData);                            
                         }
                     },
-                    z: 0,
                     count: 0,
                     updateWhenPaused: false,
                     draw: function (gameData) {
