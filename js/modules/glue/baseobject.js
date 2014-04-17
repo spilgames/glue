@@ -47,6 +47,7 @@ glue.module.create(
                 parent = null,
                 uniqueID = ++crossInstanceID,
                 callRegistrants = function (type, gameData) {
+                    var registrant;
                     typeRegistrants = registrants[type];
                     for (registrant in typeRegistrants) {
                         if (type === 'draw' && Sugar.contains(drawLast, registrant)) {
@@ -63,7 +64,8 @@ glue.module.create(
                         scaleMatrix = Matrix(3, 3),
                         rotateMatrix = Matrix(3, 3),
                         sin,
-                        cos;
+                        cos,
+                        type;
                     
                     /** 
                     * reverse transformation

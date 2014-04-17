@@ -50,7 +50,8 @@ glue.module.create(
                         screen.setShown(true);
                     }
                     if (action === 'hide') {
-                        Game.remove(screen, objectHandled);
+                        Game.remove(screen);
+                        objectHandled();
                         screen.setShown(false);
                     }
                     objects = screen.getObjects();
@@ -59,7 +60,9 @@ glue.module.create(
                         if (action === 'show') {
                             Game.add(objects[i], objectHandled);
                         } else if (action === 'hide') {
-                            Game.remove(objects[i], objectHandled);
+                            Game.remove(objects[i]);
+                            // can call the callback because objects are removed immediately
+                            objectHandled();
                         }
                     }
                     if (action === 'show') {
