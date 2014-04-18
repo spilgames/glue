@@ -6361,10 +6361,13 @@ glue.module.create(
                             l;
 
                         context.save();
-                        context.translate(
-                            position.x - scroll.x,
-                            position.y - scroll.y
-                        );
+                        context.translate(position.x, position.y);
+
+                        // scroll (only applies to parent objects)
+                        if (parent === null) {
+                            context.translate(-scroll.x, -scroll.y);
+                        }
+
 
                         // draws rotatable, scalable etc.
                         callRegistrants('draw', gameData);
