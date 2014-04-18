@@ -18,6 +18,8 @@ glue.module.create(
             crossInstanceID = 0;
         return function () {
             var name,
+                active = true,
+                visible = true,
                 mixins = Array.prototype.slice.call(arguments),
                 mixin = null,
                 position = Vector(0, 0),
@@ -114,10 +116,12 @@ glue.module.create(
                     update: function (gameData) {
                         var i,
                             l;
-                        callRegistrants('update', gameData);
-                        // update children
-                        for (i = 0, l = children.length; i < l; ++i) {
-                            children[i].update(gameData);                            
+                        if (active) {
+                            callRegistrants('update', gameData);
+                            // update children
+                            for (i = 0, l = children.length; i < l; ++i) {
+                                children[i].update(gameData);                            
+                            }
                         }
                     },
                     count: 0,
@@ -127,52 +131,54 @@ glue.module.create(
                             context = gameData.context,
                             i,
                             l;
-
-                        context.save();
-                        context.translate(position.x, position.y);
-
-                        // scroll (only applies to parent objects)
-                        if (parent === null) {
-                            context.translate(-scroll.x, -scroll.y);
-                        }
-
-
-                        // draws rotatable, scalable etc.
-                        callRegistrants('draw', gameData);
-
-                        // translate to origin
-                        context.translate(-origin.x, -origin.y);
-
-                        // draws animatable and spritable
-                        for (d = 0; d < dLength; ++d) {
-                            drawRegistrant = registrants.draw[drawLast[d]];
-                            if (drawRegistrant) {
-                                drawRegistrant(gameData);
+                        if (visible) {
+                            context.save();
+                            context.translate(position.x, position.y);
+                            
+                            // scroll (only applies to parent objects)
+                            if (parent === null) {
+                                context.translate(-scroll.x, -scroll.y);
                             }
-                        }
 
-                        // translate back from origin before drawing children
-                        context.translate(origin.x, origin.y);
-                        // draw children
-                        for (i = 0, l = children.length; i < l; ++i) {
-                            children[i].draw(gameData);                            
+
+                            // draws rotatable, scalable etc.
+                            callRegistrants('draw', gameData);
+
+                            // translate to origin
+                            context.translate(-origin.x, -origin.y);
+
+                            // draws animatable and spritable
+                            for (d = 0; d < dLength; ++d) {
+                                drawRegistrant = registrants.draw[drawLast[d]];
+                                if (drawRegistrant) {
+                                    drawRegistrant(gameData);
+                                }
+                            }
+
+                            // translate back from origin before drawing children
+                            context.translate(origin.x, origin.y);
+                            // draw children
+                            for (i = 0, l = children.length; i < l; ++i) {
+                                children[i].draw(gameData);                            
+                            }
+                            
+                            context.restore();
                         }
-                        
-                        context.restore();
                     },
                     pointerDown: function (e) {
                         var i,
                             l = children.length,
                             childEvent,
                             pos;
+                        if (active) {
+                            callRegistrants('pointerDown', e);
 
-                        callRegistrants('pointerDown', e);
-
-                        if (l) {
-                            childEvent = transformEvent(e);
-                            // pass through children
-                            for (i = 0; i < l; ++i) {
-                                children[i].pointerDown(childEvent);
+                            if (l) {
+                                childEvent = transformEvent(e);
+                                // pass through children
+                                for (i = 0; i < l; ++i) {
+                                    children[i].pointerDown(childEvent);
+                                }
                             }
                         }
                     },
@@ -181,14 +187,15 @@ glue.module.create(
                             l = children.length,
                             childEvent,
                             pos;
+                        if (active) {
+                            callRegistrants('pointerMove', e);
 
-                        callRegistrants('pointerMove', e);
-
-                        if (l) {
-                            childEvent = transformEvent(e);
-                            // pass through children
-                            for (i = 0; i < l; ++i) {
-                                children[i].pointerMove(childEvent);
+                            if (l) {
+                                childEvent = transformEvent(e);
+                                // pass through children
+                                for (i = 0; i < l; ++i) {
+                                    children[i].pointerMove(childEvent);
+                                }
                             }
                         }
                     },
@@ -197,14 +204,15 @@ glue.module.create(
                             l = children.length,
                             childEvent,
                             pos;
+                        if (active) {
+                            callRegistrants('pointerUp', e);
 
-                        callRegistrants('pointerUp', e);
-
-                        if (l) {
-                            childEvent = transformEvent(e);
-                            // pass through children
-                            for (i = 0; i < l; ++i) {
-                                children[i].pointerUp(childEvent);
+                            if (l) {
+                                childEvent = transformEvent(e);
+                                // pass through children
+                                for (i = 0; i < l; ++i) {
+                                    children[i].pointerUp(childEvent);
+                                }
                             }
                         }
                     },
@@ -275,6 +283,28 @@ glue.module.create(
                     },
                     getOrigin: function () {
                         return origin;
+                    },
+                    isActive: function () {
+                        return active;
+                    },
+                    setActive: function (value) {
+                        if (Sugar.isBoolean(value)) {
+                            active = value;
+                        }
+                        else {
+                            throw "value should be a boolean";
+                        }
+                    },
+                    isVisible: function () {
+                        return visible;
+                    },
+                    setVisible: function (value) {
+                        if (Sugar.isBoolean(value)) {
+                            visible = value;
+                        }
+                        else {
+                            throw "value should be a boolean";
+                        }
                     },
                     addChild: function (baseObject) {
                         children.push(baseObject);
