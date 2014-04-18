@@ -66,7 +66,7 @@ glue.module.get(
                     },
                     draw: function (gameData) {
                         var context = gameData.context,
-                            value = obj1.isActive() ? (obj1.getName() + 'ACTIVE') : (obj1.getName() + 'INACTIVE');
+                            value = obj1.isActive() ? 'ACTIVE' : 'INACTIVE';
                         this.base.draw(gameData);
                         context.font = '20px Verdana';
                         context.fillText(value, buttonPosition1.x + 30, buttonPosition1.y + 30);
@@ -88,7 +88,7 @@ glue.module.get(
                     },
                     draw: function (gameData) {
                         var context = gameData.context,
-                            value = obj1.isVisible() ? (obj1.getName() + 'VISIBLE') : (obj1.getName() + 'INVISIBLE');
+                            value = obj1.isVisible() ? 'VISIBLE' : 'INVISIBLE';
                         this.base.draw(gameData);
                         context.font = '20px Verdana';
                         context.fillText(value, buttonPosition2.x + 30, buttonPosition2.y + 30);
@@ -130,7 +130,6 @@ glue.module.get(
                 group = [],
                 i,
                 obj;
-            obj1.setName('Collider');
             Game.add(obj1);
             for (i = 0; i < 100; ++i) {
                 obj = BaseObject(Spritable, Kineticable).add({
