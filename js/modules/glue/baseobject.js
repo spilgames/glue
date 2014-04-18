@@ -256,7 +256,9 @@ glue.module.create(
                         return rectangle;
                     },
                     setBoundingBox: function (value) {
-                        rectangle = value;
+                        if (active) {
+                            rectangle = value;
+                        }
                     },
                     updateBoundingBox: function () {
                         var scale = module.scalable ? module.scalable.getScale() : Vector(1, 1),
@@ -264,15 +266,16 @@ glue.module.create(
                             y1 = position.y - origin.y * scale.y,
                             x2 = position.x + (dimension.width - origin.x) * scale.x,
                             y2 = position.y + (dimension.height - origin.y) * scale.y;
-
-                        // swap variables if scale is negative
-                        if (scale.x < 0) {
-                            x2 = [x1, x1 = x2][0];
+                        if (active) {
+                            // swap variables if scale is negative
+                            if (scale.x < 0) {
+                                x2 = [x1, x1 = x2][0];
+                            }
+                            if (scale.y < 0) {
+                                y2 = [y1, y1 = y2][0];
+                            }
+                            rectangle = Rectangle(x1, y1, x2, y2);
                         }
-                        if (scale.y < 0) {
-                            y2 = [y1, y1 = y2][0];
-                        }
-                        rectangle = Rectangle(x1, y1, x2, y2);
                     },
                     setOrigin: function (value) {
                         if (Sugar.isVector(value)) {
@@ -288,7 +291,14 @@ glue.module.create(
                         return active;
                     },
                     setActive: function (value) {
+                        if (value) {
+                            console.log(name, ' is ACTIVATED');
+                        }
+                        else {
+                            console.log(name, 'is DEACTIVATED');
+                        }
                         if (Sugar.isBoolean(value)) {
+
                             active = value;
                         }
                         else {
