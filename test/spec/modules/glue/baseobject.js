@@ -35,7 +35,7 @@ glue.module.create(
                 var initialized = false,
                     object = BaseObject().add({
                         init: function () {
-                            // init should be called
+                            // init should be called during addChild
                             initialized = true;
                         },
                         update: function () {
@@ -52,18 +52,23 @@ glue.module.create(
                 Game.add(parent);
             });
             it('Should be able to remove children from a base object', function (done) {
-                var object = BaseObject().add({
+                var destroyed = false,
+                    object = BaseObject().add({
                         destroy: function () {
-                            // destroy should be called
-                            done();
+                            // destroy method should be called after removeChild
+                            destroyed = true;
                         }
                     }),
                     parent = BaseObject().add({
                         update: function (gameData) {
                             var children = this.getChildren();
-                            // remove again
+                            // remove if children are present
                             if (children.length > 0) {
                                 this.removeChild(object);
+                            } else {
+                                // no more children
+                                expect(destroyed).toBeTruthy();
+                                done();
                             }
                             // make sure you call the base update
                             this.base.update(gameData);
