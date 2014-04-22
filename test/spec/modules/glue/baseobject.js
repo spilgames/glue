@@ -31,6 +31,54 @@ glue.module.create(
                     done();
                 }, 300);
             });
+            it('Should be able to add children objects to a base object', function (done) {
+                var initialized = false,
+                    object = BaseObject().add({
+                        init: function () {
+                            // init should be called during addChild
+                            initialized = true;
+                        },
+                        update: function () {
+                            expect(initialized).toBeTruthy();
+                            done();
+                        }
+                    }),
+                    parent = BaseObject().add({
+                        init: function () {
+                            this.addChild(object);
+                        }
+                    });
+
+                Game.add(parent);
+            });
+            it('Should be able to remove children from a base object', function (done) {
+                var destroyed = false,
+                    object = BaseObject().add({
+                        destroy: function () {
+                            // destroy method should be called after removeChild
+                            destroyed = true;
+                        }
+                    }),
+                    parent = BaseObject().add({
+                        update: function (gameData) {
+                            var children = this.getChildren();
+                            // remove if children are present
+                            if (children.length > 0) {
+                                this.removeChild(object);
+                            } else {
+                                // no more children
+                                expect(destroyed).toBeTruthy();
+                                done();
+                            }
+                            // make sure you call the base update
+                            this.base.update(gameData);
+                        }
+                    });
+
+                parent.addChild(object);
+
+                Game.add(parent);
+            });
         });
     }
 );
