@@ -6250,6 +6250,8 @@ glue.module.create(
             crossInstanceID = 0;
         return function () {
             var name,
+                active = true,
+                visible = true,
                 mixins = Array.prototype.slice.call(arguments),
                 mixin = null,
                 position = Vector(0, 0),
@@ -6358,6 +6360,9 @@ glue.module.create(
                     update: function (gameData) {
                         var i,
                             l;
+                        if (!active) {
+                            return;
+                        }
                         callRegistrants('update', gameData);
                         // clean up
                         removeChildren();
@@ -6365,6 +6370,7 @@ glue.module.create(
                         for (i = 0, l = children.length; i < l; ++i) {
                             children[i].update(gameData);                            
                         }
+                        
                     },
                     count: 0,
                     updateWhenPaused: false,
@@ -6373,10 +6379,12 @@ glue.module.create(
                             context = gameData.context,
                             i,
                             l;
-
+                        if (!visible) {
+                            return;
+                        }
                         context.save();
                         context.translate(position.x, position.y);
-
+                        
                         // scroll (only applies to parent objects)
                         if (parent === null) {
                             context.translate(-scroll.x, -scroll.y);
@@ -6411,7 +6419,9 @@ glue.module.create(
                             l = children.length,
                             childEvent,
                             pos;
-
+                        if (!active) {
+                            return;
+                        }
                         callRegistrants('pointerDown', e);
 
                         if (l) {
@@ -6427,7 +6437,9 @@ glue.module.create(
                             l = children.length,
                             childEvent,
                             pos;
-
+                        if (!active) {
+                            return;
+                        }
                         callRegistrants('pointerMove', e);
 
                         if (l) {
@@ -6443,7 +6455,9 @@ glue.module.create(
                             l = children.length,
                             childEvent,
                             pos;
-
+                        if (!active) {
+                            return;
+                        }
                         callRegistrants('pointerUp', e);
 
                         if (l) {
@@ -6494,7 +6508,9 @@ glue.module.create(
                         return rectangle;
                     },
                     setBoundingBox: function (value) {
-                        rectangle = value;
+                        if (active) {
+                            rectangle = value;
+                        }
                     },
                     updateBoundingBox: function () {
                         var scale = module.scalable ? module.scalable.getScale() : Vector(1, 1),
@@ -6502,7 +6518,9 @@ glue.module.create(
                             y1 = position.y - origin.y * scale.y,
                             x2 = position.x + (dimension.width - origin.x) * scale.x,
                             y2 = position.y + (dimension.height - origin.y) * scale.y;
-
+                        if (!active) {
+                            return;
+                        }
                         // swap variables if scale is negative
                         if (scale.x < 0) {
                             x2 = [x1, x1 = x2][0];
@@ -6521,6 +6539,34 @@ glue.module.create(
                     },
                     getOrigin: function () {
                         return origin;
+                    },
+                    isActive: function () {
+                        return active;
+                    },
+                    setActive: function (value) {
+                        if (value) {
+                            console.log(name, ' is ACTIVATED');
+                        }
+                        else {
+                            console.log(name, 'is DEACTIVATED');
+                        }
+                        if (Sugar.isBoolean(value)) {
+                            active = value;
+                        }
+                        else {
+                            throw "value should be a boolean";
+                        }
+                    },
+                    isVisible: function () {
+                        return visible;
+                    },
+                    setVisible: function (value) {
+                        if (Sugar.isBoolean(value)) {
+                            visible = value;
+                        }
+                        else {
+                            throw "value should be a boolean";
+                        }
                     },
                     addChild: function (baseObject) {
                         children.push(baseObject);
@@ -10287,38 +10333,48 @@ glue.module.create(
                 },
                 collide: function (obj1, obj2, type) {
                     if (Sugar.isDefined(obj1.kineticable) && Sugar.isDefined(obj2.kineticable)) {
-                        type = type || module.RECTANGLE_TO_RECTANGLE;
-                        switch (type) {
-                            case module.RECTANGLE_TO_RECTANGLE:
-                                return solveRectangeToRectangle(obj1, obj2);
-                                break;
-                            case module.CIRCLE_TO_CIRCLE:
-                                return solveCircleToCircle(obj1, obj2);
-                                break;
-                            default:
-                                throw 'The type of collision is not valid.';
-                                break;
+                        if (obj1.isActive() && obj2.isActive()) {
+                            type = type || module.RECTANGLE_TO_RECTANGLE;
+                            switch (type) {
+                                case module.RECTANGLE_TO_RECTANGLE:
+                                    return solveRectangeToRectangle(obj1, obj2);
+                                    break;
+                                case module.CIRCLE_TO_CIRCLE:
+                                    return solveCircleToCircle(obj1, obj2);
+                                    break;
+                                default:
+                                    throw 'The type of collision is not valid.';
+                                    break;
+                            }
+                            return false;
                         }
-                        return false;
+                        else {
+                            return false;
+                        }
                     } else {
                         throw 'Collisions can only be tested between Kineticable.';
                     }
                 },
                 overlap: function (obj1, obj2, type) {
                     if (Sugar.isDefined(obj1.kineticable) && Sugar.isDefined(obj2.kineticable)) {
-                        type = type || module.RECTANGLE_TO_RECTANGLE;
-                        switch (type) {
-                            case module.RECTANGLE_TO_RECTANGLE:
-                                return overlapRect(obj1, obj2);
-                                break;
-                            case module.CIRCLE_TO_CIRCLE:
-                                return overlapCircle(obj1, obj2);
-                                break;
-                            default:
-                                return overlapRect(obj1, obj2);
-                                break;
+                        if (obj1.isActive() && obj2.isActive()) {
+                            type = type || module.RECTANGLE_TO_RECTANGLE;
+                            switch (type) {
+                                case module.RECTANGLE_TO_RECTANGLE:
+                                    return overlapRect(obj1, obj2);
+                                    break;
+                                case module.CIRCLE_TO_CIRCLE:
+                                    return overlapCircle(obj1, obj2);
+                                    break;
+                                default:
+                                    return overlapRect(obj1, obj2);
+                                    break;
+                            }
+                            return false;
                         }
-                        return false;
+                        else {
+                            return false;
+                        }
                     } else {
                         throw 'Collisions can only be tested between Kineticable.';
                     }
