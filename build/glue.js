@@ -8452,6 +8452,15 @@ glue.module.create(
                     return screens;
                 },
                 /**
+                 * Get a specific screen
+                 * @name getScreen
+                 * @memberOf Director
+                 * @function
+                 */
+                getScreen: function (value) {
+                    return screens[value];
+                },
+                /**
                  * Show a screen
                  * @name showScreen
                  * @memberOf Director
