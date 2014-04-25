@@ -6278,6 +6278,7 @@ glue.module.create(
                     pointerUp: {}
                 },
                 children = [],
+                removedChildren = [],
                 parent = null,
                 uniqueID = ++crossInstanceID,
                 callRegistrants = function (type, gameData) {
@@ -6335,6 +6336,17 @@ glue.module.create(
                     e.parent = evt;
                     return e;  
                 },
+                removeChildren = function () {
+                    var i, object;
+                    for (i = 0; i < removedChildren.length; ++i) {
+                        object = removedChildren[i];
+                        if (Sugar.isFunction(object.destroy)) {
+                            object.destroy();
+                        }
+                        Sugar.removeObject(children, object);
+                    }
+                    removedChildren.length = 0;
+                },
                 module = {
                     add: function (object) {
                         return Sugar.combine(this, object);
@@ -6352,6 +6364,8 @@ glue.module.create(
                             return;
                         }
                         callRegistrants('update', gameData);
+                        // clean up
+                        removeChildren();
                         // update children
                         for (i = 0, l = children.length; i < l; ++i) {
                             children[i].update(gameData);                            
@@ -6561,6 +6575,9 @@ glue.module.create(
                         if (baseObject.init) {
                             baseObject.init();
                         }
+                    },
+                    removeChild: function (baseObject) {
+                        removedChildren.push(baseObject);
                     },
                     getChildren: function () {
                         return children;

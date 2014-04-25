@@ -5,8 +5,7 @@
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
-    'glue/baseobject',
-    [
+    'glue/baseobject', [
         'glue',
         'glue/math/vector',
         'glue/math/rectangle',
@@ -46,6 +45,7 @@ glue.module.create(
                     pointerUp: {}
                 },
                 children = [],
+                removedChildren = [],
                 parent = null,
                 uniqueID = ++crossInstanceID,
                 callRegistrants = function (type, gameData) {
@@ -68,10 +68,10 @@ glue.module.create(
                         sin,
                         cos,
                         type;
-                    
+
                     /** 
-                    * reverse transformation
-                    */
+                     * reverse transformation
+                     */
                     // construct a translation matrix and apply to position vector
                     translateMatrix.set(2, 0, -position.x);
                     translateMatrix.set(2, 1, -position.y);
@@ -96,12 +96,23 @@ glue.module.create(
                         }
                     }
 
-                    e.position.x = positionVector.get(0, 0); 
+                    e.position.x = positionVector.get(0, 0);
                     e.position.y = positionVector.get(0, 1);
 
                     // pass parent
                     e.parent = evt;
-                    return e;  
+                    return e;
+                },
+                removeChildren = function () {
+                    var i, object;
+                    for (i = 0; i < removedChildren.length; ++i) {
+                        object = removedChildren[i];
+                        if (Sugar.isFunction(object.destroy)) {
+                            object.destroy();
+                        }
+                        Sugar.removeObject(children, object);
+                    }
+                    removedChildren.length = 0;
                 },
                 module = {
                     add: function (object) {
@@ -120,11 +131,13 @@ glue.module.create(
                             return;
                         }
                         callRegistrants('update', gameData);
+                        // clean up
+                        removeChildren();
                         // update children
                         for (i = 0, l = children.length; i < l; ++i) {
-                            children[i].update(gameData);                            
+                            children[i].update(gameData);
                         }
-                        
+
                     },
                     count: 0,
                     updateWhenPaused: false,
@@ -138,7 +151,7 @@ glue.module.create(
                         }
                         context.save();
                         context.translate(position.x, position.y);
-                        
+
                         // scroll (only applies to parent objects)
                         if (parent === null) {
                             context.translate(-scroll.x, -scroll.y);
@@ -163,9 +176,9 @@ glue.module.create(
                         context.translate(origin.x, origin.y);
                         // draw children
                         for (i = 0, l = children.length; i < l; ++i) {
-                            children[i].draw(gameData);                            
+                            children[i].draw(gameData);
                         }
-                        
+
                         context.restore();
                     },
                     pointerDown: function (e) {
@@ -298,16 +311,9 @@ glue.module.create(
                         return active;
                     },
                     setActive: function (value) {
-                        if (value) {
-                            console.log(name, ' is ACTIVATED');
-                        }
-                        else {
-                            console.log(name, 'is DEACTIVATED');
-                        }
                         if (Sugar.isBoolean(value)) {
                             active = value;
-                        }
-                        else {
+                        } else {
                             throw "value should be a boolean";
                         }
                     },
@@ -317,8 +323,7 @@ glue.module.create(
                     setVisible: function (value) {
                         if (Sugar.isBoolean(value)) {
                             visible = value;
-                        }
-                        else {
+                        } else {
                             throw "value should be a boolean";
                         }
                     },
@@ -329,6 +334,9 @@ glue.module.create(
                         if (baseObject.init) {
                             baseObject.init();
                         }
+                    },
+                    removeChild: function (baseObject) {
+                        removedChildren.push(baseObject);
                     },
                     getChildren: function () {
                         return children;
