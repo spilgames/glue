@@ -6348,13 +6348,15 @@ glue.module.create(
                     update: function (gameData) {
                         var i,
                             l;
-                        if (active) {
-                            callRegistrants('update', gameData);
-                            // update children
-                            for (i = 0, l = children.length; i < l; ++i) {
-                                children[i].update(gameData);                            
-                            }
+                        if (!active) {
+                            return;
                         }
+                        callRegistrants('update', gameData);
+                        // update children
+                        for (i = 0, l = children.length; i < l; ++i) {
+                            children[i].update(gameData);                            
+                        }
+                        
                     },
                     count: 0,
                     updateWhenPaused: false,
@@ -6363,54 +6365,56 @@ glue.module.create(
                             context = gameData.context,
                             i,
                             l;
-                        if (visible) {
-                            context.save();
-                            context.translate(position.x, position.y);
-                            
-                            // scroll (only applies to parent objects)
-                            if (parent === null) {
-                                context.translate(-scroll.x, -scroll.y);
-                            }
-
-
-                            // draws rotatable, scalable etc.
-                            callRegistrants('draw', gameData);
-
-                            // translate to origin
-                            context.translate(-origin.x, -origin.y);
-
-                            // draws animatable and spritable
-                            for (d = 0; d < dLength; ++d) {
-                                drawRegistrant = registrants.draw[drawLast[d]];
-                                if (drawRegistrant) {
-                                    drawRegistrant(gameData);
-                                }
-                            }
-
-                            // translate back from origin before drawing children
-                            context.translate(origin.x, origin.y);
-                            // draw children
-                            for (i = 0, l = children.length; i < l; ++i) {
-                                children[i].draw(gameData);                            
-                            }
-                            
-                            context.restore();
+                        if (!visible) {
+                            return;
                         }
+                        context.save();
+                        context.translate(position.x, position.y);
+                        
+                        // scroll (only applies to parent objects)
+                        if (parent === null) {
+                            context.translate(-scroll.x, -scroll.y);
+                        }
+
+
+                        // draws rotatable, scalable etc.
+                        callRegistrants('draw', gameData);
+
+                        // translate to origin
+                        context.translate(-origin.x, -origin.y);
+
+                        // draws animatable and spritable
+                        for (d = 0; d < dLength; ++d) {
+                            drawRegistrant = registrants.draw[drawLast[d]];
+                            if (drawRegistrant) {
+                                drawRegistrant(gameData);
+                            }
+                        }
+
+                        // translate back from origin before drawing children
+                        context.translate(origin.x, origin.y);
+                        // draw children
+                        for (i = 0, l = children.length; i < l; ++i) {
+                            children[i].draw(gameData);                            
+                        }
+                        
+                        context.restore();
                     },
                     pointerDown: function (e) {
                         var i,
                             l = children.length,
                             childEvent,
                             pos;
-                        if (active) {
-                            callRegistrants('pointerDown', e);
+                        if (!active) {
+                            return;
+                        }
+                        callRegistrants('pointerDown', e);
 
-                            if (l) {
-                                childEvent = transformEvent(e);
-                                // pass through children
-                                for (i = 0; i < l; ++i) {
-                                    children[i].pointerDown(childEvent);
-                                }
+                        if (l) {
+                            childEvent = transformEvent(e);
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerDown(childEvent);
                             }
                         }
                     },
@@ -6419,15 +6423,16 @@ glue.module.create(
                             l = children.length,
                             childEvent,
                             pos;
-                        if (active) {
-                            callRegistrants('pointerMove', e);
+                        if (!active) {
+                            return;
+                        }
+                        callRegistrants('pointerMove', e);
 
-                            if (l) {
-                                childEvent = transformEvent(e);
-                                // pass through children
-                                for (i = 0; i < l; ++i) {
-                                    children[i].pointerMove(childEvent);
-                                }
+                        if (l) {
+                            childEvent = transformEvent(e);
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerMove(childEvent);
                             }
                         }
                     },
@@ -6436,15 +6441,16 @@ glue.module.create(
                             l = children.length,
                             childEvent,
                             pos;
-                        if (active) {
-                            callRegistrants('pointerUp', e);
+                        if (!active) {
+                            return;
+                        }
+                        callRegistrants('pointerUp', e);
 
-                            if (l) {
-                                childEvent = transformEvent(e);
-                                // pass through children
-                                for (i = 0; i < l; ++i) {
-                                    children[i].pointerUp(childEvent);
-                                }
+                        if (l) {
+                            childEvent = transformEvent(e);
+                            // pass through children
+                            for (i = 0; i < l; ++i) {
+                                children[i].pointerUp(childEvent);
                             }
                         }
                     },
@@ -6498,16 +6504,17 @@ glue.module.create(
                             y1 = position.y - origin.y * scale.y,
                             x2 = position.x + (dimension.width - origin.x) * scale.x,
                             y2 = position.y + (dimension.height - origin.y) * scale.y;
-                        if (active) {
-                            // swap variables if scale is negative
-                            if (scale.x < 0) {
-                                x2 = [x1, x1 = x2][0];
-                            }
-                            if (scale.y < 0) {
-                                y2 = [y1, y1 = y2][0];
-                            }
-                            rectangle = Rectangle(x1, y1, x2, y2);
+                        if (!active) {
+                            return;
                         }
+                        // swap variables if scale is negative
+                        if (scale.x < 0) {
+                            x2 = [x1, x1 = x2][0];
+                        }
+                        if (scale.y < 0) {
+                            y2 = [y1, y1 = y2][0];
+                        }
+                        rectangle = Rectangle(x1, y1, x2, y2);
                     },
                     setOrigin: function (value) {
                         if (Sugar.isVector(value)) {
@@ -6530,7 +6537,6 @@ glue.module.create(
                             console.log(name, 'is DEACTIVATED');
                         }
                         if (Sugar.isBoolean(value)) {
-
                             active = value;
                         }
                         else {
