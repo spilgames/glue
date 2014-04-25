@@ -186,38 +186,48 @@ glue.module.create(
                 },
                 collide: function (obj1, obj2, type) {
                     if (Sugar.isDefined(obj1.kineticable) && Sugar.isDefined(obj2.kineticable)) {
-                        type = type || module.RECTANGLE_TO_RECTANGLE;
-                        switch (type) {
-                            case module.RECTANGLE_TO_RECTANGLE:
-                                return solveRectangeToRectangle(obj1, obj2);
-                                break;
-                            case module.CIRCLE_TO_CIRCLE:
-                                return solveCircleToCircle(obj1, obj2);
-                                break;
-                            default:
-                                throw 'The type of collision is not valid.';
-                                break;
+                        if (obj1.isActive() && obj2.isActive()) {
+                            type = type || module.RECTANGLE_TO_RECTANGLE;
+                            switch (type) {
+                                case module.RECTANGLE_TO_RECTANGLE:
+                                    return solveRectangeToRectangle(obj1, obj2);
+                                    break;
+                                case module.CIRCLE_TO_CIRCLE:
+                                    return solveCircleToCircle(obj1, obj2);
+                                    break;
+                                default:
+                                    throw 'The type of collision is not valid.';
+                                    break;
+                            }
+                            return false;
                         }
-                        return false;
+                        else {
+                            return false;
+                        }
                     } else {
                         throw 'Collisions can only be tested between Kineticable.';
                     }
                 },
                 overlap: function (obj1, obj2, type) {
                     if (Sugar.isDefined(obj1.kineticable) && Sugar.isDefined(obj2.kineticable)) {
-                        type = type || module.RECTANGLE_TO_RECTANGLE;
-                        switch (type) {
-                            case module.RECTANGLE_TO_RECTANGLE:
-                                return overlapRect(obj1, obj2);
-                                break;
-                            case module.CIRCLE_TO_CIRCLE:
-                                return overlapCircle(obj1, obj2);
-                                break;
-                            default:
-                                return overlapRect(obj1, obj2);
-                                break;
+                        if (obj1.isActive() && obj2.isActive()) {
+                            type = type || module.RECTANGLE_TO_RECTANGLE;
+                            switch (type) {
+                                case module.RECTANGLE_TO_RECTANGLE:
+                                    return overlapRect(obj1, obj2);
+                                    break;
+                                case module.CIRCLE_TO_CIRCLE:
+                                    return overlapCircle(obj1, obj2);
+                                    break;
+                                default:
+                                    return overlapRect(obj1, obj2);
+                                    break;
+                            }
+                            return false;
                         }
-                        return false;
+                        else {
+                            return false;
+                        }
                     } else {
                         throw 'Collisions can only be tested between Kineticable.';
                     }
