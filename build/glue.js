@@ -8630,9 +8630,10 @@ glue.module.create(
         'glue/domready',
         'glue/math/vector',
         'glue/event/system',
-        'glue/loader'
+        'glue/loader',
+        'glue/preloader'
     ],
-    function (Glue, DomReady, Vector, Event, Loader) {
+    function (Glue, DomReady, Vector, Event, Loader, Preloader) {
         'use strict';
         var Sugar = Glue.sugar,
             win = null,
@@ -9046,11 +9047,12 @@ glue.module.create(
                                 Loader.setAssets(Loader.ASSET_TYPE_IMAGE_REMOTE, config.asset.remoteImage);
                             }
                             Loader.load(function () {
+                                Preloader.onReady();
                                 startup();
                                 if (onReady) {
                                     onReady();
                                 }
-                            });
+                            }, Preloader.onAssetLoad);
                         } else {
                             startup();
                             if (onReady) {
@@ -9138,13 +9140,12 @@ glue.module.create(
 );
 /*
  *  @module Loader
- *  @desc Used to load assets in the beginning of the game, shows a progress bar
+ *  @desc Used to load assets in the beginning of the game
  *  @copyright (C) SpilGames
  *  @license BSD 3-Clause License (see LICENSE file in project root)
  */
 glue.module.create(
-    'glue/loader',
-    [
+    'glue/loader', [
         'glue'
     ],
     function (Glue) {
@@ -9162,26 +9163,21 @@ glue.module.create(
                 binary: {}
             },
             completedHandler,
-            loader = document.getElementById('loader'),
-            loadBar = document.getElementById('loadbar'),
-            percentageBar = document.getElementById('percentagebar'),
+            assetLoadCallback,
             percentageLoaded,
             assetLoadedHandler = function (e) {
                 ++loadCount;
-                //console.log('Loaded ' + loadCount + ' from ' + assetCount + ' assets');
                 percentageLoaded = Math.floor((loadCount / assetCount) * 100);
-                if (loadBar !== null) {
-                    loadBar.style.width = percentageLoaded + '%';
+                // callback for single asset loaded
+                if (Sugar.isFunction(assetLoadCallback)) {
+                    assetLoadCallback(percentageLoaded);
                 }
-                if (percentageBar !== null) {
-                    percentageBar.innerHTML = percentageLoaded + '%';
-                }
+                // finish
                 if (assetCount === loadCount) {
-                    if (loader !== null) {
-                        loader.style.display = 'none';
-                    }
                     loaded = true;
-                    completedHandler();
+                    if (Sugar.isFunction(completedHandler)) {
+                        completedHandler();
+                    }
                 }
             },
             assetErrorHandler = function (name) {
@@ -9201,7 +9197,7 @@ glue.module.create(
                     onload: success
                 });
                 loadedAssets.audio[name] = asset;
-            },            
+            },
             loadJSON = function (name, source, success, failure) {
                 var xhr = new XMLHttpRequest();
                 if (xhr.overrideMimeType) {
@@ -9273,7 +9269,7 @@ glue.module.create(
                     atlasLoaded = false,
                     checkReady = function () {
                         if (imageLoaded && jsonLoaded && atlasLoaded)
-                        success();
+                            success();
                     };
                 loadImage(name, source + '.png', function () {
                     imageLoaded = true;
@@ -9291,26 +9287,26 @@ glue.module.create(
             loadAsset = function (name, type, source) {
                 var asset;
                 switch (type) {
-                    case module.ASSET_TYPE_IMAGE_REMOTE:
-                        loadImage(name, source, assetLoadedHandler, assetErrorHandler);
+                case module.ASSET_TYPE_IMAGE_REMOTE:
+                    loadImage(name, source, assetLoadedHandler, assetErrorHandler);
                     break;
-                    case module.ASSET_TYPE_IMAGE:
-                        loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
+                case module.ASSET_TYPE_IMAGE:
+                    loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
-                    case module.ASSET_TYPE_AUDIO:
-                        loadAudio(name, assetPath + 'audio/' + source, assetLoadedHandler, assetErrorHandler);
+                case module.ASSET_TYPE_AUDIO:
+                    loadAudio(name, assetPath + 'audio/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
-                    case module.ASSET_TYPE_JSON:
-                        loadJSON(name, assetPath + 'json/' + source, assetLoadedHandler, assetErrorHandler);
+                case module.ASSET_TYPE_JSON:
+                    loadJSON(name, assetPath + 'json/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
-                    case module.ASSET_TYPE_BINARY:
-                        loadBinary(name, assetPath + 'binary/' + source, assetLoadedHandler, assetErrorHandler);
+                case module.ASSET_TYPE_BINARY:
+                    loadBinary(name, assetPath + 'binary/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
-                    case module.ASSET_TYPE_AUDIOSPRITE:
-                        loadAudioSprite(name, source, assetLoadedHandler, assetErrorHandler);
+                case module.ASSET_TYPE_AUDIOSPRITE:
+                    loadAudioSprite(name, source, assetLoadedHandler, assetErrorHandler);
                     break;
-                    case module.ASSET_TYPE_SPINE:
-                        loadSpine(name, assetPath + 'spine/' + source, assetLoadedHandler, assetErrorHandler);
+                case module.ASSET_TYPE_SPINE:
+                    loadSpine(name, assetPath + 'spine/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                 }
             },
@@ -9355,13 +9351,13 @@ glue.module.create(
                  * @memberOf loader
                  * @function
                  * @param {Function} onReady: Callback function for completion
+                 * @param {Function} onLoad: Callback function for single asset load
                  */
-                load: function (onReady) {
-                    var typeList, type;
-                    if (percentageBar !== null) {
-                        percentageBar.innerHTML = '0%';
-                    }
+                load: function (onReady, onLoad) {
+                    var typeList, type, name;
+                    loaded = false;
                     completedHandler = onReady;
+                    assetLoadCallback = onLoad;
                     for (type in assets) {
                         if (assets.hasOwnProperty(type)) {
                             typeList = assets[type];
@@ -9372,13 +9368,15 @@ glue.module.create(
                             }
                         }
                     }
+                    // reset assets so it can be reused for another loading session
+                    assets = {};
                 },
                 /**
                  * Are the assets loaded
                  * @name isLoaded
                  * @memberOf loader
                  * @function
-                 * @return Boolean whether asset loading is done or not 
+                 * @return Boolean whether asset loading is done or not
                  */
                 isLoaded: function () {
                     return loaded;
@@ -9389,12 +9387,9 @@ glue.module.create(
                  * @memberOf loader
                  * @function
                  * @throws Throws an exception when assets haven't been loaded yet
-                 * @return Object containing references to all assets 
+                 * @return Object containing references to all assets
                  */
                 getAssets: function () {
-                    if (!loaded) {
-                        throw('Assets are not loaded yet');
-                    }
                     return loadedAssets;
                 },
                 /**
@@ -9403,14 +9398,15 @@ glue.module.create(
                  * @memberOf loader
                  * @function
                  * @param {String} name: asset name
-                 * @throws Throws an exception when assets haven't been loaded yet
-                 * @return Image object 
+                 * @throws Throws an exception when asset cannot be found
+                 * @return Image object
                  */
                 getImage: function (name) {
-                    if (!loaded) {
-                        throw('Asset ' + name + ' is not loaded yet');
+                    var asset = loadedAssets.image[name];
+                    if (!Sugar.isDefined(asset)) {
+                        throw ('Asset ' + name + ' could not be found');
                     }
-                    return loadedAssets.image[name];
+                    return asset;
                 },
                 /**
                  * Gets the audio asset
@@ -9418,14 +9414,15 @@ glue.module.create(
                  * @memberOf loader
                  * @function
                  * @param {String} name: asset name
-                 * @throws Throws an exception when assets haven't been loaded yet
-                 * @return Audio object (depends on adapter set for audio) 
+                 * @throws Throws an exception when asset cannot be found
+                 * @return Audio object (depends on adapter set for audio)
                  */
                 getAudio: function (name) {
-                    if (!loaded) {
-                        throw('Asset ' + name + ' is not loaded yet');
+                    var asset = loadedAssets.audio[name];
+                    if (!Sugar.isDefined(asset)) {
+                        throw ('Asset ' + name + ' could not be found');
                     }
-                    return loadedAssets.audio[name];
+                    return asset;
                 },
                 /**
                  * Gets the json asset
@@ -9433,14 +9430,15 @@ glue.module.create(
                  * @memberOf loader
                  * @function
                  * @param {String} name: asset name
-                 * @throws Throws an exception when assets haven't been loaded yet
-                 * @return JSON parsed object  
+                 * @throws Throws an exception when asset cannot be found
+                 * @return JSON parsed object
                  */
                 getJSON: function (name) {
-                    if (!loaded) {
-                        throw('Asset ' + name + ' is not loaded yet');
+                    var asset = loadedAssets.json[name];
+                    if (!Sugar.isDefined(asset)) {
+                        throw ('Asset ' + name + ' could not be found');
                     }
-                    return loadedAssets.json[name];
+                    return asset;
                 },
                 /**
                  * Gets the binary asset
@@ -9448,14 +9446,15 @@ glue.module.create(
                  * @memberOf loader
                  * @function
                  * @param {String} name: asset name
-                 * @throws Throws an exception when assets haven't been loaded yet
-                 * @return Binary object 
+                 * @throws Throws an exception when asset cannot be found
+                 * @return Binary object
                  */
                 getBinary: function (name) {
-                    if (!loaded) {
-                        throw('Asset ' + name + ' is not loaded yet');
+                    var asset = loadedAssets.binary[name];
+                    if (!Sugar.isDefined(asset)) {
+                        throw ('Asset ' + name + ' could not be found');
                     }
-                    return loadedAssets.binary[name];
+                    return asset;
                 },
                 /**
                  * Get the first asset with the provided name
@@ -9463,12 +9462,8 @@ glue.module.create(
                  * @memberOf loader
                  * @function
                  * @param {String} name: asset name
-                 * @throws Throws an exception when assets haven't been loaded yet
                  */
                 getAsset: function (name) {
-                    if (!loaded) {
-                        throw('Asset ' + name + ' is not loaded yet');
-                    }
                     if (Sugar.has(loadedAssets.image, name)) {
                         return loadedAssets.image[name];
                     } else if (Sugar.has(loadedAssets.audio, name)) {
@@ -9478,14 +9473,13 @@ glue.module.create(
                     } else if (Sugar.has(loadedAssets.binary, name)) {
                         return loadedAssets.binary[name];
                     }
-                    throw('Asset ' + name + ' could not be found');
+                    throw ('Asset ' + name + ' could not be found');
                 }
             };
 
         return module;
     }
 );
-
 /**
  *  @module Math
  *  @desc The math module
@@ -10144,6 +10138,44 @@ glue.module.create('glue/math/vector', [
         return module;
     }
 );
+/*
+ *  @module Preloader
+ *  @desc Shows the glue progress bar
+ *  @copyright (C) SpilGames
+ *  @license BSD 3-Clause License (see LICENSE file in project root)
+ */
+glue.module.create('glue/preloader', [
+    'glue'
+], function (Glue) {
+    var Sugar = Glue.sugar,
+        loader = document.getElementById('loader'),
+        loadBar = document.getElementById('loadbar'),
+        percentageBar = document.getElementById('percentagebar'),
+        loadHandler = function (percentageLoaded) {
+            if (loadBar !== null) {
+                loadBar.style.width = percentageLoaded + '%';
+            }
+            if (percentageBar !== null) {
+                percentageBar.innerHTML = percentageLoaded + '%';
+            }
+        },
+        module = {
+            onReady: function () {
+                if (loader !== null) {
+                    loader.style.display = 'none';
+                }
+            },
+            onAssetLoad: function (percentage) {
+                loadHandler(percentage);
+            }
+        };
+    // init percent bar
+    if (percentageBar !== null) {
+        percentageBar.innerHTML = '0%';
+    }
+
+    return module;
+});
 /**
  *  @module SAT (Separating Axis Theorem)
  *  @desc Handles the collision between two rectangles.

@@ -11,9 +11,10 @@ glue.module.create(
         'glue/domready',
         'glue/math/vector',
         'glue/event/system',
-        'glue/loader'
+        'glue/loader',
+        'glue/preloader'
     ],
-    function (Glue, DomReady, Vector, Event, Loader) {
+    function (Glue, DomReady, Vector, Event, Loader, Preloader) {
         'use strict';
         var Sugar = Glue.sugar,
             win = null,
@@ -427,11 +428,12 @@ glue.module.create(
                                 Loader.setAssets(Loader.ASSET_TYPE_IMAGE_REMOTE, config.asset.remoteImage);
                             }
                             Loader.load(function () {
+                                Preloader.onReady();
                                 startup();
                                 if (onReady) {
                                     onReady();
                                 }
-                            });
+                            }, Preloader.onAssetLoad);
                         } else {
                             startup();
                             if (onReady) {
