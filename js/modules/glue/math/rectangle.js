@@ -48,10 +48,10 @@ glue.module.create(
                     this.y2 = Math.max(this.y2, rectangle.y2);
                 },
                 intersect: function (rectangle) {
-                    return this.x1 + this.x2 > rectangle.x1 &&
-                           this.x1 < rectangle.x1 + rectangle.x2 &&
-                           this.y1 + this.y2 > rectangle.y1 &&
-                           this.y1 < rectangle.y1 + rectangle.y2;
+                    return this.x2 > rectangle.x1 &&
+                           this.x1 < rectangle.x2 &&
+                           this.y2 > rectangle.y1 &&
+                           this.y1 < rectangle.y2;
                 },
                 intersection: function (rectangle) {
                     var inter = {
