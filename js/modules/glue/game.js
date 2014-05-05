@@ -183,12 +183,12 @@ glue.module.create(
                     requestAnimationFrame(cycle);
                 }
                 if (canvasSupported) {
-                    if (useSort) {
-                        sort();
-                    }
                     redraw();
                     removeObjects();
                     addObjects();
+                    if (useSort) {
+                        sort();
+                    }
 
                     deltaT = (time - lastFrameTime) / 1000;
                     if (debug) {
