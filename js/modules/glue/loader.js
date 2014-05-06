@@ -52,8 +52,19 @@ glue.module.create(
             },
             loadAudio = function (name, source, success, failure) {
                 // TODO: Implement failure
-                var asset = new Audio({
-                    urls: [source],
+                var asset,
+                    i;
+                // convert source to array if needed (assumed to be a string)
+                if (!Sugar.isArray(source)) {
+                    source = [assetPath + 'audio/' + source];
+                } else {
+                    // prepend asset paths
+                    for (i = 0; i < source.length; ++i) {
+                        source[i] = assetPath + 'audio/' + source[i]
+                    }
+                }
+                asset = new Audio({
+                    urls: source,
                     onload: success
                 });
                 loadedAssets.audio[name] = asset;
@@ -155,7 +166,7 @@ glue.module.create(
                     loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                 case module.ASSET_TYPE_AUDIO:
-                    loadAudio(name, assetPath + 'audio/' + source, assetLoadedHandler, assetErrorHandler);
+                    loadAudio(name, source, assetLoadedHandler, assetErrorHandler);
                     break;
                 case module.ASSET_TYPE_JSON:
                     loadJSON(name, assetPath + 'json/' + source, assetLoadedHandler, assetErrorHandler);
