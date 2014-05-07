@@ -8804,12 +8804,12 @@ glue.module.create(
                     requestAnimationFrame(cycle);
                 }
                 if (canvasSupported) {
-                    if (useSort) {
-                        sort();
-                    }
                     redraw();
                     removeObjects();
                     addObjects();
+                    if (useSort) {
+                        sort();
+                    }
 
                     deltaT = (time - lastFrameTime) / 1000;
                     if (debug) {
@@ -9194,8 +9194,19 @@ glue.module.create(
             },
             loadAudio = function (name, source, success, failure) {
                 // TODO: Implement failure
-                var asset = new Audio({
-                    urls: [source],
+                var asset,
+                    i;
+                // convert source to array if needed (assumed to be a string)
+                if (!Sugar.isArray(source)) {
+                    source = [assetPath + 'audio/' + source];
+                } else {
+                    // prepend asset paths
+                    for (i = 0; i < source.length; ++i) {
+                        source[i] = assetPath + 'audio/' + source[i]
+                    }
+                }
+                asset = new Audio({
+                    urls: source,
                     onload: success
                 });
                 loadedAssets.audio[name] = asset;
@@ -9297,7 +9308,7 @@ glue.module.create(
                     loadImage(name, assetPath + 'image/' + source, assetLoadedHandler, assetErrorHandler);
                     break;
                 case module.ASSET_TYPE_AUDIO:
-                    loadAudio(name, assetPath + 'audio/' + source, assetLoadedHandler, assetErrorHandler);
+                    loadAudio(name, source, assetLoadedHandler, assetErrorHandler);
                     break;
                 case module.ASSET_TYPE_JSON:
                     loadJSON(name, assetPath + 'json/' + source, assetLoadedHandler, assetErrorHandler);
@@ -9982,10 +9993,10 @@ glue.module.create(
                     this.y2 = Math.max(this.y2, rectangle.y2);
                 },
                 intersect: function (rectangle) {
-                    return this.x2 > rectangle.x1 &&
-                           this.x1 < rectangle.x2 &&
-                           this.y2 > rectangle.y1 &&
-                           this.y1 < rectangle.y2;
+                    return this.x1 + this.x2 > rectangle.x1 &&
+                           this.x1 < rectangle.x1 + rectangle.x2 &&
+                           this.y1 + this.y2 > rectangle.y1 &&
+                           this.y1 < rectangle.y1 + rectangle.y2;
                 },
                 intersection: function (rectangle) {
                     var inter = {
