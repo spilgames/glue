@@ -64,7 +64,7 @@ glue.module.create(
                     }
                     if (action === 'show') {
                         activeScreen = screen;
-                    } else if (action === 'show') {
+                    } else if (action === 'hide') {
                         activeScreen = null;
                     }
                 }
