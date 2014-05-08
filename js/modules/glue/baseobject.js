@@ -150,11 +150,11 @@ glue.module.create(
                             return;
                         }
                         context.save();
-                        context.translate(position.x, position.y);
+                        context.translate(Math.round(position.x), Math.round(position.y));
 
                         // scroll (only applies to parent objects)
                         if (parent === null) {
-                            context.translate(-scroll.x, -scroll.y);
+                            context.translate(Math.round(-scroll.x), Math.round(-scroll.y));
                         }
 
 
@@ -162,7 +162,7 @@ glue.module.create(
                         callRegistrants('draw', gameData);
 
                         // translate to origin
-                        context.translate(-origin.x, -origin.y);
+                        context.translate(Math.round(-origin.x), Math.round(-origin.y));
 
                         // draws animatable and spritable
                         for (d = 0; d < dLength; ++d) {
@@ -173,7 +173,7 @@ glue.module.create(
                         }
 
                         // translate back from origin before drawing children
-                        context.translate(origin.x, origin.y);
+                        context.translate(Math.round(origin.x), Math.round(origin.y));
                         // draw children
                         for (i = 0, l = children.length; i < l; ++i) {
                             children[i].draw(gameData);
