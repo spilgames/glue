@@ -6507,9 +6507,7 @@ glue.module.create(
                         return rectangle;
                     },
                     setBoundingBox: function (value) {
-                        if (active) {
-                            rectangle = value;
-                        }
+                        rectangle = value;
                     },
                     updateBoundingBox: function () {
                         var scale = module.scalable ? module.scalable.getScale() : Vector(1, 1),
@@ -6517,9 +6515,7 @@ glue.module.create(
                             y1 = position.y - origin.y * scale.y,
                             x2 = position.x + (dimension.width - origin.x) * scale.x,
                             y2 = position.y + (dimension.height - origin.y) * scale.y;
-                        if (!active) {
-                            return;
-                        }
+                            
                         // swap variables if scale is negative
                         if (scale.x < 0) {
                             x2 = [x1, x1 = x2][0];
